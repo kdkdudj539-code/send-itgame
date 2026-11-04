@@ -67,24 +67,34 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);font-size:
   color:#fff;background:rgba(10,16,34,.7);padding:calc(var(--u)*1.5) calc(var(--u)*4);white-space:nowrap;pointer-events:none;transition:opacity .6s}
 #avalGlow{position:absolute;inset:0;pointer-events:none;opacity:0;background:linear-gradient(90deg,rgba(255,77,94,.55),rgba(255,77,94,0) 22%)}
 
-/* Touch pad */
-#pad{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;width:100%;max-width:640px;touch-action:none}
+/* Touch pad: links Joystick für Flips/Spins/Corks, rechts Grabs, GAS und SPRUNG (Daumen kann zwischen den Tasten rutschen) */
+#pad{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;width:100%;max-width:640px;box-sizing:border-box;touch-action:none;user-select:none;-webkit-user-select:none}
 #pad.over{position:fixed;left:0;right:0;bottom:0;max-width:none;pointer-events:none;
   padding-bottom:max(10px,env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));opacity:.82}
-#pad.over .k{pointer-events:auto}
-.dpad{display:grid;grid-template-columns:repeat(3,54px);grid-template-rows:repeat(3,48px);gap:4px;grid-template-areas:". up ." "left gas right" ". down ."}
+#pad.over .stick,#pad.over .acts{pointer-events:auto}
+.stick{position:relative;width:140px;height:140px;flex:none;touch-action:none;-webkit-touch-callout:none}
+.stick .ring{position:absolute;inset:12px;border-radius:50%;background:rgba(20,30,62,.6);box-shadow:inset 0 0 0 3px #24315a,inset 0 0 0 5px #0a0f20,0 0 0 2px #0a0f20}
+.stick .knob{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:#3c4f8c;pointer-events:none;
+  box-shadow:inset -3px -3px 0 rgba(0,0,0,.35),inset 3px 3px 0 rgba(255,255,255,.22),0 0 0 2px #0a0f20}
+.stick.on .knob{background:#5568a8}
+.stick .lb{position:absolute;font-family:var(--ui);font-size:8px;line-height:1;color:#9fb2d9;pointer-events:none;letter-spacing:.5px;white-space:nowrap}
+.lb.n{top:17px;left:50%;transform:translateX(-50%)}.lb.s{bottom:17px;left:50%;transform:translateX(-50%)}
+.lb.w{left:18px;top:50%;transform:translateY(-50%)}.lb.e{right:18px;top:50%;transform:translateY(-50%)}
+.lb.ne,.lb.nw,.lb.se,.lb.sw{font-size:7px;color:#8395bf}.lb.ne{top:3px;right:0}.lb.nw{top:3px;left:0}.lb.se{bottom:3px;right:0}.lb.sw{bottom:3px;left:0}
+.stick[data-dir^="n"] .lb.n,.stick[data-dir^="s"] .lb.s,.stick[data-dir$="e"] .lb.e,.stick[data-dir$="w"] .lb.w,
+.stick[data-dir="ne"] .lb.ne,.stick[data-dir="nw"] .lb.nw,.stick[data-dir="se"] .lb.se,.stick[data-dir="sw"] .lb.sw{color:#ffd04a}
 .k{font-family:var(--display);font-size:13px;color:#fff;background:#24315a;border:0;touch-action:none;cursor:pointer;
   box-shadow:inset -3px -3px 0 rgba(0,0,0,.35),inset 3px 3px 0 rgba(255,255,255,.18),0 0 0 2px #0a0f20}
 .k.on{background:#3c4f8c;transform:translateY(2px)}
-.k.gas{grid-area:gas;background:#2f8f5b;font-size:10px}.k.gas.on{background:#46b876}.k.up{grid-area:up}.k.left{grid-area:left}.k.right{grid-area:right}.k.down{grid-area:down}
-.acts{display:flex;align-items:flex-end;gap:8px}
-.grabs{display:grid;grid-template-columns:repeat(2,58px);grid-template-rows:repeat(2,44px);gap:4px}
+.acts{display:grid;grid-template-columns:auto auto;grid-template-areas:"grabs jump" "gas jump";gap:6px 8px;align-items:end;touch-action:none;-webkit-touch-callout:none}
+.grabs{grid-area:grabs;display:grid;grid-template-columns:repeat(2,58px);grid-template-rows:repeat(2,44px);gap:4px}
 .k.g{font-size:9px;background:#2c3a66}
-.k.jump{width:92px;height:92px;border-radius:50%;background:var(--orange);color:#2a1205;font-size:11px;
+.k.gas{grid-area:gas;height:44px;background:#2f8f5b;font-size:11px}.k.gas.on{background:#46b876}
+.k.jump{grid-area:jump;align-self:end;width:92px;height:92px;border-radius:50%;background:var(--orange);color:#2a1205;font-size:11px;
   box-shadow:inset -4px -4px 0 rgba(0,0,0,.3),inset 4px 4px 0 rgba(255,255,255,.35),0 0 0 2px #0a0f20}
 .k.jump.on{background:#ff9a5c}
 
-@media (max-width:440px){.dpad{grid-template-columns:repeat(3,44px);grid-template-rows:repeat(3,44px)}.grabs{grid-template-columns:repeat(2,50px);grid-template-rows:repeat(2,42px)}.k.g{font-size:7px}.k.jump{width:74px;height:74px;font-size:9px}#pad{gap:8px}.acts{gap:6px}}
+@media (max-width:440px){.stick{width:122px;height:122px}.stick .knob{width:46px;height:46px;margin:-23px 0 0 -23px}.grabs{grid-template-columns:repeat(2,50px);grid-template-rows:repeat(2,40px)}.k.g{font-size:7px}.k.gas{height:40px;font-size:9px}.k.jump{width:76px;height:76px;font-size:9px}#pad{gap:8px}.acts{gap:5px 6px}}
 /* Screens */
 .screen{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;overflow:auto;
   background:rgba(8,12,26,.72);padding-block:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-bottom,0px));
@@ -179,18 +189,18 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
     <div id="hint" hidden></div>
   </div>
   <div id="pad" hidden>
-    <div class="dpad">
-      <button class="k up" data-k="up" aria-label="Frontflip">▲</button>
-      <button class="k gas" data-k="gas" aria-label="Gas geben">GAS</button>
-      <button class="k left" data-k="left" aria-label="Bremsen oder Spin links">◀</button>
-      <button class="k right" data-k="right" aria-label="Spin rechts">▶</button>
-      <button class="k down" data-k="down" aria-label="Backflip">▼</button>
+    <div class="stick" id="stick" role="group" aria-label="Joystick: oben Frontflip, unten Backflip, links und rechts Spin, schräg oben Misty, schräg unten Cork">
+      <div class="ring"></div>
+      <span class="lb n">FRONT</span><span class="lb s">BACK</span><span class="lb w">◀</span><span class="lb e">▶</span>
+      <span class="lb nw">MISTY</span><span class="lb ne">MISTY</span><span class="lb sw">CORK</span><span class="lb se">CORK</span>
+      <div class="knob" id="knob"></div>
     </div>
     <div class="acts">
       <div class="grabs">
         <button class="k g" data-k="japan">JAPAN</button><button class="k g" data-k="nose">NOSE</button>
         <button class="k g" data-k="tail">TAIL</button><button class="k g" data-k="mute" id="kMute">MUTE</button>
       </div>
+      <button class="k gas" data-k="gas" aria-label="Gas geben">GAS</button>
       <button class="k jump" data-k="jump">SPRUNG</button>
     </div>
   </div>
@@ -246,6 +256,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
       </dl></div>
     </div>
     <p class="note">Lande parallel zum Hang. Ein 180er landet Switch, mit Twin Tips kein Problem. Lass den Grab vor der Landung los, sonst wird's sketchy. Kommst du am Gap zu kurz, fällst du ins Void. Die Ski Patrol kann keine Gaps springen: Wenn sie dir am Heck klebt, spring über den nächsten Gap und sie bleibt stehen. Mit Vollgas fährst du ihr auch davon. Den Big Air schaffst du nur mit Vollgas plus Pop.</p>
+    <p class="note">Am Handy: Mit dem Stick links steuerst du die Tricks. Oben ist Frontflip, unten Backflip, links und rechts drehst du dich, links bremst auf der Piste. Schräg oben kommt ein Misty, schräg unten ein Cork. Rechts liegen GAS, SPRUNG und die Grabs. Du kannst mit dem Daumen von GAS auf SPRUNG und weiter auf einen Grab rutschen, ohne loszulassen.</p>
     <p class="note">Nach einer Weile wechselt die Strecke in die Freeride-Zone. Dort grindest du umgefallene Bäume und springst Cliffs. Cliffs halten die Ski Patrol genauso auf wie Gaps. Im Powder sinkst du ein und wirst langsamer, wenn du zu wenig Speed hast. Dafür verzeiht er schiefe Landungen. Pass auf die Steine auf: Kleine bringen dich zu Fall, gegen große Felsen ist der Run vorbei. Spring mit der Leertaste drüber.</p>
     <div class="btns"><button class="btn" id="bHelpBack">ZURÜCK</button></div>
   </div>
@@ -1390,14 +1401,35 @@ addEventListener('keydown',e=>{
   K[c]=true;
 });
 addEventListener('keyup',e=>{K[e.code]=false});
-addEventListener('blur',()=>{for(const k in K)K[k]=false;for(const k in TC)TC[k]=false;if(state==='play')setPause(true)});
-document.querySelectorAll('#pad .k').forEach(b=>{
-  const k=b.dataset.k;
-  const down=e=>{e.preventDefault();unlockAudio();try{b.setPointerCapture(e.pointerId)}catch(_){};b.classList.add('on');if(k==='jump')jumpBuf=.14;else TC[k]=true};
-  const up=()=>{b.classList.remove('on');TC[k]=false};
-  b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('lostpointercapture',up);
-  b.addEventListener('contextmenu',e=>e.preventDefault());
-});
+addEventListener('blur',()=>{for(const k in K)K[k]=false;if(typeof padReset==='function')padReset();else for(const k in TC)TC[k]=false;if(state==='play')setPause(true)});
+/* Joystick: 8 Richtungen. Oben Frontflip, unten Backflip, links/rechts Spin (links bremst auf der Piste),
+   schräg oben Misty, schräg unten Cork (= Flip und Spin gleichzeitig). Hauptrichtungen sind etwas breiter als die Diagonalen. */
+const stickEl=$('stick'),knobEl=$('knob');let stickId=null;
+function stickApply(dx,dy,R){
+  const d=Math.hypot(dx,dy),m=Math.min(d,R),kx=d?dx/d*m:0,ky=d?dy/d*m:0;knobEl.style.transform='translate('+kx.toFixed(1)+'px,'+ky.toFixed(1)+'px)';
+  let u=false,dn=false,l=false,r=false;
+  if(d>R*.3){const s=((Math.atan2(-dy,dx)*DEG)%360+360)%360,near=c=>Math.abs(((s-c+540)%360)-180)<=24;
+    if(near(90))u=true;else if(near(270))dn=true;else if(near(0))r=true;else if(near(180))l=true;
+    else{u=s<180;dn=!u;r=s<90||s>270;l=!r}}
+  TC.up=u;TC.down=dn;TC.left=l;TC.right=r;stickEl.dataset.dir=(u?'n':dn?'s':'')+(r?'e':l?'w':'');
+}
+function stickMove(e){const b=stickEl.getBoundingClientRect();stickApply(e.clientX-(b.left+b.width/2),e.clientY-(b.top+b.height/2),b.width*.34)}
+function stickReset(){stickId=null;knobEl.style.transform='';stickEl.classList.remove('on');stickEl.dataset.dir='';TC.up=TC.down=TC.left=TC.right=false}
+stickEl.addEventListener('pointerdown',e=>{e.preventDefault();unlockAudio();stickId=e.pointerId;try{stickEl.setPointerCapture(e.pointerId)}catch(_){}stickEl.classList.add('on');stickMove(e)});
+stickEl.addEventListener('pointermove',e=>{if(e.pointerId===stickId)stickMove(e)});
+['pointerup','pointercancel','lostpointercapture'].forEach(t=>stickEl.addEventListener(t,e=>{if(e.pointerId===stickId)stickReset()}));
+stickEl.addEventListener('contextmenu',e=>e.preventDefault());
+/* Rechte Seite: die Taste unter dem Finger zählt, auch beim Rutschen (GAS halten, auf SPRUNG rutschen, weiter auf einen Grab) */
+const actsEl=document.querySelector('#pad .acts'),actHeld=new Map(),actBtn=k=>actsEl.querySelector('[data-k="'+k+'"]');
+function actAt(x,y){const el=document.elementFromPoint(x,y),b=el&&el.closest?el.closest('#pad .acts .k'):null;return b?b.dataset.k:null}
+function actSet(id,k){const prev=actHeld.get(id)||null;if(prev===k)return;if(k)actHeld.set(id,k);else actHeld.delete(id);
+  if(prev&&![...actHeld.values()].includes(prev)){actBtn(prev).classList.remove('on');if(prev!=='jump')TC[prev]=false}
+  if(k){actBtn(k).classList.add('on');if(k==='jump')jumpBuf=.14;else TC[k]=true}}
+actsEl.addEventListener('pointerdown',e=>{e.preventDefault();unlockAudio();try{actsEl.setPointerCapture(e.pointerId)}catch(_){}actSet(e.pointerId,actAt(e.clientX,e.clientY))});
+actsEl.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&!e.buttons)return;actSet(e.pointerId,actAt(e.clientX,e.clientY))});
+['pointerup','pointercancel','lostpointercapture'].forEach(t=>actsEl.addEventListener(t,e=>actSet(e.pointerId,null)));
+actsEl.addEventListener('contextmenu',e=>e.preventDefault());
+function padReset(){stickReset();for(const id of [...actHeld.keys()])actSet(id,null);for(const k in TC)TC[k]=false}
 
 /* ================= AUDIO ================= */
 let AC=null,muted=false;
@@ -1946,8 +1978,8 @@ function show(id){screens.forEach(s=>$(s).hidden=s!==id);if(id){const b=$(id).qu
 function refreshMenu(){$('kMute').textContent=SAVE.gear==='board'?'INDY':'MUTE';document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.gear===SAVE.gear)));$('bAssist').setAttribute('aria-pressed',String(!!SAVE.assist));$('bAssist').textContent='LANDEHILFE: '+(SAVE.assist?'AN':'AUS');setT($('mCoins'),String(SAVE.coins));setT($('mBest'),String(SAVE.best));setT($('mDist'),SAVE.bestDist+' m')}
 let hintTimer=0;
 function startRun(){
-  unlockAudio();resetRun();updCamera(0,true);state='play';show(null);$('hud').hidden=false;if(document.activeElement)document.activeElement.blur();
-  const h=$('hint');h.hidden=false;h.style.opacity='1';h.textContent=isTouch?'GAS halten · ◀ Bremsen · SPRUNG am Kicker-Ende':'Shift Gas · ← Bremsen · Leertaste springen · Tricks in der Luft';
+  unlockAudio();padReset();resetRun();updCamera(0,true);state='play';show(null);$('hud').hidden=false;if(document.activeElement)document.activeElement.blur();
+  const h=$('hint');h.hidden=false;h.style.opacity='1';h.textContent=isTouch?'GAS halten · Stick ◀ bremst · SPRUNG am Kicker-Ende · in der Luft Stick für Flips und Spins':'Shift Gas · ← Bremsen · Leertaste springen · Tricks in der Luft';
   clearTimeout(hintTimer);hintTimer=setTimeout(()=>{h.style.opacity='0';setTimeout(()=>h.hidden=true,700)},5200);
   layout();
 }
