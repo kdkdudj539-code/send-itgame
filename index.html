@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="description" content="SEND IT – Pixel-Art Freestyle-Ski- und Snowboard-Spiel im Browser.">
 <title>Send It Freestyle</title>
 <style>
@@ -25,9 +25,11 @@
   --ui:'Silkscreen','Courier New',monospace;
   color-scheme:dark;
 }
-html,body{height:100%}
+html,body{height:100%;touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust:100%}
+*{touch-action:manipulation}
+#stage,#stage *,#pad,#pad *{touch-action:none}
 [hidden]{display:none!important}
-body{background:var(--night);color:var(--ink);font-family:var(--body);font-size:20px;overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+body{background:var(--night);color:var(--ink);font-family:var(--body);font-size:20px;overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
 #wrap{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
   padding-block:max(8px,env(safe-area-inset-top,0px)) max(8px,env(safe-area-inset-bottom,0px));
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
@@ -1409,6 +1411,11 @@ addEventListener('keydown',e=>{
 });
 addEventListener('keyup',e=>{K[e.code]=false});
 addEventListener('blur',()=>{for(const k in K)K[k]=false;if(typeof padReset==='function')padReset();else for(const k in TC)TC[k]=false;if(state==='play')setPause(true)});
+/* Wie eine App: kein Zoomen per Doppeltipp oder mit zwei Fingern, kein Kontextmenü beim langen Drücken */
+['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
+document.addEventListener('touchmove',e=>{if(e.touches.length>1||e.scale&&e.scale!==1)e.preventDefault()},{passive:false});
+document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
+document.addEventListener('contextmenu',e=>e.preventDefault());
 /* Joystick: 8 Richtungen. Oben Frontflip, unten Backflip, links/rechts Spin (links bremst auf der Piste),
    schräg oben Misty, schräg unten Cork (= Flip und Spin gleichzeitig). Hauptrichtungen sind etwas breiter als die Diagonalen. */
 const stickEl=$('stick'),knobEl=$('knob');let stickId=null;
