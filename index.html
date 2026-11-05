@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="description" content="SEND IT – Pixel-Art Freestyle-Ski- und Snowboard-Spiel im Browser.">
+<meta name="description" content="SEND IT – Pixel-Art Freestyle-Ski- und Snowboard-Spiel im Browser / pixel art freestyle ski and snowboard game in your browser (Deutsch, English).">
 <title>Send It Freestyle</title>
 <style>
 /* Schriften liegen auf dem eigenen Webspace (keine Verbindung zu Google) */
@@ -121,6 +121,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
 .gearbtn{font-family:var(--ui);font-weight:700;font-size:13px;letter-spacing:.08em;padding:9px 14px;background:var(--panel2);color:var(--muted);border:0;cursor:pointer;box-shadow:0 0 0 2px #000}
 .gearbtn[aria-pressed="true"]{background:var(--gold);color:#2a1a05}
 .gearbtn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.langsw{display:inline-flex;gap:4px}
 .btn{font-family:var(--display);font-size:13px;padding:14px 18px;background:var(--orange);color:#2a1205;border:0;cursor:pointer;
   box-shadow:inset -3px -3px 0 rgba(0,0,0,.3),inset 3px 3px 0 rgba(255,255,255,.35),0 0 0 3px #000,0 6px 0 3px #000}
 .btn:active{transform:translateY(3px);box-shadow:inset -3px -3px 0 rgba(0,0,0,.3),inset 3px 3px 0 rgba(255,255,255,.35),0 0 0 3px #000,0 3px 0 3px #000}
@@ -261,7 +262,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
       <h1>SEND<br><em>IT</em></h1>
       <p class="lede">Die Lawine schiebt von hinten, die Ski Patrol jagt dich. Spring die Gaps, steh deine Tricks, sammel Münzen.</p>
       <div class="gear" role="group" aria-label="Sportgerät wählen"><button class="gearbtn" data-gear="ski" aria-pressed="true">SKI</button><button class="gearbtn" data-gear="board" aria-pressed="false">SNOWBOARD</button></div>
-      <div class="gear"><button class="gearbtn" id="bAssist" aria-pressed="false">LANDEHILFE: AUS</button><button class="gearbtn" id="bMusic" aria-pressed="true">MUSIK: AN</button><button class="gearbtn" id="bPack" aria-pressed="false" hidden>RUCKSACK: AUS</button></div>
+      <div class="gear"><button class="gearbtn" id="bAssist" aria-pressed="false">LANDEHILFE: AUS</button><button class="gearbtn" id="bMusic" aria-pressed="true">MUSIK: AN</button><button class="gearbtn" id="bPack" aria-pressed="false" hidden>RUCKSACK: AUS</button><span class="langsw" role="group" aria-label="Sprache"><button class="gearbtn" data-lang="de" aria-pressed="true" aria-label="Deutsch">DE</button><button class="gearbtn" data-lang="en" aria-pressed="false" aria-label="English">EN</button></span></div>
       <p class="acct" id="mAcct"></p>
       <div class="stats"><span><i class="coin"></i><b id="mCoins">0</b></span><span>Highscore<b id="mBest">0</b></span><span>Weiteste Fahrt<b id="mDist">0 m</b></span></div>
       <div class="btns">
@@ -280,7 +281,9 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
     <p class="eyebrow">Was ist neu</p>
     <h2>PATCH NOTES</h2>
     <div class="pn">
-      <h3>v2.9 · 05.11.2026</h3>
+      <h3>v3.0 · 05.11.2026</h3>
+      <ul><li>Englisch: im Menü zwischen Deutsch und Englisch wechseln</li><li>Afterbangs sind reiner Style: keine Punkte, keine Anzeige</li><li>Pistenraupe neu: grau, mit Fräse, Ketten, Kabine und Räumschild. Die Rutschfläche ist genau die sichtbare Oberkante, man kann hinten über die Fräse reinfahren, Stürze landen oben auf der Raupe und die Ski Patrol bleibt an ihr hängen</li></ul>
+      <h3>v2.9</h3>
       <ul><li>Start auf der Alm: Hütte, Leute, Blaskapelle mit eigener Polka; man fährt automatisch los, ab der Piste steuerst du (Sprung überspringt)</li><li>Polka blendet beim Wegfahren in die Spielmusik über</li></ul>
       <h3>v2.8</h3>
       <ul><li>Gaps im Park sind jetzt Gletscherspalten mit Eiswänden und Eiszapfen</li></ul>
@@ -374,7 +377,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
         <dt><kbd>A</kbd><kbd>D</kbd></dt><dd>Tube und Baum: 90° drehen. Gerade drauf ist ein 50-50</dd>
         <dt>Absprung</dt><dd>Du drehst automatisch zurück in die Richtung, in der du aufgesprungen bist (Switch bleibt Switch). Mit A/D drehst du zusätzlich 180er raus</dd>
         <dt><kbd>Leertaste</kbd></dt><dd>Absprung vom Rail</dd>
-        <dt>Neue Features</dt><dd>Kink-Rails (Flat-Down, Down-Flat-Down, Flat-Down-Flat), Rainbow, Waterfall, Roller Coaster, Treppen-Rail, Boxen (A-Frame, Battleship), Pistenraupe und Picknicktisch geben Bonuspunkte. Pole Jam: einfach reinfahren. Reifen und Fässer antippen oder draufspringen</dd>
+        <dt>Neue Features</dt><dd>Kink-Rails (Flat-Down, Down-Flat-Down, Flat-Down-Flat), Rainbow, Waterfall, Roller Coaster, Treppen-Rail, Boxen (A-Frame, Battleship), Pistenraupe und Picknicktisch geben Bonuspunkte. Pistenraupe und Pole Jam: einfach reinfahren, die Raupe hält auch die Ski Patrol auf. Reifen und Fässer antippen oder draufspringen</dd>
         <dt><kbd>P</kbd><kbd>Esc</kbd></dt><dd>Pause</dd>
       </dl></div>
     </div>
@@ -528,13 +531,41 @@ const DEF={coins:0,best:0,bestDist:0,owned:{},equip:{helmet:'h_black',goggles:'g
 // Stand prüfen und auffüllen (vom Gerät oder aus dem Konto). t = letzte Änderung, uid = Konto, zu dem der Stand gehört, sc = Münzen beim letzten Abgleich mit dem Konto
 function normSave(s){s=s&&typeof s==='object'?s:{};const ob=v=>v&&typeof v==='object'&&!Array.isArray(v);
   return {coins:Math.max(0,s.coins|0),best:Math.max(0,s.best|0),bestDist:Math.max(0,s.bestDist|0),owned:ob(s.owned)?Object.assign({},s.owned):{},
-    equip:Object.assign({},DEF.equip,ob(s.equip)?s.equip:{}),gear:s.gear==='board'?'board':'ski',assist:!!s.assist,music:s.music!==false,packLast:typeof s.packLast==='string'?s.packLast:'pk_free',
+    equip:Object.assign({},DEF.equip,ob(s.equip)?s.equip:{}),gear:s.gear==='board'?'board':'ski',assist:!!s.assist,music:s.music!==false,packLast:typeof s.packLast==='string'?s.packLast:'pk_free',lang:s.lang==='en'||s.lang==='de'?s.lang:null,
     t:+s.t||0,uid:typeof s.uid==='string'?s.uid:null,sc:Math.max(0,s.sc|0)}}
 function loadSave(){try{const s=JSON.parse(localStorage.getItem('sendit_save_v1')||'null');if(s&&typeof s==='object')return normSave(s)}catch(e){}return normSave(DEF)}
 const SAVE=loadSave();
 let cloudHook=null;   // wird vom Online-Teil gesetzt: nach jeder Änderung den Stand ins Konto laden
 function writeSave(){try{localStorage.setItem('sendit_save_v1',JSON.stringify(SAVE))}catch(e){}}
 function persist(){SAVE.t=Date.now();writeSave();if(cloudHook)cloudHook()}
+
+/* ================= SPRACHE: Deutsch / Englisch =================
+   Deutsch ist das Original. Texte aus dem HTML tauscht das Wörterbuch EN (deutscher Text -> englisch), Texte aus dem Code
+   kommen über TX(deutsch, englisch). Ohne eigene Wahl gilt die Browsersprache; die Wahl im Menü wird gespeichert (auch im Konto). */
+const LANG_AUTO=/^de\b/i.test((navigator.languages&&navigator.languages[0])||navigator.language||'de')?'de':'en';
+let LANG=SAVE.lang||LANG_AUTO;
+const TX=(de,en)=>LANG==='en'?en:de;
+const EN={"LAWINE": "AVALANCHE", "SPRUNG": "JUMP", "Die Lawine schiebt von hinten, die Ski Patrol jagt dich. Spring die Gaps, steh deine Tricks, sammel Münzen.": "The avalanche is pushing from behind and the ski patrol is chasing you. Jump the gaps, land your tricks, grab the coins.", "LANDEHILFE: AUS": "LANDING ASSIST: OFF", "MUSIK: AN": "MUSIC: ON", "RUCKSACK: AUS": "BACKPACK: OFF", "Highscore": "High score", "Weiteste Fahrt": "Longest run", "FAHREN": "RIDE", "STEUERUNG": "CONTROLS", "RANGLISTE": "LEADERBOARD", "Was ist neu": "What's new", "Englisch: im Menü zwischen Deutsch und Englisch wechseln": "English: switch between German and English in the menu", "Afterbangs sind reiner Style: keine Punkte, keine Anzeige": "Afterbangs are pure style now: no points, no label", "Pistenraupe neu: grau, mit Fräse, Ketten, Kabine und Räumschild. Die Rutschfläche ist genau die sichtbare Oberkante, man kann hinten über die Fräse reinfahren, Stürze landen oben auf der Raupe und die Ski Patrol bleibt an ihr hängen": "New snowcat: grey, with tiller, tracks, cab and blade. The grind surface is exactly its visible top edge, you can ride on over the tiller at the back, crashes land on top of the cat, and the ski patrol gets stuck behind it", "Start auf der Alm: Hütte, Leute, Blaskapelle mit eigener Polka; man fährt automatisch los, ab der Piste steuerst du (Sprung überspringt)": "Start at the alpine hut: crowd and brass band with its own polka; you ride off automatically and take control on the slope (jump skips)", "Polka blendet beim Wegfahren in die Spielmusik über": "The polka fades into the game music as you ride away", "Gaps im Park sind jetzt Gletscherspalten mit Eiswänden und Eiszapfen": "Park gaps are now glacier crevasses with ice walls and icicles", "Eigene Musik: winterlicher Chiptune mit Glockenspiel, läuft in Schleife, im Menü abschaltbar": "Own soundtrack: wintery chiptune with glockenspiel, loops, can be turned off in the menu", "Bäume im Freeride stecken im Schnee und sehen alle anders aus": "Freeride trees sit in the snow and all look different", "Tiere im Tiefschnee ohne Kasten um die Beine": "Animals in deep snow without a box around their legs", "Afterbangs: nur noch Shifty, Lean Back, Hands Behind Back": "Afterbangs: only Shifty, Lean Back, Hands Behind Back", "Afterbangs: nach sauberen Landungen kurz lässig (Shifty, Lean Back, Hands Behind Back)": "Afterbangs: a moment of style after clean landings (Shifty, Lean Back, Hands Behind Back)", "Grind-Geräusche je nach Material": "Grind sounds depending on the material", "Pistenraupe statt Auto, Pole Jam blau und abgenutzt": "Snowcat instead of a car, pole jam blue and worn", "Drehungen mit Körper: Schultern und Kopf führen, Ski und Board ziehen nach, in der Luft und auf Rails": "Spins with the whole body: shoulders and head lead, skis and board follow, in the air and on rails", "Weicher Übergang beim Swappen auf Rails": "Smooth transition when swapping on rails", "14 neue Park-Features: Kink-Rails, Rainbow, Waterfall, Roller Coaster, Treppen-Rail, A-Frame- und Battleship-Box, Auto, Picknicktisch, Pole Jam, Reifen und Fässer": "14 new park features: kink rails, rainbow, waterfall, roller coaster, stair rail, A-frame and battleship box, car, picnic table, pole jam, tires and barrels", "Freeride-Drops: man fährt nicht mehr an der Felswand runter": "Freeride drops: you no longer ride down the cliff face", "Lawinenschaufel im Freeride-Rucksack: rettet dich einmal pro Lauf vor der Lawine": "Avalanche shovel in the freeride backpack: saves you from the avalanche once per run", "Switch auf die Rail heißt jetzt Switch wieder runter": "Switch onto a rail now means switch off it again", "Freeride: keine kleinen Steine mehr, Felsen nur noch selten": "Freeride: no more small stones, rocks are rare now", "Schönere Mute-Pose auf Ski": "Nicer mute pose on skis", "Grabs mit Zwischenbild: die Hand greift sichtbar zum Ski bzw. Brett": "Grabs with an in-between frame: you can see the hand reach for the ski or board", "Spielstand im Konto: Münzen, gekaufte Sachen, Outfit und Bestwerte sind auf jedem Gerät dabei": "Progress in your account: coins, purchases, outfit and best scores on every device", "Neue Lawine: riesige Pulverwolke mit großem Kopf vorne": "New avalanche: huge powder cloud with a big head at the front", "Switch mit Gas: kein Stockeinsatz mehr": "Riding switch with speed: no more pole pushing", "Swaps auf Rails etwas langsamer": "Rail swaps a bit slower", "Mit Drehung auf die Rail und Stick halten: Drehung läuft auf der Rail weiter": "Spin onto a rail and hold the stick: the spin continues on the rail", "Park: gleichmäßige Abstände, kleine Kicker ohne Gap entfernt": "Park: even spacing, small kickers without a gap removed", "Ohne Helm fahren: Beanie, Bommelmütze und Fisherman in vielen Farben": "Ride without a helmet: beanie, pom beanie and fisherman in lots of colors", "Rucksack in sieben weiteren Farben, jetzt auch von der Seite sichtbar": "Backpack in seven more colors, now also visible from the side", "Kopf dreht sich bei Corks mit": "The head turns along in corks", "Freeride-Rucksack im Shop: Spitzhacke rettet dich einmal pro Lauf aus dem Abgrund": "Freeride backpack in the shop: the ice axe saves you from the abyss once per run", "Mehr Abstand zwischen den Hindernissen im Park": "More space between the obstacles in the park", "Butter mit eigener Pose und gebogenen Ski": "Butters with their own pose and flexed skis", "Nose Butter 180 und Switch Tail Butter 180": "Nose butter 180 and switch tail butter 180", "Gas nur noch mit Stick ganz rechts": "Speed boost only with the stick all the way right", "Online-Rangliste mit eigenem Konto": "Online leaderboard with your own account", "Butter und Nose Butter": "Butter and nose butter", "Sprung halb so hoch, Felsen flacher": "Jumps half as high, flatter rocks", "Nebliges Flutlicht, präparierte Piste, Bär läuft": "Foggy floodlights, groomed slope, the bear walks", "Handy: zwei Sticks, die unter dem Finger erscheinen": "Phone: two sticks that appear under your finger", "Rail-Swaps durch Halten, kein Zoom beim Doppeltippen": "Rail swaps by holding, no zoom on double tap", "Felsklippen mit Nebel, neue Bergketten, Stirnlampe": "Rock cliffs with fog, new mountain ranges, headlamp", "Tag und Nacht, Tiere, Landehilfe, neue Lawine": "Day and night, animals, landing assist, new avalanche", "Erste Version: Park, Freeride, Ski und Snowboard, Shop": "First version: park, freeride, ski and snowboard, shop", "ZURÜCK": "BACK", "Mit Konto landet dein Bestwert in der Rangliste, und dein Spielstand (Münzen, gekaufte Sachen, Outfit, Bestwerte) ist auf jedem Gerät dabei. Nur Spielername und Passwort, keine E-Mail. Merk dir das Passwort gut, es lässt sich nicht zurücksetzen.": "With an account your best score goes on the leaderboard, and your progress (coins, purchases, outfit, best scores) is with you on every device. Just a player name and password, no email. Remember your password, it can't be reset.", "ANMELDEN": "LOG IN", "KONTO ERSTELLEN": "CREATE ACCOUNT", "Angemeldet als": "Logged in as", "ABMELDEN": "LOG OUT", "Lädt …": "Loading …", "So fährst du": "How to ride", "Auf der Piste": "On the slope", "Gas: kräftig beschleunigen bis Vollgas": "Speed: accelerate hard up to full speed", "Bremsen": "Brake", "Butter und Nose Butter (halten)": "Butter and nose butter (hold)", "Nose Butter 180 (switch: ↓ + Spin für Tail Butter 180)": "Nose butter 180 (switch: ↓ + spin for tail butter 180)", "Leertaste": "Space", "Springen. Am Kicker-Ende gibt's extra Pop": "Jump. Extra pop at the end of a kicker", "In der Luft": "In the air", "Cork (gleichzeitig drücken)": "Cork (press together)", "Misty (gleichzeitig drücken)": "Misty (press together)", "Draufspringen": "Jump on", "Slide, Punkte pro Sekunde. Drehst du beim Aufspringen und hältst A/D weiter, drehst du auf der Rail weiter": "Slide, points per second. Spin onto it and keep holding A/D to keep spinning on the rail", "Rail: 180er Swap, halten dreht weiter": "Rail: 180 swap, hold to keep spinning", "Tube und Baum: 90° drehen. Gerade drauf ist ein 50-50": "Tube and tree: turn 90°. Straight on is a 50-50", "Absprung": "Pop off", "Du drehst automatisch zurück in die Richtung, in der du aufgesprungen bist (Switch bleibt Switch). Mit A/D drehst du zusätzlich 180er raus": "You automatically turn back to the direction you jumped on in (switch stays switch). Use A/D to spin an extra 180 out", "Absprung vom Rail": "Pop off the rail", "Neue Features": "Features", "Kink-Rails (Flat-Down, Down-Flat-Down, Flat-Down-Flat), Rainbow, Waterfall, Roller Coaster, Treppen-Rail, Boxen (A-Frame, Battleship), Pistenraupe und Picknicktisch geben Bonuspunkte. Pistenraupe und Pole Jam: einfach reinfahren, die Raupe hält auch die Ski Patrol auf. Reifen und Fässer antippen oder draufspringen": "Kink rails (flat-down, down-flat-down, flat-down-flat), rainbow, waterfall, roller coaster, stair rail, boxes (A-frame, battleship), snowcat and picnic table give bonus points. Snowcat and pole jam: just ride in, and the snowcat also stops the ski patrol. Tap tires and barrels or jump onto them", "Lande parallel zum Hang. Ein 180er landet Switch, mit Twin Tips kein Problem. Lass den Grab vor der Landung los, sonst wird's sketchy. Kommst du am Gap zu kurz, fällst du ins Void. Die Ski Patrol kann keine Gaps springen: Wenn sie dir am Heck klebt, spring über den nächsten Gap und sie bleibt stehen. Mit Vollgas fährst du ihr auch davon. Den Big Air schaffst du nur mit Vollgas plus Pop.": "Land parallel to the slope. A 180 lands switch, no problem with twin tips. Let go of the grab before you land or it gets sketchy. Come up short at a gap and you fall into the void. The ski patrol can't jump gaps: if it's right on your tail, jump the next gap and it gets stuck. You can also outrun it at full speed. You only clear the big air with full speed plus pop.", "Am Handy: Mit dem Stick links steuerst du die Tricks. Oben ist Frontflip, unten Backflip, links und rechts drehst du dich, links bremst auf der Piste. Schräg oben kommt ein Misty, schräg unten ein Cork. Tippst du in die linke Bildschirmhälfte, greifst du den linken Stick, rechts den rechten. Die Richtung vom Stick zu deinem Finger zählt sofort: Tippst du rechts neben den Stick, ist er schon nach rechts gedrückt. Auf der Piste gibst du mit dem linken Stick nach rechts Gas und bremst nach links, nach unten machst du einen Butter, nach oben einen Nose Butter. Gas gibt es nur, wenn du den Stick ganz nach rechts drückst. Lenkst du beim Nose Butter schräg nach oben links oder rechts, drehst du einen flachen Nose Butter 180. Fährst du switch, geht das genauso mit dem Tail Butter schräg nach unten. Der rechte Stick ist Sprung und Grab zugleich: Antippen springt, gedrückt halten und schieben greift. Oben Japan, unten Mute (Board: Indy), links Tail, rechts Nose. In der Luft springt er nicht, da zählen nur die Grabs.": "On a phone: the left stick controls your tricks. Up is a frontflip, down a backflip, left and right spin you, and left brakes on the slope. Diagonally up gives a misty, diagonally down a cork. Tap the left half of the screen to grab the left stick, the right half for the right stick. The direction from the stick to your finger counts right away: tap to the right of the stick and it is already pushed right. On the slope, push the left stick right for speed and left to brake, down for a butter and up for a nose butter. You only get speed when you push the stick all the way right. Steer diagonally up left or right during a nose butter to spin a flat nose butter 180. Riding switch, it works the same with a tail butter diagonally down. The right stick is jump and grab in one: tap to jump, hold and slide to grab. Up Japan, down Mute (board: Indy), left Tail, right Nose. In the air it doesn't jump, only the grabs count there.", "Freeride-Rucksack (Shop, 5000 Münzen, im Menü an- und ausschaltbar): Fällst du in einen Abgrund, hält dich einmal pro Lauf die Spitzhacke an der rechten Wand fest. Mit dem linken Stick nach oben (Pfeil hoch) kletterst du hoch, oben klickst du automatisch wieder in Ski oder Board ein. Erwischt dich die Lawine, gräbst du dich einmal pro Lauf mit der Lawinenschaufel wieder aus.": "Freeride backpack (shop, 5000 coins, can be switched on and off in the menu): if you fall into an abyss, the ice axe holds you on the right wall once per run. Push the left stick up (arrow up) to climb, and at the top you click back into your skis or board automatically. If the avalanche catches you, you dig yourself out with the avalanche shovel once per run.", "Nach einer Weile wechselt die Strecke in die Freeride-Zone. Dort grindest du umgefallene Bäume und springst Cliffs. Cliffs halten die Ski Patrol genauso auf wie Gaps. Im Powder sinkst du ein und wirst langsamer, wenn du zu wenig Speed hast. Dafür verzeiht er schiefe Landungen. Pass auf die Felsen auf: Dagegen ist der Run vorbei. Spring mit der Leertaste drüber.": "After a while the course changes to the freeride zone. There you grind fallen trees and jump cliffs. Cliffs stop the ski patrol just like gaps do. In powder you sink in and slow down if you don't have enough speed, but it forgives crooked landings. Watch out for rocks: hit one and the run is over. Jump over them with Space.", "Tippe ein Teil an für die Vorschau.": "Tap an item to preview it.", "FERTIG": "DONE", "Kurz durchatmen": "Take a breath", "WEITER": "RESUME", "AUFGEBEN": "GIVE UP", "Distanz": "Distance", "Münzen": "Coins", "Bester Trick": "Best trick", "NOCHMAL": "AGAIN", "MENÜ": "MENU", "Spielfeld": "Game area", "Ton an oder aus": "Sound on or off", "Joystick: oben Frontflip, unten Backflip, links und rechts Spin, schräg oben Misty, schräg unten Cork": "Joystick: up frontflip, down backflip, left and right spin, diagonally up misty, diagonally down cork", "Sprung-Stick: antippen springt, halten und schieben greift: oben Japan, unten Mute oder Indy, links Tail, rechts Nose": "Jump stick: tap to jump, hold and slide to grab: up Japan, down Mute or Indy, left Tail, right Nose", "Dein Fahrer": "Your rider", "Sportgerät wählen": "Choose your gear", "Spielername": "Player name", "Passwort, mind. 6 Zeichen": "Password, at least 6 characters", "Passwort": "Password", "Vorschau": "Preview", "Sprache": "Language"};
+const I18N=[];
+(function i18nCollect(){const nk=s=>s.replace(/\s+/g,' ').trim();
+  const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+  for(let n;(n=w.nextNode());){const pn=n.parentNode&&n.parentNode.nodeName;if(pn==='SCRIPT'||pn==='STYLE')continue;const k=nk(n.nodeValue);
+    if(k&&EN[k]!==undefined){const m=n.nodeValue.match(/^(\s*)[\s\S]*?(\s*)$/);I18N.push({n,de:n.nodeValue,en:m[1]+EN[k]+m[2]})}}
+  document.querySelectorAll('[aria-label],[placeholder],[title]').forEach(el=>{for(const a of ['aria-label','placeholder','title']){const v=el.getAttribute(a);if(v&&EN[nk(v)]!==undefined)I18N.push({el,a,de:v,en:EN[nk(v)]})}})})();
+function applyLang(){document.documentElement.lang=LANG;
+  for(const o of I18N){const v=LANG==='en'?o.en:o.de;if(o.n)o.n.nodeValue=v;else o.el.setAttribute(o.a,v)}
+  document.querySelectorAll('.gearbtn[data-lang]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LANG)))}
+// Shop-Namen auf Englisch (fehlt ein Eintrag, ist der Name schon englisch)
+const CAT_EN={helmet:'Helmet',beanie:'Beanie',goggles:'Goggles',hoodie:'Zip Hoodie',pants:'Baggy Pants',skis:'Twin Tips',board:'Snowboard',pack:'Backpack',poles:'Poles'};
+const SHOP_EN={h_none:'No Helmet (Beanie)',h_black:'Matte Black',h_white:'Chalk White',h_orange:'Safety Orange',h_lilac:'Lilac',
+  bn_black:'Beanie Black',bn_grey:'Beanie Grey',bn_red:'Beanie Red',bn_pom_white:'Pom Beanie White',bn_pom_red:'Pom Beanie Red',bn_pom_navy:'Pom Beanie Navy',bn_pom_pink:'Pom Beanie Pink',bn_pom_green:'Pom Beanie Forest',
+  bn_fish_mustard:'Fisherman Mustard',bn_fish_lilac:'Fisherman Lilac',d_grey:'Heather Grey',d_black:'Black',d_forest:'Forest Green',d_purple:'Purple',d_red:'Red',d_neon:'Neon Yellow',
+  p_black:'Black',p_white:'White',p_camo:'Snow Camo',s_red:'Red / White',s_wood:'Wood Topsheet',b_wood:'Wood Core',
+  pk_none:'No Backpack',pk_free:'Freeride Backpack',pk_black:'Backpack Black',pk_navy:'Backpack Navy',pk_olive:'Backpack Olive',pk_orange:'Backpack Orange',pk_mint:'Backpack Mint',pk_purple:'Backpack Purple',pk_yellow:'Backpack Yellow',
+  po_silver:'Alu Silver',po_white:'White',po_red:'Red',po_bamboo:'Bamboo'};
+const INFO_EN={pk_free:'With ice axe and avalanche shovel: saves you from the abyss once per run and from the avalanche once. Can be switched on and off in the menu.'};
+const RAIL_EN={'Pistenraupe':'Snowcat','Picknicktisch':'Picnic Table','Treppen-Rail':'Stair Rail'};
+const catName=c=>LANG==='en'?CAT_EN[c]||SHOP[c].label:SHOP[c].label,itName=it=>LANG==='en'?SHOP_EN[it.id]||it.name:it.name,itInfo=it=>LANG==='en'?INFO_EN[it.id]||it.info:it.info;
 
 /* ================= COLORS ================= */
 function hexRgb(h){h=h.replace('#','');return [0,2,4].map(i=>parseInt(h.slice(i,i+2),16))}
@@ -1099,8 +1130,12 @@ function fRail(tube){
    Waterfall, Roller Coaster, A-Frame, Battleship) plus Jibs: Auto, Picknicktisch, Pole Jam, Treppen-Rail.
    sec = Gelände unter dem Feature als [Winkel, Länge]-Stücke, hf(u) = Höhe über dem Gelände (u = 0..1), curve = Bogen fein abtasten. */
 const BOX_COLS=['#2f7fd0','#e85d3a','#2b2e38','#3fa66b','#7e4fc4'];
-// Pistenraupe von hinten nach vorne: Fräse, Motorhaube, Kabine mit Dach, Frontscheibe, Räumschild
-const catH=u=>u<.1?11+3*smooth01(u/.1):u<.16?14+8*smooth01((u-.1)/.06):u<.46?22:u<.52?22+8*smooth01((u-.46)/.06):u<.76?30:u<.83?30-9*smooth01((u-.76)/.07):u<.9?21-5*smooth01((u-.83)/.07):17;
+/* Pistenraupe von hinten nach vorne: Gummi-Finisher und Fräse als Rampe ab dem Schnee (reinfahren geht), Heckaufbau, Kabine,
+   Frontscheibe, Schildrahmen, Räumschild. catH = Höhe der Oberkante in px über dem (flachen) Boden; Bild und Rutschfläche
+   benutzen genau diese Kurve, alle Übergänge weich (höchstens ca. 50°). */
+const CAT_LEN=124,CAT_SH=42;
+function catH(u){const x=u*CAT_LEN,S=(a,b,h0,h1)=>h0+(h1-h0)*smooth01((x-a)/(b-a));
+  return x<44?S(0,44,1,22):x<60?S(44,60,22,23):x<72?S(60,72,23,32):x<96?32:x<105?S(96,105,32,23):x<110?S(105,110,23,21):x<116?S(110,116,21,17):S(116,124,17,21)}
 const JIB={
   fd:()=>({name:'Flat-Down',sec:[[3,rand(70,100)],[rand(26,32),rand(90,130)]],hf:()=>12,bonus:80}),
   dfd:()=>({name:'Down-Flat-Down',sec:[[rand(22,28),rand(60,80)],[3,rand(50,70)],[rand(24,30),rand(60,80)]],hf:()=>12,bonus:120}),
@@ -1112,7 +1147,7 @@ const JIB={
   battleship:()=>({name:'Battleship',type:'box',sec:[[3,rand(160,200)]],curve:16,hf:u=>8+16*clamp((1-Math.abs(2*u-1))*2.6,0,1),bonus:120}),
   flatbox:()=>({name:'Flat Box',type:'box',sec:[[3,rand(120,170)]],hf:()=>10}),
   downbox:()=>({name:'Down Box',type:'box',sec:[[rand(18,24),rand(150,200)]],hf:()=>10}),
-  cat:()=>({name:'Pistenraupe',type:'box',look:'cat',sec:[[2,116]],curve:40,hf:catH,bonus:220,coins:false}),
+  cat:()=>({name:'Pistenraupe',type:'box',look:'cat',sec:[[0,CAT_LEN]],curve:62,hf:catH,bonus:220,coins:false}),
   table:()=>({name:'Picknicktisch',type:'box',look:'table',sec:[[2,66]],hf:()=>12,bonus:100,coins:false}),
   pole:()=>({name:'Pole Jam',type:'pole',look:'pole',sec:[[2,46]],hf:u=>18*u,bonus:80,coins:false}),
   stairs:()=>({name:'Treppen-Rail',type:'rail',look:'stairs',sec:[[3,50],[30,100],[3,50]],hf:()=>13,bonus:150})};
@@ -1620,8 +1655,8 @@ function playerView(){
     if(p.mode==='ground'&&p.ab){const k=p.ab.kind,t=p.ab.t,d=p.ab.dur;
       if(k==='shifty'){twist=42*p.ab.dir*Math.sin(Math.PI*smooth01(t/d));look=false}
       else{const L=board?BOARD3:SKI3;if(L[k])pose=(t<.12||t>d-.12)?k+'_h':k}}
-    const rockHit=p.mode==='crash'||(p.mode==='dead'&&p.deadReason==='rock');
-    if(rockHit){pose='tuck';ang=p.ang+(p.mode==='crash'?p.tumble:90);look=false;phi=0}
+    const rockHit=p.mode==='crash'||(p.mode==='rail'&&p.rCrash>0)||(p.mode==='dead'&&p.deadReason==='rock');
+    if(rockHit){pose='tuck';ang=p.ang+(p.mode==='dead'?90:p.tumble);look=false;phi=0;twist=0}
     const inAva=p.mode==='dead'&&p.deadReason==='wall';
     if(inAva){pose=(Math.floor(p.deadT*2.5)%2)?'layout':'tuck';ang=p.ang+(p.wTumble||0);look=false;phi=0}
     const r=ang*RAD;comx=p.x+FOOT*Math.sin(r);comy=p.y-FOOT*Math.cos(r);
@@ -2153,7 +2188,7 @@ function scoreAir(sketchy){
 function powderBurst(x,y,n,sp){for(let i=0;i<n;i++)parts.push({x:x+rand(-6,6),y:y-rand(0,4),vx:rand(-sp,sp*.6),vy:-rand(30,sp),life:rand(.5,1.1),col:Math.random()<.6?'#ffffff':'#e3ecf8',sz:Math.random()<.5?3:2,gr:70})}
 function crash(s,why,pow){
   p.mode='crash';p.crashT=pow?.8:1.05;p.s=Math.max(30,s*(pow?.5:.35));p.combo=0;p.tumble=0;p.spin=0;p.sw=false;
-  showTrick(why||'CRASH!',pow?'Kopfüber in den Powder':'Speed weg','bad');SFX.crash();shake=6;
+  showTrick(why||'CRASH!',pow?TX('Kopfüber in den Powder','Face-first into the powder'):TX('Speed weg','Speed gone'),'bad');SFX.crash();shake=6;
   if(pow)powderBurst(p.x,p.y,40,150);else burst(p.x,p.y-4,26,['#ffffff','#dbe8fa','#b9cdea'],160);
 }
 function land(g,fx){
@@ -2165,7 +2200,7 @@ function land(g,fx){
   if(ok){
     p.spin=Math.round(p.spin/180)*180;p.sw=Math.abs(Math.round(p.spin/180))%2===1;p.ang=gDeg;
     const sketchy=!!p.grab;p.s=clamp(s*(sketchy?.8:1),70,VMAX);
-    if(!pow&&p.vy>420&&Math.abs(g.a)<.12){p.s*=.7;showTrick('FLAT LANDING','Autsch','bad')}else{const sc=scoreAir(sketchy);if(!sketchy&&(sc||(p.fromRail&&p.grindPts)))startAfterbang()}
+    if(!pow&&p.vy>420&&Math.abs(g.a)<.12){p.s*=.7;showTrick('FLAT LANDING',TX('Autsch','Ouch'),'bad')}else{const sc=scoreAir(sketchy);if(!sketchy&&(sc||(p.fromRail&&p.grindPts)))startAfterbang()}
     SFX.land();if(pow){powderBurst(fx,g.y,26+Math.min(30,p.vy/14),130);p.sink=5;shake=Math.min(2,p.vy/250)}else{burst(fx,g.y,10,['#ffffff','#e4eefb'],90);shake=Math.min(4,p.vy/160)}
   }else crash(s,null,pow);
 }
@@ -2203,7 +2238,7 @@ function updGround(dt){
   if(g2.seg!==g.seg&&(g2.seg.kind==='rock'||g2.a-a>.5)){p.x=nx;p.y=ny;launch(a,0,g.seg);return}
   if(g2.y>ny+1.2&&g2.a-a>.15){p.x=nx;p.y=ny;launch(a,0,g.seg);return}
   // Pole Jam: reinfahren reicht, man rutscht die Stange hoch und poppt am Ende ab
-  for(const r of rails)if(r.type==='pole'&&p.x<r.x0&&nx>=r.x0&&p.mode==='ground'){p.x=r.x0+.2;mountRail(r);return}
+  for(const r of rails)if((r.type==='pole'&&p.mode==='ground'||r.look==='cat')&&p.x<r.x0&&nx>=r.x0){p.x=r.x0+.2;p.tumble=0;mountRail(r);return}   // Pistenraupe: über die Fräse rauf
   // Reifen und Fässer am Boden: antippen = kleiner Hüpfer drüber
   for(const b of bonks)if(!b.hit&&p.x<b.x-b.w/2&&nx>=b.x-b.w/2){b.hit=true;b.t=0;p.x=nx;p.y=ny;launch(a-.25,90,null);addPoints(150,b.kind==='tire'?'Tire Tap':'Barrel Tap');burst(b.x,b.y-b.h,8,['#ffffff','#e4eefb'],80);SFX.jump();return}
   p.x=nx;p.y=g2.y;
@@ -2215,13 +2250,11 @@ function updGround(dt){
   else if(p.s>140&&Math.random()<(p.braking?.9:.35)){const d=p.sw?1:-1;parts.push({x:p.x+d*6,y:p.y-1,vx:-p.s*.25+rand(-30,30),vy:-rand(20,70),life:rand(.25,.5),col:Math.random()<.5?'#ffffff':'#d8e6fa',sz:1,gr:300})}
 }
 /* Afterbangs (Freeski-Slang): nach einer sauberen Landung ca. 1 s lässig weiterfahren, als wäre nichts gewesen.
-   Zufällig: Shifty (seitlich schauen), zurücklehnen, Hände hinter den Rücken.
+   Zufällig: Shifty (seitlich schauen), zurücklehnen, Hände hinter den Rücken. Reiner Style: keine Punkte, keine Anzeige.
    Jede Eingabe außer Gas bricht ab. */
-const AB_NAMES={shifty:'Shifty',ab_back:'Hands Behind Back',ab_lean:'Lean Back'};
 function startAfterbang(){
-  const ski=SAVE.gear!=='board',L=['shifty','ab_lean','ab_back'];
-  const k=L[Math.floor(Math.random()*L.length)];p.ab={kind:k,t:0,dur:1.05,dir:Math.random()<.5?1:-1,held:(inU()?1:0)|(inD()?2:0)|(inL()?4:0)|(inR()&&!inGas()?8:0)};
-  run.score+=60;const sp=$('trick').querySelector('span');if(sp)sp.textContent+='  ·  '+AB_NAMES[k]+' +60';
+  const L=['shifty','ab_lean','ab_back'],k=L[Math.floor(Math.random()*L.length)];
+  p.ab={kind:k,t:0,dur:1.05,dir:Math.random()<.5?1:-1,held:(inU()?1:0)|(inD()?2:0)|(inL()?4:0)|(inR()&&!inGas()?8:0)};
 }
 function butterEnd(){const t=p.butterT||0,b=p.butter||0;p.butter=0;p.butterT=0;
   if(b&&t>=.35&&p.mode==='ground')addPoints(Math.round(Math.min(400,40+t*90)),(p.sw?'Switch ':'')+(b<0?'Butter':'Nose Butter'),t.toFixed(1)+'s')}
@@ -2233,11 +2266,11 @@ function updLoop(dt){
   p.x=L.cx+L.R*Math.sin(p.phi);p.y=L.cy+L.R*Math.cos(p.phi);p.ang=-p.phi*DEG;
   if(p.phi>=Math.PI*2){p.mode='ground';p.x=L.cx+.5;p.y=groundAt(p.x).y;p.ang=0;addPoints(500,'LOOP');return}
   const N=p.s*p.s/L.R+G*Math.cos(p.phi);
-  if(N<0||p.s<20){launch(-p.phi,0,null);p.bailed=true;showTrick('ZU LANGSAM','Loop verpasst','bad')}
+  if(N<0||p.s<20){launch(-p.phi,0,null);p.bailed=true;showTrick(TX('ZU LANGSAM','TOO SLOW'),TX('Loop verpasst','Missed the loop'),'bad')}
 }
 function landRail(r,fx){
-  const ra=railA(r,fx),diff=norm(p.ang-ra*DEG);
-  if(Math.abs(diff)>55||p.bailed){p.bailed=true;p.noRail=r;p.vy=-80;p.vx*=.6;return false}
+  const ra=railA(r,fx),diff=norm(p.ang-ra*DEG),cat=r.look==='cat';
+  if(Math.abs(diff)>(cat?75:55)||p.bailed){if(cat){catCrash(r,fx);return true}p.bailed=true;p.noRail=r;p.vy=-80;p.vx*=.6;return false}
   scoreAir(false);
   const s=p.vx*Math.cos(ra)+p.vy*Math.sin(ra);
   p.mode='rail';p.rail=r;p.x=fx;p.y=railY(r,fx);p.s=Math.max(90,s);p.grindT=0;p.ang=ra*DEG;
@@ -2250,7 +2283,11 @@ function landRail(r,fx){
   p.gspin=gs;p.gspinVis=hd?p.spin:gs;p.lastGsv=null;p.gTw=p.spinTw||0;p.gHold=hd;p.gRepT=0;p.gSwaps=0;p.gParts=[];p.gLastDir=hd||1;p.gPrevL=hl;p.gPrevR=hr;gLabel();
   SFX.land();return true;
 }
-function mountRail(r){p.mode='rail';p.rail=r;if(r.type==='pole')p.s=Math.min(p.s,240);   // die Stange hoch bremst
+// Auf der Pistenraupe gestürzt: man bleibt oben, überschlägt sich kurz, rappelt sich auf und rutscht ohne Punkte bis vorne
+function catCrash(r,fx){const ra=railA(r,fx),s=p.vx*Math.cos(ra)+p.vy*Math.sin(ra);p.x=fx;mountRail(r);
+  p.s=clamp(s*.45,60,200);p.rCrash=.7;p.tumble=0;p.gBust=true;p.combo=0;p.bailed=false;
+  showTrick('CRASH!',TX('Auf die Pistenraupe geknallt','Slammed onto the snowcat'),'bad');SFX.crash();shake=5;burst(fx,railY(r,fx)-2,18,['#ffffff','#c9d0da','#8d95a1'],140)}
+function mountRail(r){p.mode='rail';p.rail=r;p.gBust=false;p.rCrash=0;if(r.type==='pole')p.s=Math.min(p.s,240);   // die Stange hoch bremst
   p.y=railY(r,p.x);p.grindT=0;p.ang=railA(r,p.x)*DEG;p.spin=p.sw?180:0;p.gEntrySw=!!p.sw;
   p.gspin=p.spin;p.gspinVis=p.spin;p.lastGsv=null;p.gTw=0;p.gHold=0;p.gRepT=0;p.gSwaps=0;p.gParts=[];p.gLastDir=1;p.gPrevL=inL();p.gPrevR=inR();p.butter=0;p.butterVis=0;p.bs=null;gLabel();SFX.land()}
 function gLabel(){
@@ -2259,12 +2296,12 @@ function gLabel(){
   if(!p.gParts.includes(nm))p.gParts.push(nm);
 }
 function endGrind(){
-  p.grindPts=false;const t=p.grindT;if(t<=.15)return;
-  const nm=p.gParts.join(' to ')+(p.gSwaps?' · '+p.gSwaps+'x '+(p.rail.type==='rail'?'Swap':'90'):'')+(p.rail.name?' · '+p.rail.name:'');
+  p.grindPts=false;if(p.gBust){p.gBust=false;return}const t=p.grindT;if(t<=.15)return;
+  const nm=p.gParts.join(' to ')+(p.gSwaps?' · '+p.gSwaps+'x '+(p.rail.type==='rail'?'Swap':'90'):'')+(p.rail.name?' · '+(LANG==='en'&&RAIL_EN[p.rail.name]||p.rail.name):'');
   addPoints(Math.round(t*280+p.gSwaps*120+(p.gParts.length>1?100:0)+(p.rail.bonus||0)),nm,t.toFixed(1)+'s');p.grindPts=true;
 }
 function leaveRail(a,pop){
-  endGrind();p.spin=p.gspin;launch(a,pop,null);p.fromRail=true;p.aPrevL=false;p.aPrevR=false;
+  if(p.rCrash>0){p.rCrash=0;p.tumble=0}endGrind();p.spin=p.gspin;launch(a,pop,null);p.fromRail=true;p.aPrevL=false;p.aPrevR=false;
   if(Math.abs(p.gspin-p.gspinVis)>1){p.spin=p.gspinVis;p.spinTarget=p.gspin}
   {const g=p.gspin;if(((g%180)+180)%180!==0){const lo=Math.floor(g/180)*180,odd=x=>Math.abs(Math.round(x/180))%2===1,tg=odd(lo)===!!p.gEntrySw?lo:lo+180;p.spinTarget=tg;p.spinStart=tg}}
 }
@@ -2274,6 +2311,7 @@ function updRail(dt){
   p.x+=Math.cos(a)*p.s*dt;p.grindT+=dt;
   if(p.x>=r.x1){p.y=railY(r,r.x1);leaveRail(a,r.type==='pole'?JUMP_POP*.5:0);return}   // Pole Jam: am Ende abpoppen
   p.y=railY(r,p.x);p.ang+=(a*DEG-p.ang)*Math.min(1,dt*24);   // an Knicken weich mitdrehen
+  if(p.rCrash>0){p.rCrash-=dt;if(p.rCrash>.35)p.tumble+=760*dt;else p.tumble=90;jumpBuf=0;if(p.rCrash<=0){p.rCrash=0;p.tumble=0}return}   // Sturz auf der Raupe
   const kl=inL(),kr=inR(),step=r.type==='rail'?180:90;
   // Swap beim Drücken; bleibt die Richtung gedrückt, dreht er nach jedem fertigen Swap weiter
   const swap=dir=>{p.gspin+=dir*step;p.gSwaps++;p.gLastDir=dir;p.gRepT=GRIND_REP;gLabel();SFX.jump()};
@@ -2333,7 +2371,10 @@ function updAir(dt){
   // Reifen und Fässer in der Luft antippen: Bonk, federt nach oben
   if(p.vy>0)for(const b of bonks){const top=b.y-b.h;if(fx>=b.x-b.w/2-2&&fx<=b.x+b.w/2+2&&pfy<=top+1&&fy>=top){b.hit=true;b.t=0;p.y-=fy-top;p.vy=-Math.max(170,p.vy*.6);
     addPoints(200,b.kind==='tire'?'Tire Bonk':'Barrel Bonk');burst(fx,top,10,['#ffffff','#e4eefb'],90);SFX.jump();break}}
-  if(p.vy>0){for(const rl of rails){if(rl===p.noRail)continue;if(fx>=rl.x0&&fx<=rl.x1){const ry=railY(rl,fx),pry=railY(rl,clamp(pfx,rl.x0,rl.x1));if(pfy<=pry+1.5&&fy>=ry){if(landRail(rl,fx))return}}}}
+  for(const rl of rails){if(fx<rl.x0||fx>rl.x1)continue;const ry=railY(rl,fx),pry=railY(rl,clamp(pfx,rl.x0,rl.x1));
+    // Pistenraupe ist massiv: wer von oben kommt oder seitlich in den Aufbau fliegt, landet oben drauf (auch steigend, nur nicht direkt nach dem Absprung)
+    if(rl.look==='cat'){if(fy>=ry&&(pfy<=pry+1.5||fy-ry<14)&&!(p.airT<.08&&p.vy<0)){if(landRail(rl,fx))return}continue}
+    if(p.vy>0&&rl!==p.noRail&&pfy<=pry+1.5&&fy>=ry){if(landRail(rl,fx))return}}
   const g=groundAt(fx);
   if(g){
     if(fy>=g.y&&!(p.airT<.06&&p.vy<0)){
@@ -2356,7 +2397,7 @@ function startClimb(gs,fy){run.packUsed=true;
   p.climb={wx,rim:gs.y1,fromX:p.x,fromY:footY(),toY:ty,t:0,anim:0,moving:false};
   p.mode='climb';p.vx=0;p.vy=0;p.s=0;p.spin=0;p.flipAcc=0;p.corkMode=null;p.grab=null;p.ang=0;p.sw=false;p.bs=null;p.butter=0;p.butterVis=0;
   p.x=p.climb.fromX;p.y=p.climb.fromY;
-  showTrick('SPITZHACKE!',isTouch?'Linken Stick nach oben: klettern':'Pfeil hoch: klettern');shake=4;SFX.land();
+  showTrick(TX('SPITZHACKE!','ICE AXE!'),isTouch?TX('Linken Stick nach oben: klettern','Left stick up: climb'):TX('Pfeil hoch: klettern','Arrow up: climb'));shake=4;SFX.land();
 }
 function updClimb(dt){const c=p.climb;c.t+=dt;
   // erst zur Wand schwingen, dann festhalten und klettern
@@ -2364,7 +2405,7 @@ function updClimb(dt){const c=p.climb;c.t+=dt;
   p.x=c.wx-5;c.moving=!!inU();
   if(c.moving){c.anim+=dt;p.y-=40*dt;if(Math.random()<.15)parts.push({x:c.wx-1,y:p.y-12,vx:rand(-30,10),vy:rand(-20,30),life:.35,col:Math.random()<.5?'#ffffff':'#c9d3e4',sz:1,gr:300})}
   if(p.y<=c.rim+2){const x=c.wx+5,g=groundAt(x);p.climb=null;p.mode='ground';p.x=x;p.y=g?g.y:c.rim;p.ang=g?g.a*DEG:0;p.s=70;p.sw=false;p.butter=0;p.butterT=0;p.bLock=false;
-    showTrick('WIEDER EINGEKLICKT!','Weiter gehts');SFX.trick()}
+    showTrick(TX('WIEDER EINGEKLICKT!','CLICKED BACK IN!'),TX('Weiter gehts','Keep going'));SFX.trick()}
 }
 /* Lawinenschaufel (Freeride-Rucksack): erwischt dich die Lawine, wirst du einmal pro Lauf verschüttet statt zu sterben.
    Weißblitz, die Lawine zieht weiter und ist danach ein gutes Stück hinter dir, du gräbst dich in zwei Bewegungen frei. */
@@ -2377,13 +2418,13 @@ function startDig(){run.shovelUsed=true;
   p.mode='dig';p.dig={t:0,mound:15};p.vx=0;p.vy=0;p.s=0;p.spin=0;p.flipAcc=0;p.corkMode=null;p.grab=null;p.gVis=0;p.sw=false;p.bs=null;p.butter=0;p.butterVis=0;p.sink=0;
   wall.x=p.x-470;whiteout=1;shake=6;SFX.die();
   burst(p.x,p.y-8,40,['#ffffff','#e3ecf8','#c9d6e8'],160);
-  showTrick('VERSCHÜTTET!','Lawinenschaufel raus','bad');
+  showTrick(TX('VERSCHÜTTET!','BURIED!'),TX('Lawinenschaufel raus','Shovel out!'),'bad');
 }
 function updDig(dt){const d=p.dig;d.t+=dt;whiteout=Math.max(0,whiteout-dt*2.2);
   if(d.t>.45){const k=(d.t-.45)/1.15;d.mound=15*(1-smooth01(k));
     const fr=Math.floor((d.t-.45)/.24)%2;if(fr===1&&d.lastFr===0){for(let i=0;i<9;i++)parts.push({x:p.x-4+rand(-3,3),y:p.y-22+rand(-3,3),vx:rand(-120,-40),vy:rand(-110,-40),life:rand(.4,.8),col:Math.random()<.5?'#ffffff':'#d8e3f2',sz:Math.random()<.4?2:1,gr:380});SFX.jump()}
     d.lastFr=fr}
-  if(d.t>=1.6){p.dig=null;p.mode='ground';p.s=150;p.bLock=false;p.butterT=0;showTrick('AUSGEGRABEN!','Weiter gehts');SFX.trick()}
+  if(d.t>=1.6){p.dig=null;p.mode='ground';p.s=150;p.bLock=false;p.butterT=0;showTrick(TX('AUSGEGRABEN!','DUG OUT!'),TX('Weiter gehts','Keep going'));SFX.trick()}
 }
 function die(reason){
   if(p.mode==='dead'||p.mode==='dig')return;
@@ -2392,8 +2433,8 @@ function die(reason){
   if(reason==='wall'){p.inAir=false;p.x=fx0;const g=groundAt(fx0);if(g){p.y=g.y;p.ang=g.a*DEG}p.wallSink=0;p.wTumble=0;p.sink=0}
   p.mode='dead';p.deadReason=reason;p.deadT=0;SFX.die();shake=reason==='void'?0:8;
   if(reason==='patrol')showTrick('BUSTED!','Ski Patrol','bad');
-  if(reason==='wall')showTrick('LAWINE!','','bad');
-  if(reason==='rock'){showTrick('FELS!','Voll dagegen','bad');burst(p.x,p.y-6,30,['#ffffff','#8d91a3','#e3ecf8'],170)}
+  if(reason==='wall')showTrick(TX('LAWINE!','AVALANCHE!'),'','bad');
+  if(reason==='rock'){showTrick(TX('FELS!','ROCK!'),TX('Voll dagegen','Straight into it'),'bad');burst(p.x,p.y-6,30,['#ffffff','#8d91a3','#e3ecf8'],170)}
 }
 function updRocks(){
   if(p.mode!=='ground'&&p.mode!=='air'&&p.mode!=='crash')return;
@@ -2406,7 +2447,7 @@ function updRocks(){
     const g=groundAt(fx),wasAir=p.mode==='air',s=wasAir?Math.hypot(p.vx,p.vy):p.s;
     if(wasAir&&g){p.x=fx;p.y=g.y;p.mode='ground';p.ang=g.a*DEG}
     if(r.big){p.s=0;die('rock')}
-    else if(p.mode!=='crash')crash(s,'STEIN!',true);
+    else if(p.mode!=='crash')crash(s,TX('STEIN!','STONE!'),true);
     return;
   }
 }
@@ -2442,7 +2483,7 @@ function updPatrol(dt){
     pat.next-=dt;
     if(pat.next<=0&&p.mode!=='dead'){
       const sx=fx-300,g=groundAt(sx);
-      if(g&&!gapBetween(sx,fx)&&p.mode!=='loop'){Object.assign(pat,{on:true,state:'chase',x:sx,y:g.y,a:g.a,s:Math.min(PAT_MAX,Math.max(240,hSpeed()+60)),sirenT:0});showTrick('SKI PATROL!','Spring einen Gap oder gib Vollgas','bad')}
+      if(g&&!gapBetween(sx,fx)&&p.mode!=='loop'){Object.assign(pat,{on:true,state:'chase',x:sx,y:g.y,a:g.a,s:Math.min(PAT_MAX,Math.max(240,hSpeed()+60)),sirenT:0});showTrick('SKI PATROL!',TX('Spring einen Gap oder gib Vollgas','Jump a gap or go full speed'),'bad')}
       else pat.next=1.2;
     }
     return;
@@ -2450,15 +2491,17 @@ function updPatrol(dt){
   pat.sirenT-=dt;if(pat.sirenT<=0&&pat.state==='chase'){pat.sirenT=1.1;SFX.siren()}
   if(pat.state==='chase'){
     const dist=fx-pat.x,ps=hSpeed();
-    if(dist>470&&p.mode!=='dead'){pat.state='stuck';pat.t=.05;run.score+=150;showTrick('DAVONGEFAHREN!','+150  Patrol abgehängt');SFX.shake();return}
+    if(dist>470&&p.mode!=='dead'){pat.state='stuck';pat.t=.05;run.score+=150;showTrick(TX('DAVONGEFAHREN!','OUTRAN THEM!'),TX('+150  Patrol abgehängt','+150  Patrol shaken off'));SFX.shake();return}
     const tgt=Math.min(PAT_MAX,dist>150?Math.max(ps+70,270):Math.max(ps+30,200));
     pat.s+=(tgt-pat.s)*Math.min(1,dt*1.6);
     let nx=pat.x+pat.s*dt;
+    {const cb=p.mode==='dead'?null:rails.find(r=>r.look==='cat'&&pat.x<=r.x0-8&&nx>r.x0-8);   // die Pistenraupe hält die Patrol auf
+      if(cb){const ge=groundAt(cb.x0-8);pat.x=cb.x0-8;if(ge){pat.y=ge.y;pat.a=ge.a}pat.state='stuck';pat.t=2.4;run.score+=250;showTrick(TX('ABGEHÄNGT!','LOST THEM!'),TX('+250  Patrol steht an der Pistenraupe','+250  Patrol stuck at the snowcat'));SFX.shake();return}}
     if(p.mode==='dead')nx=pat.x;
     if(p.mode==='loop'){nx=Math.min(nx,p.loop.cx-p.loop.R-40);if(nx<pat.x)nx=pat.x}
     const g=groundAt(nx);
     if(!g||g.seg.kind==='rock'){const gs=gapAt(nx);const ex=gs?gs.x0-7:g?g.seg.x0-7:pat.x;const ge=groundAt(ex)||groundAt(pat.x);pat.x=ex;if(ge){pat.y=ge.y;pat.a=ge.a}
-      pat.state='stuck';pat.t=2.4;if(p.mode!=='dead'){run.score+=250;showTrick('ABGEHÄNGT!','+250  Patrol steht am '+(gs?'Gap':'Cliff'));SFX.shake()}return}
+      pat.state='stuck';pat.t=2.4;if(p.mode!=='dead'){run.score+=250;showTrick(TX('ABGEHÄNGT!','LOST THEM!'),TX('+250  Patrol steht am '+(gs?'Gap':'Cliff'),'+250  Patrol stuck at the '+(gs?'gap':'cliff')));SFX.shake()}return}
     if(nx>fx-7&&Math.abs(g.y-fy)>=20)nx=Math.min(nx,fx-7);
     const g2=groundAt(nx);if(g2){pat.x=nx;pat.y=g2.y;pat.a+=(g2.a-pat.a)*Math.min(1,dt*10)}
     if(p.mode!=='dead'&&p.mode!=='loop'&&p.mode!=='dig'&&p.mode!=='climb'&&fx-pat.x<9&&Math.abs(pat.y-fy)<20)die('patrol');
@@ -2496,7 +2539,7 @@ function update(dt){
   }
   if(state==='play'&&p.mode==='rail'&&p.rail){if(!grindSnd||grindSnd.rail!==p.rail)grindStart(railMat(p.rail),p.rail);grindUpdate(p.s)}else if(grindSnd)grindStop();
   if(state!=='play')return;
-  {const zg=groundAt(footX());if(zg&&zg.seg.zone!==run.zone){run.zone=zg.seg.zone;if(run.zone==='free')showTrick('FREERIDE ZONE','Powder · Tree Grinds · Drops · Felsen');else showTrick('SNOWPARK','Kicker · Rails · Big Air')}}
+  {const zg=groundAt(footX());if(zg&&zg.seg.zone!==run.zone){run.zone=zg.seg.zone;if(run.zone==='free')showTrick('FREERIDE ZONE',TX('Powder · Tree Grinds · Drops · Felsen','Powder · Tree Grinds · Drops · Rocks'));else showTrick('SNOWPARK','Kicker · Rails · Big Air')}}
   updRocks();updFauna(dt);updWall(dt);updPatrol(dt);if(p.mode!=='dead')updCoins();updParts(dt);updCamera(dt);
   while(gx<cam.x+VW+900)genNext();
   pruneT-=dt;if(pruneT<=0){pruneT=1;const cut=Math.min(wall.x,cam.x,pat.on?pat.x:1e9)-500;
@@ -2573,35 +2616,85 @@ function drawBox(r,cX,cY){const xa=Math.max(Math.floor(r.x0),cX),xb=Math.min(Mat
     ctx.fillStyle='#1a2133';ctx.fillRect(sx,ry-1,1,gy-ry+2);if(edge)continue;
     ctx.fillStyle=r.col;ctx.fillRect(sx,ry+2,1,Math.max(0,gy-ry-2));ctx.fillStyle=dk;ctx.fillRect(sx,gy-2,1,2);ctx.fillStyle=lt;ctx.fillRect(sx,ry+5,1,1);
     ctx.fillStyle='#eef2f7';ctx.fillRect(sx,ry,1,2)}}
-// Pistenraupe: rote Karosserie, Kabine mit Fenstern und Rundumleuchte, Ketten mit Laufrädern, Räumschild vorne, Fräse hinten.
-// Die Oberkante (Fräse, Motorhaube, Dach, Schild) ist die Rutschfläche.
-function drawCat(r,cX,cY){const L=r.x1-r.x0,xa=Math.max(Math.floor(r.x0),cX),xb=Math.min(Math.ceil(r.x1),cX+VW);
-  const gyAt=x=>{const g=groundAt(x);return g?Math.round(g.y)-cY:0};
-  for(let x=xa;x<xb;x++){const sx=x-cX,u=(x-r.x0)/L,top=Math.round(railY(r,x))-cY,gy=gyAt(x);
-    if(u>=.9){   // Räumschild: gewölbtes Stahlblech, unten am Boden
-      const edge=u>.985;ctx.fillStyle='#16181f';ctx.fillRect(sx,top-1,1,gy-top+1);if(edge)continue;
-      const k=(u-.9)/.1;ctx.fillStyle=k<.35?'#8b939f':k<.7?'#b9c1cd':'#dfe4ea';ctx.fillRect(sx,top,1,gy-top-1);ctx.fillStyle='#ff7a2f';ctx.fillRect(sx,top,1,2);continue}
-    if(u<.1){    // Fräse: graues Gehäuse mit Gummilappen
-      ctx.fillStyle='#16181f';ctx.fillRect(sx,top-1,1,gy-top+1);if(u<.012)continue;
-      ctx.fillStyle='#6f7785';ctx.fillRect(sx,top,1,gy-top-4);ctx.fillStyle='#9aa3b2';ctx.fillRect(sx,top,1,1);ctx.fillStyle='#22252e';ctx.fillRect(sx,gy-4,1,4);continue}
-    // Karosserie über den Ketten
-    const tr=gy-9;ctx.fillStyle='#16181f';ctx.fillRect(sx,top-1,1,1);
-    const cab=u>.46&&u<.83;
-    if(cab){const bl=tr-7,pil=Math.abs(u-.49)<.012||Math.abs(u-.64)<.01||Math.abs(u-.8)<.014;
-      if(!pil&&bl-top>3){ctx.fillStyle='#16181f';ctx.fillRect(sx,top,1,1);ctx.fillStyle='#a9d8ff';ctx.fillRect(sx,top+2,1,bl-top-2);ctx.fillStyle='#e6f4ff';if(((x>>1)&7)===0)ctx.fillRect(sx,top+3,1,Math.max(1,bl-top-6));ctx.fillStyle='#d2423a';ctx.fillRect(sx,top,1,2)}
-      else{ctx.fillStyle='#d2423a';ctx.fillRect(sx,top,1,bl-top)}
-      ctx.fillStyle='#d2423a';ctx.fillRect(sx,bl,1,tr-bl);ctx.fillStyle='#a8322c';ctx.fillRect(sx,tr-2,1,2)}
-    else{ctx.fillStyle='#d2423a';ctx.fillRect(sx,top,1,tr-top);ctx.fillStyle='#ef6b5c';ctx.fillRect(sx,top,1,1);ctx.fillStyle='#a8322c';ctx.fillRect(sx,tr-2,1,2);
-      if(u>.18&&u<.44&&((x-Math.floor(r.x0))%4===0)){ctx.fillStyle='#8f2a25';ctx.fillRect(sx,top+3,1,Math.max(0,tr-top-7))}}   // Lüftungsgitter
-    ctx.fillStyle='#16181f';ctx.fillRect(sx,tr,1,1)}
-  // Ketten mit Laufrädern und Stollen
-  const k0=r.x0+L*.1,k1=r.x0+L*.9;
-  for(let x=Math.max(Math.floor(k0),cX);x<Math.min(Math.ceil(k1),cX+VW);x++){const sx=x-cX,gy=gyAt(x),e=Math.min(x-k0,k1-x),cut=e<3?3-Math.round(e):0;
-    ctx.fillStyle='#0f1116';ctx.fillRect(sx,gy-9+cut,1,9-cut*2+1);ctx.fillStyle='#2b2e38';ctx.fillRect(sx,gy-8+cut,1,Math.max(0,7-cut*2));
-    if(((x-Math.floor(k0))%3)===0){ctx.fillStyle='#4a4e5c';ctx.fillRect(sx,gy-9+cut,1,1);ctx.fillRect(sx,gy-1-cut,1,1)}}
-  for(let i=0;i<5;i++){const x=k0+6+i*(k1-k0-12)/4,sx=Math.round(x-cX),gy=gyAt(x);if(sx<-4||sx>VW+4)continue;ctx.fillStyle='#16181f';ctx.fillRect(sx-2,gy-7,5,5);ctx.fillStyle='#9aa3b2';ctx.fillRect(sx-1,gy-6,3,3);ctx.fillStyle='#5f6774';ctx.fillRect(sx,gy-5,1,1)}
-  // Rundumleuchte auf dem Dach, blinkt
-  {const x=r.x0+L*.66,sx=Math.round(x-cX),ty=Math.round(railY(r,x))-cY;ctx.fillStyle='#16181f';ctx.fillRect(sx-2,ty-4,4,4);ctx.fillStyle=(Math.floor(T*4)&1)?'#ffb02e':'#c47a10';ctx.fillRect(sx-1,ty-3,2,3)}}
+/* Pistenraupe (grau), einmal als Bild vorberechnet. Von hinten (links) nach vorne: Gummi-Finisher und Fräse, Heckaufbau mit
+   Lüftungsgitter, Auspuff und Rücklicht, Kabine mit großen Scheiben, Dachträger mit Arbeitsscheinwerfern, Rundumleuchte,
+   Ketten mit Antriebsrad, Laufrädern und Spannrad, Schildrahmen mit Hydraulik, gewölbtes Räumschild mit Warnmarkierung.
+   Die oberste Zeile jeder Spalte liegt genau auf catH: was man sieht, ist die Rutschfläche. */
+let CAT_SPR=null;
+function makeCatSprite(){
+  const W=CAT_LEN,H=CAT_SH,[c,g]=mk(W,H),id=g.createImageData(W,H),D=id.data,cc={};
+  const rgb=h=>cc[h]||(cc[h]=hexRgb(h));
+  const put=(x,y,col)=>{x=Math.round(x);y=Math.round(y);if(x<0||x>=W||y<0||y>=H)return;const i=(y*W+x)*4,v=rgb(col);D[i]=v[0];D[i+1]=v[1];D[i+2]=v[2];D[i+3]=255};
+  const has=(x,y)=>x>=0&&x<W&&y>=0&&y<H&&D[(y*W+x)*4+3]>0;
+  const top=x=>H-Math.round(catH((x+.5)/W));
+  const line=(x0,y0,x1,y1,w,col)=>{const n=Math.ceil(Math.hypot(x1-x0,y1-y0)*2);for(let k=0;k<=n;k++){const x=x0+(x1-x0)*k/n,y=y0+(y1-y0)*k/n;for(let a=0;a<w;a++)for(let b=0;b<w;b++)put(Math.floor(x)+a,Math.floor(y)+b,col)}};
+  const O='#15181f',B0='#a3abb6',B1='#ccd2db',B2='#87909c',B3='#69717d',B4='#4b515c',DK='#2b2f38';
+  const BELT='#1d2027',INNER='#262a32',GL='#2c3a4d',GR='#55708c',GH='#8eaecb',Y=H-1;   // Y = unterste Zeile (auf dem Schnee)
+  // Ketten: Gurt mit runden Enden
+  const tk0=31,tk1=110,tcy=Y-5.5,tr=6;
+  const beltDy=x=>x<tk0+tr?Math.sqrt(Math.max(0,tr*tr-(tk0+tr-x-.5)**2)):x>tk1-tr?Math.sqrt(Math.max(0,tr*tr-(x+.5-(tk1-tr))**2)):tr;
+  for(let x=tk0;x<=tk1;x++){const dy=beltDy(x);for(let y=Math.round(tcy-dy);y<=Math.round(tcy+dy)-1;y++)put(x,y,dy-Math.abs(y+.5-tcy)>2.2?INNER:BELT)}
+  // Antriebsrad hinten (mit Zähnen), fünf Laufräder, Spannrad vorne: dunkle Stahlscheiben
+  const wheel=(cx,cy,r,teeth)=>{for(let y=Math.floor(cy-r-1);y<=Math.ceil(cy+r);y++)for(let x=Math.floor(cx-r-1);x<=Math.ceil(cx+r);x++){
+      const dx=x+.5-cx,dy=y+.5-cy,d=Math.hypot(dx,dy);if(d>r)continue;
+      let col=d>r-1.1?(teeth?((Math.round((Math.atan2(dy,dx)+Math.PI)*6/Math.PI)&1)?'#69717d':'#2b2f38'):(dx+dy<-1.5?'#6b7380':'#4b515c')):d>r-2.2?'#363b45':d>1.5?'#59606c':'#1d2027';
+      if(d<=1.5&&dx<0&&dy<0)col='#8b939f';put(x,y,col)}};
+  wheel(37.5,Y-6.5,4.6,true);for(const wx of [47.5,58.5,69.5,80.5,91.5])wheel(wx,Y-5,4.7,false);wheel(103.5,Y-6,4.6,false);
+  // Ober- und Untertrum über den Rädern, mit Alu-Stegen
+  for(let x=tk0+tr-2;x<=tk1-tr+2;x++){put(x,Y-11,x%3===0?'#8b939f':BELT);put(x,Y-10,x%3===0?'#4b515c':BELT);put(x,Y-1,x%3===1?'#4b515c':BELT);put(x,Y,x%3===1?'#8b939f':BELT)}
+  // Rahmenleiste über den Ketten
+  for(let x=27;x<=112;x++){put(x,Y-13,B4);put(x,Y-12,'#3a3f49')}
+  // Gummi-Finisher (Kamm) ganz hinten, liegt auf dem Schnee
+  for(let x=0;x<=5;x++)for(let y=top(x);y<=Y;y++)put(x,y,y===Y?(x&1?'#3d414b':'#22252c'):(x&1?'#3d414b':'#2a2d35'));
+  // Fräsengehäuse: Rampe vom Schnee hoch, Rippen, Lagerdeckel
+  for(let x=4;x<=21;x++){const t0=top(x);for(let y=t0;y<=Y;y++){let col=y===t0+1?B1:y>=Y-3&&y<=Y-2?B3:y===Y?DK:B2;if(x%4===1&&y>t0+1&&y<Y-3)col='#7a828e';put(x,y,col)}}
+  for(let y=Y-7;y<=Y-1;y++)for(let x=14;x<=21;x++){const d=Math.hypot(x+.5-17.5,y+.5-(Y-3.5));if(d<=2.6)put(x,y,d>1.7?O:d>.8?'#c3c9d3':'#3a3f49')}
+  // Abdeckung und Arm zwischen Fräse und Heck (darunter frei)
+  for(let x=20;x<=32;x++){const t0=top(x);for(let y=t0;y<=t0+3;y++)put(x,y,y===t0+1?B1:y===t0+3?B3:B2)}
+  line(19.5,Y-4.5,32,Y-11.5,2,DK);line(21.5,Y-7.5,30.5,Y-12.5,1,'#c9d0da');
+  // Heckaufbau mit Motorhaube (steigt zur Kabine), Rücklicht, Lüftungsgitter, Blechfugen
+  for(let x=28;x<=69;x++){const t0=top(x);for(let y=t0;y<=Y-14;y++)put(x,y,y===t0+1?B1:y>=Y-15?B2:B0)}
+  put(29,Y-15,'#e0453a');put(30,Y-15,'#e0453a');put(29,Y-14,'#a8322c');put(30,Y-14,'#a8322c');
+  for(let x=40;x<=58;x++){const t0=top(x);for(let y=t0+3;y<=Y-17;y++)put(x,y,x===40||x===58||y===t0+3||y===Y-17?B3:(y&1?'#79818d':B2))}
+  for(const fx of [36,62])for(let y=top(fx)+2;y<=Y-15;y++)put(fx,y,B2);
+  // Kabine: kastig, große Scheiben mit Spiegelungen, Säulen, Tür mit Griff
+  for(let x=68;x<=105;x++){const t0=top(x);for(let y=t0;y<=Y-14;y++)put(x,y,y===t0+1?B1:y>=Y-15?B2:B0)}
+  const glass=(x,y)=>{const s=((x+(24-y))%13+13)%13;put(x,y,s<2?GH:s<4?GR:GL)};
+  const gTop=12,gBot=Y-20;
+  for(let x=70;x<=103;x++){if(x===83||x===84||x===96)continue;const y0=Math.max(top(x)+2,gTop);for(let y=y0;y<=gBot;y++)glass(x,y)}
+  for(let x=69;x<=104;x++)if(top(x)+1<gBot+1)put(x,gBot+1,B3);
+  for(let y=top(68)+1;y<=Y-14;y++){put(68,y,B3);put(69,y,B2)}
+  for(let y=gTop;y<=Y-14;y++){put(83,y,B3);put(96,y,B3)}put(84,gTop,B2);
+  put(92,gBot+3,'#eef1f5');put(93,gBot+3,'#eef1f5');put(92,gBot+4,B3);put(93,gBot+4,B3);
+  for(let x=31;x<=109;x++)if(top(x)+1<Y-15)put(x,Y-15,'#5b6270');
+  // Front: Scheinwerfer, Blinker
+  for(let x=104;x<=111;x++)for(let y=top(x)+1;y<=Y-12;y++)put(x,y,y>=Y-13?'#3a3f49':y>=Y-15?B2:B0);
+  for(let x=105;x<=107;x++){put(x,Y-18,'#fff1c4');put(x,Y-17,'#ffe08a');put(x,Y-16,B3)}put(108,Y-18,'#ffb02e');
+  // Schildrahmen: Hydraulik oben (Rutschfläche), Schubarm unten, dazwischen frei
+  for(let x=110;x<=114;x++){const t0=top(x);put(x,t0,O);put(x,t0+1,'#5b6270');put(x,t0+2,'#5b6270');put(x,t0+3,'#3a3f49')}
+  line(108.5,Y-16.5,113.5,Y-15,1,'#d5dae2');line(110.5,Y-11,114.5,Y-6.5,2,DK);line(111.5,Y-15.5,112.5,Y-10,1,'#69717d');
+  // Räumschild: gewölbt (vorne hohl), helle Kante, unten Schneidkante, oben Warnmarkierung
+  for(let x=114;x<=123;x++){const t0=top(x);for(let y=t0;y<=Y;y++){const t=(y-t0)/(Y-t0),xf=Math.min(123,Math.round(119.5+4*Math.pow(Math.abs(2*t-1),1.8)));if(x>xf)continue;
+    let col=x<=115?B4:x>=xf-1?'#e3e8ee':y>=Y-1?'#3a3f49':(x===116?B3:(y-t0)%7===3?'#79818d':B2);
+    if(y>=t0+2&&y<=t0+6&&x>=117&&x<=120)col=((x+y)&3)<2?'#d23b30':'#f2f4f7';put(x,y,col)}}
+  // Umriss innen an allen Kanten (die Silhouette bleibt genau die Rutschfläche)
+  const edge=[];for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(has(x,y)&&(!has(x-1,y)||!has(x+1,y)||!has(x,y-1)||(y<Y&&!has(x,y+1))))edge.push([x,y]);
+  for(const [x,y] of edge)put(x,y,O);
+  // über der Rutschfläche: Auspuff, Außenspiegel, Dachträger mit Arbeitsscheinwerfern, Sockel der Rundumleuchte
+  {const t0=top(52);for(let y=t0-5;y<t0;y++){put(52,y,DK);put(53,y,'#3d424d')}put(52,t0-6,'#9aa3b2');put(53,t0-6,'#c9d0da')}
+  line(103,17.5,105.5,15,1,DK);for(let y=12;y<=15;y++){put(106,y,DK);put(107,y,y===12?'#69717d':'#3d424d')}
+  const ry=top(80)-1;for(let x=76;x<=94;x++)put(x,ry,DK);for(const lx of [77,83,89]){put(lx,ry-1,'#dfe4ea');put(lx+1,ry-1,'#b3bac5')}
+  for(let x=72;x<=74;x++)put(x,ry,DK);put(72,ry-1,'#a35f0c');put(73,ry-1,'#c47a10');put(74,ry-1,'#a35f0c');put(73,ry-2,'#c47a10');
+  g.putImageData(id,0,0);return c}
+function drawCat(r,cX,cY){if(!CAT_SPR)CAT_SPR=makeCatSprite();
+  const g=groundAt(r.x0+2);if(!g)return;const sx=Math.round(r.x0-cX),sy=Math.round(g.y-cY)-CAT_SH;
+  if(sx>VW||sx+CAT_LEN<0)return;ctx.drawImage(CAT_SPR,sx,sy);
+  // Rundumleuchte blinkt; nachts Scheinwerfer und Arbeitslichter an
+  const on=(Math.floor(T*4)&1)===1,lit=curDS.night>.25;
+  const ry=CAT_SH-Math.round(catH(80.5/CAT_LEN))-2,hy=CAT_SH-19;
+  if(on){ctx.fillStyle='#ffb02e';ctx.fillRect(sx+72,sy+ry,3,1);ctx.fillRect(sx+73,sy+ry-1,1,1);ctx.fillStyle='#fff1c4';ctx.fillRect(sx+73,sy+ry,1,1)}
+  if(lit){ctx.fillStyle='#fff6d6';ctx.fillRect(sx+105,sy+hy,3,2);for(const lx of [77,83,89])ctx.fillRect(sx+lx,sy+ry,2,1);
+    emissive.push({x:sx+106,y:sy+hy+1,r:11});for(const lx of [78,84,90])emissive.push({x:sx+lx,y:sy+ry,r:6});if(on)emissive.push({x:sx+73,y:sy+ry,r:5})}}
 // Picknicktisch: Holzplatte mit A-Beinen
 function drawTable(r,cX,cY){const xa=Math.max(Math.floor(r.x0),cX),xb=Math.min(Math.ceil(r.x1),cX+VW);
   for(const lx of [r.x0+9,r.x1-9])for(const d of [-6,6]){const top=railY(r,lx),g=groundAt(lx+d);if(!g)continue;
@@ -2832,31 +2925,32 @@ function drawHud(){
 /* ================= FLOW ================= */
 const screens=['menu','help','shop','pause','over','rank','notes'];
 function show(id){screens.forEach(s=>$(s).hidden=s!==id);if(id){const b=$(id).querySelector('.btn');if(b&&!isTouch)b.focus({preventScroll:true})}}
-function refreshMenu(){if(cloudHook)cloudShow();$('kMute').textContent=SAVE.gear==='board'?'INDY':'MUTE';document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.gear===SAVE.gear)));$('bAssist').setAttribute('aria-pressed',String(!!SAVE.assist));{const own=!!SAVE.owned.pk_free,on=!!SAVE.equip.pack&&SAVE.equip.pack!=='pk_none',b=$('bPack');b.hidden=!own;b.setAttribute('aria-pressed',String(on));b.textContent='RUCKSACK: '+(on?'AN':'AUS')}$('bAssist').textContent='LANDEHILFE: '+(SAVE.assist?'AN':'AUS');$('bMusic').textContent='MUSIK: '+(SAVE.music!==false?'AN':'AUS');$('bMusic').setAttribute('aria-pressed',String(SAVE.music!==false));setT($('mCoins'),String(SAVE.coins));setT($('mBest'),String(SAVE.best));setT($('mDist'),SAVE.bestDist+' m')}
+function refreshMenu(){if(cloudHook)cloudShow();$('kMute').textContent=SAVE.gear==='board'?'INDY':'MUTE';document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.gear===SAVE.gear)));$('bAssist').setAttribute('aria-pressed',String(!!SAVE.assist));{const own=!!SAVE.owned.pk_free,on=!!SAVE.equip.pack&&SAVE.equip.pack!=='pk_none',b=$('bPack');b.hidden=!own;b.setAttribute('aria-pressed',String(on));const ON=TX('AN','ON'),OFF=TX('AUS','OFF');b.textContent=TX('RUCKSACK: ','BACKPACK: ')+(on?ON:OFF)}$('bAssist').textContent=TX('LANDEHILFE: ','LANDING ASSIST: ')+(SAVE.assist?TX('AN','ON'):TX('AUS','OFF'));$('bMusic').textContent=TX('MUSIK: ','MUSIC: ')+(SAVE.music!==false?TX('AN','ON'):TX('AUS','OFF'));$('bMusic').setAttribute('aria-pressed',String(SAVE.music!==false));setT($('mCoins'),String(SAVE.coins));setT($('mBest'),String(SAVE.best));setT($('mDist'),SAVE.bestDist+' m')}
 let hintTimer=0;
 function showHint(txt,ms){const h=$('hint');h.hidden=false;h.style.opacity='1';h.textContent=txt;clearTimeout(hintTimer);hintTimer=setTimeout(()=>{h.style.opacity='0';setTimeout(()=>h.hidden=true,700)},ms)}
 // Ende der Alm-Ausfahrt: ab hier steuert man selbst (überspringen = direkt ans Ende des Plateaus)
 function endIntro(skip){if(!p.auto)return;p.auto=false;
   if(skip){const g=groundAt(ALM_END+2);p.x=ALM_END+2;if(g){p.y=g.y;p.ang=g.a*DEG}p.s=Math.max(p.s,150);p.mode='ground';updCamera(0,true)}
-  wall.x=p.x-430;showTrick('LOS GEHT\'S!','Ab jetzt fährst du');
-  showHint(isTouch?'Links tippen: Stick ▶ Gas, ◀ bremsen, in der Luft Flips und Spins · Rechts tippen: Sprung, halten und schieben = Grab':'Shift Gas · ← Bremsen · Leertaste springen · Tricks in der Luft',5200)}
+  wall.x=p.x-430;showTrick(TX('LOS GEHT\'S!','LET\'S GO!'),TX('Ab jetzt fährst du','You\'re in control now'));
+  showHint(isTouch?TX('Links tippen: Stick ▶ Gas, ◀ bremsen, in der Luft Flips und Spins · Rechts tippen: Sprung, halten und schieben = Grab','Tap left: stick ▶ speed, ◀ brake, flips and spins in the air · Tap right: jump, hold and slide = grab'):TX('Shift Gas · ← Bremsen · Leertaste springen · Tricks in der Luft','Shift speed · ← brake · Space jump · tricks in the air'),5200)}
 function startRun(){
   unlockAudio();padReset();resetRun();updCamera(0,true);state='play';show(null);$('hud').hidden=false;if(document.activeElement)document.activeElement.blur();
-  MUS.step=0;ALM.step=0;musicMix(true);showTrick('SERVUS AUF DER ALM!','Gleich geht\'s los');
-  showHint(isTouch?'Rechts tippen: Intro überspringen':'Leertaste: Intro überspringen',3800);
+  MUS.step=0;ALM.step=0;musicMix(true);showTrick(TX('SERVUS AUF DER ALM!','SERVUS! WELCOME TO THE ALM'),TX('Gleich geht\'s los','We\'re off in a sec'));
+  showHint(isTouch?TX('Rechts tippen: Intro überspringen','Tap right: skip intro'):TX('Leertaste: Intro überspringen','Space: skip intro'),3800);
   layout();
 }
 function setPause(on){if(on&&state==='play'){state='pause';show('pause');persist()}else if(!on&&state==='pause'){state='play';show(null);if(document.activeElement)document.activeElement.blur()}}
 function gameOver(){
   if(state!=='play')return;
-  state='over';$('hud').hidden=true;$('avalGlow').style.opacity='0';
+  state='over';$('hud').hidden=true;$('avalGlow').style.opacity='0';clearTimeout(hintTimer);$('hint').hidden=true;
   const meters=Math.max(0,Math.floor(footX()/10)),score=run.score+meters;
-  const reasons={rock:['Volle Kanne gegen einen Felsen','FELS!'],quit:['Aufgegeben','RUN BEENDET'],void:['Zu kurz gesprungen','INS VOID GEFALLEN'],wall:['Die Lawine war schneller','ÜBERROLLT'],patrol:['Die Ski Patrol hat dich','ERWISCHT']};
+  const reasons=LANG==='en'?{rock:['Full speed into a rock','ROCK!'],quit:['Gave up','RUN OVER'],void:['Came up short','FELL INTO THE VOID'],wall:['The avalanche was faster','BURIED'],patrol:['The ski patrol got you','BUSTED']}
+    :{rock:['Volle Kanne gegen einen Felsen','FELS!'],quit:['Aufgegeben','RUN BEENDET'],void:['Zu kurz gesprungen','INS VOID GEFALLEN'],wall:['Die Lawine war schneller','ÜBERROLLT'],patrol:['Die Ski Patrol hat dich','ERWISCHT']};
   const [r1,r2]=reasons[p.deadReason]||['Game Over','GAME OVER'];
   $('oReason').textContent=r1;$('oTitle').textContent=r2;
   $('oScore').textContent=score;$('oDist').textContent=meters+' m';$('oCoins').textContent='+'+run.coins;$('oTrick').textContent=run.bestTrick?run.bestTrick+' ('+run.bestPts+')':'–';
-  let msg='';if(score>SAVE.best){SAVE.best=score;msg='Neuer Highscore!'}if(meters>SAVE.bestDist){SAVE.bestDist=meters;msg=msg?msg+' Und weiteste Fahrt!':'Weiteste Fahrt bisher!'}
-  $('oBest').textContent=msg||('Highscore: '+SAVE.best);
+  let msg='';if(score>SAVE.best){SAVE.best=score;msg=TX('Neuer Highscore!','New high score!')}if(meters>SAVE.bestDist){SAVE.bestDist=meters;msg=msg?msg+TX(' Und weiteste Fahrt!',' And your longest run!'):TX('Weiteste Fahrt bisher!','Longest run yet!')}
+  $('oBest').textContent=msg||(TX('Highscore: ','High score: ')+SAVE.best);
   persist();show('over');layout();onlineAfterRun(score,meters,run.bestTrick?run.bestTrick+' ('+run.bestPts+')':'');
 }
 function toMenu(){state='menu';$('hud').hidden=true;refreshMenu();resetRun();updCamera(0,true);show('menu');layout()}
@@ -2867,30 +2961,30 @@ function openShop(){tryOn={};$('shopMsg').textContent='';show('shop');renderShop
 function renderShop(){
   setT($('sCoins'),String(SAVE.coins));
   const tabs=$('tabs');tabs.innerHTML='';
-  for(const c of CATS){const b=document.createElement('button');b.className='tab';b.role='tab';b.textContent=SHOP[c].label;b.setAttribute('aria-selected',c===shopCat);b.onclick=()=>{shopCat=c;renderShop()};tabs.appendChild(b)}
+  for(const c of CATS){const b=document.createElement('button');b.className='tab';b.role='tab';b.textContent=catName(c);b.setAttribute('aria-selected',c===shopCat);b.onclick=()=>{shopCat=c;renderShop()};tabs.appendChild(b)}
   const grid=$('grid');grid.innerHTML='';
   for(const it of SHOP[shopCat].items){
     const owned=it.price===0||SAVE.owned[it.id],eq=SAVE.equip[shopCat]===it.id,sel=tryOn[shopCat]===it.id;
     const b=document.createElement('button');b.className='item'+(eq?' eq':'')+(sel?' sel':'')+(owned&&!eq?' owned':'');
     b.style.setProperty('--c',it.c);if(it.a)b.style.setProperty('--a',it.a);if(it.pat)b.style.setProperty('--a',it.pat[0]);
-    let pr;if(eq)pr='ANGEZOGEN';else if(owned)pr='ANZIEHEN';else if(sel)pr='KAUFEN · '+it.price;else pr=String(it.price);
+    let pr;if(eq)pr=TX('ANGEZOGEN','EQUIPPED');else if(owned)pr=TX('ANZIEHEN','EQUIP');else if(sel)pr=TX('KAUFEN · ','BUY · ')+it.price;else pr=String(it.price);
     b.innerHTML='<span class="sw"></span><span class="nm"></span><span class="pr">'+(!owned?'<i class="coin"></i>':'')+'<span></span></span>';
-    b.querySelector('.nm').textContent=it.name;b.querySelector('.pr span').textContent=pr;
+    b.querySelector('.nm').textContent=itName(it);b.querySelector('.pr span').textContent=pr;
     b.onclick=()=>shopClick(it,b);grid.appendChild(b);
   }
-  const t=tryOn[shopCat],ti=t?itemOf(shopCat,t):null;$('prevNote').textContent=ti?'Vorschau: '+ti.name+'. '+(ti.info?ti.info+' ':'')+'Nochmal tippen zum Kaufen.':'Tippe ein Teil an für die Vorschau.';
+  const t=tryOn[shopCat],ti=t?itemOf(shopCat,t):null;$('prevNote').textContent=ti?TX('Vorschau: ','Preview: ')+itName(ti)+'. '+(ti.info?itInfo(ti)+' ':'')+TX('Nochmal tippen zum Kaufen.','Tap again to buy.'):TX('Tippe ein Teil an für die Vorschau.','Tap an item to preview it.');
 }
 function shopEquip(it){SAVE.equip[shopCat]=it.id;
-  if(shopCat==='beanie'&&SAVE.equip.helmet!=='h_none'){SAVE.equip.helmet='h_none';return ' Helm abgesetzt, damit man die Mütze sieht.'}
+  if(shopCat==='beanie'&&SAVE.equip.helmet!=='h_none'){SAVE.equip.helmet='h_none';return TX(' Helm abgesetzt, damit man die Mütze sieht.',' Helmet taken off so the beanie shows.')}
   if(shopCat==='pack'&&it.id!=='pk_none')SAVE.packLast=it.id;return ''}
 function shopClick(it,el){
   const owned=it.price===0||SAVE.owned[it.id];
-  if(!owned&&it.req&&!SAVE.owned[it.req]){$('shopMsg').textContent='Erst den '+itemOf(shopCat,it.req).name+' kaufen, dann gibt es ihn in anderen Farben.';el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');return}
-  if(owned){const ex=shopEquip(it);delete tryOn[shopCat];persist();$('shopMsg').textContent=it.name+' angezogen.'+ex;renderShop();return}
+  if(!owned&&it.req&&!SAVE.owned[it.req]){$('shopMsg').textContent=TX('Erst den '+itName(itemOf(shopCat,it.req))+' kaufen, dann gibt es ihn in anderen Farben.','Buy the '+itName(itemOf(shopCat,it.req))+' first, then you can get it in other colors.');el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');return}
+  if(owned){const ex=shopEquip(it);delete tryOn[shopCat];persist();$('shopMsg').textContent=itName(it)+TX(' angezogen.',' equipped.')+ex;renderShop();return}
   if(tryOn[shopCat]!==it.id){tryOn[shopCat]=it.id;$('shopMsg').textContent='';renderShop();return}
-  if(SAVE.coins<it.price){$('shopMsg').textContent='Dir fehlen '+(it.price-SAVE.coins)+' Münzen. Ab auf die Piste!';el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');return}
+  if(SAVE.coins<it.price){$('shopMsg').textContent=TX('Dir fehlen '+(it.price-SAVE.coins)+' Münzen. Ab auf die Piste!','You need '+(it.price-SAVE.coins)+' more coins. Hit the slopes!');el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');return}
   SAVE.coins-=it.price;SAVE.owned[it.id]=true;const ex=shopEquip(it);delete tryOn[shopCat];persist();
-  $('shopMsg').textContent=it.name+' gekauft und angezogen.'+ex;unlockAudio();SFX.trick();renderShop();
+  $('shopMsg').textContent=itName(it)+TX(' gekauft und angezogen.',' bought and equipped.')+ex;unlockAudio();SFX.trick();renderShop();
 }
 function drawPreview(id,eq,gear,pushAnim){
   const c=$(id);if(!c||c.closest('.screen').hidden)return;const g=c.getContext('2d');g.imageSmoothingEnabled=false;
@@ -2937,17 +3031,17 @@ async function sbFresh(){if(!SESS)return false;if(Date.now()<SESS.expires_at)ret
 const nameOk=n=>/^[A-Za-z0-9_-]{3,16}$/.test(n),sbMail=n=>n.toLowerCase()+SB_MAIL;
 async function sbSignup(name,pw){
   const ex=await sb('/rest/v1/profiles?select=id&name=ilike.'+encodeURIComponent(name.replace(/[_%]/g,'\\$&')));
-  if(ex.ok&&ex.body&&ex.body.length)return 'Der Name ist schon vergeben.';
+  if(ex.ok&&ex.body&&ex.body.length)return TX('Der Name ist schon vergeben.','That name is already taken.');
   const r=await sb('/auth/v1/signup',{method:'POST',body:JSON.stringify({email:sbMail(name),password:pw,data:{name}})});
-  if(r.status===0)return 'Keine Verbindung zur Rangliste.';
+  if(r.status===0)return TX('Keine Verbindung zur Rangliste.','Can\'t reach the leaderboard.');
   if(r.ok&&r.body&&r.body.access_token){sessSave(sbSess(r.body,name));return ''}
-  if(r.ok)return 'Konto angelegt, aber die E-Mail-Bestätigung ist in Supabase noch an.';
-  const m=sbErr(r.body);if(/already|registered|exists|Database error/i.test(m))return 'Der Name ist schon vergeben.';
-  if(/password/i.test(m))return 'Das Passwort ist zu kurz oder zu einfach.';
-  return 'Konto ging nicht: '+m}
+  if(r.ok)return TX('Konto angelegt, aber die E-Mail-Bestätigung ist in Supabase noch an.','Account created, but email confirmation is still switched on in Supabase.');
+  const m=sbErr(r.body);if(/already|registered|exists|Database error/i.test(m))return TX('Der Name ist schon vergeben.','That name is already taken.');
+  if(/password/i.test(m))return TX('Das Passwort ist zu kurz oder zu einfach.','The password is too short or too simple.');
+  return TX('Konto ging nicht: ','Couldn\'t create the account: ')+m}
 async function sbLogin(name,pw){const r=await sb('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email:sbMail(name),password:pw})});
-  if(r.status===0)return 'Keine Verbindung zur Rangliste.';
-  if(r.ok){sessSave(sbSess(r.body,name));return ''}return 'Name oder Passwort stimmt nicht.'}
+  if(r.status===0)return TX('Keine Verbindung zur Rangliste.','Can\'t reach the leaderboard.');
+  if(r.ok){sessSave(sbSess(r.body,name));return ''}return TX('Name oder Passwort stimmt nicht.','Wrong name or password.')}
 async function sbSubmit(score,dist,trick){if(!await sbFresh())return false;
   const r=await sb('/rest/v1/rpc/submit_score',{method:'POST',body:JSON.stringify({p_score:Math.round(score),p_dist:Math.round(dist),p_trick:trick||null})},true);return r.ok}
 const RANK_PAGE=100;
@@ -2962,11 +3056,11 @@ function rankAcc(){const on=!!SESS;$('rForm').hidden=on;$('rMe').hidden=!on;if(o
 // Alle Fahrer: erst 100, beim Runterscrollen kommen die nächsten 100 dazu
 let rankN=0,rankDone=false,rankBusy=false,rankMine=false;
 const rankLi=(r,pl)=>'<li'+(SESS&&r.user_id===SESS.uid?' class="mine"':'')+'><span class="pl">'+pl+'.</span><span class="nm">'+escH(r.profiles?r.profiles.name:'?')+'</span><span class="sc">'+r.best+'</span></li>';
-async function rankLoad(){const L=$('rList');L.innerHTML='<li class="info">Lädt …</li>';$('rCount').textContent='';rankN=0;rankDone=false;rankBusy=false;rankMine=false;L.scrollTop=0;await rankMore(true)}
+async function rankLoad(){const L=$('rList');L.innerHTML='<li class="info">'+TX('Lädt …','Loading …')+'</li>';$('rCount').textContent='';rankN=0;rankDone=false;rankBusy=false;rankMine=false;L.scrollTop=0;await rankMore(true)}
 async function rankMore(first){if(rankBusy||rankDone)return;rankBusy=true;const L=$('rList'),pg=await sbBoardPage(rankN);rankBusy=false;
-  if(!pg){if(first)L.innerHTML='<li class="info">Rangliste gerade nicht erreichbar.</li>';return}
-  if(first){L.innerHTML='';if(pg.total!=null)$('rCount').textContent=pg.total===1?'1 Fahrer in der Rangliste':pg.total+' Fahrer in der Rangliste'}
-  if(first&&!pg.rows.length){L.innerHTML='<li class="info">Noch keine Einträge. Hol dir Platz 1!</li>';rankDone=true;return}
+  if(!pg){if(first)L.innerHTML='<li class="info">'+TX('Rangliste gerade nicht erreichbar.','The leaderboard is unreachable right now.')+'</li>';return}
+  if(first){L.innerHTML='';if(pg.total!=null)$('rCount').textContent=pg.total===1?TX('1 Fahrer in der Rangliste','1 rider on the leaderboard'):pg.total+TX(' Fahrer in der Rangliste',' riders on the leaderboard')}
+  if(first&&!pg.rows.length){L.innerHTML='<li class="info">'+TX('Noch keine Einträge. Hol dir Platz 1!','No entries yet. Grab first place!')+'</li>';rankDone=true;return}
   const ex=L.querySelector('li.extra');if(ex)ex.remove();
   L.insertAdjacentHTML('beforeend',pg.rows.map((r,i)=>rankLi(r,rankN+i+1)).join(''));
   if(SESS&&pg.rows.some(r=>r.user_id===SESS.uid))rankMine=true;
@@ -2976,17 +3070,17 @@ async function rankMore(first){if(rankBusy||rankDone)return;rankBusy=true;const 
 $('rList').addEventListener('scroll',()=>{const L=$('rList');if(L.scrollTop+L.clientHeight>L.scrollHeight-80)rankMore(false)},{passive:true});
 function openRank(){$('rMsg').textContent='';rankAcc();show('rank');rankLoad()}
 async function accAction(signup){const n=$('rName').value.trim(),pw=$('rPass').value,msg=$('rMsg');
-  if(!nameOk(n)){msg.textContent='Name: 3 bis 16 Zeichen, nur Buchstaben, Zahlen, _ und -.';return}
-  if(pw.length<6){msg.textContent='Das Passwort braucht mindestens 6 Zeichen.';return}
-  msg.textContent=signup?'Konto wird angelegt …':'Anmelden …';
+  if(!nameOk(n)){msg.textContent=TX('Name: 3 bis 16 Zeichen, nur Buchstaben, Zahlen, _ und -.','Name: 3 to 16 characters, only letters, numbers, _ and -.');return}
+  if(pw.length<6){msg.textContent=TX('Das Passwort braucht mindestens 6 Zeichen.','The password needs at least 6 characters.');return}
+  msg.textContent=signup?TX('Konto wird angelegt …','Creating account …'):TX('Anmelden …','Logging in …');
   const err=signup?await sbSignup(n,pw):await sbLogin(n,pw);if(err){msg.textContent=err;return}
-  $('rPass').value='';msg.textContent=signup?'Willkommen, '+n+'!':'Angemeldet.';rankAcc();
-  await cloudSync();if(cloudState==='ok')msg.textContent=signup?'Willkommen, '+n+'! Dein Spielstand liegt jetzt im Konto.':'Angemeldet. Spielstand geladen.';
+  $('rPass').value='';msg.textContent=signup?TX('Willkommen, ','Welcome, ')+n+'!':TX('Angemeldet.','Logged in.');rankAcc();
+  await cloudSync();if(cloudState==='ok')msg.textContent=signup?TX('Willkommen, '+n+'! Dein Spielstand liegt jetzt im Konto.','Welcome, '+n+'! Your progress is now saved in your account.'):TX('Angemeldet. Spielstand geladen.','Logged in. Progress loaded.');
   if(SAVE.best>0)await sbSubmit(SAVE.best,SAVE.bestDist||0,'');rankLoad()}
 $('rForm').addEventListener('submit',e=>{e.preventDefault();accAction(false)});
 $('bSignup').onclick=()=>accAction(true);
 $('bLogout').onclick=async()=>{if(cloudTimer){clearTimeout(cloudTimer);cloudTimer=0;await cloudSync()}else if(cloudRun)await cloudRun;
-  if(SESS)await sb('/auth/v1/logout',{method:'POST'},true);sessSave(null);cloudState='';cloudShow();rankAcc();$('rMsg').textContent='Abgemeldet. Dein Spielstand bleibt im Konto gespeichert.';rankLoad()};
+  if(SESS)await sb('/auth/v1/logout',{method:'POST'},true);sessSave(null);cloudState='';cloudShow();rankAcc();$('rMsg').textContent=TX('Abgemeldet. Dein Spielstand bleibt im Konto gespeichert.','Logged out. Your progress stays saved in your account.');rankLoad()};
 $('bRank').onclick=openRank;$('bNotes').onclick=()=>show('notes');$('bNotesBack').onclick=()=>show('menu');$('bRankBack').onclick=()=>{refreshMenu();show('menu')};
 /* ---------- Spielstand im Konto ----------
    Tabelle saves (supabase-save.sql), Zugriff nur über load_game/save_game, jeder nur auf seinen eigenen Stand.
@@ -2994,7 +3088,7 @@ $('bRank').onclick=openRank;$('bNotes').onclick=()=>show('notes');$('bNotesBack'
    seit dem letzten Abgleich dazukam oder ausgegeben wurde), Outfit und Einstellungen vom zuletzt geänderten Gerät.
    Wer ohne Konto gespielt hat und sich anmeldet, nimmt seinen Fortschritt ins Konto mit. Der Stand eines anderen Kontos auf
    diesem Gerät wird dagegen nie übernommen. */
-const CLOUD_KEYS=['coins','best','bestDist','owned','equip','gear','assist','packLast','music','t'];
+const CLOUD_KEYS=['coins','best','bestDist','owned','equip','gear','assist','packLast','music','lang','t'];
 let cloudState='',cloudTimer=0,cloudRun=null,cloudAgain=false;
 function cloudData(s){const o={};for(const k of CLOUD_KEYS)o[k]=s[k];return o}
 function cloudMerge(local,cloud,uid){
@@ -3002,7 +3096,7 @@ function cloudMerge(local,cloud,uid){
   if(!cloud)return Object.assign({},local,{uid,sc:local.coins});
   const base=mine?local.sc:0,newer=local.t>cloud.t?local:cloud,coins=Math.max(0,cloud.coins+local.coins-base);
   return {coins,best:Math.max(cloud.best,local.best),bestDist:Math.max(cloud.bestDist,local.bestDist),owned:Object.assign({},cloud.owned,local.owned),
-    equip:Object.assign({},newer.equip),gear:newer.gear,assist:newer.assist,packLast:newer.packLast,music:newer.music,t:Math.max(local.t,cloud.t),uid,sc:coins}}
+    equip:Object.assign({},newer.equip),gear:newer.gear,assist:newer.assist,packLast:newer.packLast,music:newer.music,lang:newer.lang||(newer===local?cloud:local).lang||null,t:Math.max(local.t,cloud.t),uid,sc:coins}}
 function cloudSoon(ms){if(!SESS)return;clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>{cloudTimer=0;cloudSync()},ms==null?1500:ms)}
 async function cloudSync(){
   if(!SESS)return;
@@ -3019,27 +3113,28 @@ async function cloudSync(){
     // Was während des Abgleichs auf dem Gerät passiert ist (Kauf, Lauf zu Ende), obendrauf rechnen und gleich nochmal abgleichen
     const now=normSave(SAVE);
     if(now.t!==before.t){m.coins=Math.max(0,m.coins+now.coins-before.coins);m.owned=Object.assign(m.owned,now.owned);m.best=Math.max(m.best,now.best);m.bestDist=Math.max(m.bestDist,now.bestDist);
-      m.equip=now.equip;m.gear=now.gear;m.assist=now.assist;m.packLast=now.packLast;m.music=now.music;m.t=now.t;cloudAgain=true}
-    Object.assign(SAVE,m);writeSave();cloudState='ok';
+      m.equip=now.equip;m.gear=now.gear;m.assist=now.assist;m.packLast=now.packLast;m.music=now.music;m.lang=now.lang||m.lang;m.t=now.t;cloudAgain=true}
+    Object.assign(SAVE,m);writeSave();cloudState='ok';if(SAVE.lang&&SAVE.lang!==LANG){LANG=SAVE.lang;applyLang()}
     if(state==='menu')refreshMenu();if(!$('shop').hidden)renderShop()})();
   try{await cloudRun}finally{cloudRun=null;cloudShow();if(cloudAgain){cloudAgain=false;cloudSoon(400)}}
 }
 function cloudShow(){
-  const t=!SESS?'':cloudState==='sync'?'Spielstand wird gespeichert …':cloudState==='ok'?'Spielstand im Konto gespeichert':cloudState==='setup'?'Konto-Speicher ist noch nicht eingerichtet':cloudState==='off'?'Offline, wird später gespeichert':'';
+  const t=!SESS?'':cloudState==='sync'?TX('Spielstand wird gespeichert …','Saving progress …'):cloudState==='ok'?TX('Spielstand im Konto gespeichert','Progress saved to your account'):cloudState==='setup'?TX('Konto-Speicher ist noch nicht eingerichtet','Account storage isn\'t set up yet'):cloudState==='off'?TX('Offline, wird später gespeichert','Offline, will save later'):'';
   const cls=cloudState==='ok'?'ok':cloudState==='setup'||cloudState==='off'?'warn2':'';
-  $('mAcct').innerHTML=SESS?'Angemeldet als <b>'+escH(SESS.name)+'</b>'+(t?' · <span class="'+cls+'">'+t+'</span>':''):'Spielstand nur auf diesem Gerät. Mit Konto (RANGLISTE) hast du ihn überall.';
+  $('mAcct').innerHTML=SESS?TX('Angemeldet als ','Logged in as ')+'<b>'+escH(SESS.name)+'</b>'+(t?' · <span class="'+cls+'">'+t+'</span>':''):TX('Spielstand nur auf diesem Gerät. Mit Konto (RANGLISTE) hast du ihn überall.','Progress is only on this device. With an account (LEADERBOARD) you have it everywhere.');
   $('rSync').textContent=t}
 cloudHook=()=>cloudSoon();
 document.addEventListener('visibilitychange',()=>{if(!SESS)return;if(document.visibilityState==='visible')cloudSoon(300);else if(cloudTimer){clearTimeout(cloudTimer);cloudTimer=0;cloudSync()}});
 async function onlineAfterRun(score,meters,trick){const o=$('oRank');
-  if(!SESS){o.textContent='Mit Konto kommst du in die Online-Rangliste (Menü → RANGLISTE).';return}
-  o.textContent='Wird in die Rangliste eingetragen …';
-  const ok=await sbSubmit(score,meters,trick);if(!ok){o.textContent=SESS?'Rangliste gerade nicht erreichbar.':'Bitte neu anmelden (Menü → RANGLISTE).';return}
-  const m=await sbMyRank();o.textContent=m?'Rangliste: Platz '+m.rank+' mit '+m.best+' Punkten':'In der Rangliste eingetragen.'}
+  if(!SESS){o.textContent=TX('Mit Konto kommst du in die Online-Rangliste (Menü → RANGLISTE).','With an account you get on the online leaderboard (Menu → LEADERBOARD).');return}
+  o.textContent=TX('Wird in die Rangliste eingetragen …','Submitting to the leaderboard …');
+  const ok=await sbSubmit(score,meters,trick);if(!ok){o.textContent=SESS?TX('Rangliste gerade nicht erreichbar.','The leaderboard is unreachable right now.'):TX('Bitte neu anmelden (Menü → RANGLISTE).','Please log in again (Menu → LEADERBOARD).');return}
+  const m=await sbMyRank();o.textContent=m?TX('Rangliste: Platz '+m.rank+' mit '+m.best+' Punkten','Leaderboard: rank '+m.rank+' with '+m.best+' points'):TX('In der Rangliste eingetragen.','Added to the leaderboard.')}
 
 /* ================= BUTTONS ================= */
 document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.onclick=()=>{SAVE.gear=b.dataset.gear;persist();refreshMenu()});
 $('bAssist').onclick=()=>{SAVE.assist=!SAVE.assist;persist();refreshMenu()};
+document.querySelectorAll('.gearbtn[data-lang]').forEach(b=>b.onclick=()=>{LANG=b.dataset.lang;SAVE.lang=LANG;persist();applyLang();refreshMenu()});
 $('bMusic').onclick=()=>{SAVE.music=SAVE.music===false;persist();refreshMenu();unlockAudio();musicSync()};
 $('bPack').onclick=()=>{if(!SAVE.owned.pk_free)return;const on=SAVE.equip.pack&&SAVE.equip.pack!=='pk_none';SAVE.equip.pack=on?'pk_none':(SAVE.owned[SAVE.packLast]?SAVE.packLast:'pk_free');persist();refreshMenu()};
 $('bPlay').onclick=startRun;$('bShop').onclick=openShop;$('bHelp').onclick=()=>show('help');$('bHelpBack').onclick=()=>show('menu');
@@ -3064,7 +3159,7 @@ function frame(t){
 }
 function start(){
   PATROL_SPR=[makePatrol(true),makePatrol(false)];makeTreeSprites();makeAlmSprites();
-  layout();resetRun();updCamera(0,true);refreshMenu();show('menu');
+  applyLang();layout();resetRun();updCamera(0,true);refreshMenu();show('menu');
   if(document.fonts&&document.fonts.load)document.fonts.load('8px Silkscreen').catch(()=>{});
   requestAnimationFrame(t=>{last=t;frame(t)});
   setTimeout(warmAva,700);
