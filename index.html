@@ -280,7 +280,9 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
     <p class="eyebrow">Was ist neu</p>
     <h2>PATCH NOTES</h2>
     <div class="pn">
-      <h3>v2.8 · 05.11.2026</h3>
+      <h3>v2.9 · 05.11.2026</h3>
+      <ul><li>Start auf der Alm: Hütte, Leute, Blaskapelle mit eigener Polka; man fährt automatisch los, ab der Piste steuerst du (Sprung überspringt)</li><li>Polka blendet beim Wegfahren in die Spielmusik über</li></ul>
+      <h3>v2.8</h3>
       <ul><li>Gaps im Park sind jetzt Gletscherspalten mit Eiswänden und Eiszapfen</li></ul>
       <h3>v2.7</h3>
       <ul><li>Eigene Musik: winterlicher Chiptune mit Glockenspiel, läuft in Schleife, im Menü abschaltbar</li></ul>
@@ -1333,7 +1335,7 @@ function genNext(){
 }
 function resetWorld(){
   segs=[];rails=[];bonks=[];loops=[];coins=[];signs=[];trees=[];rocks=[];floods=[];fauna=[];cliffs=[];cliffJobs=[];gapFogs=[];pendGaps=[];crevs=[];mReset(1+Math.floor(Math.random()*9973));nextFloodX=-260;gx=-260;gy=0;sinceGap=0;lastLoopX=-9999;lastType='';curZone='park';
-  seg(300,5,'start');seg(260,19);coinRow(120,8,16,12);
+  gx=ALM_X0;seg(ALM_END-ALM_X0,2,'alm');seg(160,6,'start');seg(260,19);coinRow(120,8,16,12);makeAlmDeco();
   parkEnd=null;leadCut=0;fRail(Math.random()<.5);lastType='rail';
 }
 function makeLoopImg(R){
@@ -1775,6 +1777,78 @@ function makeTreeSprites(){TREE_SPR=[];
     cols=TREE_COLS[i%TREE_COLS.length],snow=.25+hash01(i*9.1+2)*.75,[c,g]=mk(w*2+6,h+6);
     drawTreeVar(g,w+2,h+5,h,w,cols,snow,tr,i+1);TREE_SPR.push({c,w,tr,base:h+5})}}
 
+
+/* ================= ALM: Start einer Runde =================
+   Bayerische Almhütte auf einem Plateau, viele Leute, eine kleine Blaskapelle. Die Figur fährt automatisch von der Hütte los;
+   ab dem Ende des Plateaus (Piste) hat man die Kontrolle. Springen bzw. rechts tippen überspringt das Intro. */
+const ALM_X0=-1180,ALM_END=-140,ALM_HUT=-934,ALM_START=-868;
+let almDeco=[],ALM_SPR=null;const almPeople=new Map();
+const ALM_JK=['#d2423a','#2f7fd0','#f2c445','#3fa66b','#ff86c8','#7e4fc4','#ff7a2f','#e8ecf2','#2b2e38','#86e0bf'];
+const ALM_HAT=['#2b2e38','#d2423a','#e8ecf2','#2f7fd0','#f2c445','#3fa66b','#ff7a2f'];
+function almR(g){return (x,y,w,h,col)=>{g.fillStyle=col;g.fillRect(x,y,w,h)}}
+function makeHut(){const W=132,H=100,[c,g]=mk(W,H),R=almR(g),yr=x=>Math.round(40-Math.max(0,34-Math.abs(x-66)*.515));
+  for(let x=12;x<120;x++){const t=yr(x)+3;R(x,t,1,40-t,(x%5===0)?'#6a3f22':'#8a5a33')}   // Giebel, senkrechte Bretter
+  R(12,40,108,46,'#7a4a28');for(let y=42;y<86;y+=4)R(12,y,108,1,'#5e3a1f');R(12,40,2,46,'#5e3a1f');R(118,40,2,46,'#5e3a1f');
+  R(10,86,112,14,'#5f6370');for(let i=0;i<46;i++){const x=10+Math.floor(hash01(i*3.1+.5)*104),y=87+Math.floor(hash01(i*7.7+.2)*12),w=4+Math.floor(hash01(i*1.3+.9)*6);R(x,y,w,3,hash01(i*5.5)<.5?'#8b8f9a':'#767b87')}R(10,86,112,1,'#3f424c');
+  const win=(x,y,w,h)=>{R(x-4,y,3,h,'#2f6b3f');R(x+w+1,y,3,h,'#2f6b3f');R(x-3,y+Math.floor(h/2),1,1,'#e0262f');R(x+w+2,y+Math.floor(h/2),1,1,'#e0262f');
+    R(x-1,y-1,w+2,h+2,'#efe6d2');R(x,y,w,h,'#ffd77a');R(x,y+Math.floor(h/2),w,Math.ceil(h/2),'#e8b84a');R(x+Math.floor(w/2),y,1,h,'#5e3a1f');R(x,y+Math.floor(h/2),w,1,'#5e3a1f')};
+  win(26,46,12,10);win(94,46,12,10);win(22,72,12,11);win(98,72,12,11);
+  R(57,69,18,17,'#efe6d2');R(58,70,16,16,'#4a2c16');R(65,70,1,16,'#3b2414');R(71,78,1,2,'#e8b830');   // Tür
+  R(48,45,36,10,'#3b2414');R(49,46,34,8,'#d9b98a');   // Schild mit ALM
+  const L={A:['.#.','#.#','###','#.#','#.#'],L:['#..','#..','#..','#..','###'],M:['#...#','##.##','#.#.#','#...#','#...#']};let lx=55;
+  for(const ch of 'ALM'){const m=L[ch];m.forEach((row,j)=>{for(let i=0;i<row.length;i++)if(row[i]==='#')R(lx+i,47+j,1,1,'#3b2414')});lx+=m[0].length+2}
+  R(14,62,104,2,'#5e3a1f');for(let x=16;x<118;x+=5)R(x,64,1,6,'#5e3a1f');R(14,69,104,2,'#5e3a1f');   // Balkon
+  R(16,59,100,3,'#7a4a28');for(let x=16;x<116;x++){if(hash01(x*2.3+.1)<.55)R(x,56+Math.floor(hash01(x*1.1)*2),1,1,hash01(x*4.7)<.5?'#e0262f':'#ff6b6b');if(hash01(x*3.9+.7)<.5)R(x,58,1,1,'#3fa66b')}
+  R(92,8,9,16,'#6b6f7a');R(92,8,9,2,'#ffffff');R(93,13,7,1,'#555a66');R(93,18,7,1,'#555a66');   // Kamin
+  for(let x=0;x<W;x++){const y=yr(x);R(x,y-1,1,5,'#3b2414');R(x,y-5,1,4,'#ffffff');R(x,y-1,1,1,'#d7e6f6');if(x%7===3&&Math.abs(x-66)>18)R(x,y+4,1,2+Math.floor(hash01(x)*3),'#d7f0fb')}
+  return c}
+function makeFlag(fr){const [c,g]=mk(26,58),R=almR(g);R(2,2,2,56,'#c9ced8');R(2,2,1,56,'#ffffff');R(1,0,4,3,'#e8b830');
+  for(let i=0;i<20;i++){const dy=Math.round(1.6*Math.sin(i*.45+fr*2.1)*(i/20));for(let j=0;j<13;j++){const u=i+2*j,v=i-2*j,blue=((Math.floor(u/6)+Math.floor(v/6))&1)===1;R(4+i,4+j+dy,1,1,blue?'#2f8fd8':'#ffffff')}}
+  return c}
+// Leute: Jacke, Mütze, Pose (stand, wave, cheer, trad=Tracht, tuba, acc, trump)
+function almPerson(jk,hat,pose,fr){const key=jk+hat+pose+fr;let c=almPeople.get(key);if(c)return c;let g;[c,g]=mk(16,26);const R=almR(g),O='#1b1d26',trad=pose==='tuba'||pose==='acc'||pose==='trump',b=trad&&fr?1:0;
+  const shirt=trad?'#f2efe6':jk,pants=trad?'#6b4a2f':'#3b3f4f';
+  R(5,19+b,2,5-b,pants);R(8,19+b,2,5-b,pants);R(4,24,3,2,O);R(8,24,3,2,O);if(trad){R(5,22,5,1,'#e8e2d0')}
+  R(4,11+b,7,9,shirt);R(4,11+b,7,1,shade(shirt,.2));if(trad){R(5,11+b,1,8,'#6b4a2f');R(9,11+b,1,8,'#6b4a2f');R(4,17+b,7,3,pants)}
+  R(5,5+b,5,6,'#f1c9a5');R(6,8+b,1,1,O);R(8,8+b,1,1,O);R(5,10+b,5,1,'#d9a982');
+  if(trad){R(3,4+b,9,2,'#2f5a3a');R(5,2+b,5,2,'#2f5a3a');R(10,0+b,1,3,'#e8ecf2')}else{R(4,3+b,7,3,hat);R(5,2+b,5,1,hat)}
+  if(pose==='cheer'){R(3,4+fr,1,8,shirt);R(11,4+fr,1,8,shirt);R(3,3+fr,1,1,'#f1c9a5');R(11,3+fr,1,1,'#f1c9a5')}
+  else if(pose==='wave'){R(3,12,1,6,shirt);R(11,4+fr*2,1,8,shirt);R(11,3+fr*2,1,1,'#f1c9a5')}
+  else if(pose==='tuba'){R(0,9+b,7,7,'#e8b830');R(1,10+b,5,5,'#b8862a');R(1,8+b,4,2,'#ffe58a');R(6,14+b,3,1,'#e8b830')}
+  else if(pose==='acc'){const w=fr?8:6;R(7-Math.floor(w/2),13+b,w,6,'#c8392f');R(7-Math.floor(w/2),13+b,1,6,'#f2efe6');for(let i=1;i<w;i+=2)R(7-Math.floor(w/2)+i,13+b,1,6,'#8f2a25')}
+  else if(pose==='trump'){R(10,9+b,5,1,'#e8b830');R(14,8+b,2,3,'#e8b830');R(11,12+b,1,4,shirt)}
+  else{R(3,12,1,7,shirt);R(11,12,1,7,shirt)}
+  almPeople.set(key,c);return c}
+// Bierbank mit Leuten und Maßkrügen; fr 1 = Prost
+function makeTable(cols,hats,fr){const [c,g]=mk(46,30),R=almR(g),O='#1b1d26';
+  cols.forEach((jk,i)=>{const x=3+i*14,up=fr&&i===1?1:0;R(x+1,6,5,6,'#f1c9a5');R(x+2,9,1,1,O);R(x+4,9,1,1,O);R(x,4,7,3,hats[i]);R(x+1,3,5,1,hats[i]);R(x-1,12,9,8,jk);
+    if(up){R(x+8,3,4,6,'#f2c445');R(x+8,2,4,1,'#ffffff');R(x+7,7,1,5,jk)}else{R(x+8,13,4,6,'#f2c445');R(x+8,12,4,1,'#ffffff');R(x+12,14,1,3,'#f2c445')}});
+  R(0,19,46,3,'#a0703c');R(0,19,46,1,'#c79a5e');R(3,22,2,8,'#6e4a26');R(41,22,2,8,'#6e4a26');R(5,25,36,2,'#8a5a33');R(7,27,1,3,'#6e4a26');R(38,27,1,3,'#6e4a26');return c}
+function makeSkiRack(){const [c,g]=mk(34,28),R=almR(g);R(0,16,34,2,'#6e4a26');R(2,16,2,12,'#5e3a1f');R(30,16,2,12,'#5e3a1f');
+  const cols=['#d2423a','#2f7fd0','#f2c445','#3fa66b','#ff86c8','#2b2e38'];for(let i=0;i<6;i++){const x=4+i*4.5|0;R(x,2+(i%2),2,24-(i%2),cols[i]);R(x,2+(i%2),2,1,'#ffffff')}return c}
+function makeSnowman(){const [c,g]=mk(18,30),R=almR(g),ball=(cx,cy,r)=>{for(let y=-r;y<=r;y++){const w=Math.round(Math.sqrt(r*r-y*y));R(cx-w,cy+y,w*2+1,1,y>r*.4?'#d4e0ef':'#ffffff')}};
+  ball(9,23,7);ball(9,13,5);ball(9,6,4);R(5,1,9,2,'#2b2e38');R(7,-2,5,4,'#2b2e38');R(8,5,1,1,'#1b1d26');R(10,5,1,1,'#1b1d26');R(11,6,4,1,'#ff7a2f');R(4,9,10,2,'#d2423a');return c}
+function makeAlmSprites(){ALM_SPR={hut:makeHut(),flag:[0,1,2].map(makeFlag),rack:makeSkiRack(),snowman:makeSnowman()}}
+function makeAlmDeco(){almDeco=[];const pick=a=>a[Math.floor(Math.random()*a.length)];const add=o=>{const g=groundAt(o.x),g2=groundAt(o.x+(o.w||0));if(g){o.y=Math.max(g.y,g2?g2.y:g.y);almDeco.push(o)}};
+  add({t:'hut',x:ALM_HUT,w:132});add({t:'flag',x:-790});
+  add({t:'p',x:-772,pose:'tuba',jk:'',hat:''});add({t:'p',x:-758,pose:'acc',jk:'',hat:''});add({t:'p',x:-744,pose:'trump',jk:'',hat:''});
+  for(const x of [-706,-588]){const cols=[pick(ALM_JK),pick(ALM_JK),pick(ALM_JK)],hats=[pick(ALM_HAT),pick(ALM_HAT),pick(ALM_HAT)];add({t:'table',x,w:46,spr:[makeTable(cols,hats,0),makeTable(cols,hats,1)]})}
+  add({t:'rack',x:-1000,w:34});add({t:'rack',x:-520,w:34});add({t:'snowman',x:-262});add({t:'snowman',x:-1080});
+  for(const [x,pose] of [[-1040,'stand'],[-1016,'wave'],[-650,'wave'],[-632,'stand'],[-472,'stand'],[-456,'cheer'],[-404,'wave'],[-388,'stand'],[-338,'stand'],[-306,'wave'],[-214,'wave'],[-196,'stand']])
+    add({t:'p',x,pose,jk:pick(ALM_JK),hat:pick(ALM_HAT),cheer:0})}
+function drawAlm(cX,cY){if(!ALM_SPR||!almDeco.length||cX>ALM_END+260)return;const lit=curDS.night>.25,beat=Math.floor(T*118/60*2)&1;
+  for(const d of almDeco){let sp,ox=0;
+    if(d.t==='hut')sp=ALM_SPR.hut;else if(d.t==='flag'){sp=ALM_SPR.flag[Math.floor(T*5)%3];ox=-3}else if(d.t==='rack')sp=ALM_SPR.rack;else if(d.t==='snowman')sp=ALM_SPR.snowman;
+    else if(d.t==='table')sp=d.spr[Math.floor(T*1.2+d.x*.01)&1&(Math.floor(T*.6+d.x)%3===0?1:0)];
+    else{let pose=d.pose,fr=beat;
+      if(pose==='stand'||pose==='wave'||pose==='cheer'){if(p.auto&&Math.abs(p.x-d.x)<60)d.cheer=1.3;if(d.cheer>0){d.cheer-=1/60;pose='cheer';fr=Math.floor(T*6)&1}else fr=Math.floor(T*2+d.x)&1}
+      sp=almPerson(d.jk,d.hat,pose,fr)}
+    const W=sp.width,H=sp.height,sx=Math.round(d.x-cX)+ox,sy=Math.round(d.y-cY)-H+2;if(sx>VW||sx+W<0||sy>VH)continue;
+    ctx.save();clipAboveGround(sx,sy-2,W,cX,cY,1);ctx.drawImage(sp,sx,sy);ctx.restore();
+    if(d.t==='hut'){   // Rauch aus dem Kamin, nachts leuchtende Fenster
+      for(let i=0;i<6;i++){const a=(T*.45+i/6)%1,x=sx+96+a*16+Math.sin(T*1.3+i)*2,y=sy+6-a*34,r=1.5+a*4;ctx.globalAlpha=.55*(1-a);ctx.fillStyle='#e9eef6';ctx.fillRect(Math.round(x-r),Math.round(y-r),Math.round(r*2),Math.round(r*2))}ctx.globalAlpha=1;
+      if(lit)for(const [wx,wy] of [[32,51],[100,51],[28,77],[104,77]])emissive.push({x:sx+wx,y:sy+wy,r:9})}}}
+
 /* ================= STATE ================= */
 const cv=$('cv');let ctx=cv.getContext('2d');
 let state='menu',now=0,shake=0;
@@ -1786,8 +1860,8 @@ function resetRun(){
   Object.assign(p,{mode:'ground',x:0,y:0,s:110,vx:0,vy:0,ang:0,spin:0,sw:false,tuck:false,braking:false,combo:0,lastTrickT:-9,
     airT:0,flipAcc:0,flipDir:0,flipTarget:null,spinDir:0,spinTarget:null,spinStart:0,grabT:{},grab:null,bailed:false,wallHit:false,
     rail:null,loop:null,phi:0,crashT:0,tumble:0,deadT:0,deadReason:'',spinLock:false,prevX:0,grindT:0,bigAir:false,takeoffSwitch:false,sparkT:0});
-  const g=groundAt(0);p.y=g.y;p.ang=g.a*DEG;
-  wall.x=-430;wall.v=140;
+  p.x=ALM_START;p.auto=true;const g=groundAt(p.x);p.y=g.y;p.ang=g.a*DEG;p.s=20;
+  wall.x=ALM_START-900;wall.v=140;
   Object.assign(pat,{on:false,next:20,x:0,y:0,s:0,a:0,state:'',t:0,sirenT:0});
   run={score:0,coins:0,bestTrick:'',bestPts:0,start:0,time:0,zone:'park',packUsed:false,shovelUsed:false};whiteout=0;
   parts=[];
@@ -1797,7 +1871,8 @@ function resetRun(){
 
 /* ================= INPUT ================= */
 const K={},TC={};let jumpBuf=0;
-const inL=()=>K.ArrowLeft||K.KeyA||TC.left,inR=()=>K.ArrowRight||K.KeyD||TC.right,inU=()=>K.ArrowUp||K.KeyW||TC.up,inD=()=>K.ArrowDown||K.KeyS||TC.down,inGas=()=>K.ShiftLeft||K.ShiftRight||TC.gas;
+// Während der Ausfahrt von der Alm zählt keine Eingabe (Sprung überspringt das Intro)
+const inL=()=>!p.auto&&(K.ArrowLeft||K.KeyA||TC.left),inR=()=>!p.auto&&(K.ArrowRight||K.KeyD||TC.right),inU=()=>!p.auto&&(K.ArrowUp||K.KeyW||TC.up),inD=()=>!p.auto&&(K.ArrowDown||K.KeyS||TC.down),inGas=()=>!p.auto&&(K.ShiftLeft||K.ShiftRight||TC.gas);
 function inGrab(){if(K.KeyJ||K.Digit1||TC.japan)return 'japan';if(K.KeyK||K.Digit2||TC.nose)return 'nose';if(K.KeyL||K.Digit3||TC.tail)return 'tail';if(K.KeyI||K.Digit4||TC.mute)return 'mute';return null}
 addEventListener('keydown',e=>{
   if(e.target&&e.target.tagName==='INPUT')return;
@@ -1962,11 +2037,58 @@ function musicStep(step,t){const bar=Math.floor(step/16),s=step%16,B=SONG[bar%SO
 function musicTick(){if(!MUS.on||!AC)return;const ahead=AC.currentTime+.2,st=60/MUS.bpm/4;
   if(MUS.next<AC.currentTime-.3)MUS.next=AC.currentTime+.05;   // nach Hänger nicht alles nachholen
   while(MUS.next<ahead){musicStep(MUS.step,MUS.next);MUS.next+=st;MUS.step=(MUS.step+1)%(SONG.length*16)}}
-function musicStart(){if(!AC)return;musicBus();if(MUS.on)return;MUS.on=true;MUS.next=AC.currentTime+.08;const t=AC.currentTime;MUS.bus.gain.cancelScheduledValues(t);MUS.bus.gain.setValueAtTime(MUS.bus.gain.value,t);MUS.bus.gain.setTargetAtTime(MUS_VOL,t,.5);
-  clearInterval(MUS.timer);MUS.timer=setInterval(musicTick,50);musicTick()}
-function musicStop(){if(!MUS.on)return;MUS.on=false;clearInterval(MUS.timer);if(AC&&MUS.bus){const t=AC.currentTime;MUS.bus.gain.cancelScheduledValues(t);MUS.bus.gain.setValueAtTime(MUS.bus.gain.value,t);MUS.bus.gain.setTargetAtTime(0,t,.15)}}
+function musicStart(){if(!AC)return;musicBus();if(MUS.on)return;MUS.on=true;MUS.next=AC.currentTime+.08;clearInterval(MUS.timer);MUS.timer=setInterval(musicTick,50);musicTick()}
+function musicStop(){if(!MUS.on)return;MUS.on=false;clearInterval(MUS.timer)}   // Lautstärke regelt das Mischpult (musicMix)
+
+/* ---- Alm-Musik: eigene bayerische Polka (2/4, 118 BPM, F-Dur). Tuba auf den Schlägen, Akkordeon auf den Achteln dazwischen,
+   zweistimmige Melodie in Terzen (Trompete/Klarinette), dumpfe große Trommel und kleine Trommel. 32 Takte (~33 s), in Schleife. ---- */
+const ALM={bpm:118,on:false,step:0,next:0,bus:null,ch:null,timer:0},ALM_VOL=.7;
+const PK={F:{r:41,f:36,acc:[60,65,69],pc:[5,9,0]},C7:{r:36,f:43,acc:[58,64,67],pc:[0,4,7,10]},Bb:{r:46,f:41,acc:[58,62,65],pc:[10,2,5]}};
+const ALM_CH=['F','F','C7','C7','C7','C7','F','F','F','F','Bb','Bb','C7','C7','F','F','Bb','Bb','F','F','C7','C7','F','F','F','F','C7','C7','C7','C7','F','F'];
+const ALM_MEL=(()=>{const A=[[[0,.5,81],[.5,.5,84],[1,.5,81],[1.5,.5,77]],[[0,.5,72],[.5,.5,77],[1,1,81]],[[0,.5,79],[.5,.5,82],[1,.5,79],[1.5,.5,76]],[[0,.5,72],[.5,.5,76],[1,1,79]],
+    [[0,.5,82],[.5,.5,81],[1,.5,79],[1.5,.5,76]],[[0,1,79],[1,1,84]],[[0,.5,81],[.5,.5,79],[1,.5,77],[1.5,.5,76]],[[0,1,77],[1,.5,72],[1.5,.5,76]]];
+  const A2=[A[0],A[1],[[0,.5,82],[.5,.5,86],[1,.5,82],[1.5,.5,77]],[[0,.5,74],[.5,.5,77],[1,1,82]],[[0,.5,84],[.5,.5,82],[1,.5,79],[1.5,.5,76]],[[0,.5,79],[.5,.5,81],[1,.5,82],[1.5,.5,79]],[[0,1,81],[1,.5,84],[1.5,.5,81]],[[0,1,77]]];
+  const B=[[[0,.5,77],[.5,.5,82],[1,.5,86],[1.5,.5,82]],[[0,.5,84],[.5,.5,86],[1,1,82]],[[0,.5,81],[.5,.5,84],[1,.5,89],[1.5,.5,84]],[[0,1,81],[1,1,77]],
+    [[0,.5,79],[.5,.5,84],[1,.5,88],[1.5,.5,84]],[[0,1,82],[1,1,79]],[[0,.5,81],[.5,.5,79],[1,.5,81],[1.5,.5,82]],[[0,1,84],[1,.5,72],[1.5,.5,76]]];
+  return A.concat(A2,B,A.slice(0,7),[[[0,1,77]]])})();
+function almBus(){if(ALM.bus)return;const bus=AC.createGain();bus.gain.value=0;bus.connect(AC.destination);
+  const len=Math.floor(AC.sampleRate*1.1),ir=AC.createBuffer(2,len,AC.sampleRate);for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,4)}
+  const rev=AC.createConvolver();rev.buffer=ir;const rg=AC.createGain();rg.gain.value=.35;rev.connect(rg);rg.connect(bus);
+  const chan=(dry,wet)=>{const g=AC.createGain(),d=AC.createGain();d.gain.value=dry;g.connect(d);d.connect(bus);if(wet){const w=AC.createGain();w.gain.value=wet;g.connect(w);w.connect(rev)}return g};
+  ALM.bus=bus;ALM.ch={tuba:chan(1,.1),acc:chan(.9,.3),horn:chan(.9,.4),drum:chan(1,.15)}}
+function vTuba(t,m,len){const o=AC.createOscillator(),o2=AC.createOscillator();o.type='sawtooth';o2.type='triangle';o.frequency.value=o2.frequency.value=mhz(m);
+  const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(260,t);f.frequency.linearRampToValueAtTime(560,t+.04);f.frequency.exponentialRampToValueAtTime(300,t+len);const g=AC.createGain(),g1=AC.createGain();g1.gain.value=.5;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.16,t+.03);g.gain.exponentialRampToValueAtTime(.05,t+len*.8);g.gain.linearRampToValueAtTime(0,t+len);
+  o.connect(g1);g1.connect(f);o2.connect(f);f.connect(g);g.connect(ALM.ch.tuba);o.start(t);o2.start(t);o.stop(t+len+.02);o2.stop(t+len+.02)}
+function vAccord(t,notes,len){for(const m of notes)for(const det of [-11,11]){const o=AC.createOscillator();o.type='square';o.frequency.value=mhz(m);o.detune.value=det;
+  const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=1900;const g=AC.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.012,t+.01);g.gain.setValueAtTime(.011,t+len*.6);g.gain.linearRampToValueAtTime(0,t+len);
+  o.connect(f);f.connect(g);g.connect(ALM.ch.acc);o.start(t);o.stop(t+len+.02)}}
+function vHorn(t,m,len,vol){const o=AC.createOscillator(),o2=AC.createOscillator(),lfo=AC.createOscillator(),lg=AC.createGain();o.type='sawtooth';o2.type='square';o.frequency.value=o2.frequency.value=mhz(m);
+  lfo.frequency.value=6;lg.gain.setValueAtTime(0,t);lg.gain.linearRampToValueAtTime(9,t+Math.min(.25,len));lfo.connect(lg);lg.connect(o.detune);lg.connect(o2.detune);
+  const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(1400,t);f.frequency.linearRampToValueAtTime(3200,t+.05);f.Q.value=1.2;const g=AC.createGain(),g2=AC.createGain();g2.gain.value=.3;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.02);g.gain.setValueAtTime(vol*.85,t+Math.max(.03,len-.05));g.gain.linearRampToValueAtTime(0,t+len+.06);
+  o.connect(f);o2.connect(g2);g2.connect(f);f.connect(g);g.connect(ALM.ch.horn);for(const x of [o,o2,lfo]){x.start(t);x.stop(t+len+.1)}}
+function vThump(t){const o=AC.createOscillator();o.type='sine';o.frequency.setValueAtTime(95,t);o.frequency.exponentialRampToValueAtTime(48,t+.12);const g=AC.createGain();
+  g.gain.setValueAtTime(.13,t);g.gain.exponentialRampToValueAtTime(.001,t+.22);o.connect(g);g.connect(ALM.ch.drum);o.start(t);o.stop(t+.24)}
+const almThird=(m,pc)=>{for(let k=m-3;k>=m-9;k--)if(pc.includes(((k%12)+12)%12))return k;return 0};
+function almStep(step,t){const bar=Math.floor(step/4)%ALM_CH.length,s=step%4,B=PK[ALM_CH[bar]],e=60/ALM.bpm/2;
+  if(s===0){vTuba(t,B.r,e*1.5);vThump(t)}if(s===2){vTuba(t,B.f,e*1.5);vThump(t)}
+  if(s===1||s===3){vAccord(t,B.acc,e*.8);vNoise(t,.07,'bandpass',2300,1,.03,ALM.ch.drum)}
+  for(const [b,d,m] of ALM_MEL[bar])if(Math.round(b*2)===s){const L=d*2*e*.9;vHorn(t,m,L,.05);const h=almThird(m,B.pc);if(h)vHorn(t,h,L,.032)}}
+function almTick(){if(!ALM.on||!AC)return;const ahead=AC.currentTime+.2,e=60/ALM.bpm/2;if(ALM.next<AC.currentTime-.3)ALM.next=AC.currentTime+.05;
+  while(ALM.next<ahead){almStep(ALM.step,ALM.next);ALM.next+=e;ALM.step=(ALM.step+1)%(ALM_CH.length*4)}}
+function almStart(){if(!AC)return;almBus();if(ALM.on)return;ALM.on=true;ALM.next=AC.currentTime+.06;clearInterval(ALM.timer);ALM.timer=setInterval(almTick,50);almTick()}
+function almStop(){if(!ALM.on)return;ALM.on=false;clearInterval(ALM.timer)}
+// Mischpult: an der Alm Polka, beim Wegfahren langsam aus und die Spielmusik (von vorn) herein; im Menü nur Spielmusik
+let mixA=-1,mixG=-1;
+function setBus(bus,v){const t=AC.currentTime;bus.gain.cancelScheduledValues(t);bus.gain.setValueAtTime(bus.gain.value,t);bus.gain.setTargetAtTime(v,t,.35)}
+function musicMix(force){if(!AC)return;const en=!muted&&SAVE.music!==false&&!document.hidden,inRun=state==='play'||state==='pause';
+  const a=en&&inRun?clamp(1-(p.x-(ALM_START+160))/720,0,1):0,gm=en?1-a:0;
+  if(gm>.01)musicStart();else musicStop();if(a>.01)almStart();else almStop();
+  if(MUS.bus&&(force||Math.abs(gm-mixG)>.01)){mixG=gm;setBus(MUS.bus,MUS_VOL*gm)}
+  if(ALM.bus&&(force||Math.abs(a-mixA)>.01)){mixA=a;setBus(ALM.bus,ALM_VOL*a*a)}}
 // Läuft, wenn Ton an, Musik im Menü an und die Seite sichtbar ist; setzt beim Wiedereinschalten an derselben Stelle fort
-function musicSync(){const want=!!AC&&!muted&&SAVE.music!==false&&!document.hidden;if(want)musicStart();else musicStop()}
+function musicSync(){musicMix(true)}
 document.addEventListener('visibilitychange',()=>musicSync());
 document.addEventListener('pointerdown',()=>{if(!AC||AC.state!=='running'||!MUS.on)unlockAudio()},{capture:true,passive:true});
 
@@ -2053,7 +2175,7 @@ function updGround(dt){
   const a=g.a,ctrl=p.mode==='ground';
   let drag=.0022,acc=G*Math.sin(a)-.035*G*Math.cos(a);
   const pow=isPow(g.seg);
-  p.tuck=ctrl&&inGas();p.braking=ctrl&&inL()&&!inU()&&!inD();
+  p.tuck=ctrl&&(inGas()||!!p.auto);p.braking=ctrl&&inL()&&!inU()&&!inD();
   // Afterbang: was beim Landen schon gedrückt war, zählt erst nach dem Loslassen; ein neuer Druck (außer Gas) bricht ab
   if(p.ab){const cur=(inU()?1:0)|(inD()?2:0)|(inL()?4:0)|(inR()&&!inGas()?8:0),fresh=cur&~p.ab.held;p.ab.held&=cur;
     if(!ctrl||jumpBuf>0||fresh||p.bs||p.butter)p.ab=null;else{p.ab.t+=dt;if(p.ab.t>=p.ab.dur)p.ab=null}}
@@ -2073,7 +2195,7 @@ function updGround(dt){
   if(p.braking)acc-=260;
   if(!ctrl)acc-=140;
   acc-=drag*p.s*p.s;
-  p.s=clamp(p.s+acc*dt,ctrl?40:0,VMAX);
+  p.s=clamp(p.s+acc*dt,ctrl?(p.auto?0:40):0,p.auto?170:VMAX);
   p.sink=(p.sink||0)+((pow?4:0)-(p.sink||0))*Math.min(1,dt*8);
   const prevX=p.x,nx=p.x+Math.cos(a)*p.s*dt,ny=p.y+Math.sin(a)*p.s*dt,g2=groundAt(nx);
   if(!g2){p.x=nx;p.y=ny;launch(a,0,g.seg);return}
@@ -2305,7 +2427,7 @@ function avaGround(wx){const i=segIndexAt(wx);if(i<0)return null;const s=segs[i]
   if(!s.gap)return s.y0+(s.y1-s.y0)*(wx-s.x0)/(s.x1-s.x0);
   const u=(wx-s.x0)/(s.x1-s.x0);return s.y0+(s.y1-s.y0)*u*u}
 function updWall(dt){
-  if(p.mode==='dig')return;
+  if(p.mode==='dig'||p.auto)return;
   wall.v=Math.min(VMAX*.77,140+run.time*1.2);
   wall.x+=wall.v*dt;
   const fx=footX(),fy=footY();wall.x=Math.max(wall.x,fx-560);
@@ -2314,6 +2436,7 @@ function updWall(dt){
 }
 function gapBetween(a,b){for(let x=a;x<b;x+=5){const g=groundAt(x);if(!g||g.seg.kind==='rock')return true}return false}
 function updPatrol(dt){
+  if(p.auto)return;
   const fx=footX(),fy=footY();
   if(!pat.on){
     pat.next-=dt;
@@ -2359,7 +2482,8 @@ function updCamera(dt,snap){
 }
 let pruneT=0;
 function update(dt){
-  now+=dt;run.time+=dt;if(jumpBuf>0)jumpBuf-=dt;
+  now+=dt;if(!p.auto)run.time+=dt;if(jumpBuf>0)jumpBuf-=dt;
+  if(p.auto){if(jumpBuf>0){jumpBuf=0;endIntro(true)}else if(p.x>=ALM_END)endIntro(false)}
   p.prevX=p.x;
   switch(p.mode){
     case 'ground':case 'crash':updGround(dt);break;
@@ -2679,7 +2803,7 @@ function render(dt){
   // Welt: Piste, Klippen, alles Bewegliche; nachts Flutlicht und Stirnlampe
   if(!worldCv||worldCv.width!==VW){[worldCv,worldCtx]=mk(VW,VH)}
   ctx=worldCtx;ctx.clearRect(0,0,VW,VH);
-  drawTerrain(cX,cY);drawCrevasses(cX,cY);drawGapMist(cX,cY);drawCliffs(cX,cY);drawTrees(cX,cY);drawFauna(cX,cY);drawFloods(cX,cY);drawRocks(cX,cY);drawLoops(cX,cY);drawSigns(cX,cY);drawRails(cX,cY);drawBonks(cX,cY);drawCoins(cX,cY);drawPatrol(cX,cY);drawPlayer(cX,cY);
+  drawTerrain(cX,cY);drawAlm(cX,cY);drawCrevasses(cX,cY);drawGapMist(cX,cY);drawCliffs(cX,cY);drawTrees(cX,cY);drawFauna(cX,cY);drawFloods(cX,cY);drawRocks(cX,cY);drawLoops(cX,cY);drawSigns(cX,cY);drawRails(cX,cY);drawBonks(cX,cY);drawCoins(cX,cY);drawPatrol(cX,cY);drawPlayer(cX,cY);
   for(const q of parts){ctx.fillStyle=q.col;ctx.fillRect(Math.round(q.x-cX),Math.round(q.y-cY),q.sz,q.sz)}
   drawGapFog(cX,cY);drawWall(cX,cY);
   const lamp=applyNight(cX,cY,curDS,fm);
@@ -2710,10 +2834,16 @@ const screens=['menu','help','shop','pause','over','rank','notes'];
 function show(id){screens.forEach(s=>$(s).hidden=s!==id);if(id){const b=$(id).querySelector('.btn');if(b&&!isTouch)b.focus({preventScroll:true})}}
 function refreshMenu(){if(cloudHook)cloudShow();$('kMute').textContent=SAVE.gear==='board'?'INDY':'MUTE';document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.gear===SAVE.gear)));$('bAssist').setAttribute('aria-pressed',String(!!SAVE.assist));{const own=!!SAVE.owned.pk_free,on=!!SAVE.equip.pack&&SAVE.equip.pack!=='pk_none',b=$('bPack');b.hidden=!own;b.setAttribute('aria-pressed',String(on));b.textContent='RUCKSACK: '+(on?'AN':'AUS')}$('bAssist').textContent='LANDEHILFE: '+(SAVE.assist?'AN':'AUS');$('bMusic').textContent='MUSIK: '+(SAVE.music!==false?'AN':'AUS');$('bMusic').setAttribute('aria-pressed',String(SAVE.music!==false));setT($('mCoins'),String(SAVE.coins));setT($('mBest'),String(SAVE.best));setT($('mDist'),SAVE.bestDist+' m')}
 let hintTimer=0;
+function showHint(txt,ms){const h=$('hint');h.hidden=false;h.style.opacity='1';h.textContent=txt;clearTimeout(hintTimer);hintTimer=setTimeout(()=>{h.style.opacity='0';setTimeout(()=>h.hidden=true,700)},ms)}
+// Ende der Alm-Ausfahrt: ab hier steuert man selbst (überspringen = direkt ans Ende des Plateaus)
+function endIntro(skip){if(!p.auto)return;p.auto=false;
+  if(skip){const g=groundAt(ALM_END+2);p.x=ALM_END+2;if(g){p.y=g.y;p.ang=g.a*DEG}p.s=Math.max(p.s,150);p.mode='ground';updCamera(0,true)}
+  wall.x=p.x-430;showTrick('LOS GEHT\'S!','Ab jetzt fährst du');
+  showHint(isTouch?'Links tippen: Stick ▶ Gas, ◀ bremsen, in der Luft Flips und Spins · Rechts tippen: Sprung, halten und schieben = Grab':'Shift Gas · ← Bremsen · Leertaste springen · Tricks in der Luft',5200)}
 function startRun(){
   unlockAudio();padReset();resetRun();updCamera(0,true);state='play';show(null);$('hud').hidden=false;if(document.activeElement)document.activeElement.blur();
-  const h=$('hint');h.hidden=false;h.style.opacity='1';h.textContent=isTouch?'Links tippen: Stick ▶ Gas, ◀ bremsen, in der Luft Flips und Spins · Rechts tippen: Sprung, halten und schieben = Grab':'Shift Gas · ← Bremsen · Leertaste springen · Tricks in der Luft';
-  clearTimeout(hintTimer);hintTimer=setTimeout(()=>{h.style.opacity='0';setTimeout(()=>h.hidden=true,700)},5200);
+  MUS.step=0;ALM.step=0;musicMix(true);showTrick('SERVUS AUF DER ALM!','Gleich geht\'s los');
+  showHint(isTouch?'Rechts tippen: Intro überspringen':'Leertaste: Intro überspringen',3800);
   layout();
 }
 function setPause(on){if(on&&state==='play'){state='pause';show('pause');persist()}else if(!on&&state==='pause'){state='play';show(null);if(document.activeElement)document.activeElement.blur()}}
@@ -2927,13 +3057,13 @@ function frame(t){
   const dt=Math.min(.05,(t-last)/1000);last=t;
   if(state==='play'){acc+=dt;let n=0;while(acc>=STEP&&n<12){update(STEP);acc-=STEP;n++}if(n>=12)acc=0}
   else{acc=0;if(grindSnd)grindStop(true);if(state==='menu'){cam.x+=dt*18;while(gx<cam.x+VW+900)genNext()}}
-  render(dt);
+  render(dt);musicMix();
   if(state==='menu')drawPreview('pvMenu');
   if(!$('shop').hidden)drawPreview('pvShop',Object.assign({},SAVE.equip,tryOn,shopCat==='beanie'?{helmet:'h_none'}:{}),shopCat==='board'?'board':(shopCat==='skis'||shopCat==='poles')?'ski':SAVE.gear,shopCat==='poles');
   requestAnimationFrame(frame);
 }
 function start(){
-  PATROL_SPR=[makePatrol(true),makePatrol(false)];makeTreeSprites();
+  PATROL_SPR=[makePatrol(true),makePatrol(false)];makeTreeSprites();makeAlmSprites();
   layout();resetRun();updCamera(0,true);refreshMenu();show('menu');
   if(document.fonts&&document.fonts.load)document.fonts.load('8px Silkscreen').catch(()=>{});
   requestAnimationFrame(t=>{last=t;frame(t)});
