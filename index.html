@@ -277,7 +277,9 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
     <p class="eyebrow">Was ist neu</p>
     <h2>PATCH NOTES</h2>
     <div class="pn">
-      <h3>v1.7 · 05.11.2026</h3>
+      <h3>v1.8 · 05.11.2026</h3>
+      <ul><li>Swaps auf Rails etwas langsamer</li><li>Mit Drehung auf die Rail und Stick halten: Drehung läuft auf der Rail weiter</li><li>Park: gleichmäßige Abstände, kleine Kicker ohne Gap entfernt</li></ul>
+      <h3>v1.7</h3>
       <ul><li>Ohne Helm fahren: Beanie, Bommelmütze und Fisherman in vielen Farben</li><li>Rucksack in sieben weiteren Farben, jetzt auch von der Seite sichtbar</li><li>Kopf dreht sich bei Corks mit</li></ul>
       <h3>v1.6</h3>
       <ul><li>Freeride-Rucksack im Shop: Spitzhacke rettet dich einmal pro Lauf aus dem Abgrund</li><li>Mehr Abstand zwischen den Hindernissen im Park</li></ul>
@@ -342,8 +344,8 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
         <dt><kbd>I</kbd><kbd>4</kbd></dt><dd>Mute (Ski), Indy (Board)</dd>
       </dl></div>
       <div><h3>Rails &amp; Tubes</h3><dl>
-        <dt>Draufspringen</dt><dd>Slide, Punkte pro Sekunde</dd>
-        <dt><kbd>A</kbd><kbd>D</kbd></dt><dd>Rail: 180er Swap</dd>
+        <dt>Draufspringen</dt><dd>Slide, Punkte pro Sekunde. Drehst du beim Aufspringen und hältst A/D weiter, drehst du auf der Rail weiter</dd>
+        <dt><kbd>A</kbd><kbd>D</kbd></dt><dd>Rail: 180er Swap, halten dreht weiter</dd>
         <dt><kbd>A</kbd><kbd>D</kbd></dt><dd>Tube und Baum: 90° drehen. Gerade drauf ist ein 50-50</dd>
         <dt>Absprung</dt><dd>Quer runter? Dreh dich in der Luft mit A/D in 90er-Schritten raus, sonst crashst du</dd>
         <dt><kbd>Leertaste</kbd></dt><dd>Absprung vom Rail</dd>
@@ -403,7 +405,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
 (()=>{
 'use strict';
 const RAD=Math.PI/180, DEG=180/Math.PI;
-const BUTTER180_T=.5, G=430, POP=190, JUMP_POP=Math.round(190*Math.SQRT1_2), FOOT=11, VH=342, FLIP_RATE=520, SPIN_RATE=600, CORK_SLOW=.6, STEP=1/120, VMAX=364, PARK_LEN=13000, FREE_LEN=11000;
+const BUTTER180_T=.5,GRIND_SPIN=700,GRIND_REP=.32, G=430, POP=190, JUMP_POP=Math.round(190*Math.SQRT1_2), FOOT=11, VH=342, FLIP_RATE=520, SPIN_RATE=600, CORK_SLOW=.6, STEP=1/120, VMAX=364, PARK_LEN=13000, FREE_LEN=11000;
 let VW=608;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
@@ -951,11 +953,9 @@ function coinArc(x0,y0,aDeg,s,maxD,maxN){
   let vx=s*Math.cos(aDeg*RAD),vy=s*Math.sin(aDeg*RAD),x=x0,y=y0-FOOT,n=0;
   for(let i=0;i<80&&n<maxN;i++){const dt=.075;x+=vx*dt;vy+=G*dt;y+=vy*dt;if(x>x0+maxD)break;if(i>0){coins.push({x,y,ph:Math.random()*4});n++}}
 }
-function fRun(){const x=gx,L=rand(90,170);seg(L,rand(16,26));if(Math.random()<.6)coinRow(x+25,Math.floor(L/24),16,12)}
-function fRoller(){seg(70,24);addSign(gx-50,'ROLLER');const ks=[seg(10,-6,'kicker'),seg(10,-14,'kicker'),seg(12,-20,'kicker')];ks.forEach(k=>k.vmax=230);ks[2].lip=true;const lx=gx,ly=gy;seg(60,30);seg(110,22);coinArc(lx,ly,-20,220,90,5)}
 function fKicker(big){
   const d=difficulty(),x0=gx;
-  seg(big?480:160,big?25:26);seg(big?36:28,big?8:6);
+  seg(Math.max(big?220:60,(big?480:160)-leadCut),big?25:26);seg(big?36:28,big?8:6);
   addSign(x0+24,big?'BIG AIR':'KICKER');if(big)addSign(x0+230,'VOLLGAS!');
   const steps=big?[-12,-22,-32]:[-10,-18,-26],sl=big?16:11,ks=[];
   for(const a of steps)ks.push(seg(sl,a,'kicker'));
@@ -968,31 +968,34 @@ function fKicker(big){
   ks.forEach(s=>{s.req=req;s.big=big;s.vmax=vmax;s.assist=big?0:.86});
   addPole(lipX,lipY);gapSeg(gap,drop);addPole(gx+2,gy);
   coinArc(lipX,lipY,la,req*1.03,gap+110,big?18:9);
-  const L=clamp(flightLen(lipX,lipY,la,vmax,POP*1.1,gx,gy,lDeg)+80,big?500:230,big?1400:620);
+  const L=clamp(flightLen(lipX,lipY,la,vmax,JUMP_POP*1.1,gx,gy,lDeg)+80,big?500:230,big?1400:620);
+  parkEnd=gx+flightLen(lipX,lipY,la,vmax,JUMP_POP*1.1,gx,gy,lDeg);   // weiteste Landung mit Gas und Sprung
   seg(L,lDeg,'landing');seg(70,12);
 }
 function fDrop(){
-  const d=difficulty();seg(150,25);addSign(gx-120,'DROP');const dk=seg(24,4,'deck');dk.vmax=360;
+  const d=difficulty();seg(Math.max(80,150-leadCut),25);addSign(gx-120,'DROP');const dk=seg(24,4,'deck');dk.vmax=360;
   const lipX=gx,lipY=gy,gap=rand(75,105)+d*35,drop=rand(40,54);
   addPole(lipX,lipY);gapSeg(gap,drop);addPole(gx+2,gy);
   coinArc(lipX,lipY,4,270,gap+70,7);
-  seg(clamp(flightLen(lipX,lipY,4,360,POP,gx,gy,28)+80,220,620),28,'landing');seg(60,14);
+  parkEnd=gx+flightLen(lipX,lipY,4,360,JUMP_POP,gx,gy,28);
+  seg(clamp(flightLen(lipX,lipY,4,360,JUMP_POP,gx,gy,28)+80,220,620),28,'landing');seg(60,14);
 }
 function fRail(tube){
   const flat=Math.random()<.35,deg=flat?6:rand(14,22),x0=gx;
-  seg(90,flat?22:deg);addSign(x0+20,tube?'TUBE':'RAIL');
+  seg(Math.max(50,90-leadCut),flat?22:deg);addSign(x0+20,tube?'TUBE':'RAIL');
   const len=(tube?rand(170,240):rand(200,290))*(Math.random()<.35?rand(1.3,1.55):1),h=tube?11:14,rx=gx+34;
-  seg(len+80,deg);
+  seg(len+80,deg);parkEnd=rx+len;
   const g0=groundAt(rx),g1=groundAt(rx+len);
   const r={x0:rx,y0:g0.y-h,x1:rx+len,y1:g1.y-h,type:tube?'tube':'rail'};rails.push(r);
   for(let x=rx+12;x<rx+len-4;x+=18)coins.push({x,y:railY(r,x)-FOOT-3,ph:Math.random()*4});
   seg(40,deg);
 }
 function fGapRail(){
-  const d=difficulty();seg(140,24);addSign(gx-110,'GAP RAIL');const dk=seg(50,5,'deck');dk.vmax=370;
+  const d=difficulty();seg(Math.max(90,140-leadCut),24);addSign(gx-110,'GAP RAIL');const dk=seg(50,5,'deck');dk.vmax=370;
   const lipX=gx,lipY=gy,gap=rand(120,155)+d*30,drop=34,h=13;
   addPole(lipX,lipY);gapSeg(gap,drop);addPole(gx+2,gy);
-  seg(clamp(flightLen(lipX,lipY,5,370,POP,gx,gy,24)+80,210,620),24,'landing');seg(50,12);
+  parkEnd=Math.max(lipX+gap+34,gx+flightLen(lipX,lipY,5,370,JUMP_POP,gx,gy,24));
+  seg(clamp(flightLen(lipX,lipY,5,370,JUMP_POP,gx,gy,24)+80,210,620),24,'landing');seg(50,12);
   const xa=lipX-28,xb=lipX+gap+34;
   const r={x0:xa,y0:groundAt(xa).y-h,x1:xb,y1:groundAt(xb).y-h,type:'rail'};rails.push(r);
   for(let x=xa+14;x<xb-6;x+=20)coins.push({x,y:railY(r,x)-FOOT-3,ph:Math.random()*4});
@@ -1001,7 +1004,7 @@ function fLoop(){
   seg(210,30);addSign(gx-170,'LOOP');seg(24,14);seg(20,4);
   const R=40,cx=gx+R+40,cy=gy-R;
   seg(R*2+110,0,'loopfloor');
-  loops.push({cx,cy,R,done:false,img:makeLoopImg(R)});
+  loops.push({cx,cy,R,done:false,img:makeLoopImg(R)});parkEnd=cx+20;
   for(let k=2;k<=10;k++){const ph=k*30*RAD;coins.push({x:cx+(R-13)*Math.sin(ph),y:cy+(R-13)*Math.cos(ph),ph:Math.random()*4})}
   seg(60,12);
 }
@@ -1157,28 +1160,33 @@ function genFree(){
   addFauna(fx0,gx);
 }
 function pickW(o){let t=0;for(const k in o)t+=o[k];let r=Math.random()*t;for(const k in o){r-=o[k];if(r<=0)return k}return Object.keys(o)[0]}
+/* Park-Abstand in px (~1,1 s Fahrt mit Gas). PARK_LEAD: Strecke vom Anfang eines Hindernisses bis zur Rampe/Rail/Kante */
+const PARK_SPACE=380,PARK_LEAD={kicker:188,bigair:516,rail:124,tube:124,drop:150,gaprail:162,loop:254};
+let parkEnd=null,leadCut=0;
 function genNext(){
   const z=zoneAt(gx);
-  if(z!==curZone){curZone=z;fZone(z);sinceGap=0;lastType='';return}
+  if(z!==curZone){curZone=z;fZone(z);sinceGap=0;lastType='';parkEnd=null;return}
   if(z==='free'){genFree();return}
   const d=difficulty();let o;
   if(sinceGap>=2)o={kicker:3,drop:2,gaprail:1.1,bigair:1+d*1.5};
-  else o={run:1.2,roller:1,kicker:3,rail:1.3,tube:2.1,drop:1.5,gaprail:.8,bigair:.8+d,loop:0};
+  else o={kicker:3,rail:1.3,tube:2.1,drop:1.5,gaprail:.8,bigair:.8+d};
   if(o[lastType])o[lastType]*=.35;
   const t=pickW(o);
-  ({run:fRun,roller:fRoller,kicker:()=>fKicker(false),bigair:()=>fKicker(true),rail:()=>fRail(false),tube:()=>fRail(true),drop:fDrop,gaprail:fGapRail,loop:fLoop})[t]();
+  // Gleicher Abstand: vom Ende des letzten Hindernisses (Rail-Ende bzw. normale Landestelle) bis zum Anfang des nächsten
+  // Zu viel Platz: Zwischenstück. Zu wenig (lange Landezone davor): Anlauf des nächsten Hindernisses kürzen, mit Mindestlänge.
+  leadCut=0;
+  if(parkEnd!==null){const L=PARK_SPACE+rand(-15,15)-(gx-parkEnd)-PARK_LEAD[t];
+    if(L>8){const x=gx;seg(L,rand(14,20));if(L>140&&Math.random()<.4)coinRow(x+30,Math.floor((L-50)/24),16,12)}else leadCut=-L}
+  ({kicker:()=>fKicker(false),bigair:()=>fKicker(true),rail:()=>fRail(false),tube:()=>fRail(true),drop:fDrop,gaprail:fGapRail,loop:fLoop})[t]();
   sinceGap=['kicker','bigair','drop','gaprail'].includes(t)?0:sinceGap+1;
   if(t==='loop')lastLoopX=gx;
   lastType=t;
-  // Auslauf nach jedem Hindernis, damit nicht direkt der nächste Kicker hinter einer Rail kommt
-  {const x=gx,L=rand(170,250);seg(L,rand(14,20));if(Math.random()<.4)coinRow(x+40,Math.floor((L-60)/24),16,12)}
-  if(Math.random()<.45)fRun();
   addFloods();flushGapFx();
 }
 function resetWorld(){
   segs=[];rails=[];loops=[];coins=[];signs=[];trees=[];rocks=[];floods=[];fauna=[];cliffs=[];cliffJobs=[];gapFogs=[];pendGaps=[];mReset(1+Math.floor(Math.random()*9973));nextFloodX=-260;gx=-260;gy=0;sinceGap=0;lastLoopX=-9999;lastType='';curZone='park';
   seg(300,5,'start');seg(260,19);coinRow(120,8,16,12);
-  fRail(Math.random()<.5);fRun();
+  parkEnd=null;leadCut=0;fRail(Math.random()<.5);lastType='rail';
 }
 function makeLoopImg(R){
   const S=R*2+24,[c,g]=mk(S,S),cx=S/2,cy=S/2;
@@ -1833,8 +1841,12 @@ function landRail(r,fx){
   scoreAir(false);
   const s=p.vx*Math.cos(ra)+p.vy*Math.sin(ra);
   p.mode='rail';p.rail=r;p.x=fx;p.y=railY(r,fx);p.s=Math.max(90,s);p.grindT=0;p.ang=ra*DEG;
-  let gs=Math.round(p.spin/90)*90;if(r.type==='rail'&&((gs%180)+180)%180===0)gs+=90;
-  p.gspin=gs;p.gspinVis=gs;p.gSwaps=0;p.gParts=[];p.gLastDir=1;p.gPrevL=inL();p.gPrevR=inR();gLabel();
+  // Rail: nur quer (90 + k*180). Tube/Baum: jede Vierteldrehung.
+  const st=r.type==='rail'?180:90,off=r.type==='rail'?90:0,hl=inL(),hr=inR(),hd=!p.spinLock&&hl!==hr?(hr?1:-1):0;
+  let gs;
+  if(hd)gs=(hd>0?Math.ceil((p.spin-off)/st):Math.floor((p.spin-off)/st))*st+off;   // Stick bleibt in Drehrichtung: Drehung läuft auf der Rail weiter
+  else{gs=Math.round(p.spin/90)*90;if(r.type==='rail'&&((gs%180)+180)%180===0)gs+=90}
+  p.gspin=gs;p.gspinVis=hd?p.spin:gs;p.gHold=hd;p.gRepT=0;p.gSwaps=0;p.gParts=[];p.gLastDir=hd||1;p.gPrevL=hl;p.gPrevR=hr;gLabel();
   SFX.land();return true;
 }
 function gLabel(){
@@ -1849,6 +1861,7 @@ function endGrind(){
 }
 function leaveRail(a,pop){
   endGrind();p.spin=p.gspin;launch(a,pop,null);p.fromRail=true;p.aPrevL=false;p.aPrevR=false;
+  if(Math.abs(p.gspin-p.gspinVis)>1){p.spin=p.gspinVis;p.spinTarget=p.gspin}
 }
 function updRail(dt){
   const r=p.rail,a=Math.atan2(r.y1-r.y0,r.x1-r.x0);
@@ -1858,13 +1871,13 @@ function updRail(dt){
   p.y=railY(r,p.x);p.ang=a*DEG;
   const kl=inL(),kr=inR(),step=r.type==='rail'?180:90;
   // Swap beim Drücken; bleibt die Richtung gedrückt, dreht er nach jedem fertigen Swap weiter
-  const swap=dir=>{p.gspin+=dir*step;p.gSwaps++;p.gLastDir=dir;p.gRepT=.24;gLabel();SFX.jump()};
+  const swap=dir=>{p.gspin+=dir*step;p.gSwaps++;p.gLastDir=dir;p.gRepT=GRIND_REP;gLabel();SFX.jump()};
   p.gRepT=Math.max(0,(p.gRepT||0)-dt);if(!kl&&!kr)p.gHold=0;
-  const caught=Math.abs(p.gspin-p.gspinVis)<step*.15;
-  if(kl&&!p.gPrevL){swap(-1);p.gHold=-1}else if(kl&&p.gHold===-1&&caught&&p.gRepT<=0)swap(-1);
-  if(kr&&!p.gPrevR){swap(1);p.gHold=1}else if(kr&&p.gHold===1&&caught&&p.gRepT<=0)swap(1);
+  const lag=Math.abs(p.gspin-p.gspinVis),caught=lag<step*.15,free=lag<step;
+  if(kl&&!p.gPrevL){if(free)swap(-1);p.gHold=-1}else if(kl&&p.gHold===-1&&caught&&p.gRepT<=0)swap(-1);
+  if(kr&&!p.gPrevR){if(free)swap(1);p.gHold=1}else if(kr&&p.gHold===1&&caught&&p.gRepT<=0)swap(1);
   p.gPrevL=kl;p.gPrevR=kr;
-  {const dv=p.gspin-p.gspinVis,mx=1000*dt;p.gspinVis+=clamp(dv,-mx,mx)}
+  {const dv=p.gspin-p.gspinVis,mx=GRIND_SPIN*dt;p.gspinVis+=clamp(dv,-mx,mx)}
   if(jumpBuf>0){jumpBuf=0;leaveRail(a,JUMP_POP*.9);return}
   p.sparkT-=dt;if(p.sparkT<=0){p.sparkT=.03;const lg=r.type==='log';parts.push({x:p.x+rand(-3,3),y:p.y,vx:rand(-90,10),vy:-rand(30,90),life:rand(.15,.35),col:lg?(Math.random()<.6?'#ffffff':'#a77b4f'):(Math.random()<.5?'#ffd04a':'#ff8a3d'),sz:lg&&Math.random()<.4?2:1,gr:400});if(!lg&&Math.random()<.3)SFX.grind()}
 }
