@@ -137,7 +137,11 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
 .note{font-size:20px;color:var(--muted);line-height:1.1;margin:0 0 18px;max-width:60ch}
 
 /* Rangliste */
-.rank{max-width:640px}
+.rank{max-width:820px;box-sizing:border-box;display:flex;flex-direction:column;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px)}
+.rhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex:none}
+.rhead h2{margin:4px 0 12px}
+.rank .acc,.rank .rcount{flex:none}
+.fields .btn{flex:none;padding:12px 14px}
 .acc{background:var(--panel2);box-shadow:0 0 0 3px #000;padding:14px;margin:0 0 16px}
 .acc .note{font-size:18px;margin-bottom:12px}
 .fields{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
@@ -147,7 +151,9 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
 .me{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;font-family:var(--ui);font-size:15px;color:var(--muted)}
 .me b{color:#fff;font-family:var(--display);font-weight:400;font-size:14px;margin-left:6px}
 .rmsg{font-family:var(--ui);font-size:14px;color:var(--gold);min-height:1.2em;margin:10px 0 0}
-.board{list-style:none;margin:0 0 18px;padding:0;max-height:min(46vh,420px);overflow:auto;box-shadow:0 0 0 3px #000;background:#0b1124;touch-action:pan-y}
+.rmsg:empty{display:none}
+.board{list-style:none;margin:0;padding:0;flex:1 1 auto;min-height:96px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;box-shadow:0 0 0 3px #000;background:#0b1124;touch-action:pan-y}
+.rcount{font-family:var(--ui);font-size:13px;color:var(--muted);margin:0 0 8px;min-height:1em}
 .board li{display:grid;grid-template-columns:3.2em minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:7px 12px;font-size:20px;color:#d7e2ff;border-bottom:2px solid #141c33}
 .board li .pl{font-family:var(--display);font-size:12px;color:var(--muted)}
 .board li .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--ui);font-size:15px;color:#fff}
@@ -155,6 +161,8 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
 .board li.mine{background:#22305a}
 .board li:nth-child(1) .pl{color:#ffd04a}.board li:nth-child(2) .pl{color:#dfe6f2}.board li:nth-child(3) .pl{color:#e0a46a}
 .board li.info{display:block;font-family:var(--ui);font-size:15px;color:var(--muted)}
+.rank .board{max-height:none}
+@media (max-height:560px){.rank{padding:12px 16px}.rank .eyebrow,.acc .note{display:none}.rhead h2{margin:0 0 8px}.rhead .btn{padding:10px 12px}.acc{padding:10px;margin-bottom:8px}.fields{margin-bottom:0;gap:8px}.fields input{padding:8px 10px}.fields .btn{padding:9px 11px;font-size:11px}.rmsg{margin-top:6px}.board li{padding:5px 12px}}
 .orank{font-family:var(--ui);font-size:15px;color:var(--gold);min-height:1.2em;margin:-6px 0 14px}
 
 /* Shop */
@@ -254,22 +262,21 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
 
 <section id="rank" class="screen" hidden>
   <div class="card rank">
-    <p class="eyebrow">Online</p>
-    <h2>RANGLISTE</h2>
+    <div class="rhead"><div><p class="eyebrow">Online</p><h2>RANGLISTE</h2></div><button class="btn ghost" id="bRankBack">ZURÜCK</button></div>
     <div class="acc">
       <form id="rForm" autocomplete="on">
         <p class="note">Mit Konto landet dein Bestwert in der Rangliste. Nur Spielername und Passwort, keine E-Mail. Merk dir das Passwort gut, es lässt sich nicht zurücksetzen.</p>
         <div class="fields">
           <input id="rName" name="username" maxlength="16" placeholder="Spielername" autocomplete="username" autocapitalize="off" spellcheck="false" aria-label="Spielername">
           <input id="rPass" name="password" type="password" maxlength="64" placeholder="Passwort, mind. 6 Zeichen" autocomplete="current-password" aria-label="Passwort">
+          <button type="submit" class="btn" id="bLogin">ANMELDEN</button><button type="button" class="btn alt" id="bSignup">KONTO ERSTELLEN</button>
         </div>
-        <div class="btns"><button type="submit" class="btn" id="bLogin">ANMELDEN</button><button type="button" class="btn alt" id="bSignup">KONTO ERSTELLEN</button></div>
       </form>
       <div class="me" id="rMe" hidden><span>Angemeldet als<b id="rMeName"></b></span><button type="button" class="gearbtn" id="bLogout">ABMELDEN</button></div>
       <p class="rmsg" id="rMsg" role="status"></p>
     </div>
+    <p class="rcount" id="rCount"></p>
     <ol class="board" id="rList"><li class="info">Lädt …</li></ol>
-    <div class="btns"><button class="btn ghost" id="bRankBack">ZURÜCK</button></div>
   </div>
 </section>
 
@@ -1378,19 +1385,20 @@ function faunaSprite(type,fr,run){const key=type+fr+(run?'r':'');if(FAUNA_SPR[ke
 function addFauna(x0,x1){
   if(x1-x0<120||Math.random()>.3)return;const x=rand(x0+50,x1-50),g=groundAt(x);if(!g||!isPow(g.seg))return;
   const r=Math.random(),type=r<.42?'deer':r<.64?'bear':'hare';
-  fauna.push({x,y:g.y,type,dir:Math.random()<.5?1:-1,flee:false,t:Math.random()*5,walk:Math.random()<.55});
+  fauna.push({x,y:g.y,type,dir:Math.random()<.5?1:-1,flee:false,t:Math.random()*5,walk:type==='bear'||Math.random()<.55,pt:rand(2,5)});
 }
 function updFauna(dt){
   const fx=footX();
   for(const a of fauna){a.t+=dt;
-    if(!a.flee&&a.type!=='bear'&&a.x-fx<170&&a.x-fx>-30){a.flee=true;a.dir=1}
+    if(!a.flee&&a.x-fx<(a.type==='bear'?150:170)&&a.x-fx>-30){a.flee=true;a.dir=1}
+    if(a.type==='bear'&&!a.flee){a.pt-=dt;if(a.pt<=0){a.walk=!a.walk;a.pt=a.walk?rand(3,6):rand(1,2.2);if(a.walk&&Math.random()<.4)a.dir*=-1}}
     const hop=a.type==='hare'&&(a.t%1.2)<.45;
-    const sp=a.flee?(a.type==='deer'?330:300):a.walk?(a.type==='deer'?10:a.type==='bear'?7:(hop?42:0)):0;
-    if(sp){const nx=a.x+a.dir*sp*dt,g=groundAt(nx);if(g&&isPow(g.seg)){a.x=nx;a.y=g.y}else if(!a.flee)a.dir*=-1;else a.flee=false}}
+    const sp=a.flee?(a.type==='deer'?330:a.type==='bear'?150:300):a.walk?(a.type==='deer'?10:a.type==='bear'?26:(hop?42:0)):0;
+    if(sp){const nx=a.x+a.dir*sp*dt,g=groundAt(nx);if(g&&isPow(g.seg)){a.x=nx;a.y=g.y}else if(!a.flee){a.dir*=-1;if(a.type==='bear'){a.walk=false;a.pt=rand(1,2)}}else a.flee=false}}
 }
 function drawFauna(cX,cY){
   for(const a of fauna){
-    const moving=a.flee||(a.walk&&(a.type!=='hare'||(a.t%1.2)<.45)),fr=moving?Math.floor(a.t*(a.flee?10:4))%2:0;
+    const moving=a.flee||(a.walk&&(a.type!=='hare'||(a.t%1.2)<.45)),fr=moving?Math.floor(a.t*(a.flee?(a.type==='bear'?6:10):a.type==='bear'?3:4))%2:0;
     const sp=faunaSprite(a.type,fr,a.flee||(a.type==='hare'&&moving)),w=sp.width,h=sp.height,sx=Math.round(a.x-cX-w/2);if(sx>VW||sx+w<0)continue;
     const gl=groundAt(a.x-w*.35),gr=groundAt(a.x+w*.35),base=Math.max(gl?gl.y:a.y,gr?gr.y:a.y)-cY+1,y0=Math.round(base-h);
     ctx.save();ctx.translate(sx,y0);if(a.dir<0){ctx.scale(-1,1);ctx.drawImage(sp,-w,0)}else ctx.drawImage(sp,0,0);ctx.restore();
@@ -1869,6 +1877,12 @@ function drawTerrain(cX,cY){
       if(wd<1){ctx.fillStyle=C.edge;ctx.fillRect(sx,y+3,1,VH-y-3)}
       else if(((wi*2654435761)>>>0)%4===0){ctx.fillStyle='rgba(255,255,255,.35)';ctx.fillRect(sx,y+6,1,VH-y-6)}}
     if(fz){const b=((wi*7919)>>>0)%6===0?1:0;ctx.fillStyle=C.top;ctx.fillRect(sx,y-b,1,3+b);continue}
+    // präparierter Schnee: Kordrillen der Pistenraupe, dicht unter der Oberfläche am deutlichsten
+    if(wd>=8&&y+16<VH){const kk=s.kind==='kicker',dk=kk?'#c9dbf3':'#d3e1f4',lt=kk?'#e6f0fc':'#f1f6fe',h=((wi*2654435761)>>>0);
+      ctx.fillStyle='#dbe6f6';ctx.fillRect(sx,y+2,1,1);
+      for(let k=4;k<16;k+=2){if(((h>>>(k&15))&31)===0)continue;ctx.fillStyle=k<10?dk:'#dce7f7';ctx.fillRect(sx,y+k,1,1);if(k<12){ctx.fillStyle=lt;ctx.fillRect(sx,y+k-1,1,1)}}
+      // breite Spuren nebeneinander fahrender Pistenraupen: alle paar Meter eine etwas hellere Bahn
+      if((Math.floor(wi/120)&1)===0){ctx.fillStyle='rgba(255,255,255,.18)';ctx.fillRect(sx,y+3,1,12)}}
     ctx.fillStyle=C.top;ctx.fillRect(sx,y,1,2);
     if(s.kind==='landing'&&(wi%44)<3){ctx.fillStyle='#3a6fd8';ctx.fillRect(sx,y+2,1,1)}
     if(s.kind==='kicker'&&s.lip&&s.x1-wx<3){ctx.fillStyle='#ff7a2f';ctx.fillRect(sx,y+1,1,3)}
@@ -2160,18 +2174,30 @@ async function sbLogin(name,pw){const r=await sb('/auth/v1/token?grant_type=pass
   if(r.ok){sessSave(sbSess(r.body,name));return ''}return 'Name oder Passwort stimmt nicht.'}
 async function sbSubmit(score,dist,trick){if(!await sbFresh())return false;
   const r=await sb('/rest/v1/rpc/submit_score',{method:'POST',body:JSON.stringify({p_score:Math.round(score),p_dist:Math.round(dist),p_trick:trick||null})},true);return r.ok}
-async function sbBoard(){const r=await sb('/rest/v1/scores?select=best,best_dist,best_trick,user_id,profiles(name)&order=best.desc,updated_at.asc&limit=50');return r.ok?r.body:null}
+const RANK_PAGE=100;
+async function sbBoardPage(from){const r=await sb('/rest/v1/scores?select=best,best_dist,best_trick,user_id,profiles(name)&order=best.desc,updated_at.asc&offset='+from+'&limit='+RANK_PAGE,{headers:{'Prefer':'count=exact'}});
+  if(!r.ok)return null;const cr=r.headers&&r.headers.get('content-range');const n=cr?parseInt(cr.split('/')[1],10):NaN;return {rows:r.body||[],total:isNaN(n)?null:n}}
 async function sbMyRank(){if(!SESS||!SESS.uid)return null;const me=await sb('/rest/v1/scores?select=best&user_id=eq.'+SESS.uid);
   if(!me.ok||!me.body||!me.body.length)return null;const best=me.body[0].best;
   const c=await sb('/rest/v1/scores?select=user_id&best=gt.'+best,{headers:{'Prefer':'count=exact','Range':'0-0'}});
   const cr=c.headers&&c.headers.get('content-range');const n=cr?parseInt(cr.split('/')[1],10):NaN;return isNaN(n)?null:{rank:n+1,best}}
 const escH=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function rankAcc(){const on=!!SESS;$('rForm').hidden=on;$('rMe').hidden=!on;if(on)$('rMeName').textContent=SESS.name}
-async function rankLoad(){const L=$('rList');L.innerHTML='<li class="info">Lädt …</li>';
-  const rows=await sbBoard();if(!rows){L.innerHTML='<li class="info">Rangliste gerade nicht erreichbar.</li>';return}
-  if(!rows.length){L.innerHTML='<li class="info">Noch keine Einträge. Hol dir Platz 1!</li>';return}
-  L.innerHTML=rows.map((r,i)=>'<li'+(SESS&&r.user_id===SESS.uid?' class="mine"':'')+'><span class="pl">'+(i+1)+'.</span><span class="nm">'+escH(r.profiles?r.profiles.name:'?')+'</span><span class="sc">'+r.best+'</span></li>').join('');
-  if(SESS&&!rows.some(r=>r.user_id===SESS.uid)){const m=await sbMyRank();if(m)L.insertAdjacentHTML('beforeend','<li class="mine"><span class="pl">'+m.rank+'.</span><span class="nm">'+escH(SESS.name)+'</span><span class="sc">'+m.best+'</span></li>')}}
+// Alle Fahrer: erst 100, beim Runterscrollen kommen die nächsten 100 dazu
+let rankN=0,rankDone=false,rankBusy=false,rankMine=false;
+const rankLi=(r,pl)=>'<li'+(SESS&&r.user_id===SESS.uid?' class="mine"':'')+'><span class="pl">'+pl+'.</span><span class="nm">'+escH(r.profiles?r.profiles.name:'?')+'</span><span class="sc">'+r.best+'</span></li>';
+async function rankLoad(){const L=$('rList');L.innerHTML='<li class="info">Lädt …</li>';$('rCount').textContent='';rankN=0;rankDone=false;rankBusy=false;rankMine=false;L.scrollTop=0;await rankMore(true)}
+async function rankMore(first){if(rankBusy||rankDone)return;rankBusy=true;const L=$('rList'),pg=await sbBoardPage(rankN);rankBusy=false;
+  if(!pg){if(first)L.innerHTML='<li class="info">Rangliste gerade nicht erreichbar.</li>';return}
+  if(first){L.innerHTML='';if(pg.total!=null)$('rCount').textContent=pg.total===1?'1 Fahrer in der Rangliste':pg.total+' Fahrer in der Rangliste'}
+  if(first&&!pg.rows.length){L.innerHTML='<li class="info">Noch keine Einträge. Hol dir Platz 1!</li>';rankDone=true;return}
+  const ex=L.querySelector('li.extra');if(ex)ex.remove();
+  L.insertAdjacentHTML('beforeend',pg.rows.map((r,i)=>rankLi(r,rankN+i+1)).join(''));
+  if(SESS&&pg.rows.some(r=>r.user_id===SESS.uid))rankMine=true;
+  rankN+=pg.rows.length;if(pg.rows.length<RANK_PAGE)rankDone=true;
+  if(SESS&&!rankMine){const m=await sbMyRank();if(m)L.insertAdjacentHTML('beforeend','<li class="mine extra"><span class="pl">'+m.rank+'.</span><span class="nm">'+escH(SESS.name)+'</span><span class="sc">'+m.best+'</span></li>')}
+  if(!rankDone&&L.scrollHeight<=L.clientHeight+4)rankMore(false)}
+$('rList').addEventListener('scroll',()=>{const L=$('rList');if(L.scrollTop+L.clientHeight>L.scrollHeight-80)rankMore(false)},{passive:true});
 function openRank(){$('rMsg').textContent='';rankAcc();show('rank');rankLoad()}
 async function accAction(signup){const n=$('rName').value.trim(),pw=$('rPass').value,msg=$('rMsg');
   if(!nameOk(n)){msg.textContent='Name: 3 bis 16 Zeichen, nur Buchstaben, Zahlen, _ und -.';return}
