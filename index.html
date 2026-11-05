@@ -277,7 +277,9 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
     <p class="eyebrow">Was ist neu</p>
     <h2>PATCH NOTES</h2>
     <div class="pn">
-      <h3>v1.6 · 05.11.2026</h3>
+      <h3>v1.7 · 05.11.2026</h3>
+      <ul><li>Ohne Helm fahren: Beanie, Bommelmütze und Fisherman in vielen Farben</li><li>Rucksack in sieben weiteren Farben, jetzt auch von der Seite sichtbar</li><li>Kopf dreht sich bei Corks mit</li></ul>
+      <h3>v1.6</h3>
       <ul><li>Freeride-Rucksack im Shop: Spitzhacke rettet dich einmal pro Lauf aus dem Abgrund</li><li>Mehr Abstand zwischen den Hindernissen im Park</li></ul>
       <h3>v1.5</h3>
       <ul><li>Butter mit eigener Pose und gebogenen Ski</li><li>Nose Butter 180 und Switch Tail Butter 180</li><li>Gas nur noch mit Stick ganz rechts</li></ul>
@@ -411,6 +413,7 @@ const $=id=>document.getElementById(id);
 /* ================= SHOP DATA ================= */
 const SHOP={
   helmet:{label:'Helm',items:[
+    {id:'h_none',name:'Ohne Helm (Mütze)',price:0,c:'#3b4152',a:'#c8442e'},
     {id:'h_black',name:'Matt Schwarz',price:0,c:'#2e313d'},
     {id:'h_white',name:'Kreideweiß',price:25,c:'#e8ecf2'},
     {id:'h_mint',name:'Mint',price:40,c:'#86e0bf'},
@@ -418,6 +421,20 @@ const SHOP={
     {id:'h_orange',name:'Signalorange',price:60,c:'#ff8434'},
     {id:'h_lilac',name:'Flieder',price:70,c:'#b79cf0'},
     {id:'h_gold',name:'Gold',price:200,c:'#f2c445'}]},
+  beanie:{label:'Mütze',items:[
+    {id:'bn_black',name:'Beanie Schwarz',price:0,model:'classic',c:'#2d3039',a:'#454a57'},
+    {id:'bn_grey',name:'Beanie Grau',price:20,model:'classic',c:'#8d939f',a:'#6c7280'},
+    {id:'bn_navy',name:'Beanie Navy',price:25,model:'classic',c:'#2c3f73',a:'#22335e'},
+    {id:'bn_red',name:'Beanie Rot',price:30,model:'classic',c:'#c8392f',a:'#a12c24'},
+    {id:'bn_orange',name:'Beanie Orange',price:35,model:'classic',c:'#f07a2c',a:'#cf6420'},
+    {id:'bn_pom_white',name:'Bommelmütze Weiß',price:60,model:'pom',c:'#e8ecf2',a:'#c9d0db',pom:'#ffffff'},
+    {id:'bn_pom_red',name:'Bommelmütze Rot',price:70,model:'pom',c:'#c8392f',a:'#ffffff',pom:'#ffffff'},
+    {id:'bn_pom_navy',name:'Bommelmütze Navy',price:70,model:'pom',c:'#2c3f73',a:'#e8ecf2',pom:'#f2c445'},
+    {id:'bn_pom_pink',name:'Bommelmütze Pink',price:80,model:'pom',c:'#ff86c8',a:'#d9649f',pom:'#ffffff'},
+    {id:'bn_pom_green',name:'Bommelmütze Wald',price:80,model:'pom',c:'#3f7a55',a:'#e8ecf2',pom:'#e8ecf2'},
+    {id:'bn_fish_mustard',name:'Fisherman Senf',price:90,model:'fish',c:'#d9a52f',a:'#b88a22'},
+    {id:'bn_fish_mint',name:'Fisherman Mint',price:90,model:'fish',c:'#86e0bf',a:'#5fbf9c'},
+    {id:'bn_fish_lilac',name:'Fisherman Flieder',price:100,model:'fish',c:'#b79cf0',a:'#9478d6'}]},
   goggles:{label:'Brille',items:[
     {id:'g_orange',name:'Orange Mirror',price:0,c:'#ff9a3c'},
     {id:'g_blue',name:'Blue Mirror',price:25,c:'#4fb6ff'},
@@ -459,7 +476,14 @@ const SHOP={
     {id:'b_gold',name:'Gold Edition',price:200,c:'#f2c445',a:'#6e4a10'}]},
   pack:{label:'Rucksack',items:[
     {id:'pk_none',name:'Ohne Rucksack',price:0,c:'#5d6680'},
-    {id:'pk_free',name:'Freeride-Rucksack',price:5000,c:'#c8442e',a:'#2b2e38',info:'Mit Spitzhacke: rettet dich einmal pro Lauf aus dem Abgrund. Im Menü an- und ausschaltbar.'}]},
+    {id:'pk_free',name:'Freeride-Rucksack',price:5000,c:'#c8442e',a:'#2b2e38',info:'Mit Spitzhacke: rettet dich einmal pro Lauf aus dem Abgrund. Im Menü an- und ausschaltbar.'},
+    {id:'pk_black',name:'Rucksack Schwarz',price:150,c:'#33363f',a:'#ff7a2f',req:'pk_free'},
+    {id:'pk_navy',name:'Rucksack Navy',price:150,c:'#2c3f73',a:'#e8ecf2',req:'pk_free'},
+    {id:'pk_olive',name:'Rucksack Olive',price:150,c:'#6b7442',a:'#2b2e38',req:'pk_free'},
+    {id:'pk_orange',name:'Rucksack Orange',price:200,c:'#f07a2c',a:'#2b2e38',req:'pk_free'},
+    {id:'pk_mint',name:'Rucksack Mint',price:200,c:'#86e0bf',a:'#1d5f4a',req:'pk_free'},
+    {id:'pk_purple',name:'Rucksack Lila',price:200,c:'#7e4fc4',a:'#f2c445',req:'pk_free'},
+    {id:'pk_yellow',name:'Rucksack Gelb',price:250,c:'#f2c445',a:'#2b2e38',req:'pk_free'}]},
   poles:{label:'Skistöcke',items:[
     {id:'po_black',name:'Carbon',price:0,c:'#8a93aa',a:'#ff7a2f'},
     {id:'po_silver',name:'Alu Silber',price:20,c:'#c3c9d4',a:'#3a6fd8'},
@@ -472,10 +496,10 @@ const SHOP={
 const CATS=Object.keys(SHOP);
 
 /* ================= SAVE ================= */
-const DEF={coins:0,best:0,bestDist:0,owned:{},equip:{helmet:'h_black',goggles:'g_orange',hoodie:'d_grey',pants:'p_khaki',skis:'s_red',board:'b_black',poles:'po_black',pack:'pk_none'},gear:'ski',assist:false};
+const DEF={coins:0,best:0,bestDist:0,owned:{},equip:{helmet:'h_black',goggles:'g_orange',hoodie:'d_grey',pants:'p_khaki',skis:'s_red',board:'b_black',poles:'po_black',pack:'pk_none',beanie:'bn_black'},gear:'ski',assist:false,packLast:'pk_free'};
 function loadSave(){
   try{ const s=JSON.parse(localStorage.getItem('sendit_save_v1')||'null');
-    if(s&&typeof s==='object') return {coins:s.coins|0,best:s.best|0,bestDist:s.bestDist|0,owned:s.owned||{},equip:Object.assign({},DEF.equip,s.equip||{}),gear:s.gear==='board'?'board':'ski',assist:!!s.assist};
+    if(s&&typeof s==='object') return {coins:s.coins|0,best:s.best|0,bestDist:s.bestDist|0,owned:s.owned||{},equip:Object.assign({},DEF.equip,s.equip||{}),gear:s.gear==='board'?'board':'ski',assist:!!s.assist,packLast:typeof s.packLast==='string'?s.packLast:'pk_free'};
   }catch(e){}
   return JSON.parse(JSON.stringify(DEF));
 }
@@ -487,9 +511,9 @@ function hexRgb(h){h=h.replace('#','');return [0,2,4].map(i=>parseInt(h.slice(i,
 function shade(h,f){const c=hexRgb(h).map(v=>Math.round(f<0?v*(1+f):v+(255-v)*f));return '#'+c.map(v=>clamp(v,0,255).toString(16).padStart(2,'0')).join('')}
 function itemOf(cat,id){const L=SHOP[cat].items;return L.find(i=>i.id===id)||L[0]}
 function palette(eq){
-  const H=itemOf('helmet',eq.helmet).c, L=itemOf('goggles',eq.goggles).c, D=itemOf('hoodie',eq.hoodie).c, Pi=itemOf('pants',eq.pants), Si=itemOf('skis',eq.skis),Bi=itemOf('board',eq.board),Pl=itemOf('poles',eq.poles),Pk=eq.pack&&eq.pack!=='pk_none'?itemOf('pack',eq.pack):null;
+  const H=itemOf('helmet',eq.helmet).c, L=itemOf('goggles',eq.goggles).c, D=itemOf('hoodie',eq.hoodie).c, Pi=itemOf('pants',eq.pants), Si=itemOf('skis',eq.skis),Bi=itemOf('board',eq.board),Pl=itemOf('poles',eq.poles),Pk=eq.pack&&eq.pack!=='pk_none'?itemOf('pack',eq.pack):null,Bn=itemOf('beanie',eq.beanie),noHelm=eq.helmet==='h_none';
   return {O:'#121626',H,h:shade(H,-.38),l:shade(H,.5),L,M:shade(L,.65),G:'#252a39',S:'#eab58f',k:'#c38663',
-    D,d:shade(D,-.3),P:Pi.c,p:shade(Pi.c,-.28),pat:Pi.pat||null,K:Si.c,ka:Si.a,B:Bi.c,ba:Bi.a,PO:Pl.c,pa:Pl.a,pk:Pk?Pk.c:null,pka:Pk?Pk.a:null,boot:'#3c4356',glove:'#272b38',zip:'#eef1f7'};
+    D,d:shade(D,-.3),P:Pi.c,p:shade(Pi.c,-.28),pat:Pi.pat||null,K:Si.c,ka:Si.a,B:Bi.c,ba:Bi.a,PO:Pl.c,pa:Pl.a,pk:Pk?Pk.c:null,pka:Pk?Pk.a:null,hat:noHelm?Bn.model:null,N:Bn.c,n:shade(Bn.c,-.22),C:Bn.a||shade(Bn.c,-.15),Q:Bn.pom||'#ffffff',q:shade(Bn.pom||'#ffffff',-.2),R:'#3b2a20',boot:'#3c4356',glove:'#272b38',zip:'#eef1f7'};
 }
 const eqKey=eq=>CATS.map(c=>eq[c]).join(',');
 
@@ -539,7 +563,26 @@ const HEADS={
     "..OkkkkkO..",
     "...OOOOO..."]
 };
-function drawHead(g,kind,x,y,P,flip){const m=HEADS[kind];for(let r=0;r<m.length;r++)for(let c=0;c<m[r].length;c++){const ch=m[r][c];if(ch==='.')continue;g.fillStyle=P[ch];g.fillRect(x+(flip?m[r].length-1-c:c),y+r,1,1)}}
+/* Mützen statt Helm. X = Strick (wird zu senkrechten Rippen N/n), C Umschlag, Q/q Bommel, R Haare.
+   classic = Slouch-Beanie (hängt nach hinten), pom = Bommelmütze, fish = kurze Fisherman-Mütze */
+const BN_FIT={side:["...OOOOO...","..OXXXXXO..",".OXXXXXXXO.",".OCCCCCCCCO","OGGGGGLLLLO","OGGGGLMLLLO",".OkSSSSSSO.","..OkSSSSO..","...OOOOO..."],
+  front:["...OOOOO...","..OXXXXXO..",".OXXXXXXXO.",".OCCCCCCCO.","OGLLLLLLLGO","OGLMLLLLLGO",".OSSSSSSSO.","..OSSkSSO..","...OOOOO..."],
+  back:["...OOOOO...","..OXXXXXO..",".OXXXXXXXO.",".OCCCCCCCO.","OGGGGGGGGGO","OGGGGGGGGGO",".ORRRRRRRO.","..OkkkkkO..","...OOOOO..."]};
+const BN_RAW={
+  classic:{side:["..OOO......",".OXXXOO....",".OXXXXXOO..",".OXXXXXXXO.",".OCCCCCCCCO","OGGGGGLLLLO","OGGGGLMLLLO",".OkSSSSSSO.","..OkSSSSO..","...OOOOO..."],
+    front:["...OOOOO...","..OXXXXXO..",".OXXXXXXXO.",".OXXXXXXXO.",".OCCCCCCCO.","OGLLLLLLLGO","OGLMLLLLLGO",".OSSSSSSSO.","..OSSkSSO..","...OOOOO..."],
+    back:["...OOOOO...","..OXXXXXO..",".OXXXXXXXO.",".OXXXXXXXO.",".OCCCCCCCO.","OGGGGGGGGGO","OGGGGGGGGGO",".ORRRRRRRO.","..OkkkkkO..","...OOOOO..."]},
+  pom:Object.fromEntries(Object.entries(BN_FIT).map(([k,m])=>[k,["....OOO....","...OQQqO...","..OOqqqOO..",...m.slice(1)]])),
+  fish:{side:["...OOOOO...","..OXXXXXO..",".OCCCCCCCO.",".ORRRRRRRRO","OGGGGGLLLLO","OGGGGLMLLLO",".OkSSSSSSO.","..OkSSSSO..","...OOOOO..."],
+    front:["...OOOOO...","..OXXXXXO..",".OCCCCCCCO.",".ORRRRRRRO.","OGLLLLLLLGO","OGLMLLLLLGO",".OSSSSSSSO.","..OSSkSSO..","...OOOOO..."],
+    back:["...OOOOO...","..OXXXXXO..",".OCCCCCCCO.",".ORRRRRRRO.","OGGGGGGGGGO","OGGGGGGGGGO",".ORRRRRRRO.","..OkkkkkO..","...OOOOO..."]}};
+const BEANIES=Object.fromEntries(Object.entries(BN_RAW).map(([k,v])=>[k,Object.fromEntries(Object.entries(v).map(([kk,m])=>[kk,m.map(r=>r.replace(/X/g,(_,i)=>i%2?'n':'N'))]))]));
+/* rot = Vierteldrehungen im Uhrzeigersinn (Corks), gedreht um die Kopfmitte; Mützen-Aufbau wächst immer Richtung Kopf-oben */
+function drawHead(g,kind,x,y,P,flip,rot){const m=P.hat?BEANIES[P.hat][kind]:HEADS[kind],e=m.length-9,X=x+5,Y=y+4;
+  for(let r=0;r<m.length;r++)for(let c=0;c<m[r].length;c++){const ch=m[r][c];if(ch==='.')continue;
+    const dc=(flip?m[r].length-1-c:c)-5,dr=r-4-e;let sx=dc,sy=dr;
+    if(rot===1){sx=-dr;sy=dc}else if(rot===2){sx=-dc;sy=-dr}else if(rot===3){sx=dr;sy=-dc}
+    g.fillStyle=P[ch];g.fillRect(X+sx,Y+sy,1,1)}}
 
 /* ===== 3D-Figur: Gelenke als [vorne, unten, rechts] relativ zum Schwerpunkt ===== */
 const SPR=56,SCX=28,SCY=30;
@@ -809,8 +852,11 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork){
         g.fillStyle=P.d;g.fillRect(Math.round(h[0]-5),Math.round(h[1]-3),3,1);g.fillRect(Math.round(h[0]+3),Math.round(h[1]-3),3,1)}}
   }});
   // Rucksack: Kasten am Rücken (in Rückenrichtung des Oberkörpers), vor dem Rumpf gezeichnet, wenn der Rücken zum Spieler zeigt
-  if(P.pk&&!L.noPack){const mid=[(L.torso[0][0]+L.torso[1][0])/2,(L.torso[0][1]+L.torso[1][1])/2-.5,0],bc=up(v3.add(mid,[-3.4,0,0])),tc=up(mid),as=Math.abs(Math.sin(yU*RAD));
-    const w=Math.round(4+2.5*as),h=8;parts.push({key:bc[2]>tc[2]+.3?4.52:4.48,draw:()=>{const x=Math.round(bc[0]-w/2),y=Math.round(bc[1]-h/2);
+  // Seitlich: Kasten sitzt senkrecht zur Wirbelsäule hinter dem Rücken und wird über den Rücken-Umriss gezeichnet; von vorne sieht man die Träger
+  if(P.pk&&!L.noPack){const t0=L.torso[0],t1=L.torso[1],dl=Math.hypot(t1[0]-t0[0],t1[1]-t0[1])||1,nb=[(t1[1]-t0[1])/dl,-(t1[0]-t0[0])/dl,0],
+      mid=[(t0[0]+t1[0])/2,(t0[1]+t1[1])/2-.5,0],bc=up(v3.add(mid,v3.mul(nb,5.2))),tc=up(mid),as=Math.abs(Math.sin(yU*RAD)),sfP=Math.sin(tYaw*RAD);
+    if(sfP>.5)parts.push({key:4.51,draw:()=>{const s=up(t1);g.fillStyle=shade(P.pk,-.12);g.fillRect(Math.round(s[0]-3.5),Math.round(s[1]),1,5);g.fillRect(Math.round(s[0]+2.5),Math.round(s[1]),1,5)}});
+    const w=Math.round(4+2.5*as),h=8;parts.push({key:as<.5||bc[2]>tc[2]+.3?4.52:4.48,draw:()=>{const x=Math.round(bc[0]-w/2),y=Math.round(bc[1]-h/2);
       rectO(g,x,y,w,h,P.pk,O);g.fillStyle=shade(P.pk,-.3);g.fillRect(x,y+h-3,w,3);g.fillStyle=shade(P.pk,.25);g.fillRect(x,y,w,1);
       if(!L.axe){g.fillStyle=P.pka;g.fillRect(x+Math.floor(w/2),y-2,1,h);g.fillStyle='#c9ced8';g.fillRect(x+Math.floor(w/2)-1,y-2,3,1)}}})}
   // Spitzhacke in der Hand (Klettern)
@@ -819,7 +865,8 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork){
       strokePts(g,[[ad[0],ad[1]],[top[0],top[1]],[pk[0],pk[1]]],3,O);strokePts(g,[[ad[0],ad[1]],[top[0],top[1]],[pk[0],pk[1]]],1,'#c9ced8')}})}
   {const q=up(L.head),hn=norm(hYaw);let kind='side',flip=false;
     if(hn>45&&hn<=135)kind='front';else if(hn>135||hn<=-135)flip=true;else if(hn<-45)kind='back';
-    parts.push({key:4.6,draw:()=>drawHead(g,kind,Math.round(q[0]-5.5),Math.round(q[1]-4.5),P,flip)})}
+    let hr=0;if(cork&&cork.t){const t=up(v3.add(L.head,[0,-4,0])),dx=t[0]-q[0],dy=t[1]-q[1];if(dx*dx+dy*dy>2.2)hr=((Math.round(Math.atan2(dx,-dy)/(Math.PI/2))%4)+4)%4}
+    parts.push({key:4.6,draw:()=>drawHead(g,kind,Math.round(q[0]-5.5),Math.round(q[1]-4.5),P,flip,hr)})}
   const armK=[];
   L.arms.forEach((ar,i)=>{const q=ar.map(up);let key=L.armKeys&&L.armKeys[i]!=null?L.armKeys[i]:Math.max(q[1][2],q[2][2]);if(L.armBias&&L.armBias[i]&&key>0)key+=L.armBias[i];armK[i]=key;
     parts.push({key,draw:()=>{limb(g,q.map(v=>[v[0],v[1]]),3,key<-2?P.d:P.D,O);if(!L.handsBack)hand(g,[q[2][0],q[2][1]],P)}})});
@@ -1877,7 +1924,7 @@ function updAir(dt){
 }
 /* Freeride-Rucksack: einmal pro Lauf hält dich die Spitzhacke an der rechten Wand fest.
    Linker Stick nach oben (oder Pfeil hoch) klettert, oben klickst du automatisch wieder ein. */
-const packReady=()=>SAVE.equip.pack==='pk_free'&&!run.packUsed;
+const packReady=()=>!!SAVE.owned.pk_free&&SAVE.equip.pack&&SAVE.equip.pack!=='pk_none'&&!run.packUsed;
 function startClimb(gs,fy){run.packUsed=true;
   const wx=gs.x1,ty=clamp(fy,gs.y1+34,gs.y1+70);
   p.climb={wx,rim:gs.y1,fromX:p.x,fromY:footY(),toY:ty,t:0,anim:0,moving:false};
@@ -2232,7 +2279,7 @@ function drawHud(){
 /* ================= FLOW ================= */
 const screens=['menu','help','shop','pause','over','rank','notes'];
 function show(id){screens.forEach(s=>$(s).hidden=s!==id);if(id){const b=$(id).querySelector('.btn');if(b&&!isTouch)b.focus({preventScroll:true})}}
-function refreshMenu(){$('kMute').textContent=SAVE.gear==='board'?'INDY':'MUTE';document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.gear===SAVE.gear)));$('bAssist').setAttribute('aria-pressed',String(!!SAVE.assist));{const own=!!SAVE.owned.pk_free,on=SAVE.equip.pack==='pk_free',b=$('bPack');b.hidden=!own;b.setAttribute('aria-pressed',String(on));b.textContent='RUCKSACK: '+(on?'AN':'AUS')}$('bAssist').textContent='LANDEHILFE: '+(SAVE.assist?'AN':'AUS');setT($('mCoins'),String(SAVE.coins));setT($('mBest'),String(SAVE.best));setT($('mDist'),SAVE.bestDist+' m')}
+function refreshMenu(){$('kMute').textContent=SAVE.gear==='board'?'INDY':'MUTE';document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.gear===SAVE.gear)));$('bAssist').setAttribute('aria-pressed',String(!!SAVE.assist));{const own=!!SAVE.owned.pk_free,on=!!SAVE.equip.pack&&SAVE.equip.pack!=='pk_none',b=$('bPack');b.hidden=!own;b.setAttribute('aria-pressed',String(on));b.textContent='RUCKSACK: '+(on?'AN':'AUS')}$('bAssist').textContent='LANDEHILFE: '+(SAVE.assist?'AN':'AUS');setT($('mCoins'),String(SAVE.coins));setT($('mBest'),String(SAVE.best));setT($('mDist'),SAVE.bestDist+' m')}
 let hintTimer=0;
 function startRun(){
   unlockAudio();padReset();resetRun();updCamera(0,true);state='play';show(null);$('hud').hidden=false;if(document.activeElement)document.activeElement.blur();
@@ -2274,13 +2321,17 @@ function renderShop(){
   }
   const t=tryOn[shopCat],ti=t?itemOf(shopCat,t):null;$('prevNote').textContent=ti?'Vorschau: '+ti.name+'. '+(ti.info?ti.info+' ':'')+'Nochmal tippen zum Kaufen.':'Tippe ein Teil an für die Vorschau.';
 }
+function shopEquip(it){SAVE.equip[shopCat]=it.id;
+  if(shopCat==='beanie'&&SAVE.equip.helmet!=='h_none'){SAVE.equip.helmet='h_none';return ' Helm abgesetzt, damit man die Mütze sieht.'}
+  if(shopCat==='pack'&&it.id!=='pk_none')SAVE.packLast=it.id;return ''}
 function shopClick(it,el){
   const owned=it.price===0||SAVE.owned[it.id];
-  if(owned){SAVE.equip[shopCat]=it.id;delete tryOn[shopCat];persist();$('shopMsg').textContent=it.name+' angezogen.';renderShop();return}
+  if(!owned&&it.req&&!SAVE.owned[it.req]){$('shopMsg').textContent='Erst den '+itemOf(shopCat,it.req).name+' kaufen, dann gibt es ihn in anderen Farben.';el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');return}
+  if(owned){const ex=shopEquip(it);delete tryOn[shopCat];persist();$('shopMsg').textContent=it.name+' angezogen.'+ex;renderShop();return}
   if(tryOn[shopCat]!==it.id){tryOn[shopCat]=it.id;$('shopMsg').textContent='';renderShop();return}
   if(SAVE.coins<it.price){$('shopMsg').textContent='Dir fehlen '+(it.price-SAVE.coins)+' Münzen. Ab auf die Piste!';el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');return}
-  SAVE.coins-=it.price;SAVE.owned[it.id]=true;SAVE.equip[shopCat]=it.id;delete tryOn[shopCat];persist();
-  $('shopMsg').textContent=it.name+' gekauft und angezogen.';unlockAudio();SFX.trick();renderShop();
+  SAVE.coins-=it.price;SAVE.owned[it.id]=true;const ex=shopEquip(it);delete tryOn[shopCat];persist();
+  $('shopMsg').textContent=it.name+' gekauft und angezogen.'+ex;unlockAudio();SFX.trick();renderShop();
 }
 function drawPreview(id,eq,gear,pushAnim){
   const c=$(id);if(!c||c.closest('.screen').hidden)return;const g=c.getContext('2d');g.imageSmoothingEnabled=false;
@@ -2385,7 +2436,7 @@ async function onlineAfterRun(score,meters,trick){const o=$('oRank');
 /* ================= BUTTONS ================= */
 document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.onclick=()=>{SAVE.gear=b.dataset.gear;persist();refreshMenu()});
 $('bAssist').onclick=()=>{SAVE.assist=!SAVE.assist;persist();refreshMenu()};
-$('bPack').onclick=()=>{if(!SAVE.owned.pk_free)return;SAVE.equip.pack=SAVE.equip.pack==='pk_free'?'pk_none':'pk_free';persist();refreshMenu()};
+$('bPack').onclick=()=>{if(!SAVE.owned.pk_free)return;const on=SAVE.equip.pack&&SAVE.equip.pack!=='pk_none';SAVE.equip.pack=on?'pk_none':(SAVE.owned[SAVE.packLast]?SAVE.packLast:'pk_free');persist();refreshMenu()};
 $('bPlay').onclick=startRun;$('bShop').onclick=openShop;$('bHelp').onclick=()=>show('help');$('bHelpBack').onclick=()=>show('menu');
 $('bShopBack').onclick=()=>{tryOn={};if(prevScreen==='over')show('over');else{refreshMenu();show('menu')}};
 let prevScreen='menu';
@@ -2403,7 +2454,7 @@ function frame(t){
   else{acc=0;if(state==='menu'){cam.x+=dt*18;while(gx<cam.x+VW+900)genNext()}}
   render(dt);
   if(state==='menu')drawPreview('pvMenu');
-  if(!$('shop').hidden)drawPreview('pvShop',Object.assign({},SAVE.equip,tryOn),shopCat==='board'?'board':(shopCat==='skis'||shopCat==='poles')?'ski':SAVE.gear,shopCat==='poles');
+  if(!$('shop').hidden)drawPreview('pvShop',Object.assign({},SAVE.equip,tryOn,shopCat==='beanie'?{helmet:'h_none'}:{}),shopCat==='board'?'board':(shopCat==='skis'||shopCat==='poles')?'ski':SAVE.gear,shopCat==='poles');
   requestAnimationFrame(frame);
 }
 function start(){
