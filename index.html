@@ -261,7 +261,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
       <h1>SEND<br><em>IT</em></h1>
       <p class="lede">Die Lawine schiebt von hinten, die Ski Patrol jagt dich. Spring die Gaps, steh deine Tricks, sammel Münzen.</p>
       <div class="gear" role="group" aria-label="Sportgerät wählen"><button class="gearbtn" data-gear="ski" aria-pressed="true">SKI</button><button class="gearbtn" data-gear="board" aria-pressed="false">SNOWBOARD</button></div>
-      <div class="gear"><button class="gearbtn" id="bAssist" aria-pressed="false">LANDEHILFE: AUS</button><button class="gearbtn" id="bPack" aria-pressed="false" hidden>RUCKSACK: AUS</button></div>
+      <div class="gear"><button class="gearbtn" id="bAssist" aria-pressed="false">LANDEHILFE: AUS</button><button class="gearbtn" id="bMusic" aria-pressed="true">MUSIK: AN</button><button class="gearbtn" id="bPack" aria-pressed="false" hidden>RUCKSACK: AUS</button></div>
       <p class="acct" id="mAcct"></p>
       <div class="stats"><span><i class="coin"></i><b id="mCoins">0</b></span><span>Highscore<b id="mBest">0</b></span><span>Weiteste Fahrt<b id="mDist">0 m</b></span></div>
       <div class="btns">
@@ -280,7 +280,9 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
     <p class="eyebrow">Was ist neu</p>
     <h2>PATCH NOTES</h2>
     <div class="pn">
-      <h3>v2.6 · 05.11.2026</h3>
+      <h3>v2.7 · 05.11.2026</h3>
+      <ul><li>Eigene Musik: winterlicher Chiptune mit Glockenspiel, läuft in Schleife, im Menü abschaltbar</li></ul>
+      <h3>v2.6</h3>
       <ul><li>Bäume im Freeride stecken im Schnee und sehen alle anders aus</li><li>Tiere im Tiefschnee ohne Kasten um die Beine</li><li>Afterbangs: nur noch Shifty, Lean Back, Hands Behind Back</li></ul>
       <h3>v2.5</h3>
       <ul><li>Afterbangs: nach sauberen Landungen kurz lässig (Shifty, Lean Back, Hands Behind Back)</li><li>Grind-Geräusche je nach Material</li><li>Pistenraupe statt Auto, Pole Jam blau und abgenutzt</li></ul>
@@ -518,11 +520,11 @@ const SHOP={
 const CATS=Object.keys(SHOP);
 
 /* ================= SAVE ================= */
-const DEF={coins:0,best:0,bestDist:0,owned:{},equip:{helmet:'h_black',goggles:'g_orange',hoodie:'d_grey',pants:'p_khaki',skis:'s_red',board:'b_black',poles:'po_black',pack:'pk_none',beanie:'bn_black'},gear:'ski',assist:false,packLast:'pk_free'};
+const DEF={coins:0,best:0,bestDist:0,owned:{},equip:{helmet:'h_black',goggles:'g_orange',hoodie:'d_grey',pants:'p_khaki',skis:'s_red',board:'b_black',poles:'po_black',pack:'pk_none',beanie:'bn_black'},gear:'ski',assist:false,packLast:'pk_free',music:true};
 // Stand prüfen und auffüllen (vom Gerät oder aus dem Konto). t = letzte Änderung, uid = Konto, zu dem der Stand gehört, sc = Münzen beim letzten Abgleich mit dem Konto
 function normSave(s){s=s&&typeof s==='object'?s:{};const ob=v=>v&&typeof v==='object'&&!Array.isArray(v);
   return {coins:Math.max(0,s.coins|0),best:Math.max(0,s.best|0),bestDist:Math.max(0,s.bestDist|0),owned:ob(s.owned)?Object.assign({},s.owned):{},
-    equip:Object.assign({},DEF.equip,ob(s.equip)?s.equip:{}),gear:s.gear==='board'?'board':'ski',assist:!!s.assist,packLast:typeof s.packLast==='string'?s.packLast:'pk_free',
+    equip:Object.assign({},DEF.equip,ob(s.equip)?s.equip:{}),gear:s.gear==='board'?'board':'ski',assist:!!s.assist,music:s.music!==false,packLast:typeof s.packLast==='string'?s.packLast:'pk_free',
     t:+s.t||0,uid:typeof s.uid==='string'?s.uid:null,sc:Math.max(0,s.sc|0)}}
 function loadSave(){try{const s=JSON.parse(localStorage.getItem('sendit_save_v1')||'null');if(s&&typeof s==='object')return normSave(s)}catch(e){}return normSave(DEF)}
 const SAVE=loadSave();
@@ -1826,7 +1828,7 @@ function padReset(){stickReset();grabReset();for(const k in TC)TC[k]=false}
 
 /* ================= AUDIO ================= */
 let AC=null,muted=false;
-function unlockAudio(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){AC=null}}if(AC&&AC.state==='suspended')AC.resume().catch(()=>{})}
+function unlockAudio(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){AC=null}}if(AC&&AC.state==='suspended')AC.resume().catch(()=>{});musicSync()}
 function tone(f0,f1,dur,type,vol,delay){if(!AC||muted)return;const t=AC.currentTime+(delay||0);const o=AC.createOscillator(),g=AC.createGain();o.type=type||'square';o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(Math.max(30,f1),t+dur);g.gain.setValueAtTime(vol||.05,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+dur+.03)}
 /* Grind-Geräusch: durchgehendes Rauschen durch einen Bandpass, je nach Material. Metall kreischt hell (mit leisem Klingeln),
    Kunststoff-Boxen zischen dumpfer, Holz rumpelt. Lautstärke und Tonhöhe gehen mit dem Tempo. */
@@ -1854,6 +1856,81 @@ const SFX={
   die:()=>{tone(520,45,.9,'sawtooth',.07)},
   shake:()=>{tone(300,300,.06,'square',.04);tone(450,450,.06,'square',.04,.07);tone(600,600,.12,'square',.04,.14)}
 };
+
+/* ================= MUSIK =================
+   Eigene Komposition in Schleife (~100 s): ruhige Flächen, Celesta und viel Hall wie in stillen Berg-Spielen,
+   dazu Chiptune-Arpeggios, Synth-Bass und ein lockerer Retro-Beat; Glockenspiel und Schlittenglöckchen machen es winterlich.
+   D-Moll / F-Dur, 96 BPM. Alles live mit WebAudio erzeugt, nichts wird geladen.
+   Ablauf: Intro (Flächen, Glitzern) · A (Arpeggio, Bass) · B (Melodie, Beat, Schellen) · C (Bridge, Celesta-Melodie) · D (alles, Glocken doppeln) · Outro */
+const MUS={bpm:96,on:false,timer:0,step:0,next:0,bus:null,rev:null,dly:null,ch:null},MUS_VOL=.55;
+const mhz=m=>440*Math.pow(2,(m-69)/12);
+const CHORDS={Dm7:[38,62,65,69,72],Bbmaj7:[34,58,62,65,69],F:[41,60,65,69,72],C:[36,60,64,67,72],Gm7:[43,62,65,67,70],Am7:[45,60,64,67,69]};
+const SONG=(()=>{const P1=['Dm7','Bbmaj7','F','C'],P2=['Gm7','Am7','Bbmaj7','C'],s=[];
+  for(const [prog,n,sec] of [[P1,4,'intro'],[P1,8,'A'],[P1,8,'B'],[P2,8,'C'],[P1,8,'D'],[P1,4,'outro']])for(let i=0;i<n;i++)s.push({ch:prog[i%4],sec,bi:i});return s})();
+// Melodie (Takt: [Schlag, Länge in Schlägen, MIDI])
+const MEL=[[[0,1.5,69],[1.5,.5,72],[2,1,74],[3,1,76]],[[0,1.5,77],[1.5,.5,76],[2,1,74],[3,1,69]],[[0,1,72],[1,.5,69],[1.5,.5,72],[2,1.5,77],[3.5,.5,76]],[[0,2,76],[2,1,74],[3,1,72]],
+  [[0,1.5,69],[1.5,.5,72],[2,1,74],[3,1,77]],[[0,1.5,79],[1.5,.5,77],[2,1.5,74],[3.5,.5,72]],[[0,1,69],[1,1,72],[2,1,77],[3,1,81]],[[0,3,79],[3,1,76]]];
+const BELLMEL=[[[0,1,74],[1.5,1,77],[3,1,79]],[[0,1,76],[1.5,1,79],[3,1,81]],[[0,1,77],[1.5,1,81],[3,1,84]],[[0,2,79],[2,2,76]],
+  [[0,1,74],[1.5,1,77],[3,1,82]],[[0,1,81],[1.5,1,79],[3,1,76]],[[0,1,77],[1,1,74],[2,1,77],[3,1,81]],[[0,4,79]]];
+function musicBus(){if(MUS.bus)return;
+  const bus=AC.createGain();bus.gain.value=0;const comp=AC.createDynamicsCompressor();comp.threshold.value=-20;comp.ratio.value=3;comp.attack.value=.01;comp.release.value=.25;bus.connect(comp);comp.connect(AC.destination);
+  // Hall: selbst erzeugte Impulsantwort (2,6 s weich abklingendes Rauschen, Stereo)
+  const len=Math.floor(AC.sampleRate*2.6),ir=AC.createBuffer(2,len,AC.sampleRate);
+  for(let c=0;c<2;c++){const d=ir.getChannelData(c);let lp=0;for(let i=0;i<len;i++){lp=lp*.65+(Math.random()*2-1)*.35;d[i]=lp*Math.pow(1-i/len,3.2)}}
+  const rev=AC.createConvolver();rev.buffer=ir;const revG=AC.createGain();revG.gain.value=.5;rev.connect(revG);revG.connect(bus);
+  // Echo auf punktierte Achtel
+  const dly=AC.createDelay(1.5);dly.delayTime.value=60/MUS.bpm*.75;const fb=AC.createGain();fb.gain.value=.3;const dlp=AC.createBiquadFilter();dlp.type='lowpass';dlp.frequency.value=2300;
+  dly.connect(dlp);dlp.connect(fb);fb.connect(dly);const dG=AC.createGain();dG.gain.value=.38;dlp.connect(dG);dG.connect(bus);dG.connect(rev);
+  MUS.bus=bus;MUS.rev=rev;MUS.dly=dly;
+  const chan=(dry,wet,echo)=>{const g=AC.createGain(),d=AC.createGain();d.gain.value=dry;g.connect(d);d.connect(bus);
+    if(wet){const w=AC.createGain();w.gain.value=wet;g.connect(w);w.connect(rev)}if(echo){const e=AC.createGain();e.gain.value=echo;g.connect(e);e.connect(dly)}return g};
+  MUS.ch={pad:chan(.9,.7,0),arp:chan(.7,.35,.5),bass:chan(1,.06,0),lead:chan(.85,.45,.35),bell:chan(.7,.9,.25),drum:chan(1,.12,0),jingle:chan(.8,.5,0)}}
+// Instrumente
+function vPad(t,notes,dur){for(const m of notes)for(const det of [-7,7]){const o=AC.createOscillator();o.type='sawtooth';o.frequency.value=mhz(m);o.detune.value=det;
+  const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=1500;f.Q.value=.3;const g=AC.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.018,t+.7);g.gain.setValueAtTime(.018,t+dur);g.gain.linearRampToValueAtTime(0,t+dur+1.4);
+  o.connect(f);f.connect(g);g.connect(MUS.ch.pad);o.start(t);o.stop(t+dur+1.5)}}
+function vArp(t,m,len){const o=AC.createOscillator();o.type='square';o.frequency.value=mhz(m);const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=2100;
+  const g=AC.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.024,t+.006);g.gain.exponentialRampToValueAtTime(.0008,t+len);o.connect(f);f.connect(g);g.connect(MUS.ch.arp);o.start(t);o.stop(t+len+.02)}
+function vBass(t,m,len){const o=AC.createOscillator(),o2=AC.createOscillator();o.type='triangle';o2.type='square';o.frequency.value=o2.frequency.value=mhz(m);
+  const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(900,t);f.frequency.exponentialRampToValueAtTime(300,t+len);const g=AC.createGain(),g2=AC.createGain();g2.gain.value=.22;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.06,t+.01);g.gain.setValueAtTime(.048,t+len*.6);g.gain.linearRampToValueAtTime(0,t+len);
+  o.connect(f);o2.connect(g2);g2.connect(f);f.connect(g);g.connect(MUS.ch.bass);o.start(t);o2.start(t);o.stop(t+len+.02);o2.stop(t+len+.02)}
+function vLead(t,m,len){const o=AC.createOscillator(),o2=AC.createOscillator(),lfo=AC.createOscillator(),lg=AC.createGain();o.type='square';o2.type='triangle';o.frequency.value=o2.frequency.value=mhz(m);
+  lfo.frequency.value=5.2;lg.gain.setValueAtTime(0,t);lg.gain.linearRampToValueAtTime(7,t+Math.min(.35,len));lfo.connect(lg);lg.connect(o.detune);lg.connect(o2.detune);
+  const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=2500;const g=AC.createGain(),ga=AC.createGain();ga.gain.value=.4;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.045,t+.025);g.gain.setValueAtTime(.038,t+Math.max(.03,len-.08));g.gain.linearRampToValueAtTime(0,t+len+.12);
+  o.connect(ga);ga.connect(f);o2.connect(f);f.connect(g);g.connect(MUS.ch.lead);for(const x of [o,o2,lfo]){x.start(t);x.stop(t+len+.2)}}
+function vBell(t,m,vol){const f0=mhz(m);for(const [r,a,d] of [[1,1,1.6],[2.76,.3,.5],[5.4,.1,.22]]){const o=AC.createOscillator();o.type='sine';o.frequency.value=f0*r;const g=AC.createGain();
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol*a,t+.004);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(MUS.ch.bell);o.start(t);o.stop(t+d+.05)}}
+function vNoise(t,len,type,freq,q,vol,chn){const s=AC.createBufferSource();s.buffer=noiseBuffer();const f=AC.createBiquadFilter();f.type=type;f.frequency.value=freq;f.Q.value=q;const g=AC.createGain();
+  g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+len);s.connect(f);f.connect(g);g.connect(chn||MUS.ch.drum);s.start(t,Math.random()*.8);s.stop(t+len+.02)}
+function vKick(t){const o=AC.createOscillator();o.type='sine';o.frequency.setValueAtTime(125,t);o.frequency.exponentialRampToValueAtTime(42,t+.13);const g=AC.createGain();
+  g.gain.setValueAtTime(.13,t);g.gain.exponentialRampToValueAtTime(.001,t+.28);o.connect(g);g.connect(MUS.ch.drum);o.start(t);o.stop(t+.3)}
+// Ein Sechzehntel spielen
+function musicStep(step,t){const bar=Math.floor(step/16),s=step%16,B=SONG[bar%SONG.length],ch=CHORDS[B.ch],sec=B.sec,beat=60/MUS.bpm,st=beat/4,bi=B.bi;
+  const full=sec==='B'||sec==='D',mid=sec==='A'||full;
+  if(s===0)vPad(t,ch.slice(1),beat*4);
+  if(mid||(sec==='outro'&&bi<2)){const tones=ch.slice(1).concat([ch[1]+12]),pat=[0,1,2,3,4,3,2,1];vArp(t,tones[pat[s%8]]+(full&&s>=8?12:0),st*.9)}
+  if(mid){if(s===0||s===6||s===8||s===14)vBass(t,ch[0]+(s===8?12:0),st*(s===0||s===8?2.2:1.6))}
+  else if(sec==='C'&&(s===0||s===8))vBass(t,ch[0],beat*1.9);
+  if(full){if(s===0||s===10)vKick(t);if(s===4||s===12)vNoise(t,.14,'bandpass',1900,.8,.06)}
+  else if(sec==='C'&&s===0)vKick(t);
+  if(mid&&s%2===0)vNoise(t,.035,'highpass',7500,.5,s%4===2?.042:.026);
+  if(full&&s===14)vNoise(t,.12,'highpass',6500,.5,.032);
+  if((full||sec==='C')&&Math.random()<.9){const acc=s%4===0?1:.55;vNoise(t,.07,'bandpass',8800,3,.04*acc,MUS.ch.jingle);vNoise(t+.018,.05,'bandpass',10500,3,.026*acc,MUS.ch.jingle)}
+  if(full)for(const [b,d,m] of MEL[bi%8])if(Math.round(b*4)===s){vLead(t,m,d*beat*.95);if(sec==='D')vBell(t,m+12,.04)}
+  if(sec==='C')for(const [b,d,m] of BELLMEL[bi%8])if(Math.round(b*4)===s)vBell(t,m,.07);
+  if((sec==='intro'||sec==='outro'||sec==='A')&&(s===0||s===6||s===11)){const h=hash01(bar*7.13+s*1.7);if(h<.7){const tn=ch.slice(1);vBell(t,tn[Math.floor(h*10)%tn.length]+12,.038)}}}
+function musicTick(){if(!MUS.on||!AC)return;const ahead=AC.currentTime+.2,st=60/MUS.bpm/4;
+  if(MUS.next<AC.currentTime-.3)MUS.next=AC.currentTime+.05;   // nach Hänger nicht alles nachholen
+  while(MUS.next<ahead){musicStep(MUS.step,MUS.next);MUS.next+=st;MUS.step=(MUS.step+1)%(SONG.length*16)}}
+function musicStart(){if(!AC)return;musicBus();if(MUS.on)return;MUS.on=true;MUS.next=AC.currentTime+.08;const t=AC.currentTime;MUS.bus.gain.cancelScheduledValues(t);MUS.bus.gain.setValueAtTime(MUS.bus.gain.value,t);MUS.bus.gain.setTargetAtTime(MUS_VOL,t,.5);
+  clearInterval(MUS.timer);MUS.timer=setInterval(musicTick,50);musicTick()}
+function musicStop(){if(!MUS.on)return;MUS.on=false;clearInterval(MUS.timer);if(AC&&MUS.bus){const t=AC.currentTime;MUS.bus.gain.cancelScheduledValues(t);MUS.bus.gain.setValueAtTime(MUS.bus.gain.value,t);MUS.bus.gain.setTargetAtTime(0,t,.15)}}
+// Läuft, wenn Ton an, Musik im Menü an und die Seite sichtbar ist; setzt beim Wiedereinschalten an derselben Stelle fort
+function musicSync(){const want=!!AC&&!muted&&SAVE.music!==false&&!document.hidden;if(want)musicStart();else musicStop()}
+document.addEventListener('visibilitychange',()=>musicSync());
+document.addEventListener('pointerdown',()=>{if(!AC||AC.state!=='running'||!MUS.on)unlockAudio()},{capture:true,passive:true});
 
 /* ================= GAME LOGIC ================= */
 const PAT_MAX=Math.round(VMAX*.79);
@@ -2593,7 +2670,7 @@ function drawHud(){
 /* ================= FLOW ================= */
 const screens=['menu','help','shop','pause','over','rank','notes'];
 function show(id){screens.forEach(s=>$(s).hidden=s!==id);if(id){const b=$(id).querySelector('.btn');if(b&&!isTouch)b.focus({preventScroll:true})}}
-function refreshMenu(){if(cloudHook)cloudShow();$('kMute').textContent=SAVE.gear==='board'?'INDY':'MUTE';document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.gear===SAVE.gear)));$('bAssist').setAttribute('aria-pressed',String(!!SAVE.assist));{const own=!!SAVE.owned.pk_free,on=!!SAVE.equip.pack&&SAVE.equip.pack!=='pk_none',b=$('bPack');b.hidden=!own;b.setAttribute('aria-pressed',String(on));b.textContent='RUCKSACK: '+(on?'AN':'AUS')}$('bAssist').textContent='LANDEHILFE: '+(SAVE.assist?'AN':'AUS');setT($('mCoins'),String(SAVE.coins));setT($('mBest'),String(SAVE.best));setT($('mDist'),SAVE.bestDist+' m')}
+function refreshMenu(){if(cloudHook)cloudShow();$('kMute').textContent=SAVE.gear==='board'?'INDY':'MUTE';document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.gear===SAVE.gear)));$('bAssist').setAttribute('aria-pressed',String(!!SAVE.assist));{const own=!!SAVE.owned.pk_free,on=!!SAVE.equip.pack&&SAVE.equip.pack!=='pk_none',b=$('bPack');b.hidden=!own;b.setAttribute('aria-pressed',String(on));b.textContent='RUCKSACK: '+(on?'AN':'AUS')}$('bAssist').textContent='LANDEHILFE: '+(SAVE.assist?'AN':'AUS');$('bMusic').textContent='MUSIK: '+(SAVE.music!==false?'AN':'AUS');$('bMusic').setAttribute('aria-pressed',String(SAVE.music!==false));setT($('mCoins'),String(SAVE.coins));setT($('mBest'),String(SAVE.best));setT($('mDist'),SAVE.bestDist+' m')}
 let hintTimer=0;
 function startRun(){
   unlockAudio();padReset();resetRun();updCamera(0,true);state='play';show(null);$('hud').hidden=false;if(document.activeElement)document.activeElement.blur();
@@ -2749,7 +2826,7 @@ $('bRank').onclick=openRank;$('bNotes').onclick=()=>show('notes');$('bNotesBack'
    seit dem letzten Abgleich dazukam oder ausgegeben wurde), Outfit und Einstellungen vom zuletzt geänderten Gerät.
    Wer ohne Konto gespielt hat und sich anmeldet, nimmt seinen Fortschritt ins Konto mit. Der Stand eines anderen Kontos auf
    diesem Gerät wird dagegen nie übernommen. */
-const CLOUD_KEYS=['coins','best','bestDist','owned','equip','gear','assist','packLast','t'];
+const CLOUD_KEYS=['coins','best','bestDist','owned','equip','gear','assist','packLast','music','t'];
 let cloudState='',cloudTimer=0,cloudRun=null,cloudAgain=false;
 function cloudData(s){const o={};for(const k of CLOUD_KEYS)o[k]=s[k];return o}
 function cloudMerge(local,cloud,uid){
@@ -2757,7 +2834,7 @@ function cloudMerge(local,cloud,uid){
   if(!cloud)return Object.assign({},local,{uid,sc:local.coins});
   const base=mine?local.sc:0,newer=local.t>cloud.t?local:cloud,coins=Math.max(0,cloud.coins+local.coins-base);
   return {coins,best:Math.max(cloud.best,local.best),bestDist:Math.max(cloud.bestDist,local.bestDist),owned:Object.assign({},cloud.owned,local.owned),
-    equip:Object.assign({},newer.equip),gear:newer.gear,assist:newer.assist,packLast:newer.packLast,t:Math.max(local.t,cloud.t),uid,sc:coins}}
+    equip:Object.assign({},newer.equip),gear:newer.gear,assist:newer.assist,packLast:newer.packLast,music:newer.music,t:Math.max(local.t,cloud.t),uid,sc:coins}}
 function cloudSoon(ms){if(!SESS)return;clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>{cloudTimer=0;cloudSync()},ms==null?1500:ms)}
 async function cloudSync(){
   if(!SESS)return;
@@ -2774,7 +2851,7 @@ async function cloudSync(){
     // Was während des Abgleichs auf dem Gerät passiert ist (Kauf, Lauf zu Ende), obendrauf rechnen und gleich nochmal abgleichen
     const now=normSave(SAVE);
     if(now.t!==before.t){m.coins=Math.max(0,m.coins+now.coins-before.coins);m.owned=Object.assign(m.owned,now.owned);m.best=Math.max(m.best,now.best);m.bestDist=Math.max(m.bestDist,now.bestDist);
-      m.equip=now.equip;m.gear=now.gear;m.assist=now.assist;m.packLast=now.packLast;m.t=now.t;cloudAgain=true}
+      m.equip=now.equip;m.gear=now.gear;m.assist=now.assist;m.packLast=now.packLast;m.music=now.music;m.t=now.t;cloudAgain=true}
     Object.assign(SAVE,m);writeSave();cloudState='ok';
     if(state==='menu')refreshMenu();if(!$('shop').hidden)renderShop()})();
   try{await cloudRun}finally{cloudRun=null;cloudShow();if(cloudAgain){cloudAgain=false;cloudSoon(400)}}
@@ -2795,6 +2872,7 @@ async function onlineAfterRun(score,meters,trick){const o=$('oRank');
 /* ================= BUTTONS ================= */
 document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.onclick=()=>{SAVE.gear=b.dataset.gear;persist();refreshMenu()});
 $('bAssist').onclick=()=>{SAVE.assist=!SAVE.assist;persist();refreshMenu()};
+$('bMusic').onclick=()=>{SAVE.music=SAVE.music===false;persist();refreshMenu();unlockAudio();musicSync()};
 $('bPack').onclick=()=>{if(!SAVE.owned.pk_free)return;const on=SAVE.equip.pack&&SAVE.equip.pack!=='pk_none';SAVE.equip.pack=on?'pk_none':(SAVE.owned[SAVE.packLast]?SAVE.packLast:'pk_free');persist();refreshMenu()};
 $('bPlay').onclick=startRun;$('bShop').onclick=openShop;$('bHelp').onclick=()=>show('help');$('bHelpBack').onclick=()=>show('menu');
 $('bShopBack').onclick=()=>{tryOn={};if(prevScreen==='over')show('over');else{refreshMenu();show('menu')}};
@@ -2803,7 +2881,7 @@ $('bOverShop').onclick=()=>{prevScreen='over';openShop()};$('bShop').addEventLis
 $('bAgain').onclick=startRun;$('bOverMenu').onclick=toMenu;
 $('bResume').onclick=()=>setPause(false);$('bQuit').onclick=()=>{setPause(false);p.mode='dead';p.deadReason='quit';gameOver()};
 $('bPause').onclick=()=>setPause(true);
-$('bMute').onclick=()=>{muted=!muted;if(muted)grindStop(true);$('bMute').style.opacity=muted?.4:1};
+$('bMute').onclick=()=>{muted=!muted;if(muted)grindStop(true);$('bMute').style.opacity=muted?.4:1;unlockAudio();musicSync()};
 
 /* ================= LOOP ================= */
 let last=performance.now(),acc=0;
