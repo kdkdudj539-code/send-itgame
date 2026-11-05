@@ -76,7 +76,7 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);font-size:
 #pad.over{position:fixed;left:0;right:0;bottom:0;max-width:none;pointer-events:none;opacity:.82;
   padding:0 max(4.5vw,env(safe-area-inset-right,0px)) max(6vh,env(safe-area-inset-bottom,0px)) max(4.5vw,env(safe-area-inset-left,0px));
   --s:min(187px,37vh);--g:min(51px,6.7vw);--gh:min(39px,10vh);--j:min(82px,21vh)}
-#pad.over .stick,#pad.over .acts,#pad.over .k{pointer-events:auto}
+#pad.over .stick,#pad.over .rgrp,#pad.over .k{pointer-events:auto}
 .lgrp{display:flex;flex-direction:column;align-items:center;gap:10px}
 .stick{position:relative;width:var(--s);height:var(--s);flex:none;touch-action:none;-webkit-touch-callout:none}
 .stick .ring{position:absolute;inset:calc(var(--s)*.086);border-radius:50%;background:rgba(20,30,62,.45);box-shadow:inset 0 0 0 3px #24315a,inset 0 0 0 5px #0a0f20,0 0 0 2px #0a0f20}
@@ -92,16 +92,15 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);font-size:
 .k{font-family:var(--display);font-size:13px;color:#fff;background:#24315a;border:0;touch-action:none;cursor:pointer;
   box-shadow:inset -3px -3px 0 rgba(0,0,0,.35),inset 3px 3px 0 rgba(255,255,255,.18),0 0 0 2px #0a0f20}
 .k.on{background:#3c4f8c;transform:translateY(2px)}
-.k.gas{width:calc(var(--s)*.62);height:var(--gh);background:#2f8f5b;font-size:11px}.k.gas.on{background:#46b876}
-.acts{display:grid;grid-template-columns:auto auto;grid-template-areas:"grabs jump";gap:8px;align-items:end;touch-action:none;-webkit-touch-callout:none}
-.grabs{grid-area:grabs;display:grid;grid-template-columns:repeat(2,var(--g));grid-template-rows:repeat(2,var(--gh));gap:4px}
-.k.g{font-size:9px;background:#2c3a66}
-.k.jump{grid-area:jump;width:var(--j);height:var(--j);border-radius:50%;background:var(--orange);color:#2a1205;font-size:11px;
+.k.gas{width:calc(var(--s)*.86);height:calc(var(--gh)*1.45);font-size:17px;color:#fff;background:rgba(255,255,255,.1);
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.6),0 0 0 2px rgba(10,15,32,.6);text-shadow:0 2px 0 rgba(0,0,0,.55)}
+.k.gas.on{background:rgba(70,184,118,.4);transform:translateY(2px)}
+.rgrp{display:flex;flex-direction:column;align-items:center;gap:10px;touch-action:none;-webkit-touch-callout:none}
+.k.jump{width:var(--j);height:var(--j);border-radius:50%;background:var(--orange);color:#2a1205;font-size:11px;
   box-shadow:inset -4px -4px 0 rgba(0,0,0,.3),inset 4px 4px 0 rgba(255,255,255,.35),0 0 0 2px #0a0f20}
 .k.jump.on{background:#ff9a5c}
-/* Hochformat: Platz ist unter dem Bild, Grabs über dem Sprung */
-#pad:not(.over) .acts{grid-template-columns:auto;grid-template-areas:"grabs" "jump";justify-items:end}
-@media (max-width:440px){.k.g{font-size:8px}.k.gas{font-size:10px}.k.jump{font-size:10px}}
+.gstick .knob{background:#8a5a2c}.gstick.on .knob{background:#b0773e}
+@media (max-width:440px){.k.gas{font-size:13px}.k.jump{font-size:10px}}
 /* Screens */
 .screen{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;overflow:auto;
   background:rgba(8,12,26,.72);padding-block:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-bottom,0px));
@@ -205,12 +204,13 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
       <div class="knob" id="knob"></div>
     </div>
     </div>
-    <div class="acts">
-      <div class="grabs">
-        <button class="k g" data-k="japan">JAPAN</button><button class="k g" data-k="nose">NOSE</button>
-        <button class="k g" data-k="tail">TAIL</button><button class="k g" data-k="mute" id="kMute">MUTE</button>
-      </div>
+    <div class="rgrp">
       <button class="k jump" data-k="jump">SPRUNG</button>
+      <div class="stick gstick" id="gstick" role="group" aria-label="Grab-Stick: oben Japan, unten Mute oder Indy, links Tail, rechts Nose">
+        <div class="ring"></div>
+        <span class="lb n">JAPAN</span><span class="lb s" id="kMute">MUTE</span><span class="lb w">TAIL</span><span class="lb e">NOSE</span>
+        <div class="knob" id="gknob"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -265,7 +265,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
       </dl></div>
     </div>
     <p class="note">Lande parallel zum Hang. Ein 180er landet Switch, mit Twin Tips kein Problem. Lass den Grab vor der Landung los, sonst wird's sketchy. Kommst du am Gap zu kurz, fällst du ins Void. Die Ski Patrol kann keine Gaps springen: Wenn sie dir am Heck klebt, spring über den nächsten Gap und sie bleibt stehen. Mit Vollgas fährst du ihr auch davon. Den Big Air schaffst du nur mit Vollgas plus Pop.</p>
-    <p class="note">Am Handy: Mit dem Stick links steuerst du die Tricks. Oben ist Frontflip, unten Backflip, links und rechts drehst du dich, links bremst auf der Piste. Schräg oben kommt ein Misty, schräg unten ein Cork. GAS liegt links über dem Stick. Rechts liegen SPRUNG und die Grabs, und du kannst mit dem Daumen von SPRUNG direkt auf einen Grab rutschen.</p>
+    <p class="note">Am Handy: Mit dem Stick links steuerst du die Tricks. Oben ist Frontflip, unten Backflip, links und rechts drehst du dich, links bremst auf der Piste. Schräg oben kommt ein Misty, schräg unten ein Cork. GAS liegt links über dem Stick. Rechts liegt SPRUNG, darunter der Grab-Stick: oben Japan, unten Mute (Board: Indy), links Tail, rechts Nose. Halten heißt Grab halten, und du kannst vom SPRUNG direkt auf den Grab-Stick rutschen.</p>
     <p class="note">Nach einer Weile wechselt die Strecke in die Freeride-Zone. Dort grindest du umgefallene Bäume und springst Cliffs. Cliffs halten die Ski Patrol genauso auf wie Gaps. Im Powder sinkst du ein und wirst langsamer, wenn du zu wenig Speed hast. Dafür verzeiht er schiefe Landungen. Pass auf die Steine auf: Kleine bringen dich zu Fall, gegen große Felsen ist der Run vorbei. Spring mit der Leertaste drüber.</p>
     <div class="btns"><button class="btn" id="bHelpBack">ZURÜCK</button></div>
   </div>
@@ -1433,22 +1433,34 @@ stickEl.addEventListener('pointerdown',e=>{e.preventDefault();unlockAudio();stic
 stickEl.addEventListener('pointermove',e=>{if(e.pointerId===stickId)stickMove(e)});
 ['pointerup','pointercancel','lostpointercapture'].forEach(t=>stickEl.addEventListener(t,e=>{if(e.pointerId===stickId)stickReset()}));
 stickEl.addEventListener('contextmenu',e=>e.preventDefault());
-/* Rechte Seite: die Taste unter dem Finger zählt, auch beim Rutschen (von SPRUNG direkt auf einen Grab) */
-const actsEl=document.querySelector('#pad .acts'),actHeld=new Map(),actBtn=k=>actsEl.querySelector('[data-k="'+k+'"]');
-function actAt(x,y){const el=document.elementFromPoint(x,y),b=el&&el.closest?el.closest('#pad .acts .k'):null;return b?b.dataset.k:null}
-function actSet(id,k){const prev=actHeld.get(id)||null;if(prev===k)return;if(k)actHeld.set(id,k);else actHeld.delete(id);
-  if(prev&&![...actHeld.values()].includes(prev)){actBtn(prev).classList.remove('on');if(prev!=='jump')TC[prev]=false}
-  if(k){actBtn(k).classList.add('on');if(k==='jump')jumpBuf=.14;else TC[k]=true}}
-actsEl.addEventListener('pointerdown',e=>{e.preventDefault();unlockAudio();try{actsEl.setPointerCapture(e.pointerId)}catch(_){}actSet(e.pointerId,actAt(e.clientX,e.clientY))});
-actsEl.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&!e.buttons)return;actSet(e.pointerId,actAt(e.clientX,e.clientY))});
-['pointerup','pointercancel','lostpointercapture'].forEach(t=>actsEl.addEventListener(t,e=>actSet(e.pointerId,null)));
-actsEl.addEventListener('contextmenu',e=>e.preventDefault());
+/* Rechte Seite: SPRUNG und darunter der Grab-Stick. Oben Japan, unten Mute/Indy, links Tail, rechts Nose; halten = Grab halten.
+   Der Daumen kann vom SPRUNG direkt auf den Grab-Stick rutschen. */
+const rgrpEl=document.querySelector('#pad .rgrp'),gstickEl=$('gstick'),gknobEl=$('gknob'),jumpEl=document.querySelector('#pad .k.jump'),rHeld=new Map();
+const GRAB_DIR={n:'japan',s:'mute',w:'tail',e:'nose'};
+function grabApply(x,y){const b=gstickEl.getBoundingClientRect(),dx=x-(b.left+b.width/2),dy=y-(b.top+b.height/2),R=b.width*.34,d=Math.hypot(dx,dy),m=Math.min(d,R);
+  gknobEl.style.transform='translate(calc(-50% + '+(d?dx/d*m:0).toFixed(1)+'px),calc(-50% + '+(d?dy/d*m:0).toFixed(1)+'px))';
+  let dir='';if(d>R*.3){const s=((Math.atan2(-dy,dx)*DEG)%360+360)%360;dir=s>=45&&s<135?'n':s>=135&&s<225?'w':s>=225&&s<315?'s':'e'}
+  TC.japan=TC.nose=TC.tail=TC.mute=false;if(dir)TC[GRAB_DIR[dir]]=true;gstickEl.dataset.dir=dir}
+function grabReset(){gknobEl.style.transform='';gstickEl.dataset.dir='';gstickEl.classList.remove('on');TC.japan=TC.nose=TC.tail=TC.mute=false}
+function inGStick(x,y){const b=gstickEl.getBoundingClientRect();return Math.hypot(x-(b.left+b.width/2),y-(b.top+b.height/2))<=b.width/2}
+function onJumpBtn(x,y){const el=document.elementFromPoint(x,y);return !!(el&&el.closest&&el.closest('#pad .k.jump'))}
+function rUpdate(e){const st=rHeld.get(e.pointerId);if(!st)return;const x=e.clientX,y=e.clientY;
+  if(st.mode==='grab'){grabApply(x,y);return}
+  if(inGStick(x,y)){if(st.mode==='jump')jumpEl.classList.remove('on');st.mode='grab';gstickEl.classList.add('on');grabApply(x,y)}
+  else if(onJumpBtn(x,y)){if(st.mode!=='jump'){st.mode='jump';jumpEl.classList.add('on');jumpBuf=.14}}
+  else if(st.mode==='jump'){jumpEl.classList.remove('on');st.mode=null}}
+function rEnd(e){const st=rHeld.get(e.pointerId);if(!st)return;rHeld.delete(e.pointerId);
+  if(st.mode==='grab')grabReset();if(st.mode==='jump'&&![...rHeld.values()].some(s=>s.mode==='jump'))jumpEl.classList.remove('on')}
+rgrpEl.addEventListener('pointerdown',e=>{e.preventDefault();unlockAudio();try{rgrpEl.setPointerCapture(e.pointerId)}catch(_){}rHeld.set(e.pointerId,{mode:null});rUpdate(e)});
+rgrpEl.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&!e.buttons)return;rUpdate(e)});
+['pointerup','pointercancel','lostpointercapture'].forEach(t=>rgrpEl.addEventListener(t,rEnd));
+rgrpEl.addEventListener('contextmenu',e=>e.preventDefault());
 /* GAS links über dem Stick: halten zum Beschleunigen */
 const gasEl=document.querySelector('#pad .k.gas');
 gasEl.addEventListener('pointerdown',e=>{e.preventDefault();unlockAudio();try{gasEl.setPointerCapture(e.pointerId)}catch(_){}gasEl.classList.add('on');TC.gas=true});
 ['pointerup','pointercancel','lostpointercapture'].forEach(t=>gasEl.addEventListener(t,()=>{gasEl.classList.remove('on');TC.gas=false}));
 gasEl.addEventListener('contextmenu',e=>e.preventDefault());
-function padReset(){stickReset();gasEl.classList.remove('on');for(const id of [...actHeld.keys()])actSet(id,null);for(const k in TC)TC[k]=false}
+function padReset(){stickReset();grabReset();rHeld.clear();jumpEl.classList.remove('on');gasEl.classList.remove('on');for(const k in TC)TC[k]=false}
 
 /* ================= AUDIO ================= */
 let AC=null,muted=false;
