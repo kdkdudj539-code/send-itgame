@@ -277,7 +277,9 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
     <p class="eyebrow">Was ist neu</p>
     <h2>PATCH NOTES</h2>
     <div class="pn">
-      <h3>v1.4 · 05.11.2026</h3>
+      <h3>v1.5 · 05.11.2026</h3>
+      <ul><li>Butter mit eigener Pose und gebogenen Ski</li><li>Nose Butter 180 und Switch Tail Butter 180</li><li>Gas nur noch mit Stick ganz rechts</li></ul>
+      <h3>v1.4</h3>
       <ul><li>Online-Rangliste mit eigenem Konto</li><li>Butter und Nose Butter</li><li>Sprung halb so hoch, Felsen flacher</li><li>Nebliges Flutlicht, präparierte Piste, Bär läuft</li></ul>
       <h3>v1.3</h3>
       <ul><li>Handy: zwei Sticks, die unter dem Finger erscheinen</li><li>Rail-Swaps durch Halten, kein Zoom beim Doppeltippen</li></ul>
@@ -321,6 +323,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
         <dt><kbd>Shift</kbd></dt><dd>Gas: kräftig beschleunigen bis Vollgas</dd>
         <dt><kbd>←</kbd><kbd>A</kbd></dt><dd>Bremsen</dd>
         <dt><kbd>↓</kbd><kbd>↑</kbd></dt><dd>Butter und Nose Butter (halten)</dd>
+        <dt><kbd>↑</kbd>+<kbd>←</kbd><kbd>→</kbd></dt><dd>Nose Butter 180 (switch: ↓ + Spin für Tail Butter 180)</dd>
         <dt><kbd>Leertaste</kbd></dt><dd>Springen. Am Kicker-Ende gibt's extra Pop</dd>
       </dl></div>
       <div><h3>In der Luft</h3><dl>
@@ -344,7 +347,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
       </dl></div>
     </div>
     <p class="note">Lande parallel zum Hang. Ein 180er landet Switch, mit Twin Tips kein Problem. Lass den Grab vor der Landung los, sonst wird's sketchy. Kommst du am Gap zu kurz, fällst du ins Void. Die Ski Patrol kann keine Gaps springen: Wenn sie dir am Heck klebt, spring über den nächsten Gap und sie bleibt stehen. Mit Vollgas fährst du ihr auch davon. Den Big Air schaffst du nur mit Vollgas plus Pop.</p>
-    <p class="note">Am Handy: Mit dem Stick links steuerst du die Tricks. Oben ist Frontflip, unten Backflip, links und rechts drehst du dich, links bremst auf der Piste. Schräg oben kommt ein Misty, schräg unten ein Cork. Tippst du in die linke Bildschirmhälfte, greifst du den linken Stick, rechts den rechten. Die Richtung vom Stick zu deinem Finger zählt sofort: Tippst du rechts neben den Stick, ist er schon nach rechts gedrückt. Auf der Piste gibst du mit dem linken Stick nach rechts Gas und bremst nach links, nach unten machst du einen Butter, nach oben einen Nose Butter. Der rechte Stick ist Sprung und Grab zugleich: Antippen springt, gedrückt halten und schieben greift. Oben Japan, unten Mute (Board: Indy), links Tail, rechts Nose. In der Luft springt er nicht, da zählen nur die Grabs.</p>
+    <p class="note">Am Handy: Mit dem Stick links steuerst du die Tricks. Oben ist Frontflip, unten Backflip, links und rechts drehst du dich, links bremst auf der Piste. Schräg oben kommt ein Misty, schräg unten ein Cork. Tippst du in die linke Bildschirmhälfte, greifst du den linken Stick, rechts den rechten. Die Richtung vom Stick zu deinem Finger zählt sofort: Tippst du rechts neben den Stick, ist er schon nach rechts gedrückt. Auf der Piste gibst du mit dem linken Stick nach rechts Gas und bremst nach links, nach unten machst du einen Butter, nach oben einen Nose Butter. Gas gibt es nur, wenn du den Stick ganz nach rechts drückst. Lenkst du beim Nose Butter schräg nach oben links oder rechts, drehst du einen flachen Nose Butter 180. Fährst du switch, geht das genauso mit dem Tail Butter schräg nach unten. Der rechte Stick ist Sprung und Grab zugleich: Antippen springt, gedrückt halten und schieben greift. Oben Japan, unten Mute (Board: Indy), links Tail, rechts Nose. In der Luft springt er nicht, da zählen nur die Grabs.</p>
     <p class="note">Nach einer Weile wechselt die Strecke in die Freeride-Zone. Dort grindest du umgefallene Bäume und springst Cliffs. Cliffs halten die Ski Patrol genauso auf wie Gaps. Im Powder sinkst du ein und wirst langsamer, wenn du zu wenig Speed hast. Dafür verzeiht er schiefe Landungen. Pass auf die Steine auf: Kleine bringen dich zu Fall, gegen große Felsen ist der Run vorbei. Spring mit der Leertaste drüber.</p>
     <div class="btns"><button class="btn" id="bHelpBack">ZURÜCK</button></div>
   </div>
@@ -395,7 +398,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
 (()=>{
 'use strict';
 const RAD=Math.PI/180, DEG=180/Math.PI;
-const G=430, POP=190, JUMP_POP=Math.round(190*Math.SQRT1_2), FOOT=11, VH=342, FLIP_RATE=520, SPIN_RATE=600, CORK_SLOW=.6, STEP=1/120, VMAX=364, PARK_LEN=13000, FREE_LEN=11000;
+const BUTTER180_T=.5, G=430, POP=190, JUMP_POP=Math.round(190*Math.SQRT1_2), FOOT=11, VH=342, FLIP_RATE=520, SPIN_RATE=600, CORK_SLOW=.6, STEP=1/120, VMAX=364, PARK_LEN=13000, FREE_LEN=11000;
 let VW=608;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
@@ -590,6 +593,24 @@ const SKI3=(()=>{
       torso:[[-2,.5,0],[1.5,-5.5,0]],
       arms:[[[1,-5,-5],[4,-3,-2],[5,-1,2]],[[2,-5,5],[4.5,-1.5,5.5],[5.5,0,3]]],
       head:[3.5,-9.5,0]},
+    // Butter: Gewicht aufs Skiende, Hüfte zurück, Ski biegen sich, Arme seitlich zur Balance, Stöcke zeigen schräg nach hinten unten
+    butter:{
+      skis:[{c:[.5,11,-4],d:[1,0,0],flex:2.6,flexEnd:'tip'},{c:[.5,11,4],d:[1,0,0],flex:2.6,flexEnd:'tip'}],
+      boots:[[0,8,-4],[0,8,4]],
+      legs:[[[-2.5,.5,-3],[1,4,-3.5],[-1,7,-4]],[[-1.5,.5,3],[2,4,3.5],[1,7,4]]],
+      torso:[[-2.5,.5,0],[-1.6,-6.5,0]],
+      arms:[[[-1.5,-6,-5],[-4.5,-4,-8],[-6.5,-2,-9.5]],[[-.5,-6,5],[2.5,-4.5,8],[4.5,-2.5,9.5]]],
+      poleDirs:[[-.74,.67,0],[-.74,.67,0]],
+      head:[-.6,-11,0]},
+    // Nose Butter: Gewicht auf die Spitzen, Hüfte und Knie nach vorne, Enden biegen sich hoch
+    nbutter:{
+      skis:[{c:[.5,11,-4],d:[1,0,0],flex:2.6,flexEnd:'tail'},{c:[.5,11,4],d:[1,0,0],flex:2.6,flexEnd:'tail'}],
+      boots:[[0,8,-4],[0,8,4]],
+      legs:[[[0,0,-3],[3.5,4,-3.5],[1,7,-4]],[[1,0,3],[4.5,4,3.5],[1.5,7,4]]],
+      torso:[[0,0,0],[.4,-7,0]],
+      arms:[[[0,-6,-5],[-3,-4.5,-8],[-5,-2.5,-9.5]],[[1,-6,5],[4,-4.5,8],[6.5,-2.5,9.5]]],
+      poleDirs:[[-.74,.67,0],[-.74,.67,0]],
+      head:[1.6,-11.3,0]},
     // Nose: Hand an der Skispitze
     nose:{...tuck,arms:[tuck.arms[0],[[1,-6,5],[6,0,5.5],[10,6.5,4.5]]]},
     // Tail: hintere Hand ans Skiende, andere Hand hoch
@@ -637,6 +658,13 @@ const BOARD3=(()=>{
     tail:{...tuck,arms:[[[-1,-7,-4.5],[-6,-1,-3],[-10,5,-.5]],tuck.arms[1]]},
     cork:{...tuck,arms:[[[-1,-7,-4.5],[2,-5,-1],[4,-6,2.5]],[[1,-7,4.5],[3,-3.5,5],[4,-5.5,2]]]},
     misty:{...tuck,torso:[[0,-1,0],[2,-7,0]],arms:[[[0,-6.5,-4.5],[3,-4,-1],[5,-2,2]],[[1.5,-6.5,4.5],[4.5,-3,4.5],[5.5,-1,2.5]]],head:[3.5,-11,0]},
+    // Butter aufs Tail: hinteres Bein gebeugt, Board biegt sich, Arme seitlich ausgestreckt
+    butter:{...ride,handsBack:false,board:{c:[0,11,0],d:[1,0,0],flex:2.4,flexEnd:'tip'},
+      legs:[[[-3.5,0,0],[-6,4,1.5],[-5,7,0]],[[2.5,0,0],[4.5,4,1],[5,7,0]]],
+      torso:[[-1,0,0],[-1.4,-7,0]],arms:[[[-1,-6,-4.5],[-5.5,-5,-3],[-10,-4.5,-1.5]],[[0,-6,4.5],[4.5,-5.5,3],[9,-5,1.5]]],armKeys:[3,3],head:[1.4,-11.5,0]},
+    nbutter:{...ride,handsBack:false,board:{c:[0,11,0],d:[1,0,0],flex:2.4,flexEnd:'tail'},
+      legs:[[[-2.5,0,0],[-4.5,4,1],[-5,7,0]],[[3.5,0,0],[6,4,1.5],[5,7,0]]],
+      torso:[[1,0,0],[2,-7,0]],arms:[[[0,-6,-4.5],[-4.5,-5.5,-3],[-9,-5,-1.5]],[[1,-6,4.5],[5.5,-5,3],[10,-4.5,1.5]]],armKeys:[3,3],head:[3.2,-11.5,0]},
     // Indy: hintere Hand an die Zehenkante zwischen den Bindungen
     mute:{...tuck,arms:[[[-1,-7,-4.5],[-1,-1,0],[0,5,2.5]],tuck.arms[1]],armBias:[2,0]},
     layout:{
@@ -713,10 +741,14 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork){
   (board?[L.board]:L.skis).forEach((s,i)=>{
     const len=board?20:22,tip=pow?4:2,d=v3.unit(s.d);let n=s.n||[0,-1,0];n=v3.unit(v3.add(n,v3.mul(d,-v3.dot(n,d))));
     const A=v3.add(s.c,v3.mul(d,-len/2)),B=v3.add(s.c,v3.mul(d,len/2));
-    const pts=[v3.add(v3.add(A,v3.mul(d,-tip)),v3.mul(n,tip)),A,B,v3.add(v3.add(B,v3.mul(d,tip)),v3.mul(n,tip))].map(lo);
-    const key=(pts[1][2]+pts[2][2])/2-1+(L.skiKey||0);skiKeys[i]=key;
+    // Biegung beim Butter: das gedrückte Ende bleibt am Schnee, das freie Ende biegt sich nach oben
+    const fl=s.flex||0,fw=u=>s.flexEnd==='tail'?(1-u)*(1-u):u*u,FP=u=>v3.add(v3.add(A,v3.mul(v3.add(B,v3.mul(A,-1)),u)),v3.mul(n,fl*fw(u)));
+    const P3=fl?[v3.add(v3.add(FP(0),v3.mul(d,-tip)),v3.mul(n,tip)),FP(0),FP(.25),FP(.5),FP(.75),FP(1),v3.add(v3.add(FP(1),v3.mul(d,tip)),v3.mul(n,tip))]
+      :[v3.add(v3.add(A,v3.mul(d,-tip)),v3.mul(n,tip)),A,B,v3.add(v3.add(B,v3.mul(d,tip)),v3.mul(n,tip))];
+    const pts=P3.map(lo);
+    const key=(pts[1][2]+pts[pts.length-2][2])/2-1+(L.skiKey||0);skiKeys[i]=key;
     parts.push({key,draw:()=>{const sp=pts.map(q=>[q[0],q[1]]);
-      if(board){drawBoardWide(g,[v3.add(v3.add(A,v3.mul(d,-tip)),v3.mul(n,tip)),A,B,v3.add(v3.add(B,v3.mul(d,tip)),v3.mul(n,tip))],d,n,lo,P,O);const a1=lo(v3.add(v3.add(A,v3.mul(d,3)),v3.mul(n,-1))),b1=lo(v3.add(v3.add(B,v3.mul(d,-3)),v3.mul(n,-1)));strokePts(g,[[a1[0],a1[1]],[b1[0],b1[1]]],1,P.ba)}
+      if(board){drawBoardWide(g,P3,d,n,lo,P,O);const a1=lo(v3.add(v3.add(A,v3.mul(d,3)),v3.mul(n,-1))),b1=lo(v3.add(v3.add(B,v3.mul(d,-3)),v3.mul(n,-1)));strokePts(g,[[a1[0],a1[1]],[b1[0],b1[1]]],1,P.ba)}
       else{const col=L.skiDark&&L.skiDark[i]?shade(P.K,-.2):P.K;strokePts(g,sp,4,O);strokePts(g,sp,2,col);const m1=lo(v3.add(s.c,v3.mul(d,-4))),m2=lo(v3.add(s.c,v3.mul(d,4)));strokePts(g,[[m1[0],m1[1]],[m2[0],m2[1]]],2,P.ka)}}});
   });
   const bootKey=i=>(board?skiKeys[0]:skiKeys[i])+.01+i*.001;
@@ -1327,9 +1359,11 @@ function playerView(){
     if(p.corkMode)ang=p.base;
   }else{
     phi=p.mode==='rail'?(p.gspinVis??90):(p.sw?180:0);
+    const bsp=p.mode==='ground'&&p.bs?smooth01(p.bs.t/BUTTER180_T):0;if(bsp)phi+=p.bs.dir*180*bsp;
     if(p.mode==='loop')look=false;
     if(p.mode==='rail')pose=Math.abs(Math.sin(phi*RAD))>.5?'grind':'ride';
     if(p.mode==='ground'&&!board&&p.tuck&&p.pushT>0)pose='push'+(Math.floor(((p.pushT/.55)%1)*8)%8);
+    if(p.mode==='ground'&&(Math.abs(p.butterVis||0)>5||p.bs))pose=(p.bs?p.bs.end:p.butterVis)<0?'butter':'nbutter';
     const rockHit=p.mode==='crash'||(p.mode==='dead'&&p.deadReason==='rock');
     if(rockHit){pose='tuck';ang=p.ang+(p.mode==='crash'?p.tumble:90);look=false;phi=0}
     const inAva=p.mode==='dead'&&p.deadReason==='wall';
@@ -1337,7 +1371,7 @@ function playerView(){
     const r=ang*RAD;comx=p.x+FOOT*Math.sin(r);comy=p.y-FOOT*Math.cos(r);
     if(rockHit){comx=p.x;comy=p.y-(p.mode==='dead'||p.tumble===90?4:10)}
     if(inAva){comx=p.x;comy=p.y-9+(p.wallSink||0)}
-    const bv=p.mode==='ground'?(p.butterVis||0):0;
+    const bv=p.mode==='ground'?(p.butterVis||0)*(1-bsp):0;
     if(Math.abs(bv)>.3){const rr=ang*RAD,d=(bv<0?-9:9)*(p.sw?-1:1),px=p.x+Math.cos(rr)*d,py=p.y+Math.sin(rr)*d,b=bv*(p.sw?-1:1)*RAD,vx=comx-px,vy=comy-py;
       comx=px+vx*Math.cos(b)-vy*Math.sin(b);comy=py+vx*Math.sin(b)+vy*Math.cos(b);ang+=bv*(p.sw?-1:1)}
     if(p.mode==='ground'&&p.sink)comy+=p.sink;
@@ -1520,11 +1554,11 @@ document.addEventListener('contextmenu',e=>{if(!(e.target.closest&&e.target.clos
 const stickEl=$('stick'),knobEl=$('knob');let stickId=null;
 function stickApply(dx,dy,R){
   const d=Math.hypot(dx,dy),m=Math.min(d,R),kx=d?dx/d*m:0,ky=d?dy/d*m:0;knobEl.style.transform='translate(calc(-50% + '+kx.toFixed(1)+'px),calc(-50% + '+ky.toFixed(1)+'px))';
-  let u=false,dn=false,l=false,r=false;
+  let u=false,dn=false,l=false,r=false,full=false;
   if(d>R*.2){const s=((Math.atan2(-dy,dx)*DEG)%360+360)%360,near=c=>Math.abs(((s-c+540)%360)-180)<=24;
-    if(near(90))u=true;else if(near(270))dn=true;else if(near(0))r=true;else if(near(180))l=true;
+    if(near(90))u=true;else if(near(270))dn=true;else if(near(0)){r=true;full=d>R*.55}else if(near(180))l=true;
     else{u=s<180;dn=!u;r=s<90||s>270;l=!r}}
-  TC.up=u;TC.down=dn;TC.left=l;TC.right=r;TC.gas=r;stickEl.dataset.dir=(u?'n':dn?'s':'')+(r?'e':l?'w':'');
+  TC.up=u;TC.down=dn;TC.left=l;TC.right=r;TC.gas=full;stickEl.dataset.dir=(u?'n':dn?'s':'')+(r?'e':l?'w':'');
 }
 function stickMove(e){const b=stickEl.getBoundingClientRect();stickApply(e.clientX-(b.left+b.width/2),e.clientY-(b.top+b.height/2),b.width*.34)}
 function stickReset(){stickId=null;knobEl.style.transform='';stickEl.style.transform='';stickEl.classList.remove('on');stickEl.dataset.dir='';TC.up=TC.down=TC.left=TC.right=TC.gas=false}
@@ -1591,6 +1625,7 @@ function footY(){if(p.mode==='air'||(p.mode==='dead'&&p.inAir))return p.y+airFoo
 function hSpeed(){return p.mode==='air'?p.vx:p.mode==='rail'||p.mode==='ground'||p.mode==='crash'?p.s*Math.cos((p.mode==='rail'?Math.atan2(p.rail.y1-p.rail.y0,p.rail.x1-p.rail.x0):(groundAt(p.x)||{a:0}).a)):p.mode==='loop'?p.s*Math.cos(p.phi):0}
 
 function launch(a,pop,sg){
+  if(p.bs){if(p.bs.t>BUTTER180_T/2)p.sw=!p.sw;p.bs=null;p.butter=0;p.butterT=0}
   if(p.butter)butterEnd();p.butterVis=0;
   let s=p.s;
   if(sg&&sg.req&&sg.assist&&!p.braking)s=Math.max(s,sg.req*sg.assist);
@@ -1657,12 +1692,17 @@ function updGround(dt){
   const a=g.a,ctrl=p.mode==='ground';
   let drag=.0022,acc=G*Math.sin(a)-.035*G*Math.cos(a);
   const pow=isPow(g.seg);
-  p.tuck=ctrl&&inGas();p.braking=ctrl&&inL();
+  p.tuck=ctrl&&inGas();p.braking=ctrl&&inL()&&!inU()&&!inD();
   // Butter: Gewicht nach hinten (runter) hebt die Spitzen, nach vorne (hoch) die Enden
-  {const want=ctrl?(inD()?-1:inU()?1:0):0;
+  {if(p.bLock&&!inU()&&!inD())p.bLock=false;
+    const want=p.bs?p.butter:(ctrl&&!p.bLock?(inD()?-1:inU()?1:0):0);
     if(want!==(p.butter||0)){butterEnd();p.butter=want;p.butterT=0}
+    // Butter 180: auf dem vorderen Ende (regulär die Nose, switch das Tail) schräg lenken = flach um 180° drehen
+    const lead=p.sw?-1:1;
+    if(!p.bs&&ctrl&&want===lead&&p.butterT>.1&&(inL()||inR())){p.bs={dir:(inR()?1:-1)*(p.sw?-1:1),t:0,end:want};SFX.jump()}
+    if(p.bs){p.bs.t+=dt;if(p.bs.t>=BUTTER180_T){const nm=p.sw?'Switch Tail Butter 180':'Nose Butter 180';p.sw=!p.sw;p.bs=null;p.butter=0;p.butterT=0;p.butterVis=0;p.bLock=true;addPoints(320,nm)}}
     if(want){p.butterT+=dt;if(Math.random()<.5){const d=(want<0?-9:9)*(p.sw?-1:1);parts.push({x:p.x+Math.cos(a)*d,y:p.y+Math.sin(a)*d-1,vx:-p.s*.2+rand(-25,25),vy:-rand(20,60),life:rand(.2,.45),col:Math.random()<.6?'#ffffff':'#dce8f8',sz:Math.random()<.4?2:1,gr:300})}}
-    const tgt=want<0?-18:want>0?14:0;p.butterVis=(p.butterVis||0)+(tgt-(p.butterVis||0))*Math.min(1,dt*12)}
+    const tgt=p.bs?0:want<0?-14:want>0?12:0;p.butterVis=(p.butterVis||0)+(tgt-(p.butterVis||0))*Math.min(1,dt*12)}
   p.pushT=p.tuck&&SAVE.gear!=='board'?(p.pushT||0)+dt:0;
   if(p.tuck){drag*=.55;acc+=165}
   if(pow){drag*=1.12;acc-=110*clamp(1-p.s/300,0,1)}
