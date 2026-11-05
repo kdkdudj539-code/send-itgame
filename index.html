@@ -137,6 +137,8 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
 .note{font-size:20px;color:var(--muted);line-height:1.1;margin:0 0 18px;max-width:60ch}
 
 /* Credits und Patch Notes */
+.acct{font-family:var(--ui);font-size:13px;color:var(--muted);letter-spacing:.03em;margin:-6px 0 14px;min-height:1.2em}.acct b{color:#fff;font-weight:400}.acct .ok{color:#86e0bf}.acct .warn2{color:var(--gold)}
+.me .sync{display:block;font-size:13px;margin-top:4px}
 .credits{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:18px 0 0;font-family:var(--ui);font-size:13px;color:var(--muted);letter-spacing:.04em}
 .linkbtn{font-family:var(--ui);font-size:13px;letter-spacing:.06em;color:var(--ice);background:none;border:0;padding:4px 0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .linkbtn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
@@ -260,6 +262,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
       <p class="lede">Die Lawine schiebt von hinten, die Ski Patrol jagt dich. Spring die Gaps, steh deine Tricks, sammel Münzen.</p>
       <div class="gear" role="group" aria-label="Sportgerät wählen"><button class="gearbtn" data-gear="ski" aria-pressed="true">SKI</button><button class="gearbtn" data-gear="board" aria-pressed="false">SNOWBOARD</button></div>
       <div class="gear"><button class="gearbtn" id="bAssist" aria-pressed="false">LANDEHILFE: AUS</button><button class="gearbtn" id="bPack" aria-pressed="false" hidden>RUCKSACK: AUS</button></div>
+      <p class="acct" id="mAcct"></p>
       <div class="stats"><span><i class="coin"></i><b id="mCoins">0</b></span><span>Highscore<b id="mBest">0</b></span><span>Weiteste Fahrt<b id="mDist">0 m</b></span></div>
       <div class="btns">
         <button class="btn" id="bPlay">FAHREN</button>
@@ -277,7 +280,9 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
     <p class="eyebrow">Was ist neu</p>
     <h2>PATCH NOTES</h2>
     <div class="pn">
-      <h3>v1.9 · 05.11.2026</h3>
+      <h3>v2.0 · 05.11.2026</h3>
+      <ul><li>Spielstand im Konto: Münzen, gekaufte Sachen, Outfit und Bestwerte sind auf jedem Gerät dabei</li></ul>
+      <h3>v1.9</h3>
       <ul><li>Neue Lawine: riesige Pulverwolke mit großem Kopf vorne</li><li>Switch mit Gas: kein Stockeinsatz mehr</li></ul>
       <h3>v1.8</h3>
       <ul><li>Swaps auf Rails etwas langsamer</li><li>Mit Drehung auf die Rail und Stick halten: Drehung läuft auf der Rail weiter</li><li>Park: gleichmäßige Abstände, kleine Kicker ohne Gap entfernt</li></ul>
@@ -307,14 +312,14 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
     <div class="rhead"><div><p class="eyebrow">Online</p><h2>RANGLISTE</h2></div><button class="btn ghost" id="bRankBack">ZURÜCK</button></div>
     <div class="acc">
       <form id="rForm" autocomplete="on">
-        <p class="note">Mit Konto landet dein Bestwert in der Rangliste. Nur Spielername und Passwort, keine E-Mail. Merk dir das Passwort gut, es lässt sich nicht zurücksetzen.</p>
+        <p class="note">Mit Konto landet dein Bestwert in der Rangliste, und dein Spielstand (Münzen, gekaufte Sachen, Outfit, Bestwerte) ist auf jedem Gerät dabei. Nur Spielername und Passwort, keine E-Mail. Merk dir das Passwort gut, es lässt sich nicht zurücksetzen.</p>
         <div class="fields">
           <input id="rName" name="username" maxlength="16" placeholder="Spielername" autocomplete="username" autocapitalize="off" spellcheck="false" aria-label="Spielername">
           <input id="rPass" name="password" type="password" maxlength="64" placeholder="Passwort, mind. 6 Zeichen" autocomplete="current-password" aria-label="Passwort">
           <button type="submit" class="btn" id="bLogin">ANMELDEN</button><button type="button" class="btn alt" id="bSignup">KONTO ERSTELLEN</button>
         </div>
       </form>
-      <div class="me" id="rMe" hidden><span>Angemeldet als<b id="rMeName"></b></span><button type="button" class="gearbtn" id="bLogout">ABMELDEN</button></div>
+      <div class="me" id="rMe" hidden><span>Angemeldet als<b id="rMeName"></b><i class="sync" id="rSync"></i></span><button type="button" class="gearbtn" id="bLogout">ABMELDEN</button></div>
       <p class="rmsg" id="rMsg" role="status"></p>
     </div>
     <p class="rcount" id="rCount"></p>
@@ -501,14 +506,16 @@ const CATS=Object.keys(SHOP);
 
 /* ================= SAVE ================= */
 const DEF={coins:0,best:0,bestDist:0,owned:{},equip:{helmet:'h_black',goggles:'g_orange',hoodie:'d_grey',pants:'p_khaki',skis:'s_red',board:'b_black',poles:'po_black',pack:'pk_none',beanie:'bn_black'},gear:'ski',assist:false,packLast:'pk_free'};
-function loadSave(){
-  try{ const s=JSON.parse(localStorage.getItem('sendit_save_v1')||'null');
-    if(s&&typeof s==='object') return {coins:s.coins|0,best:s.best|0,bestDist:s.bestDist|0,owned:s.owned||{},equip:Object.assign({},DEF.equip,s.equip||{}),gear:s.gear==='board'?'board':'ski',assist:!!s.assist,packLast:typeof s.packLast==='string'?s.packLast:'pk_free'};
-  }catch(e){}
-  return JSON.parse(JSON.stringify(DEF));
-}
+// Stand prüfen und auffüllen (vom Gerät oder aus dem Konto). t = letzte Änderung, uid = Konto, zu dem der Stand gehört, sc = Münzen beim letzten Abgleich mit dem Konto
+function normSave(s){s=s&&typeof s==='object'?s:{};const ob=v=>v&&typeof v==='object'&&!Array.isArray(v);
+  return {coins:Math.max(0,s.coins|0),best:Math.max(0,s.best|0),bestDist:Math.max(0,s.bestDist|0),owned:ob(s.owned)?Object.assign({},s.owned):{},
+    equip:Object.assign({},DEF.equip,ob(s.equip)?s.equip:{}),gear:s.gear==='board'?'board':'ski',assist:!!s.assist,packLast:typeof s.packLast==='string'?s.packLast:'pk_free',
+    t:+s.t||0,uid:typeof s.uid==='string'?s.uid:null,sc:Math.max(0,s.sc|0)}}
+function loadSave(){try{const s=JSON.parse(localStorage.getItem('sendit_save_v1')||'null');if(s&&typeof s==='object')return normSave(s)}catch(e){}return normSave(DEF)}
 const SAVE=loadSave();
-function persist(){ try{ localStorage.setItem('sendit_save_v1',JSON.stringify(SAVE)); }catch(e){} }
+let cloudHook=null;   // wird vom Online-Teil gesetzt: nach jeder Änderung den Stand ins Konto laden
+function writeSave(){try{localStorage.setItem('sendit_save_v1',JSON.stringify(SAVE))}catch(e){}}
+function persist(){SAVE.t=Date.now();writeSave();if(cloudHook)cloudHook()}
 
 /* ================= COLORS ================= */
 function hexRgb(h){h=h.replace('#','');return [0,2,4].map(i=>parseInt(h.slice(i,i+2),16))}
@@ -2322,7 +2329,7 @@ function drawHud(){
 /* ================= FLOW ================= */
 const screens=['menu','help','shop','pause','over','rank','notes'];
 function show(id){screens.forEach(s=>$(s).hidden=s!==id);if(id){const b=$(id).querySelector('.btn');if(b&&!isTouch)b.focus({preventScroll:true})}}
-function refreshMenu(){$('kMute').textContent=SAVE.gear==='board'?'INDY':'MUTE';document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.gear===SAVE.gear)));$('bAssist').setAttribute('aria-pressed',String(!!SAVE.assist));{const own=!!SAVE.owned.pk_free,on=!!SAVE.equip.pack&&SAVE.equip.pack!=='pk_none',b=$('bPack');b.hidden=!own;b.setAttribute('aria-pressed',String(on));b.textContent='RUCKSACK: '+(on?'AN':'AUS')}$('bAssist').textContent='LANDEHILFE: '+(SAVE.assist?'AN':'AUS');setT($('mCoins'),String(SAVE.coins));setT($('mBest'),String(SAVE.best));setT($('mDist'),SAVE.bestDist+' m')}
+function refreshMenu(){if(cloudHook)cloudShow();$('kMute').textContent=SAVE.gear==='board'?'INDY':'MUTE';document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.gear===SAVE.gear)));$('bAssist').setAttribute('aria-pressed',String(!!SAVE.assist));{const own=!!SAVE.owned.pk_free,on=!!SAVE.equip.pack&&SAVE.equip.pack!=='pk_none',b=$('bPack');b.hidden=!own;b.setAttribute('aria-pressed',String(on));b.textContent='RUCKSACK: '+(on?'AN':'AUS')}$('bAssist').textContent='LANDEHILFE: '+(SAVE.assist?'AN':'AUS');setT($('mCoins'),String(SAVE.coins));setT($('mBest'),String(SAVE.best));setT($('mDist'),SAVE.bestDist+' m')}
 let hintTimer=0;
 function startRun(){
   unlockAudio();padReset();resetRun();updCamera(0,true);state='play';show(null);$('hud').hidden=false;if(document.activeElement)document.activeElement.blur();
@@ -2442,7 +2449,7 @@ async function sbMyRank(){if(!SESS||!SESS.uid)return null;const me=await sb('/re
   const c=await sb('/rest/v1/scores?select=user_id&best=gt.'+best,{headers:{'Prefer':'count=exact','Range':'0-0'}});
   const cr=c.headers&&c.headers.get('content-range');const n=cr?parseInt(cr.split('/')[1],10):NaN;return isNaN(n)?null:{rank:n+1,best}}
 const escH=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function rankAcc(){const on=!!SESS;$('rForm').hidden=on;$('rMe').hidden=!on;if(on)$('rMeName').textContent=SESS.name}
+function rankAcc(){const on=!!SESS;$('rForm').hidden=on;$('rMe').hidden=!on;if(on)$('rMeName').textContent=SESS.name;cloudShow()}
 // Alle Fahrer: erst 100, beim Runterscrollen kommen die nächsten 100 dazu
 let rankN=0,rankDone=false,rankBusy=false,rankMine=false;
 const rankLi=(r,pl)=>'<li'+(SESS&&r.user_id===SESS.uid?' class="mine"':'')+'><span class="pl">'+pl+'.</span><span class="nm">'+escH(r.profiles?r.profiles.name:'?')+'</span><span class="sc">'+r.best+'</span></li>';
@@ -2465,11 +2472,56 @@ async function accAction(signup){const n=$('rName').value.trim(),pw=$('rPass').v
   msg.textContent=signup?'Konto wird angelegt …':'Anmelden …';
   const err=signup?await sbSignup(n,pw):await sbLogin(n,pw);if(err){msg.textContent=err;return}
   $('rPass').value='';msg.textContent=signup?'Willkommen, '+n+'!':'Angemeldet.';rankAcc();
+  await cloudSync();if(cloudState==='ok')msg.textContent=signup?'Willkommen, '+n+'! Dein Spielstand liegt jetzt im Konto.':'Angemeldet. Spielstand geladen.';
   if(SAVE.best>0)await sbSubmit(SAVE.best,SAVE.bestDist||0,'');rankLoad()}
 $('rForm').addEventListener('submit',e=>{e.preventDefault();accAction(false)});
 $('bSignup').onclick=()=>accAction(true);
-$('bLogout').onclick=async()=>{if(SESS)await sb('/auth/v1/logout',{method:'POST'},true);sessSave(null);rankAcc();$('rMsg').textContent='Abgemeldet.';rankLoad()};
+$('bLogout').onclick=async()=>{if(cloudTimer){clearTimeout(cloudTimer);cloudTimer=0;await cloudSync()}else if(cloudRun)await cloudRun;
+  if(SESS)await sb('/auth/v1/logout',{method:'POST'},true);sessSave(null);cloudState='';cloudShow();rankAcc();$('rMsg').textContent='Abgemeldet. Dein Spielstand bleibt im Konto gespeichert.';rankLoad()};
 $('bRank').onclick=openRank;$('bNotes').onclick=()=>show('notes');$('bNotesBack').onclick=()=>show('menu');$('bRankBack').onclick=()=>{refreshMenu();show('menu')};
+/* ---------- Spielstand im Konto ----------
+   Tabelle saves (supabase-save.sql), Zugriff nur über load_game/save_game, jeder nur auf seinen eigenen Stand.
+   Abgleich: gekaufte Sachen werden vereinigt, Bestwerte das Maximum, Münzen 3-Wege (Stand im Konto + was auf diesem Gerät
+   seit dem letzten Abgleich dazukam oder ausgegeben wurde), Outfit und Einstellungen vom zuletzt geänderten Gerät.
+   Wer ohne Konto gespielt hat und sich anmeldet, nimmt seinen Fortschritt ins Konto mit. Der Stand eines anderen Kontos auf
+   diesem Gerät wird dagegen nie übernommen. */
+const CLOUD_KEYS=['coins','best','bestDist','owned','equip','gear','assist','packLast','t'];
+let cloudState='',cloudTimer=0,cloudRun=null,cloudAgain=false;
+function cloudData(s){const o={};for(const k of CLOUD_KEYS)o[k]=s[k];return o}
+function cloudMerge(local,cloud,uid){
+  const mine=local.uid===uid;if(!mine&&local.uid!=null)local=normSave(DEF);
+  if(!cloud)return Object.assign({},local,{uid,sc:local.coins});
+  const base=mine?local.sc:0,newer=local.t>cloud.t?local:cloud,coins=Math.max(0,cloud.coins+local.coins-base);
+  return {coins,best:Math.max(cloud.best,local.best),bestDist:Math.max(cloud.bestDist,local.bestDist),owned:Object.assign({},cloud.owned,local.owned),
+    equip:Object.assign({},newer.equip),gear:newer.gear,assist:newer.assist,packLast:newer.packLast,t:Math.max(local.t,cloud.t),uid,sc:coins}}
+function cloudSoon(ms){if(!SESS)return;clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>{cloudTimer=0;cloudSync()},ms==null?1500:ms)}
+async function cloudSync(){
+  if(!SESS)return;
+  if(state==='play'||state==='pause'){cloudSoon(4000);return}   // nie mitten im Lauf Outfit oder Sportgerät tauschen
+  if(cloudRun){cloudAgain=true;return cloudRun}
+  cloudRun=(async()=>{const uid=SESS.uid;cloudState='sync';cloudShow();
+    if(!await sbFresh()){cloudState=SESS?'off':'';return}
+    const r=await sb('/rest/v1/rpc/load_game',{method:'POST',body:'{}'},true);
+    if(!r.ok){cloudState=r.status===404?'setup':'off';return}
+    const before=normSave(SAVE),cloud=r.body&&typeof r.body==='object'&&!Array.isArray(r.body)?normSave(r.body):null,m=cloudMerge(before,cloud,uid);
+    const w=await sb('/rest/v1/rpc/save_game',{method:'POST',keepalive:true,body:JSON.stringify({p_data:cloudData(m)})},true);
+    if(!w.ok){cloudState=w.status===404?'setup':'off';return}
+    if(!SESS||SESS.uid!==uid)return;
+    // Was während des Abgleichs auf dem Gerät passiert ist (Kauf, Lauf zu Ende), obendrauf rechnen und gleich nochmal abgleichen
+    const now=normSave(SAVE);
+    if(now.t!==before.t){m.coins=Math.max(0,m.coins+now.coins-before.coins);m.owned=Object.assign(m.owned,now.owned);m.best=Math.max(m.best,now.best);m.bestDist=Math.max(m.bestDist,now.bestDist);
+      m.equip=now.equip;m.gear=now.gear;m.assist=now.assist;m.packLast=now.packLast;m.t=now.t;cloudAgain=true}
+    Object.assign(SAVE,m);writeSave();cloudState='ok';
+    if(state==='menu')refreshMenu();if(!$('shop').hidden)renderShop()})();
+  try{await cloudRun}finally{cloudRun=null;cloudShow();if(cloudAgain){cloudAgain=false;cloudSoon(400)}}
+}
+function cloudShow(){
+  const t=!SESS?'':cloudState==='sync'?'Spielstand wird gespeichert …':cloudState==='ok'?'Spielstand im Konto gespeichert':cloudState==='setup'?'Konto-Speicher ist noch nicht eingerichtet':cloudState==='off'?'Offline, wird später gespeichert':'';
+  const cls=cloudState==='ok'?'ok':cloudState==='setup'||cloudState==='off'?'warn2':'';
+  $('mAcct').innerHTML=SESS?'Angemeldet als <b>'+escH(SESS.name)+'</b>'+(t?' · <span class="'+cls+'">'+t+'</span>':''):'Spielstand nur auf diesem Gerät. Mit Konto (RANGLISTE) hast du ihn überall.';
+  $('rSync').textContent=t}
+cloudHook=()=>cloudSoon();
+document.addEventListener('visibilitychange',()=>{if(!SESS)return;if(document.visibilityState==='visible')cloudSoon(300);else if(cloudTimer){clearTimeout(cloudTimer);cloudTimer=0;cloudSync()}});
 async function onlineAfterRun(score,meters,trick){const o=$('oRank');
   if(!SESS){o.textContent='Mit Konto kommst du in die Online-Rangliste (Menü → RANGLISTE).';return}
   o.textContent='Wird in die Rangliste eingetragen …';
@@ -2506,6 +2558,7 @@ function start(){
   if(document.fonts&&document.fonts.load)document.fonts.load('8px Silkscreen').catch(()=>{});
   requestAnimationFrame(t=>{last=t;frame(t)});
   setTimeout(warmAva,700);
+  if(SESS)cloudSoon(200);
 }
 window.claude?.hot?.snapshot?.(()=>({}));
 window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
