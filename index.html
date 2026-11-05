@@ -27,7 +27,7 @@
 }
 html,body{height:100%;touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust:100%}
 *{touch-action:manipulation}
-#stage,#stage *,#pad,#pad *{touch-action:none}
+#stage,#stage *,#pad,#pad *,html.playing,html.playing *{touch-action:none}
 [hidden]{display:none!important}
 body{background:var(--night);color:var(--ink);font-family:var(--body);font-size:20px;overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
 #wrap{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
@@ -310,7 +310,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
 (()=>{
 'use strict';
 const RAD=Math.PI/180, DEG=180/Math.PI;
-const G=430, POP=190, FOOT=11, VH=342, FLIP_RATE=520, SPIN_RATE=600, STEP=1/120, VMAX=364, PARK_LEN=13000, FREE_LEN=11000;
+const G=430, POP=190, FOOT=11, VH=342, FLIP_RATE=520, SPIN_RATE=600, CORK_SLOW=.6, STEP=1/120, VMAX=364, PARK_LEN=13000, FREE_LEN=11000;
 let VW=608;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
@@ -1417,15 +1417,13 @@ const stickEl=$('stick'),knobEl=$('knob');let stickId=null;
 function stickApply(dx,dy,R){
   const d=Math.hypot(dx,dy),m=Math.min(d,R),kx=d?dx/d*m:0,ky=d?dy/d*m:0;knobEl.style.transform='translate(calc(-50% + '+kx.toFixed(1)+'px),calc(-50% + '+ky.toFixed(1)+'px))';
   let u=false,dn=false,l=false,r=false;
-  if(d>R*.3){const s=((Math.atan2(-dy,dx)*DEG)%360+360)%360,near=c=>Math.abs(((s-c+540)%360)-180)<=24;
+  if(d>R*.2){const s=((Math.atan2(-dy,dx)*DEG)%360+360)%360,near=c=>Math.abs(((s-c+540)%360)-180)<=24;
     if(near(90))u=true;else if(near(270))dn=true;else if(near(0))r=true;else if(near(180))l=true;
     else{u=s<180;dn=!u;r=s<90||s>270;l=!r}}
   TC.up=u;TC.down=dn;TC.left=l;TC.right=r;TC.gas=r;stickEl.dataset.dir=(u?'n':dn?'s':'')+(r?'e':l?'w':'');
 }
 function stickMove(e){const b=stickEl.getBoundingClientRect();stickApply(e.clientX-(b.left+b.width/2),e.clientY-(b.top+b.height/2),b.width*.34)}
 function stickReset(){stickId=null;knobEl.style.transform='';stickEl.style.transform='';stickEl.classList.remove('on');stickEl.dataset.dir='';TC.up=TC.down=TC.left=TC.right=TC.gas=false}
-stickEl.addEventListener('pointermove',e=>{if(e.pointerId===stickId)stickMove(e)});
-['pointerup','pointercancel','lostpointercapture'].forEach(t=>stickEl.addEventListener(t,e=>{if(e.pointerId===stickId)stickReset()}));
 stickEl.addEventListener('contextmenu',e=>e.preventDefault());
 /* Rechter Stick: Antippen = Sprung (nur auf Piste oder Rail, in der Luft nicht), gedrückt halten und schieben = Grab.
    Oben Japan, unten Mute/Indy, links Tail, rechts Nose. */
@@ -1433,11 +1431,9 @@ const gstickEl=$('gstick'),gknobEl=$('gknob');let gId=null;
 const GRAB_DIR={n:'japan',s:'mute',w:'tail',e:'nose'};
 function grabApply(x,y){const b=gstickEl.getBoundingClientRect(),dx=x-(b.left+b.width/2),dy=y-(b.top+b.height/2),R=b.width*.34,d=Math.hypot(dx,dy),m=Math.min(d,R);
   gknobEl.style.transform='translate(calc(-50% + '+(d?dx/d*m:0).toFixed(1)+'px),calc(-50% + '+(d?dy/d*m:0).toFixed(1)+'px))';
-  let dir='';if(d>R*.3){const s=((Math.atan2(-dy,dx)*DEG)%360+360)%360;dir=s>=45&&s<135?'n':s>=135&&s<225?'w':s>=225&&s<315?'s':'e'}
+  let dir='';if(d>R*.2){const s=((Math.atan2(-dy,dx)*DEG)%360+360)%360;dir=s>=45&&s<135?'n':s>=135&&s<225?'w':s>=225&&s<315?'s':'e'}
   TC.japan=TC.nose=TC.tail=TC.mute=false;if(dir)TC[GRAB_DIR[dir]]=true;gstickEl.dataset.dir=dir}
 function grabReset(){gId=null;gknobEl.style.transform='';gstickEl.style.transform='';gstickEl.dataset.dir='';gstickEl.classList.remove('on');TC.japan=TC.nose=TC.tail=TC.mute=false}
-gstickEl.addEventListener('pointermove',e=>{if(e.pointerId===gId)grabApply(e.clientX,e.clientY)});
-['pointerup','pointercancel','lostpointercapture'].forEach(t=>gstickEl.addEventListener(t,e=>{if(e.pointerId===gId)grabReset()}));
 gstickEl.addEventListener('contextmenu',e=>e.preventDefault());
 /* iOS/Android: langes Drücken oder Doppeltippen soll nie Text markieren oder das Kopier-Menü öffnen.
    Auf Steuerung und Spielbild den Standard-Touch abschalten (Pointer-Events laufen trotzdem), Buttons bleiben klickbar. */
@@ -1452,10 +1448,13 @@ function stickTo(el,x,y){el.style.transform='';const b=el.getBoundingClientRect(
 document.addEventListener('pointerdown',e=>{
   if(pad.hidden||state!=='play')return;const t=e.target;if(t.closest&&t.closest('button'))return;
   e.preventDefault();unlockAudio();
-  if(e.clientX<innerWidth/2){if(stickId!==null)return;stickTo(stickEl,e.clientX,e.clientY);stickId=e.pointerId;try{stickEl.setPointerCapture(e.pointerId)}catch(_){}stickEl.classList.add('on');stickMove(e)}
-  else{if(gId!==null)return;stickTo(gstickEl,e.clientX,e.clientY);gId=e.pointerId;try{gstickEl.setPointerCapture(e.pointerId)}catch(_){}
+  // ein neuer Finger auf derselben Seite übernimmt immer (ein hängengebliebener alter Finger blockiert nichts)
+  if(e.clientX<innerWidth/2){stickReset();stickTo(stickEl,e.clientX,e.clientY);stickId=e.pointerId;try{stickEl.setPointerCapture(e.pointerId)}catch(_){}stickEl.classList.add('on');stickMove(e)}
+  else{grabReset();stickTo(gstickEl,e.clientX,e.clientY);gId=e.pointerId;try{gstickEl.setPointerCapture(e.pointerId)}catch(_){}
     gstickEl.classList.add('on');if(p.mode!=='air')jumpBuf=.14;grabApply(e.clientX,e.clientY)}
 },{passive:false});
+document.addEventListener('pointermove',e=>{if(e.pointerId===stickId)stickMove(e);else if(e.pointerId===gId)grabApply(e.clientX,e.clientY)},{passive:true});
+['pointerup','pointercancel'].forEach(t=>document.addEventListener(t,e=>{if(e.pointerId===stickId)stickReset();if(e.pointerId===gId)grabReset()}));
 function padReset(){stickReset();grabReset();for(const k in TC)TC[k]=false}
 
 /* ================= AUDIO ================= */
@@ -1629,7 +1628,8 @@ function updAir(dt){
   const up=inU(),dn=inD();
   // Flips komplett von Hand: nur drehen, solange die Taste gehalten wird. Kein automatisches Weiterdrehen.
   // Die Grundneigung gleicht sich langsam dem Landehang an. Die Flip-Drehung kommt nur von dir und dreht nie automatisch weiter.
-  if(up||dn){const dir=dn?-1:1;p.flipAcc+=dir*FLIP_RATE*dt;p.flipDir=dir;p.flipPoseT=.18}else p.flipPoseT=Math.max(0,(p.flipPoseT||0)-dt);
+  const cs=p.corkMode?CORK_SLOW:1;   // Corks und Mistys drehen gemütlicher
+  if(up||dn){const dir=dn?-1:1;p.flipAcc+=dir*FLIP_RATE*cs*dt;p.flipDir=dir;p.flipPoseT=.18}else p.flipPoseT=Math.max(0,(p.flipPoseT||0)-dt);
   {const df=norm(landingGuess()-p.base),mx=150*dt;p.base+=clamp(df,-mx,mx)}
   p.ang=p.base+p.flipAcc;
   // spins
@@ -1638,12 +1638,12 @@ function updAir(dt){
     const pl=l&&!p.aPrevL,pr=r&&!p.aPrevR;p.aPrevL=l;p.aPrevR=r;
     if(p.spinTarget===null)p.spinTarget=Math.round(p.spin/90)*90;
     if(pl||pr||((l||r)&&Math.abs(p.spinTarget-p.spin)<.5))p.spinTarget+=(r?1:-1)*90;
-    const d=p.spinTarget-p.spin,mx=SPIN_RATE*dt;p.spin+=clamp(d,-mx,mx);
+    const d=p.spinTarget-p.spin,mx=SPIN_RATE*cs*dt;p.spin+=clamp(d,-mx,mx);
   }
-  else if(l||r){const dir=r?1:-1;p.spin+=dir*SPIN_RATE*dt;p.spinDir=dir;p.spinTarget=null}
+  else if(l||r){const dir=r?1:-1;p.spin+=dir*SPIN_RATE*cs*dt;p.spinDir=dir;p.spinTarget=null}
   else if(p.spinDir){
     if(p.spinTarget===null){const st=p.fromRail?90:180;p.spinTarget=p.spinDir>0?Math.ceil(p.spin/st-1e-6)*st:Math.floor(p.spin/st+1e-6)*st}
-    const ns=p.spin+p.spinDir*SPIN_RATE*dt;
+    const ns=p.spin+p.spinDir*SPIN_RATE*cs*dt;
     if((p.spinDir>0&&ns>=p.spinTarget)||(p.spinDir<0&&ns<=p.spinTarget)){p.spin=p.spinTarget;p.spinDir=0;p.spinTarget=null}else p.spin=ns;
   }
   if(!p.corkMode&&(up||dn)&&(l||r)&&Math.abs(norm(p.flipAcc))<35)p.corkMode=dn?'cork':'misty';
@@ -2068,7 +2068,7 @@ function layout(){
   const wrap=$('wrap'),cs=getComputedStyle(wrap);
   const W=wrap.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight),H=wrap.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
   const portrait=H>W*1.05;
-  pad.hidden=!(isTouch&&state==='play');
+  pad.hidden=!(isTouch&&state==='play');document.documentElement.classList.toggle('playing',isTouch&&state==='play');
   pad.classList.toggle('over',isTouch&&!portrait);
   const padH=(isTouch&&portrait&&!pad.hidden)?pad.offsetHeight+10:0;
   const aH=Math.max(120,H-padH);
