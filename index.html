@@ -277,7 +277,9 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
     <p class="eyebrow">Was ist neu</p>
     <h2>PATCH NOTES</h2>
     <div class="pn">
-      <h3>v1.8 · 05.11.2026</h3>
+      <h3>v1.9 · 05.11.2026</h3>
+      <ul><li>Neue Lawine: riesige Pulverwolke mit großem Kopf vorne</li><li>Switch mit Gas: kein Stockeinsatz mehr</li></ul>
+      <h3>v1.8</h3>
       <ul><li>Swaps auf Rails etwas langsamer</li><li>Mit Drehung auf die Rail und Stick halten: Drehung läuft auf der Rail weiter</li><li>Park: gleichmäßige Abstände, kleine Kicker ohne Gap entfernt</li></ul>
       <h3>v1.7</h3>
       <ul><li>Ohne Helm fahren: Beanie, Bommelmütze und Fisherman in vielen Farben</li><li>Rucksack in sieben weiteren Farben, jetzt auch von der Seite sichtbar</li><li>Kopf dreht sich bei Corks mit</li></ul>
@@ -1463,7 +1465,7 @@ function playerView(){
     const bsp=p.mode==='ground'&&p.bs?smooth01(p.bs.t/BUTTER180_T):0;if(bsp)phi+=p.bs.dir*180*bsp;
     if(p.mode==='loop')look=false;
     if(p.mode==='rail')pose=Math.abs(Math.sin(phi*RAD))>.5?'grind':'ride';
-    if(p.mode==='ground'&&!board&&p.tuck&&p.pushT>0)pose='push'+(Math.floor(((p.pushT/.55)%1)*8)%8);
+    if(p.mode==='ground'&&!board&&!p.sw&&p.tuck&&p.pushT>0)pose='push'+(Math.floor(((p.pushT/.55)%1)*8)%8);
     if(p.mode==='ground'&&(Math.abs(p.butterVis||0)>5||p.bs))pose=(p.bs?p.bs.end:p.butterVis)<0?'butter':'nbutter';
     const rockHit=p.mode==='crash'||(p.mode==='dead'&&p.deadReason==='rock');
     if(rockHit){pose='tuck';ang=p.ang+(p.mode==='crash'?p.tumble:90);look=false;phi=0}
@@ -1620,7 +1622,6 @@ function resetRun(){
   const g=groundAt(0);p.y=g.y;p.ang=g.a*DEG;
   wall.x=-430;wall.v=140;
   Object.assign(pat,{on:false,next:20,x:0,y:0,s:0,a:0,state:'',t:0,sirenT:0});
-  avaPuffs=[];
   run={score:0,coins:0,bestTrick:'',bestPts:0,start:0,time:0,zone:'park',packUsed:false};
   parts=[];
   cam.x=p.x-VW*.34;cam.y=p.y-VH*.45;
@@ -1804,7 +1805,7 @@ function updGround(dt){
     if(p.bs){p.bs.t+=dt;if(p.bs.t>=BUTTER180_T){const nm=p.sw?'Switch Tail Butter 180':'Nose Butter 180';p.sw=!p.sw;p.bs=null;p.butter=0;p.butterT=0;p.butterVis=0;p.bLock=true;addPoints(320,nm)}}
     if(want){p.butterT+=dt;if(Math.random()<.5){const d=(want<0?-9:9)*(p.sw?-1:1);parts.push({x:p.x+Math.cos(a)*d,y:p.y+Math.sin(a)*d-1,vx:-p.s*.2+rand(-25,25),vy:-rand(20,60),life:rand(.2,.45),col:Math.random()<.6?'#ffffff':'#dce8f8',sz:Math.random()<.4?2:1,gr:300})}}
     const tgt=p.bs?0:want<0?-14:want>0?12:0;p.butterVis=(p.butterVis||0)+(tgt-(p.butterVis||0))*Math.min(1,dt*12)}
-  p.pushT=p.tuck&&SAVE.gear!=='board'?(p.pushT||0)+dt:0;
+  p.pushT=p.tuck&&SAVE.gear!=='board'&&!p.sw?(p.pushT||0)+dt:0;   // Switch: kein Stockeinsatz
   if(p.tuck){drag*=.55;acc+=165}
   if(pow){drag*=1.12;acc-=110*clamp(1-p.s/300,0,1)}
   if(p.braking)acc-=260;
@@ -1988,7 +1989,7 @@ function updDead(dt){
   if(p.deadT>(p.deadReason==='wall'?3.4:1.35))gameOver();
 }
 /* Lawine: Schneemasse, die schulterhoch über die Piste rollt und an der Front brodelt */
-const AVA_H=30;let avaPuffs=[];
+const AVA_H=30;
 function avaH(wx){const dist=wall.x-wx;if(dist<0)return 0;const ff=smooth01(dist/46);
   return (AVA_H+Math.sin(wx*.07+T*2.4)*2+Math.sin(wx*.19-T*3.7)*1.5)*ff}
 function avaGround(wx){const i=segIndexAt(wx);if(i<0)return null;const s=segs[i];
@@ -1999,9 +2000,6 @@ function updWall(dt){
   wall.x+=wall.v*dt;
   const fx=footX(),fy=footY();wall.x=Math.max(wall.x,fx-560);
   if(p.mode!=='dead'&&fx<wall.x){const g=avaGround(fx);if(g==null||fy>g-avaH(fx)-2)die('wall')}
-  if(Math.random()<dt*20)avaPuffs.push({x:wall.x-rand(0,70),o:-rand(10,24),r:rand(3,6.5),life:rand(.8,1.4),t:0});
-  for(const b of avaPuffs){b.t+=dt;b.x+=wall.v*.82*dt;b.o-=7*dt;b.r+=2.2*dt}
-  avaPuffs=avaPuffs.filter(b=>b.t<b.life);if(avaPuffs.length>80)avaPuffs.splice(0,avaPuffs.length-80);
   if(Math.random()<.6){const g=avaGround(wall.x);if(g!=null)parts.push({x:wall.x+rand(-4,2),y:g-rand(2,AVA_H),vx:wall.v*rand(1.05,1.45),vy:-rand(20,110),life:rand(.3,.7),col:Math.random()<.5?'#ffffff':'#d3dff0',sz:Math.random()<.35?2:1,gr:320})}
 }
 function gapBetween(a,b){for(let x=a;x<b;x+=5){const g=groundAt(x);if(!g||g.seg.kind==='rock')return true}return false}
@@ -2206,31 +2204,63 @@ function drawPatrol(cX,cY){
   if(pat.state==='stuck'){ctx.fillStyle='#ffd04a';ctx.font='8px Silkscreen, monospace';ctx.fillText('?!',sx-4,sy-40+Math.round(Math.sin(T*8)*2))}
 }
 // Runder Schneeballen mit Licht oben links und Schatten unten rechts
-function snowPuff(x,y,r){r=Math.max(2,Math.round(r));const xi=Math.round(x),yi=Math.round(y);
-  for(let yy=-r;yy<=r;yy++){const w=Math.round(Math.sqrt(r*r-yy*yy));
-    ctx.fillStyle=yy>r*.38?'#d4e0f0':yy<-r*.5?'#ffffff':'#f1f5fb';ctx.fillRect(xi-w,yi+yy,w*2+1,1);
-    const sw=Math.round(w*.32);if(sw>0&&yy>-r*.6){ctx.fillStyle=yy>r*.38?'#c8d6ea':'#e1e9f5';ctx.fillRect(xi+w-sw+1,yi+yy,sw,1)}
-    if(yy<-r*.2&&yy>-r*.75){const hw=Math.round(w*.3);if(hw>0){ctx.fillStyle='#ffffff';ctx.fillRect(xi-w+1,yi+yy,hw,1)}}}}
+/* Lawine als Pulverwolke wie auf Fotos: viele Blumenkohl-Ballen, oben hell, unten bläulicher Schatten.
+   Ballen entstehen unten an der Front, steigen an der Stirn hoch, wachsen und fallen langsam zurück: vorne türmt sich ein großer Kopf.
+   Alles aus der Zeit T berechnet (kein Zustand), Ballen-Sprites einmal vorgerendert. Die Kollision bleibt avaH. */
+const AVA_TONE=['#ffffff','#eff3f9','#dce4ee','#c2cede','#a2b1c7'].map(hexRgb),AVA_FILL='#d3dce8';
+const AVA_L=(()=>{const v=[.38,-.82,.3],n=Math.hypot(...v);return v.map(x=>x/n)})();
+const AVA_RATE=14,AVA_DMAX=420,AVA_HMAX=128,avaSpr=new Map();
+const avaR=r=>r<12?Math.max(2,Math.round(r)):r<26?Math.round(r/2)*2:Math.min(57,Math.round(r/3)*3);
+// Höhe der Wolke über dem Boden, d = Abstand hinter der Front: großer Kopf direkt vorne (wie bei echten Staublawinen), Schweif etwas flacher
+const avaEnv=d=>AVA_HMAX*smooth01((d+14)/68)*(1-.25*smooth01((d-110)/420))*(1+.08*Math.sin(d*.03-T*.6));
+function puffSprite(r,v){const key=r*4+v;let c=avaSpr.get(key);if(c)return c;
+  const S=2*r+5,[cv,g]=mk(S,S),im=g.createImageData(S,S),D=im.data,cx=S/2,cy=S/2;
+  const a1=hash01(v*7.31+r*.173)*6.283,a2=hash01(v*3.17+r*.719)*6.283,a3=hash01(v*1.93+r*.37)*6.283;
+  // Unter-Ballen auf der Oberseite: geben die Blumenkohl-Struktur
+  const subs=[];if(r>=8){const n=2+Math.floor(r/8);for(let i=0;i<n;i++){const an=-2.65+hash01(v*11.3+i*3.7+r)*2.8,rad=r*(.4+hash01(v*5.1+i*1.9+r*.3)*.32);
+    subs.push([Math.cos(an)*rad,Math.sin(an)*rad,r*(.28+hash01(i*7.7+v+r*.1)*.2)])}}
+  for(let y=0;y<S;y++)for(let x=0;x<S;x++){const dx=x+.5-cx,dy=y+.5-cy,dist=Math.hypot(dx,dy);if(dist>r*1.16)continue;
+    const th=Math.atan2(dy,dx),re=r*(1+.07*Math.sin(5*th+a1)+.05*Math.sin(8*th+a2)+.03*Math.sin(13*th+a3));if(dist>re)continue;
+    const q=dist/re;let nx=dx/re,ny=dy/re,nz=Math.sqrt(Math.max(0,1-q*q));
+    for(const [sx,sy,sr] of subs){const ex=dx-sx,ey=dy-sy,e=Math.hypot(ex,ey);if(e<sr){const w=(1-e/sr)*.85;nx+=(ex/sr-nx)*w;ny+=(ey/sr-ny)*w;nz+=(Math.sqrt(Math.max(0,1-(e/sr)**2))-nz)*w}}
+    const nl=Math.hypot(nx,ny,nz)||1;let lum=(nx*AVA_L[0]+ny*AVA_L[1]+nz*AVA_L[2])/nl;
+    if(q>.76&&dy>-r*.25)lum-=(q-.76)*2.3;   // dunkler Rand unten trennt überlappende Ballen
+    lum+=((BAYER[y&3][x&3]+.5)/16-.5)*.2;
+    const t=lum>.62?0:lum>.34?1:lum>.06?2:lum>-.26?3:4,col=AVA_TONE[t],o=(y*S+x)*4;D[o]=col[0];D[o+1]=col[1];D[o+2]=col[2];D[o+3]=255}
+  g.putImageData(im,0,0);avaSpr.set(key,cv);return cv}
+// Sprites nach dem Laden in kleinen Häppchen vorbereiten, damit beim ersten Auftauchen nichts ruckelt
+function warmAva(){const L=[];for(let r=2;r<=57;r++){const q=avaR(r);if(!L.some(x=>x[0]===q))for(let v=0;v<4;v++)L.push([q,v])}
+  let i=0;const step=()=>{const t0=performance.now();while(i<L.length&&performance.now()-t0<4){puffSprite(L[i][0],L[i][1]);i++}if(i<L.length)setTimeout(step,30)};step()}
 function drawWall(cX,cY){
-  const wsx=Math.round(wall.x-cX);if(wsx<-14)return;
-  const W=Math.min(VW,wsx+4),fr=Math.floor(T*10),buried=p.mode==='dead'&&p.deadReason==='wall';
-  // Pulverwolke und Grundkörper der Lawine
-  for(let sx=0;sx<W;sx++){const wx=cX+sx+.5,gw=avaGround(wx);if(gw==null)continue;
-    const h=avaH(wx);if(h<.6)continue;const ff=smooth01((wall.x-wx)/46);
-    const gy=Math.round(gw-cY),bt=Math.round(gw-cY-h*.6),mt=Math.round(gw-cY-h)-Math.round((15+Math.sin(wx*.05-T*2)*4)*ff);
-    ctx.fillStyle='#f4f8fe';for(let y=mt;y<bt;y++){if(((sx+y+fr)&1)===0&&((sx*13+y*7+fr)%5)!==0)ctx.fillRect(sx,y,1,1)}
-    ctx.fillStyle='#ebf1f9';ctx.fillRect(sx,bt,1,gy-bt+3);ctx.fillStyle='#d6e1f0';ctx.fillRect(sx,gy-6,1,8);
-    if(buried&&Math.abs(wx-p.x)<22){ctx.fillStyle=C.s1;ctx.fillRect(sx,gy+2,1,14);ctx.fillStyle=C.s2;ctx.fillRect(sx,gy+16,1,10)}}
-  // Rollende Schneeballen obendrauf, hinten zuerst
-  const step=8,rs=24,roll=(T*rs)%step,n0=Math.floor(T*rs/step);
-  for(let k=72;k>=0;k--){const wx=wall.x-5-k*step-roll,sx=wx-cX;if(sx<-24||sx>VW+24)continue;const gw=avaGround(wx);if(gw==null)continue;
-    const ff=smooth01((wall.x-wx)/46);if(ff<.04)continue;const id=k-n0;
-    const r=(6+hash01(id*1.37)*5.5+Math.sin(T*2.2+id)*1.1)*ff+1.5,cy=gw-cY-avaH(wx)*.58-r*.3+Math.sin(T*1.7+id*.9)*1.6;
-    snowPuff(sx,cy,r)}
-  // Walze an der Front
-  {const gw=avaGround(wall.x-8);if(gw!=null){const r=9+Math.sin(T*3)*1.5;snowPuff(wall.x-8-cX,gw-cY-r*.9,r)}}
-  for(const b of avaPuffs){const g=avaGround(b.x);if(g==null)continue;const sx=b.x-cX;if(sx<-14||sx>VW+14)continue;
-    if(b.t/b.life>.85)continue;snowPuff(sx,g-cY+b.o-AVA_H*.35,b.r)}
+  const wsx=Math.round(wall.x-cX);if(wsx<-90)return;
+  const buried=p.mode==='dead'&&p.deadReason==='wall';
+  // Füllung hinter den Ballen, damit kein Himmel durchscheint
+  {const xa=Math.max(0,Math.round(wall.x-AVA_DMAX-cX)),xb=Math.min(VW,wsx-14);
+    for(let sx=xa;sx<xb;sx++){const wx=cX+sx+.5,gw=avaGround(wx);if(gw==null)continue;const gy=Math.round(gw-cY),top=Math.round(gw-cY-avaEnv(wall.x-wx)*.62),mid=Math.round(top+(gy-top)*.55);
+      ctx.fillStyle=AVA_FILL;ctx.fillRect(sx,top,1,mid-top);ctx.fillStyle='#c2cede';ctx.fillRect(sx,mid,1,gy-mid+3);
+      ctx.fillStyle=AVA_FILL;for(let y=mid;y<mid+4;y++)if(BAYER[y&3][sx&3]<(mid+4-y)*4)ctx.fillRect(sx,y,1,1)}}
+  // Ballen: entstehen an der Front, fallen zurück, steigen und wachsen
+  const L=[],k1=Math.floor(T*AVA_RATE),k0=k1-Math.ceil(AVA_RATE*(AVA_DMAX+5)/13);
+  for(let k=k0;k<=k1;k++){const a=T-k/AVA_RATE;if(a<0)continue;
+    const h1=hash01(k*1.137+.31),h2=hash01(k*2.713+1.1),h3=hash01(k*.917+2.3),h4=hash01(k*3.331+.7),h5=hash01(k*5.171+4.1);
+    const d=-5+22*h2+(13+20*h1)*a;if(d>AVA_DMAX)continue;
+    const wx=wall.x-d,sx=wx-cX;if(sx<-80||sx>VW+80)continue;const gw=avaGround(wx);if(gw==null)continue;
+    const r=Math.min(8+13*h3+24*smooth01((d+6)/75),3.5+18*a),env=avaEnv(d);
+    const lam=k%3===0?.06+.22*h4:Math.sqrt(h4),hT=Math.max(r*.55,lam*(env-r*.42)),h=Math.min(hT,2+8*h5+(60+40*h4)*a);
+    const lean=10*(h/AVA_HMAX)**2;   // Oberkante kippt leicht nach vorne wie eine brechende Welle
+    L.push({x:sx+lean+Math.sin(T*1.7+k*1.3)*1.2,y:gw-cY-h+Math.sin(T*1.3+k*2.1),r,v:k&3})}
+  // Walze an der Front: große Ballen, die sich nach vorne überschlagen
+  for(let i=0;i<3;i++){const ph=T*1.6+i*2.1,d=6+i*15+Math.sin(ph)*3,wx=wall.x-d,gw=avaGround(wx);if(gw==null)continue;
+    const r=12+i*6+Math.sin(ph*1.3)*1.5;L.push({x:wx-cX,y:gw-cY-r*.8-i*9,r,v:(i+Math.floor(T*2.5))&3})}
+  // Erfasst: Ballen über dem Fahrer
+  if(buried)for(let i=0;i<4;i++){const r=9+i*2+Math.sin(T*3+i)*1.5;L.push({x:p.x-cX+(i-1.5)*9,y:p.y-cY-8-(i&1)*7,r,v:i&3})}
+  L.sort((a,b)=>(a.y-a.r)-(b.y-b.r));
+  for(const q of L){const s=puffSprite(avaR(q.r),q.v);ctx.drawImage(s,Math.round(q.x-s.width/2),Math.round(q.y-s.height/2))}
+  // Kontaktschatten am Boden und Brocken, die vorne aus der Walze kullern
+  {const xa=Math.max(0,Math.round(wall.x-AVA_DMAX-cX)),xb=Math.min(VW,wsx+6);
+    for(let sx=xa;sx<xb;sx++){const wx=cX+sx+.5,gw=avaGround(wx);if(gw==null)continue;const gy=Math.round(gw-cY);ctx.fillStyle=wx>wall.x-4?'#c2cede':'#a2b1c7';ctx.fillRect(sx,gy-1,1,2)}
+    for(let i=0;i<16;i++){const d=((i*13.7+T*(34+i*2.3))%74)-6,wx=wall.x-d,gw=avaGround(wx);if(gw==null)continue;
+      const hh=Math.abs(Math.sin(T*(4+i*.37)+i*1.9))*(4+(i%5)*2.4),sz=i%4===0?2:1;ctx.fillStyle=i%3===0?'#8f9fb8':'#a9b7cc';ctx.fillRect(Math.round(wx-cX),Math.round(gw-cY-1-hh),sz,sz)}}
 }
 function initFlakes(){flakes=[];for(let i=0;i<140;i++)flakes.push({x:Math.random()*VW,y:Math.random()*VH,z:rand(.4,1.2),o:Math.random()*6})}
 let lastCX=0,lastCY=0;
@@ -2286,7 +2316,7 @@ function drawHud(){
   const pOn=pat.on&&pat.state==='chase';hud.hPatrol.hidden=!pOn;
   if(pOn)setT(hud.hPatrolD,Math.max(0,Math.round((footX()-pat.x)/10))+' m');
   const ad=(footX()-wall.x)/10;hud.hAval.hidden=!(ad<26&&p.mode!=='dead');if(ad<26)setT(hud.hAvalD,Math.max(0,Math.round(ad))+' m');
-  $('avalGlow').style.opacity=String(clamp(1-(ad-4)/24,0,1)*(.6+.4*Math.sin(T*10)));
+  $('avalGlow').style.opacity=String(clamp((28-ad)/8,0,1)*clamp((ad-12)/6,0,1)*(.6+.4*Math.sin(T*10)));
 }
 
 /* ================= FLOW ================= */
@@ -2475,6 +2505,7 @@ function start(){
   layout();resetRun();updCamera(0,true);refreshMenu();show('menu');
   if(document.fonts&&document.fonts.load)document.fonts.load('8px Silkscreen').catch(()=>{});
   requestAnimationFrame(t=>{last=t;frame(t)});
+  setTimeout(warmAva,700);
 }
 window.claude?.hot?.snapshot?.(()=>({}));
 window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
