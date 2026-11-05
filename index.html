@@ -280,7 +280,9 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
     <p class="eyebrow">Was ist neu</p>
     <h2>PATCH NOTES</h2>
     <div class="pn">
-      <h3>v2.4 · 05.11.2026</h3>
+      <h3>v2.5 · 05.11.2026</h3>
+      <ul><li>Afterbangs: nach sauberen Landungen kurz lässig (Hands Behind Back, Lean Back, Point, Pole/Hand Drag, Tail Press, Butter 360)</li><li>Grind-Geräusche je nach Material</li><li>Pistenraupe statt Auto, Pole Jam blau und abgenutzt</li></ul>
+      <h3>v2.4</h3>
       <ul><li>Drehungen mit Körper: Schultern und Kopf führen, Ski und Board ziehen nach, in der Luft und auf Rails</li><li>Weicher Übergang beim Swappen auf Rails</li></ul>
       <h3>v2.3</h3>
       <ul><li>14 neue Park-Features: Kink-Rails, Rainbow, Waterfall, Roller Coaster, Treppen-Rail, A-Frame- und Battleship-Box, Auto, Picknicktisch, Pole Jam, Reifen und Fässer</li><li>Freeride-Drops: man fährt nicht mehr an der Felswand runter</li></ul>
@@ -364,7 +366,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
         <dt><kbd>A</kbd><kbd>D</kbd></dt><dd>Tube und Baum: 90° drehen. Gerade drauf ist ein 50-50</dd>
         <dt>Absprung</dt><dd>Du drehst automatisch zurück in die Richtung, in der du aufgesprungen bist (Switch bleibt Switch). Mit A/D drehst du zusätzlich 180er raus</dd>
         <dt><kbd>Leertaste</kbd></dt><dd>Absprung vom Rail</dd>
-        <dt>Neue Features</dt><dd>Kink-Rails (Flat-Down, Down-Flat-Down, Flat-Down-Flat), Rainbow, Waterfall, Roller Coaster, Treppen-Rail, Boxen (A-Frame, Battleship), Auto und Picknicktisch geben Bonuspunkte. Pole Jam: einfach reinfahren. Reifen und Fässer antippen oder draufspringen</dd>
+        <dt>Neue Features</dt><dd>Kink-Rails (Flat-Down, Down-Flat-Down, Flat-Down-Flat), Rainbow, Waterfall, Roller Coaster, Treppen-Rail, Boxen (A-Frame, Battleship), Pistenraupe und Picknicktisch geben Bonuspunkte. Pole Jam: einfach reinfahren. Reifen und Fässer antippen oder draufspringen</dd>
         <dt><kbd>P</kbd><kbd>Esc</kbd></dt><dd>Pause</dd>
       </dl></div>
     </div>
@@ -691,6 +693,14 @@ const SKI3=(()=>{
       arms:[[[-1.5,-6,-5],[-4.5,-4,-8],[-6.5,-2,-9.5]],[[-.5,-6,5],[2.5,-4.5,8],[4.5,-2.5,9.5]]],
       poleDirs:[[-.74,.67,0],[-.74,.67,0]],
       head:[-.6,-11,0]},
+    // Afterbangs: lässig nach der Landung (ca. 1 s)
+    ab_back:{...ride,torso:[[-1,0,0],[-.3,-7,0]],head:[.8,-11.5,0],handsBack:true,
+      arms:[[[-1,-6,-5],[-3.5,-3,-4.5],[-4,.5,-1]],[[.5,-6,5],[-3,-3,4.5],[-3.5,.5,1]]],poleTips:null,poleDirs:[[-.9,.42,.25],[-.9,.42,-.25]]},
+    ab_lean:{...ride,torso:[[-1,0,0],[-3,-6.4,0]],head:[-1.6,-11,0],
+      arms:[[[-3,-5.6,-5],[-3,-1.6,-6.5],[-2,2,-6.5]],[[-2.2,-5.6,5],[-2,-1.6,6.5],[-1,2,6.5]]],poleTips:null,poleDirs:[[-.8,.6,0],[-.8,.6,0]]},
+    ab_pdrag:{...ride,torso:[[-2,0,0],[1.5,-6,0]],head:[3.5,-10.5,0],legs:[[[-3,.5,-3],[1.5,4.5,-3.5],[-1,7,-4]],[[-1,.5,3],[3.5,4.5,3.5],[1,7,4]]],
+      arms:[[[.5,-5.5,-5],[4,-3,-6],[6.5,-1,-6]],[[1,-5.5,5],[-3,-3,7],[-7,-.5,8]]],poleTips:[null,[-19,11,9.5]]},
+    ab_point:{...ride,arms:[[[0,-6,-5],[2,-2,-6.5],[5,-1,-6.5]],[[1.5,-6,5],[5,-9.5,6],[9,-13,6]]],poleTips:null,poleDirs:[[-.85,.5,0],[.62,-.78,.05]]},
     // Nose Butter: Gewicht auf die Spitzen, Hüfte und Knie nach vorne, Enden biegen sich hoch
     nbutter:{
       skis:[{c:[.5,11,-4],d:[1,0,0],flex:2.6,flexEnd:'tail'},{c:[.5,11,4],d:[1,0,0],flex:2.6,flexEnd:'tail'}],
@@ -749,6 +759,14 @@ const BOARD3=(()=>{
     tail:{...tuck,arms:[[[-1,-7,-4.5],[-6,-1,-3],[-10,5,-.5]],tuck.arms[1]]},
     cork:{...tuck,arms:[[[-1,-7,-4.5],[2,-5,-1],[4,-6,2.5]],[[1,-7,4.5],[3,-3.5,5],[4,-5.5,2]]]},
     misty:{...tuck,torso:[[0,-1,0],[2,-7,0]],arms:[[[0,-6.5,-4.5],[3,-4,-1],[5,-2,2]],[[1.5,-6.5,4.5],[4.5,-3,4.5],[5.5,-1,2.5]]],head:[3.5,-11,0]},
+    // Afterbangs
+    ab_back:{...ride,torso:[[0,0,0],[-.6,-7,0]],head:[1.4,-11.5,0]},
+    ab_lean:{...ride,handsBack:false,armKeys:null,torso:[[0,0,0],[-2.6,-6.5,0]],head:[-1,-11,0],
+      arms:[[[-2.5,-5.6,-4.5],[-3,-1.8,-5.5],[-2.5,2,-5.5]],[[-2.5,-5.6,4.5],[-3,-1.8,5.5],[-2.5,2,5.5]]]},
+    ab_hdrag:{...ride,handsBack:false,armKeys:null,torso:[[0,1,0],[2,-4.5,0]],head:[3.8,-9,0],
+      legs:[[[-3,1,0],[-6,5,1.5],[-5,7,0]],[[3,1,0],[6.5,4,1.5],[5,7,0]]],
+      arms:[[[.5,-4,-4.5],[-3,0,-5.5],[-7,10.5,-6.5]],[[1,-4,4.5],[4,-1.5,5.5],[7,-3,5.5]]]},
+    ab_point:{...ride,handsBack:false,armKeys:null,arms:[[[0,-6,-4.5],[-2,-2.5,-5],[-3,.5,-4]],[[.5,-6,4.5],[3.5,-9.5,5],[7.5,-13,5]]]},
     // Ausgraben mit der Lawinenschaufel
     dig0:{...ride,handsBack:false,armKeys:null,torso:[[0,0,0],[3,-5.5,0]],head:[6,-9.5,0],
       arms:[[[1.5,-5,-4.5],[4.5,-2,-4],[7,1,-2]],[[3,-5,4.5],[6,-2.5,4],[8.5,.5,2]]],shovel:1,shovelDir:[.45,1,0]},
@@ -820,7 +838,8 @@ function drawBoardWide(g,poly,d,n,lo,P,O){
     if(Array.isArray(A)&&Array.isArray(Z)&&A.length===Z.length)return Z.map((z,i)=>mixD(A[i],z,u));
     if(A&&Z&&typeof A==='object'&&typeof Z==='object'&&!Array.isArray(A)&&!Array.isArray(Z)){const o={};for(const k in Z)o[k]=k in A?mixD(A[k],Z[k],u):Z[k];return o}
     return Z};
-  for(const LIB of [SKI3,BOARD3])if(LIB.grind&&LIB.ride)LIB.grind_h=mixD(LIB.ride,LIB.grind,.5);   // Swaps: Zwischenschritt beim Rumdrehen
+  for(const LIB of [SKI3,BOARD3])if(LIB.grind&&LIB.ride)LIB.grind_h=mixD(LIB.ride,LIB.grind,.5);
+  for(const LIB of [SKI3,BOARD3])for(const k of ['ab_back','ab_lean','ab_pdrag','ab_hdrag','ab_point'])if(LIB[k])LIB[k+'_h']=mixD(LIB.ride,LIB[k],.5);   // Swaps: Zwischenschritt beim Rumdrehen
   for(const [LIB,base] of [[SKI3,'tuck'],[BOARD3,'bair']])for(const g of ['japan','nose','tail','mute'])if(LIB[g]&&LIB[base])LIB[g+'_h']=mixD(LIB[base],LIB[g],.5);
 })();
 /* Körperschwerpunkt (KSP) einer Pose: In der Luft dreht sich der Körper immer um den KSP, der auf einer Parabel fliegt.
@@ -1043,7 +1062,8 @@ function fRail(tube){
    Waterfall, Roller Coaster, A-Frame, Battleship) plus Jibs: Auto, Picknicktisch, Pole Jam, Treppen-Rail.
    sec = Gelände unter dem Feature als [Winkel, Länge]-Stücke, hf(u) = Höhe über dem Gelände (u = 0..1), curve = Bogen fein abtasten. */
 const BOX_COLS=['#2f7fd0','#e85d3a','#2b2e38','#3fa66b','#7e4fc4'];
-const carH=u=>u<.22?15:u<.36?15+9*smooth01((u-.22)/.14):u<.7?24:u<.8?24-8*smooth01((u-.7)/.1):16;
+// Pistenraupe von hinten nach vorne: Fräse, Motorhaube, Kabine mit Dach, Frontscheibe, Räumschild
+const catH=u=>u<.1?11+3*smooth01(u/.1):u<.16?14+8*smooth01((u-.1)/.06):u<.46?22:u<.52?22+8*smooth01((u-.46)/.06):u<.76?30:u<.83?30-9*smooth01((u-.76)/.07):u<.9?21-5*smooth01((u-.83)/.07):17;
 const JIB={
   fd:()=>({name:'Flat-Down',sec:[[3,rand(70,100)],[rand(26,32),rand(90,130)]],hf:()=>12,bonus:80}),
   dfd:()=>({name:'Down-Flat-Down',sec:[[rand(22,28),rand(60,80)],[3,rand(50,70)],[rand(24,30),rand(60,80)]],hf:()=>12,bonus:120}),
@@ -1055,7 +1075,7 @@ const JIB={
   battleship:()=>({name:'Battleship',type:'box',sec:[[3,rand(160,200)]],curve:16,hf:u=>8+16*clamp((1-Math.abs(2*u-1))*2.6,0,1),bonus:120}),
   flatbox:()=>({name:'Flat Box',type:'box',sec:[[3,rand(120,170)]],hf:()=>10}),
   downbox:()=>({name:'Down Box',type:'box',sec:[[rand(18,24),rand(150,200)]],hf:()=>10}),
-  car:()=>({name:'Auto',type:'box',look:'car',sec:[[2,86]],curve:30,hf:carH,bonus:200,coins:false}),
+  cat:()=>({name:'Pistenraupe',type:'box',look:'cat',sec:[[2,116]],curve:40,hf:catH,bonus:220,coins:false}),
   table:()=>({name:'Picknicktisch',type:'box',look:'table',sec:[[2,66]],hf:()=>12,bonus:100,coins:false}),
   pole:()=>({name:'Pole Jam',type:'pole',look:'pole',sec:[[2,46]],hf:u=>18*u,bonus:80,coins:false}),
   stairs:()=>({name:'Treppen-Rail',type:'rail',look:'stairs',sec:[[3,50],[30,100],[3,50]],hf:()=>13,bonus:150})};
@@ -1251,7 +1271,7 @@ function genFree(){
 }
 function pickW(o){let t=0;for(const k in o)t+=o[k];let r=Math.random()*t;for(const k in o){r-=o[k];if(r<=0)return k}return Object.keys(o)[0]}
 /* Park-Abstand in px (~1,1 s Fahrt mit Gas). PARK_LEAD: Strecke vom Anfang eines Hindernisses bis zur Rampe/Rail/Kante */
-const PARK_SPACE=380,PARK_LEAD={kicker:188,bigair:516,rail:124,tube:124,drop:150,gaprail:162,loop:254,kink:124,rainbow:124,box:124,car:124,table:124,pole:124,stairs:124,bonk:130,wave:124,waterfall:124};
+const PARK_SPACE=380,PARK_LEAD={kicker:188,bigair:516,rail:124,tube:124,drop:150,gaprail:162,loop:254,kink:124,rainbow:124,box:124,cat:124,table:124,pole:124,stairs:124,bonk:130,wave:124,waterfall:124};
 let parkEnd=null,leadCut=0;
 function genNext(){
   const z=zoneAt(gx);
@@ -1259,7 +1279,7 @@ function genNext(){
   if(z==='free'){genFree();return}
   const d=difficulty();let o;
   if(sinceGap>=2)o={kicker:3,drop:2,gaprail:1.1,bigair:1+d*1.5};
-  else o={kicker:3,rail:1.1,tube:1.6,drop:1.5,gaprail:.8,bigair:.8+d,kink:1.5,rainbow:.8,box:1.3,car:.5,table:.5,pole:.6,stairs:.6,bonk:.6,wave:.4,waterfall:.4};
+  else o={kicker:3,rail:1.1,tube:1.6,drop:1.5,gaprail:.8,bigair:.8+d,kink:1.5,rainbow:.8,box:1.3,cat:.5,table:.5,pole:.6,stairs:.6,bonk:.6,wave:.4,waterfall:.4};
   if(o[lastType])o[lastType]*=.35;
   const t=pickW(o);
   // Gleicher Abstand: vom Ende des letzten Hindernisses (Rail-Ende bzw. normale Landestelle) bis zum Anfang des nächsten
@@ -1269,7 +1289,7 @@ function genNext(){
     if(L>8){const x=gx;seg(L,rand(14,20));if(L>140&&Math.random()<.4)coinRow(x+30,Math.floor((L-50)/24),16,12)}else leadCut=-L}
   const pickOf=a=>a[Math.floor(Math.random()*a.length)];
   ({kicker:()=>fKicker(false),bigair:()=>fKicker(true),rail:()=>fRail(false),tube:()=>fRail(true),drop:fDrop,gaprail:fGapRail,loop:fLoop,
-    kink:()=>fJib(pickOf(['fd','dfd','fdf'])),rainbow:()=>fJib('rainbow'),box:()=>fJib(pickOf(['aframe','battleship','flatbox','downbox'])),car:()=>fJib('car'),
+    kink:()=>fJib(pickOf(['fd','dfd','fdf'])),rainbow:()=>fJib('rainbow'),box:()=>fJib(pickOf(['aframe','battleship','flatbox','downbox'])),cat:()=>fJib('cat'),
     table:()=>fJib('table'),pole:()=>fJib('pole'),stairs:()=>fJib('stairs'),bonk:fBonks,wave:()=>fJib('wave'),waterfall:()=>fJib('waterfall')})[t]();
   sinceGap=['kicker','bigair','drop','gaprail'].includes(t)?0:sinceGap+1;
   if(t==='loop')lastLoopX=gx;
@@ -1560,6 +1580,10 @@ function playerView(){
     if(p.mode==='rail'){const sv=Math.abs(Math.sin(phi*RAD));pose=sv>.75?'grind':sv>.4?'grind_h':'ride'}
     if(p.mode==='ground'&&!board&&!p.sw&&p.tuck&&p.pushT>0)pose='push'+(Math.floor(((p.pushT/.55)%1)*8)%8);
     if(p.mode==='ground'&&(Math.abs(p.butterVis||0)>5||p.bs))pose=(p.bs?p.bs.end:p.butterVis)<0?'butter':'nbutter';
+    if(p.mode==='ground'&&p.ab){const k=p.ab.kind,t=p.ab.t,d=p.ab.dur;
+      if(k==='b360'){const u=smooth01(t/d);phi+=360*u*p.ab.dir;twist=32*p.ab.dir*Math.sin(Math.PI*u)}
+      else if(k==='shifty'){twist=42*p.ab.dir*Math.sin(Math.PI*smooth01(t/d));look=false}
+      else if(k!=='tailpress'){const L=board?BOARD3:SKI3;if(L[k])pose=(t<.12||t>d-.12)?k+'_h':k}}
     const rockHit=p.mode==='crash'||(p.mode==='dead'&&p.deadReason==='rock');
     if(rockHit){pose='tuck';ang=p.ang+(p.mode==='crash'?p.tumble:90);look=false;phi=0}
     const inAva=p.mode==='dead'&&p.deadReason==='wall';
@@ -1798,6 +1822,22 @@ function padReset(){stickReset();grabReset();for(const k in TC)TC[k]=false}
 let AC=null,muted=false;
 function unlockAudio(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){AC=null}}if(AC&&AC.state==='suspended')AC.resume().catch(()=>{})}
 function tone(f0,f1,dur,type,vol,delay){if(!AC||muted)return;const t=AC.currentTime+(delay||0);const o=AC.createOscillator(),g=AC.createGain();o.type=type||'square';o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(Math.max(30,f1),t+dur);g.gain.setValueAtTime(vol||.05,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+dur+.03)}
+/* Grind-Geräusch: durchgehendes Rauschen durch einen Bandpass, je nach Material. Metall kreischt hell (mit leisem Klingeln),
+   Kunststoff-Boxen zischen dumpfer, Holz rumpelt. Lautstärke und Tonhöhe gehen mit dem Tempo. */
+let grindSnd=null,noiseBuf=null;
+const railMat=r=>!r?'metal':(r.look==='table'||r.type==='log')?'wood':(r.look==='cat'||r.type==='rail'||r.type==='pole')?'metal':'plastic';
+function noiseBuffer(){if(noiseBuf)return noiseBuf;const n=Math.floor(AC.sampleRate*1.2),b=AC.createBuffer(1,n,AC.sampleRate),d=b.getChannelData(0);let l=0;for(let i=0;i<n;i++){l=l*.55+(Math.random()*2-1)*.45;d[i]=l}noiseBuf=b;return b}
+function grindStart(mat,rail){if(!AC||muted)return;grindStop(true);
+  const cfg={metal:[2600,8,.11],plastic:[950,2.2,.1],wood:[420,1.6,.13]}[mat]||[2600,8,.11];
+  const src=AC.createBufferSource();src.buffer=noiseBuffer();src.loop=true;const bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=cfg[0];bp.Q.value=cfg[1];
+  const g=AC.createGain();g.gain.value=0;src.connect(bp);bp.connect(g);g.connect(AC.destination);src.start();g.gain.setTargetAtTime(cfg[2],AC.currentTime,.02);
+  let osc=null;if(mat==='metal'){osc=AC.createOscillator();osc.type='triangle';osc.frequency.value=1900;const og=AC.createGain();og.gain.value=.018;osc.connect(og);og.connect(g);osc.start()}
+  grindSnd={src,bp,g,osc,mat,rail,base:cfg[0],vol:cfg[2]};
+  tone(mat==='wood'?180:mat==='plastic'?240:520,mat==='wood'?90:120,.08,mat==='metal'?'square':'triangle',.05)}   // Klacken beim Aufspringen
+function grindUpdate(speed){if(!grindSnd||!AC)return;const k=clamp(speed/300,.35,1.25),t=AC.currentTime;
+  grindSnd.g.gain.setTargetAtTime(grindSnd.vol*k,t,.05);grindSnd.bp.frequency.setTargetAtTime(grindSnd.base*(.75+.45*k),t,.05);if(grindSnd.osc)grindSnd.osc.frequency.setTargetAtTime(1650+500*k,t,.05)}
+function grindStop(now){if(!grindSnd||!AC){grindSnd=null;return}const s=grindSnd,t=AC.currentTime;grindSnd=null;s.g.gain.setTargetAtTime(0,t,now?.004:.035);
+  setTimeout(()=>{try{s.src.stop();if(s.osc)s.osc.stop();s.g.disconnect()}catch(e){}},now?50:250)}
 const SFX={
   coin:()=>{tone(988,988,.05,'square',.035);tone(1319,1319,.1,'square',.035,.05)},
   jump:()=>tone(260,620,.12,'square',.035),
@@ -1806,7 +1846,6 @@ const SFX={
   trick:()=>{[523,659,784,1047].forEach((f,i)=>tone(f,f,.08,'square',.03,i*.055))},
   siren:()=>{tone(660,920,.28,'triangle',.045);tone(920,660,.28,'triangle',.045,.28)},
   die:()=>{tone(520,45,.9,'sawtooth',.07)},
-  grind:()=>tone(2200,1700,.04,'sawtooth',.01),
   shake:()=>{tone(300,300,.06,'square',.04);tone(450,450,.06,'square',.04,.07);tone(600,600,.12,'square',.04,.14)}
 };
 
@@ -1821,7 +1860,7 @@ function footX(){if(p.mode==='air'||(p.mode==='dead'&&p.inAir))return p.x+airFoo
 function footY(){if(p.mode==='air'||(p.mode==='dead'&&p.inAir))return p.y+airFoot()[1];return p.y}
 // Drehpunkt in der Luft verschieben, ohne dass der Körper springt
 
-function hSpeed(){return p.mode==='air'?p.vx:p.mode==='rail'||p.mode==='ground'||p.mode==='crash'?p.s*Math.cos((p.mode==='rail'?Math.atan2(p.rail.y1-p.rail.y0,p.rail.x1-p.rail.x0):(groundAt(p.x)||{a:0}).a)):p.mode==='loop'?p.s*Math.cos(p.phi):0}
+function hSpeed(){return p.mode==='air'?p.vx:p.mode==='rail'||p.mode==='ground'||p.mode==='crash'?p.s*Math.cos((p.mode==='rail'?railA(p.rail,p.x):(groundAt(p.x)||{a:0}).a)):p.mode==='loop'?p.s*Math.cos(p.phi):0}
 
 function launch(a,pop,sg){
   if(p.bs){if(p.bs.t>BUTTER180_T/2)p.sw=!p.sw;p.bs=null;p.butter=0;p.butterT=0}
@@ -1832,7 +1871,7 @@ function launch(a,pop,sg){
   if(sg&&sg.vmax)s=Math.min(s,sg.vmax);
   if(sg&&sg.kind==='kicker'&&pop)pop*=1.1;
   p.vx=Math.cos(a)*s;p.vy=Math.sin(a)*s-pop;
-  p.flipPoseT=0;p.grab=null;p.gVis=0;p.gName=null;p.corkMode=null;p.spinTw=0;p.lastSpin=null;const r=p.ang*RAD;p.x+=FOOT*Math.sin(r);p.y-=FOOT*Math.cos(r);
+  p.flipPoseT=0;p.grab=null;p.gVis=0;p.gName=null;p.corkMode=null;p.spinTw=0;p.lastSpin=null;p.ab=null;const r=p.ang*RAD;p.x+=FOOT*Math.sin(r);p.y-=FOOT*Math.cos(r);
   {const pc=poseCOM(airPose(),p.spin,SAVE.gear);p.x+=pc.cx*Math.cos(r)-pc.cy*Math.sin(r);p.y+=pc.cx*Math.sin(r)+pc.cy*Math.cos(r);p.cx=pc.cx;p.cy=pc.cy;p.cz=pc.cz;p.fx=pc.fx;p.fy=pc.fy;p.fz=pc.fz}
   p.mode='air';
   p.airT=0;p.base=p.ang;p.spinStart=p.spin;p.flipAcc=0;p.flipDir=0;p.flipTarget=null;p.spinDir=0;p.spinTarget=null;p.grabT={};p.grab=null;
@@ -1863,10 +1902,10 @@ function scoreAir(sketchy){
   for(const k of grabs){nm.push(SAVE.gear==='board'&&k==='mute'?'Indy':GRAB_NAMES[k]);pts+=150+Math.round(p.grabT[k]*120)}
   if(flips&&spinDeg)pts*=corked?1.6:1.3;
   if(p.airT>.9)pts+=(p.airT-.9)*160;
-  if(!nm.length){if(p.airT>1.05)nm.push('Big Air');else return}
+  if(!nm.length){if(p.airT>1.05)nm.push('Big Air');else return false}
   if(p.bigAir)pts*=1.5;
   if(sketchy)pts*=.5;
-  addPoints(Math.round(pts),nm.join(' '),sketchy?'SKETCHY':'');
+  addPoints(Math.round(pts),nm.join(' '),sketchy?'SKETCHY':'');return true;
 }
 function powderBurst(x,y,n,sp){for(let i=0;i<n;i++)parts.push({x:x+rand(-6,6),y:y-rand(0,4),vx:rand(-sp,sp*.6),vy:-rand(30,sp),life:rand(.5,1.1),col:Math.random()<.6?'#ffffff':'#e3ecf8',sz:Math.random()<.5?3:2,gr:70})}
 function crash(s,why,pow){
@@ -1883,7 +1922,7 @@ function land(g,fx){
   if(ok){
     p.spin=Math.round(p.spin/180)*180;p.sw=Math.abs(Math.round(p.spin/180))%2===1;p.ang=gDeg;
     const sketchy=!!p.grab;p.s=clamp(s*(sketchy?.8:1),70,VMAX);
-    if(!pow&&p.vy>420&&Math.abs(g.a)<.12){p.s*=.7;showTrick('FLAT LANDING','Autsch','bad')}else scoreAir(sketchy);
+    if(!pow&&p.vy>420&&Math.abs(g.a)<.12){p.s*=.7;showTrick('FLAT LANDING','Autsch','bad')}else{const sc=scoreAir(sketchy);if(!sketchy&&(sc||(p.fromRail&&p.grindPts)))startAfterbang()}
     SFX.land();if(pow){powderBurst(fx,g.y,26+Math.min(30,p.vy/14),130);p.sink=5;shake=Math.min(2,p.vy/250)}else{burst(fx,g.y,10,['#ffffff','#e4eefb'],90);shake=Math.min(4,p.vy/160)}
   }else crash(s,null,pow);
 }
@@ -1894,6 +1933,11 @@ function updGround(dt){
   let drag=.0022,acc=G*Math.sin(a)-.035*G*Math.cos(a);
   const pow=isPow(g.seg);
   p.tuck=ctrl&&inGas();p.braking=ctrl&&inL()&&!inU()&&!inD();
+  // Afterbang: was beim Landen schon gedrückt war, zählt erst nach dem Loslassen; ein neuer Druck (außer Gas) bricht ab
+  if(p.ab){const cur=(inU()?1:0)|(inD()?2:0)|(inL()?4:0)|(inR()&&!inGas()?8:0),fresh=cur&~p.ab.held;p.ab.held&=cur;
+    if(!ctrl||jumpBuf>0||fresh||p.bs||p.butter)p.ab=null;else{p.ab.t+=dt;if(p.ab.t>=p.ab.dur)p.ab=null;
+    else if((p.ab.kind==='ab_pdrag'||p.ab.kind==='ab_hdrag')&&p.ab.t>.12&&p.ab.t<p.ab.dur-.15&&Math.random()<.7){const d=p.sw?1:-1;
+      parts.push({x:p.x+d*(p.ab.kind==='ab_pdrag'?17:7)+rand(-2,2),y:p.y-1,vx:-p.s*.35+rand(-20,20),vy:-rand(25,80),life:rand(.25,.5),col:Math.random()<.6?'#ffffff':'#dce8f8',sz:Math.random()<.35?2:1,gr:320})}}}
   // Butter: Gewicht nach hinten (runter) hebt die Spitzen, nach vorne (hoch) die Enden
   {if(p.bLock&&!inU()&&!inD())p.bLock=false;
     const want=p.bs?p.butter:(ctrl&&!p.bLock?(inD()?-1:inU()?1:0):0);
@@ -1903,8 +1947,8 @@ function updGround(dt){
     if(!p.bs&&ctrl&&want===lead&&p.butterT>.1&&(inL()||inR())){p.bs={dir:(inR()?1:-1)*(p.sw?-1:1),t:0,end:want};SFX.jump()}
     if(p.bs){p.bs.t+=dt;if(p.bs.t>=BUTTER180_T){const nm=p.sw?'Switch Tail Butter 180':'Nose Butter 180';p.sw=!p.sw;p.bs=null;p.butter=0;p.butterT=0;p.butterVis=0;p.bLock=true;addPoints(320,nm)}}
     if(want){p.butterT+=dt;if(Math.random()<.5){const d=(want<0?-9:9)*(p.sw?-1:1);parts.push({x:p.x+Math.cos(a)*d,y:p.y+Math.sin(a)*d-1,vx:-p.s*.2+rand(-25,25),vy:-rand(20,60),life:rand(.2,.45),col:Math.random()<.6?'#ffffff':'#dce8f8',sz:Math.random()<.4?2:1,gr:300})}}
-    const tgt=p.bs?0:want<0?-14:want>0?12:0;p.butterVis=(p.butterVis||0)+(tgt-(p.butterVis||0))*Math.min(1,dt*12)}
-  p.pushT=p.tuck&&SAVE.gear!=='board'&&!p.sw?(p.pushT||0)+dt:0;   // Switch: kein Stockeinsatz
+    const abk=p.ab&&p.ab.t<p.ab.dur-.18?p.ab.kind:'',tgt=p.bs?0:want<0?-14:want>0?12:abk==='tailpress'?-14:abk==='b360'?12:0;p.butterVis=(p.butterVis||0)+(tgt-(p.butterVis||0))*Math.min(1,dt*12)}
+  p.pushT=p.tuck&&SAVE.gear!=='board'&&!p.sw&&!p.ab?(p.pushT||0)+dt:0;   // Switch und Afterbang: kein Stockeinsatz
   if(p.tuck){drag*=.55;acc+=165}
   if(pow){drag*=1.12;acc-=110*clamp(1-p.s/300,0,1)}
   if(p.braking)acc-=260;
@@ -1928,6 +1972,15 @@ function updGround(dt){
   if(jumpBuf>0&&ctrl){jumpBuf=0;butterEnd();launch(g2.a,JUMP_POP,g2.seg);return}
   if(pow){if(p.s>80&&Math.random()<.85){const d=p.sw?1:-1;parts.push({x:p.x+d*7+rand(-3,3),y:p.y-rand(0,3),vx:-p.s*.18+rand(-30,30),vy:-rand(30,110)*(p.braking?1.4:1),life:rand(.4,.9),col:Math.random()<.6?'#ffffff':'#e6eefa',sz:Math.random()<.5?3:2,gr:60})}}
   else if(p.s>140&&Math.random()<(p.braking?.9:.35)){const d=p.sw?1:-1;parts.push({x:p.x+d*6,y:p.y-1,vx:-p.s*.25+rand(-30,30),vy:-rand(20,70),life:rand(.25,.5),col:Math.random()<.5?'#ffffff':'#d8e6fa',sz:1,gr:300})}
+}
+/* Afterbangs (Freeski-Slang): nach einer sauberen Landung ca. 1 s lässig weiterfahren, als wäre nichts gewesen.
+   Zufällig: Hände hinter den Rücken, zurücklehnen, zeigen, Pole Drag (Ski) bzw. Hand Drag (Board), Tail Press, Butter 360.
+   Jede Eingabe außer Gas bricht ab. */
+const AB_NAMES={shifty:'Shifty',ab_back:'Hands Behind Back',ab_lean:'Lean Back',ab_point:'Point',ab_pdrag:'Pole Drag',ab_hdrag:'Hand Drag',tailpress:'Tail Press',b360:'Butter 360'};
+function startAfterbang(){
+  const ski=SAVE.gear!=='board',L=ski?['ab_back','ab_lean','ab_point','ab_pdrag','tailpress','b360','shifty']:['shifty','ab_lean','ab_point','ab_hdrag','tailpress','b360'];
+  const k=L[Math.floor(Math.random()*L.length)];p.ab={kind:k,t:0,dur:k==='b360'?.95:1.05,dir:Math.random()<.5?1:-1,held:(inU()?1:0)|(inD()?2:0)|(inL()?4:0)|(inR()&&!inGas()?8:0)};
+  run.score+=60;const sp=$('trick').querySelector('span');if(sp)sp.textContent+='  ·  '+AB_NAMES[k]+' +60';
 }
 function butterEnd(){const t=p.butterT||0,b=p.butter||0;p.butter=0;p.butterT=0;
   if(b&&t>=.35&&p.mode==='ground')addPoints(Math.round(Math.min(400,40+t*90)),(p.sw?'Switch ':'')+(b<0?'Butter':'Nose Butter'),t.toFixed(1)+'s')}
@@ -1965,9 +2018,9 @@ function gLabel(){
   if(!p.gParts.includes(nm))p.gParts.push(nm);
 }
 function endGrind(){
-  const t=p.grindT;if(t<=.15)return;
+  p.grindPts=false;const t=p.grindT;if(t<=.15)return;
   const nm=p.gParts.join(' to ')+(p.gSwaps?' · '+p.gSwaps+'x '+(p.rail.type==='rail'?'Swap':'90'):'')+(p.rail.name?' · '+p.rail.name:'');
-  addPoints(Math.round(t*280+p.gSwaps*120+(p.gParts.length>1?100:0)+(p.rail.bonus||0)),nm,t.toFixed(1)+'s');
+  addPoints(Math.round(t*280+p.gSwaps*120+(p.gParts.length>1?100:0)+(p.rail.bonus||0)),nm,t.toFixed(1)+'s');p.grindPts=true;
 }
 function leaveRail(a,pop){
   endGrind();p.spin=p.gspin;launch(a,pop,null);p.fromRail=true;p.aPrevL=false;p.aPrevR=false;
@@ -1991,7 +2044,8 @@ function updRail(dt){
   {const dv=p.gspin-p.gspinVis,mx=GRIND_SPIN*dt;p.gspinVis+=clamp(dv,-mx,mx)}
   {const gv=(p.gspinVis-(p.lastGsv??p.gspinVis))/Math.max(dt,1e-4);p.lastGsv=p.gspinVis;const tg=clamp(gv/GRIND_SPIN,-1,1)*SPIN_TWIST;p.gTw=(p.gTw||0)+(tg-(p.gTw||0))*Math.min(1,dt*16)}
   if(jumpBuf>0){jumpBuf=0;leaveRail(a,JUMP_POP*.9);return}
-  p.sparkT-=dt;if(p.sparkT<=0){p.sparkT=.03;const lg=r.type==='log';parts.push({x:p.x+rand(-3,3),y:p.y,vx:rand(-90,10),vy:-rand(30,90),life:rand(.15,.35),col:lg?(Math.random()<.6?'#ffffff':'#a77b4f'):(Math.random()<.5?'#ffd04a':'#ff8a3d'),sz:lg&&Math.random()<.4?2:1,gr:400});if(!lg&&Math.random()<.3)SFX.grind()}
+  p.sparkT-=dt;if(p.sparkT<=0){p.sparkT=.03;const mat=railMat(r);parts.push({x:p.x+rand(-3,3),y:p.y,vx:rand(-90,10),vy:-rand(30,90),life:rand(.15,.35),
+    col:mat==='wood'?(Math.random()<.6?'#ffffff':'#a77b4f'):mat==='plastic'?(Math.random()<.6?'#ffffff':'#d8e3f2'):(Math.random()<.5?'#ffd04a':'#ff8a3d'),sz:mat!=='metal'&&Math.random()<.4?2:1,gr:400})}
 }
 function updAir(dt){
   p.airT+=dt;
@@ -2197,6 +2251,7 @@ function update(dt){
     case 'climb':updClimb(dt);break;
     case 'dig':updDig(dt);break;
   }
+  if(state==='play'&&p.mode==='rail'&&p.rail){if(!grindSnd||grindSnd.rail!==p.rail)grindStart(railMat(p.rail),p.rail);grindUpdate(p.s)}else if(grindSnd)grindStop();
   if(state!=='play')return;
   {const zg=groundAt(footX());if(zg&&zg.seg.zone!==run.zone){run.zone=zg.seg.zone;if(run.zone==='free')showTrick('FREERIDE ZONE','Powder · Tree Grinds · Drops · Felsen');else showTrick('SNOWPARK','Kicker · Rails · Big Air')}}
   updRocks();updFauna(dt);updWall(dt);updPatrol(dt);if(p.mode!=='dead')updCoins();updParts(dt);updCamera(dt);
@@ -2254,7 +2309,7 @@ function drawRails(cX,cY){
   for(const r of rails){
     if(r.x1<cX-10||r.x0>cX+VW+10)continue;
     if(r.type==='log'){drawLog(r,cX,cY);continue}
-    if(r.look==='car'){drawCar(r,cX,cY);continue}
+    if(r.look==='cat'){drawCat(r,cX,cY);continue}
     if(r.look==='table'){drawTable(r,cX,cY);continue}
     if(r.look==='pole'){drawPoleJam(r,cX,cY);continue}
     if(r.type==='box'){drawBox(r,cX,cY);continue}
@@ -2275,29 +2330,50 @@ function drawBox(r,cX,cY){const xa=Math.max(Math.floor(r.x0),cX),xb=Math.min(Mat
     ctx.fillStyle='#1a2133';ctx.fillRect(sx,ry-1,1,gy-ry+2);if(edge)continue;
     ctx.fillStyle=r.col;ctx.fillRect(sx,ry+2,1,Math.max(0,gy-ry-2));ctx.fillStyle=dk;ctx.fillRect(sx,gy-2,1,2);ctx.fillStyle=lt;ctx.fillRect(sx,ry+5,1,1);
     ctx.fillStyle='#eef2f7';ctx.fillRect(sx,ry,1,2)}}
-// Auto: Dach-Linie ist die Rutschfläche, Fenster, rote Karosserie, Räder
-function drawCar(r,cX,cY){const L=r.x1-r.x0,xa=Math.max(Math.floor(r.x0),cX),xb=Math.min(Math.ceil(r.x1),cX+VW);
-  for(let x=xa;x<xb;x++){const sx=x-cX,u=(x-r.x0)/L,top=Math.round(railY(r,x))-cY,g=groundAt(x),gy=g?Math.round(g.y)-cY:top+24,bl=gy-11;
-    ctx.fillStyle='#1a1d26';ctx.fillRect(sx,top-1,1,gy-top+1);if(u<.015||u>.985)continue;
-    const cab=u>.24&&u<.79,pil=Math.abs(u-.255)<.02||Math.abs(u-.535)<.012||Math.abs(u-.775)<.015;
-    if(cab&&!pil&&bl-top>2){ctx.fillStyle='#a9d8ff';ctx.fillRect(sx,top+1,1,bl-top-2);ctx.fillStyle='#e6f4ff';if(((x>>1)&7)===0)ctx.fillRect(sx,top+2,1,Math.max(1,bl-top-5))}
-    const bt=cab?(pil?top:bl-1):top;ctx.fillStyle='#d2423a';ctx.fillRect(sx,bt,1,Math.max(0,gy-3-bt));ctx.fillStyle='#ef6b5c';ctx.fillRect(sx,cab?bl-1:top,1,1);
-    ctx.fillStyle='#a8322c';ctx.fillRect(sx,gy-5,1,2);ctx.fillStyle='#2b2e38';ctx.fillRect(sx,gy-3,1,3)}
-  for(const u of [.18,.82]){const x=r.x0+L*u,sx=Math.round(x-cX),g=groundAt(x),gy=g?Math.round(g.y)-cY:0;if(sx<-6||sx>VW+6)continue;
-    for(let dy=-4;dy<=4;dy++){const w=Math.round(Math.sqrt(16-dy*dy)+.3);ctx.fillStyle='#16181f';ctx.fillRect(sx-w,gy-4+dy,w*2+1,1)}ctx.fillStyle='#9aa3b2';ctx.fillRect(sx-1,gy-5,3,3)}
-  {const sx=Math.round(r.x0+1-cX),ty=Math.round(railY(r,r.x0+1))-cY;ctx.fillStyle='#ffe58a';ctx.fillRect(sx,ty+3,2,2);
-   const ex=Math.round(r.x1-3-cX),ey=Math.round(railY(r,r.x1-3))-cY;ctx.fillStyle='#ff4d5e';ctx.fillRect(ex,ey+3,2,2)}}
+// Pistenraupe: rote Karosserie, Kabine mit Fenstern und Rundumleuchte, Ketten mit Laufrädern, Räumschild vorne, Fräse hinten.
+// Die Oberkante (Fräse, Motorhaube, Dach, Schild) ist die Rutschfläche.
+function drawCat(r,cX,cY){const L=r.x1-r.x0,xa=Math.max(Math.floor(r.x0),cX),xb=Math.min(Math.ceil(r.x1),cX+VW);
+  const gyAt=x=>{const g=groundAt(x);return g?Math.round(g.y)-cY:0};
+  for(let x=xa;x<xb;x++){const sx=x-cX,u=(x-r.x0)/L,top=Math.round(railY(r,x))-cY,gy=gyAt(x);
+    if(u>=.9){   // Räumschild: gewölbtes Stahlblech, unten am Boden
+      const edge=u>.985;ctx.fillStyle='#16181f';ctx.fillRect(sx,top-1,1,gy-top+1);if(edge)continue;
+      const k=(u-.9)/.1;ctx.fillStyle=k<.35?'#8b939f':k<.7?'#b9c1cd':'#dfe4ea';ctx.fillRect(sx,top,1,gy-top-1);ctx.fillStyle='#ff7a2f';ctx.fillRect(sx,top,1,2);continue}
+    if(u<.1){    // Fräse: graues Gehäuse mit Gummilappen
+      ctx.fillStyle='#16181f';ctx.fillRect(sx,top-1,1,gy-top+1);if(u<.012)continue;
+      ctx.fillStyle='#6f7785';ctx.fillRect(sx,top,1,gy-top-4);ctx.fillStyle='#9aa3b2';ctx.fillRect(sx,top,1,1);ctx.fillStyle='#22252e';ctx.fillRect(sx,gy-4,1,4);continue}
+    // Karosserie über den Ketten
+    const tr=gy-9;ctx.fillStyle='#16181f';ctx.fillRect(sx,top-1,1,1);
+    const cab=u>.46&&u<.83;
+    if(cab){const bl=tr-7,pil=Math.abs(u-.49)<.012||Math.abs(u-.64)<.01||Math.abs(u-.8)<.014;
+      if(!pil&&bl-top>3){ctx.fillStyle='#16181f';ctx.fillRect(sx,top,1,1);ctx.fillStyle='#a9d8ff';ctx.fillRect(sx,top+2,1,bl-top-2);ctx.fillStyle='#e6f4ff';if(((x>>1)&7)===0)ctx.fillRect(sx,top+3,1,Math.max(1,bl-top-6));ctx.fillStyle='#d2423a';ctx.fillRect(sx,top,1,2)}
+      else{ctx.fillStyle='#d2423a';ctx.fillRect(sx,top,1,bl-top)}
+      ctx.fillStyle='#d2423a';ctx.fillRect(sx,bl,1,tr-bl);ctx.fillStyle='#a8322c';ctx.fillRect(sx,tr-2,1,2)}
+    else{ctx.fillStyle='#d2423a';ctx.fillRect(sx,top,1,tr-top);ctx.fillStyle='#ef6b5c';ctx.fillRect(sx,top,1,1);ctx.fillStyle='#a8322c';ctx.fillRect(sx,tr-2,1,2);
+      if(u>.18&&u<.44&&((x-Math.floor(r.x0))%4===0)){ctx.fillStyle='#8f2a25';ctx.fillRect(sx,top+3,1,Math.max(0,tr-top-7))}}   // Lüftungsgitter
+    ctx.fillStyle='#16181f';ctx.fillRect(sx,tr,1,1)}
+  // Ketten mit Laufrädern und Stollen
+  const k0=r.x0+L*.1,k1=r.x0+L*.9;
+  for(let x=Math.max(Math.floor(k0),cX);x<Math.min(Math.ceil(k1),cX+VW);x++){const sx=x-cX,gy=gyAt(x),e=Math.min(x-k0,k1-x),cut=e<3?3-Math.round(e):0;
+    ctx.fillStyle='#0f1116';ctx.fillRect(sx,gy-9+cut,1,9-cut*2+1);ctx.fillStyle='#2b2e38';ctx.fillRect(sx,gy-8+cut,1,Math.max(0,7-cut*2));
+    if(((x-Math.floor(k0))%3)===0){ctx.fillStyle='#4a4e5c';ctx.fillRect(sx,gy-9+cut,1,1);ctx.fillRect(sx,gy-1-cut,1,1)}}
+  for(let i=0;i<5;i++){const x=k0+6+i*(k1-k0-12)/4,sx=Math.round(x-cX),gy=gyAt(x);if(sx<-4||sx>VW+4)continue;ctx.fillStyle='#16181f';ctx.fillRect(sx-2,gy-7,5,5);ctx.fillStyle='#9aa3b2';ctx.fillRect(sx-1,gy-6,3,3);ctx.fillStyle='#5f6774';ctx.fillRect(sx,gy-5,1,1)}
+  // Rundumleuchte auf dem Dach, blinkt
+  {const x=r.x0+L*.66,sx=Math.round(x-cX),ty=Math.round(railY(r,x))-cY;ctx.fillStyle='#16181f';ctx.fillRect(sx-2,ty-4,4,4);ctx.fillStyle=(Math.floor(T*4)&1)?'#ffb02e':'#c47a10';ctx.fillRect(sx-1,ty-3,2,3)}}
 // Picknicktisch: Holzplatte mit A-Beinen
 function drawTable(r,cX,cY){const xa=Math.max(Math.floor(r.x0),cX),xb=Math.min(Math.ceil(r.x1),cX+VW);
   for(const lx of [r.x0+9,r.x1-9])for(const d of [-6,6]){const top=railY(r,lx),g=groundAt(lx+d);if(!g)continue;
     strokePts(ctx,[[lx-cX,top+3-cY],[lx+d-cX,g.y-cY]],3,'#3b2615');strokePts(ctx,[[lx-cX,top+3-cY],[lx+d-cX,g.y-cY]],1,'#8a5a2e')}
   for(let x=xa;x<xb;x++){const sx=x-cX,ry=Math.round(railY(r,x))-cY;ctx.fillStyle='#2a1a0e';ctx.fillRect(sx,ry-1,1,5);ctx.fillStyle='#a0703c';ctx.fillRect(sx,ry,1,3);
     ctx.fillStyle='#c79a5e';ctx.fillRect(sx,ry,1,1);if(((x-Math.floor(r.x0))%13)===0){ctx.fillStyle='#6e4a26';ctx.fillRect(sx,ry,1,3)}}}
-// Pole Jam: rot-weiße Stange schräg aus dem Schnee, Stütze am Ende
+// Pole Jam: blaue Stange, abgenutzt: Kratzer, abgeplatzter Lack (blankes Metall), Rostflecken; oben am Ende, wo gerutscht wird, am meisten
 function drawPoleJam(r,cX,cY){const a=[r.x0-cX,r.y0-cY],b=[r.x1-cX,r.y1-cY],g=groundAt(r.x1-3);
-  if(g){strokePts(ctx,[[b[0]-3,b[1]+1],[b[0]-3,g.y-cY]],3,'#1a2133');strokePts(ctx,[[b[0]-3,b[1]+1],[b[0]-3,g.y-cY]],1,'#56627c')}
-  strokePts(ctx,[a,b],4,'#1a2133');const n=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1]));
-  for(let i=0;i<=n;i++){const t=i/n,x=Math.round(a[0]+(b[0]-a[0])*t),y=Math.round(a[1]+(b[1]-a[1])*t);ctx.fillStyle=Math.floor(i/5)%2?'#ffffff':'#e0262f';ctx.fillRect(x,y-1,1,2)}}
+  if(g){strokePts(ctx,[[b[0]-3,b[1]+1],[b[0]-3,g.y-cY]],3,'#1a2133');strokePts(ctx,[[b[0]-3,b[1]+1],[b[0]-3,g.y-cY]],1,'#3f5f8f')}
+  strokePts(ctx,[a,b],4,'#141b2b');const n=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])),seed=Math.floor(r.x0);
+  for(let i=0;i<=n;i++){const t=i/n,x=Math.round(a[0]+(b[0]-a[0])*t),y=Math.round(a[1]+(b[1]-a[1])*t),h=hash01(seed*.37+i*1.91),h2=hash01(seed*.11+i*3.17),wear=.12+.55*t;
+    ctx.fillStyle='#2f6fd0';ctx.fillRect(x,y-1,1,1);ctx.fillStyle='#1d4e9a';ctx.fillRect(x,y,1,1);
+    if(h<wear*.55){ctx.fillStyle=h2<.5?'#c9ced8':'#9aa3b2';ctx.fillRect(x,y-1,1,h2<.3?2:1)}   // abgeplatzt: blankes Metall
+    else if(h>1-wear*.18){ctx.fillStyle='#7a5236';ctx.fillRect(x,y-(h2<.5?1:0),1,1)}           // Rost
+    else if(h2<.08){ctx.fillStyle='#5b9fe4';ctx.fillRect(x,y-1,1,1)}}}                       // Glanz
 // Treppe unter dem Rail: Betonstufen im Hang
 function drawStairs(r,cX,cY){const [s0,s1]=r.stairs,xa=Math.max(Math.floor(s0),cX),xb=Math.min(Math.ceil(s1),cX+VW);
   for(let x=xa;x<xb;x++){const k=Math.floor((x-s0)/9),xs=s0+k*9,g0=groundAt(xs+.01),g=groundAt(x);if(!g0||!g)continue;const top=Math.round(g0.y)-cY,gy=Math.round(g.y)-cY,sx=x-cX;
@@ -2716,14 +2792,14 @@ $('bOverShop').onclick=()=>{prevScreen='over';openShop()};$('bShop').addEventLis
 $('bAgain').onclick=startRun;$('bOverMenu').onclick=toMenu;
 $('bResume').onclick=()=>setPause(false);$('bQuit').onclick=()=>{setPause(false);p.mode='dead';p.deadReason='quit';gameOver()};
 $('bPause').onclick=()=>setPause(true);
-$('bMute').onclick=()=>{muted=!muted;$('bMute').style.opacity=muted?.4:1};
+$('bMute').onclick=()=>{muted=!muted;if(muted)grindStop(true);$('bMute').style.opacity=muted?.4:1};
 
 /* ================= LOOP ================= */
 let last=performance.now(),acc=0;
 function frame(t){
   const dt=Math.min(.05,(t-last)/1000);last=t;
   if(state==='play'){acc+=dt;let n=0;while(acc>=STEP&&n<12){update(STEP);acc-=STEP;n++}if(n>=12)acc=0}
-  else{acc=0;if(state==='menu'){cam.x+=dt*18;while(gx<cam.x+VW+900)genNext()}}
+  else{acc=0;if(grindSnd)grindStop(true);if(state==='menu'){cam.x+=dt*18;while(gx<cam.x+VW+900)genNext()}}
   render(dt);
   if(state==='menu')drawPreview('pvMenu');
   if(!$('shop').hidden)drawPreview('pvShop',Object.assign({},SAVE.equip,tryOn,shopCat==='beanie'?{helmet:'h_none'}:{}),shopCat==='board'?'board':(shopCat==='skis'||shopCat==='poles')?'ski':SAVE.gear,shopCat==='poles');
