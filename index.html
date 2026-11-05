@@ -280,7 +280,9 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
     <p class="eyebrow">Was ist neu</p>
     <h2>PATCH NOTES</h2>
     <div class="pn">
-      <h3>v2.0 · 05.11.2026</h3>
+      <h3>v2.1 · 05.11.2026</h3>
+      <ul><li>Grabs mit Zwischenbild: die Hand greift sichtbar zum Ski bzw. Brett</li></ul>
+      <h3>v2.0</h3>
       <ul><li>Spielstand im Konto: Münzen, gekaufte Sachen, Outfit und Bestwerte sind auf jedem Gerät dabei</li></ul>
       <h3>v1.9</h3>
       <ul><li>Neue Lawine: riesige Pulverwolke mit großem Kopf vorne</li><li>Switch mit Gas: kein Stockeinsatz mehr</li></ul>
@@ -412,7 +414,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
 (()=>{
 'use strict';
 const RAD=Math.PI/180, DEG=180/Math.PI;
-const BUTTER180_T=.5,GRIND_SPIN=700,GRIND_REP=.32, G=430, POP=190, JUMP_POP=Math.round(190*Math.SQRT1_2), FOOT=11, VH=342, FLIP_RATE=520, SPIN_RATE=600, CORK_SLOW=.6, STEP=1/120, VMAX=364, PARK_LEN=13000, FREE_LEN=11000;
+const BUTTER180_T=.5,GRAB_BLEND=9,GRIND_SPIN=700,GRIND_REP=.32, G=430, POP=190, JUMP_POP=Math.round(190*Math.SQRT1_2), FOOT=11, VH=342, FLIP_RATE=520, SPIN_RATE=600, CORK_SLOW=.6, STEP=1/120, VMAX=364, PARK_LEN=13000, FREE_LEN=11000;
 let VW=608;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
@@ -793,6 +795,14 @@ function drawBoardWide(g,poly,d,n,lo,P,O){
     poleTips:A.tips.map((t,i)=>{const q=L3(t,Z.tips[i],u);q[1]-=lift;return q})});
   for(let k=0;k<8;k++){const t=k/8;SKI3['push'+k]=t<.45?mix(reach,push,smooth01(t/.45),0):mix(push,reach,smooth01((t-.45)/.55),Math.sin(Math.PI*(t-.45)/.55)*5)}
 })();
+/* Grab-Zwischenbild: halb zwischen normaler Luft-Pose und Grab, damit die Hand nicht in einem Bild am Ski/Brett ist */
+(function buildGrabHalf(){
+  const mixD=(A,Z,u)=>{if(typeof A==='number'&&typeof Z==='number')return A+(Z-A)*u;
+    if(Array.isArray(A)&&Array.isArray(Z)&&A.length===Z.length)return Z.map((z,i)=>mixD(A[i],z,u));
+    if(A&&Z&&typeof A==='object'&&typeof Z==='object'&&!Array.isArray(A)&&!Array.isArray(Z)){const o={};for(const k in Z)o[k]=k in A?mixD(A[k],Z[k],u):Z[k];return o}
+    return Z};
+  for(const [LIB,base] of [[SKI3,'tuck'],[BOARD3,'bair']])for(const g of ['japan','nose','tail','mute'])if(LIB[g]&&LIB[base])LIB[g+'_h']=mixD(LIB[base],LIB[g],.5);
+})();
 /* Körperschwerpunkt (KSP) einer Pose: In der Luft dreht sich der Körper immer um den KSP, der auf einer Parabel fliegt.
    Gewichte grob nach Körperanteilen: Rumpf 43, Kopf 7, Oberschenkel je 10, Unterschenkel+Fuß je 6, Arme je 5, Ski+Schuhe zusammen ca. 11. */
 const comCache=new Map();
@@ -813,7 +823,7 @@ function poseCOM(poseName,phi,gear){
 function rodrigues(v,k,deg){const t=deg*RAD,c=Math.cos(t),s=Math.sin(t),kv=v3.dot(k,v);
   return [v[0]*c+(k[1]*v[2]-k[2]*v[1])*s+k[0]*kv*(1-c),v[1]*c+(k[2]*v[0]-k[0]*v[2])*s+k[1]*kv*(1-c),v[2]*c+(k[0]*v[1]-k[1]*v[0])*s+k[2]*kv*(1-c)]}
 const corkAxis=m=>{const b=(m==='cork'?45:-45)*RAD;return [Math.sin(b),0,Math.cos(b)]};
-function airPose(){return p.grab||(p.corkMode?p.corkMode:null)||(p.flipPoseT>0?(p.flipDir<0?'layout':'ftuck'):(SAVE.gear==='board'?'bair':'tuck'))}
+function airPose(){const gv=p.gVis||0;if(p.gName&&gv>.02&&!(p.grab&&gv>=.98))return p.gName+'_h';return p.grab||(p.corkMode?p.corkMode:null)||(p.flipPoseT>0?(p.flipDir<0?'layout':'ftuck'):(SAVE.gear==='board'?'bair':'tuck'))}
 /* Zeichnet die Figur bei Drehwinkel phi (0 = Fahrtrichtung rechts, 90 = zum Spieler, 180 = Switch, 270 = vom Spieler weg).
    look: Kopf schaut die Piste runter; bei Switch dreht sich der Oberkörper mit (Blick über die Schulter). */
 function renderFigure(g,poseName,phi,look,P,gear,pow,cork){
@@ -1741,7 +1751,7 @@ function launch(a,pop,sg){
   if(sg&&sg.vmax)s=Math.min(s,sg.vmax);
   if(sg&&sg.kind==='kicker'&&pop)pop*=1.1;
   p.vx=Math.cos(a)*s;p.vy=Math.sin(a)*s-pop;
-  p.flipPoseT=0;p.grab=null;p.corkMode=null;const r=p.ang*RAD;p.x+=FOOT*Math.sin(r);p.y-=FOOT*Math.cos(r);
+  p.flipPoseT=0;p.grab=null;p.gVis=0;p.gName=null;p.corkMode=null;const r=p.ang*RAD;p.x+=FOOT*Math.sin(r);p.y-=FOOT*Math.cos(r);
   {const pc=poseCOM(airPose(),p.spin,SAVE.gear);p.x+=pc.cx*Math.cos(r)-pc.cy*Math.sin(r);p.y+=pc.cx*Math.sin(r)+pc.cy*Math.cos(r);p.cx=pc.cx;p.cy=pc.cy;p.cz=pc.cz;p.fx=pc.fx;p.fy=pc.fy;p.fz=pc.fz}
   p.mode='air';
   p.airT=0;p.base=p.ang;p.spinStart=p.spin;p.flipAcc=0;p.flipDir=0;p.flipTarget=null;p.spinDir=0;p.spinTarget=null;p.grabT={};p.grab=null;
@@ -1918,12 +1928,14 @@ function updAir(dt){
   }
   if(!p.corkMode&&(up||dn)&&(l||r)&&Math.abs(norm(p.flipAcc))<35)p.corkMode=dn?'cork':'misty';
   const gr=inGrab();p.grab=gr;if(gr)p.grabT[gr]=(p.grabT[gr]||0)+dt;
+  if(gr&&gr!==p.gName){if((p.gVis||0)>.5)p.gVis=.5;p.gName=gr}
   // Landehilfe: kurz vor dem Aufsetzen Flip und Spin auf die nächste landbare Stellung drehen und den Grab loslassen
   if(SAVE.assist){const ax=footX(),ay=footY(),gA=groundAt(ax+p.vx*.1);
     if(gA&&p.vy>0){const tl=(gA.y-ay)/Math.max(60,p.vy);
       if(tl<.34&&!(up||dn)){const d=Math.round(p.flipAcc/360)*360-p.flipAcc,mx=720*dt;p.flipAcc+=clamp(d,-mx,mx);p.ang=p.base+p.flipAcc}
       if(tl<.32&&!(l||r)){const tg=Math.round(p.spin/180)*180,d=tg-p.spin,mx=820*dt;p.spin+=clamp(d,-mx,mx);p.spinDir=0;p.spinTarget=p.fromRail?tg:null}
       if(tl<.14)p.grab=null}}
+  {const tg=p.grab?1:0,mx=GRAB_BLEND*dt;p.gVis=(p.gVis||0)+clamp(tg-(p.gVis||0),-mx,mx)}   // Hand braucht ca. 0,11 s zum Ski
   // Pose bestimmt, wo der Schwerpunkt im Körper liegt; der Schwerpunkt selbst fliegt unbeirrt weiter
   {const pc=poseCOM(airPose(),p.spin,SAVE.gear),k=Math.min(1,dt*10);p.cx=pc.cx;p.cy=pc.cy;p.cz=pc.cz;p.fx+=(pc.fx-p.fx)*k;p.fy+=(pc.fy-p.fy)*k;p.fz=pc.fz}
   // collisions
