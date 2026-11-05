@@ -98,6 +98,7 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);font-size:
 .gstick.on .knob{background:#ff9a5c}
 /* nirgends Text markieren oder Kopier-Menü */
 *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 /* Screens */
 .screen{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;overflow:auto;
   background:rgba(8,12,26,.72);padding-block:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-bottom,0px));
@@ -134,6 +135,27 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
 .ctrl dt kbd{display:inline-block;background:var(--panel2);padding:1px 6px;box-shadow:0 0 0 2px #000;margin-right:3px;font-family:inherit}
 .ctrl dd{margin:0;color:#c7d4f5;font-size:20px;line-height:1}
 .note{font-size:20px;color:var(--muted);line-height:1.1;margin:0 0 18px;max-width:60ch}
+
+/* Rangliste */
+.rank{max-width:640px}
+.acc{background:var(--panel2);box-shadow:0 0 0 3px #000;padding:14px;margin:0 0 16px}
+.acc .note{font-size:18px;margin-bottom:12px}
+.fields{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+.fields input{flex:1 1 180px;min-width:0;font-family:var(--ui);font-size:16px;padding:10px 12px;background:#0b1124;color:#fff;border:0;box-shadow:0 0 0 2px #000,inset 0 0 0 2px var(--line);
+  -webkit-user-select:text;user-select:text;touch-action:manipulation}
+.fields input:focus{outline:3px solid var(--gold);outline-offset:1px}
+.me{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;font-family:var(--ui);font-size:15px;color:var(--muted)}
+.me b{color:#fff;font-family:var(--display);font-weight:400;font-size:14px;margin-left:6px}
+.rmsg{font-family:var(--ui);font-size:14px;color:var(--gold);min-height:1.2em;margin:10px 0 0}
+.board{list-style:none;margin:0 0 18px;padding:0;max-height:min(46vh,420px);overflow:auto;box-shadow:0 0 0 3px #000;background:#0b1124;touch-action:pan-y}
+.board li{display:grid;grid-template-columns:3.2em minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:7px 12px;font-size:20px;color:#d7e2ff;border-bottom:2px solid #141c33}
+.board li .pl{font-family:var(--display);font-size:12px;color:var(--muted)}
+.board li .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--ui);font-size:15px;color:#fff}
+.board li .sc{font-family:var(--display);font-size:13px;color:var(--gold)}
+.board li.mine{background:#22305a}
+.board li:nth-child(1) .pl{color:#ffd04a}.board li:nth-child(2) .pl{color:#dfe6f2}.board li:nth-child(3) .pl{color:#e0a46a}
+.board li.info{display:block;font-family:var(--ui);font-size:15px;color:var(--muted)}
+.orank{font-family:var(--ui);font-size:15px;color:var(--gold);min-height:1.2em;margin:-6px 0 14px}
 
 /* Shop */
 .shop{max-width:880px}
@@ -224,8 +246,30 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
         <button class="btn" id="bPlay">FAHREN</button>
         <button class="btn alt" id="bShop">SHOP</button>
         <button class="btn ghost" id="bHelp">STEUERUNG</button>
+        <button class="btn ghost" id="bRank">RANGLISTE</button>
       </div>
     </div>
+  </div>
+</section>
+
+<section id="rank" class="screen" hidden>
+  <div class="card rank">
+    <p class="eyebrow">Online</p>
+    <h2>RANGLISTE</h2>
+    <div class="acc">
+      <form id="rForm" autocomplete="on">
+        <p class="note">Mit Konto landet dein Bestwert in der Rangliste. Nur Spielername und Passwort, keine E-Mail. Merk dir das Passwort gut, es lässt sich nicht zurücksetzen.</p>
+        <div class="fields">
+          <input id="rName" name="username" maxlength="16" placeholder="Spielername" autocomplete="username" autocapitalize="off" spellcheck="false" aria-label="Spielername">
+          <input id="rPass" name="password" type="password" maxlength="64" placeholder="Passwort, mind. 6 Zeichen" autocomplete="current-password" aria-label="Passwort">
+        </div>
+        <div class="btns"><button type="submit" class="btn" id="bLogin">ANMELDEN</button><button type="button" class="btn alt" id="bSignup">KONTO ERSTELLEN</button></div>
+      </form>
+      <div class="me" id="rMe" hidden><span>Angemeldet als<b id="rMeName"></b></span><button type="button" class="gearbtn" id="bLogout">ABMELDEN</button></div>
+      <p class="rmsg" id="rMsg" role="status"></p>
+    </div>
+    <ol class="board" id="rList"><li class="info">Lädt …</li></ol>
+    <div class="btns"><button class="btn ghost" id="bRankBack">ZURÜCK</button></div>
   </div>
 </section>
 
@@ -302,6 +346,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
       <div><dt>Bester Trick</dt><dd id="oTrick">–</dd></div>
     </dl>
     <p class="best" id="oBest"></p>
+    <p class="orank" id="oRank"></p>
     <div class="btns"><button class="btn" id="bAgain">NOCHMAL</button><button class="btn alt" id="bOverShop">SHOP</button><button class="btn ghost" id="bOverMenu">MENÜ</button></div>
   </div>
 </section>
@@ -1394,6 +1439,7 @@ const K={},TC={};let jumpBuf=0;
 const inL=()=>K.ArrowLeft||K.KeyA||TC.left,inR=()=>K.ArrowRight||K.KeyD||TC.right,inU=()=>K.ArrowUp||K.KeyW||TC.up,inD=()=>K.ArrowDown||K.KeyS||TC.down,inGas=()=>K.ShiftLeft||K.ShiftRight||TC.gas;
 function inGrab(){if(K.KeyJ||K.Digit1||TC.japan)return 'japan';if(K.KeyK||K.Digit2||TC.nose)return 'nose';if(K.KeyL||K.Digit3||TC.tail)return 'tail';if(K.KeyI||K.Digit4||TC.mute)return 'mute';return null}
 addEventListener('keydown',e=>{
+  if(e.target&&e.target.tagName==='INPUT')return;
   const c=e.code;unlockAudio();
   const onBtn=document.activeElement&&document.activeElement.tagName==='BUTTON';
   if(state==='play'&&['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(c))e.preventDefault();
@@ -1410,7 +1456,7 @@ addEventListener('blur',()=>{for(const k in K)K[k]=false;if(typeof padReset==='f
 ['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
 document.addEventListener('touchmove',e=>{if(e.touches.length>1||e.scale&&e.scale!==1)e.preventDefault()},{passive:false});
 document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
-document.addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('contextmenu',e=>{if(!(e.target.closest&&e.target.closest('input')))e.preventDefault()});
 /* Joystick: 8 Richtungen. Oben Frontflip, unten Backflip, links/rechts Spin (links bremst auf der Piste),
    schräg oben Misty, schräg unten Cork (= Flip und Spin gleichzeitig). Hauptrichtungen sind etwas breiter als die Diagonalen. */
 const stickEl=$('stick'),knobEl=$('knob');let stickId=null;
@@ -1438,8 +1484,8 @@ gstickEl.addEventListener('contextmenu',e=>e.preventDefault());
 /* iOS/Android: langes Drücken oder Doppeltippen soll nie Text markieren oder das Kopier-Menü öffnen.
    Auf Steuerung und Spielbild den Standard-Touch abschalten (Pointer-Events laufen trotzdem), Buttons bleiben klickbar. */
 document.addEventListener('touchstart',e=>{const t=e.target;if(!t.closest)return;if(t.closest('button')&&!t.closest('#pad'))return;if(t.closest('#pad')||t.closest('#stage')||(!pad.hidden&&state==='play'))e.preventDefault()},{passive:false});
-document.addEventListener('selectstart',e=>e.preventDefault());
-document.addEventListener('selectionchange',()=>{const s=window.getSelection&&window.getSelection();if(s&&s.rangeCount&&!s.isCollapsed)s.removeAllRanges()});
+document.addEventListener('selectstart',e=>{const t=e.target&&e.target.nodeType===1?e.target:e.target&&e.target.parentElement;if(!(t&&t.closest&&t.closest('input')))e.preventDefault()});
+document.addEventListener('selectionchange',()=>{if(document.activeElement&&document.activeElement.tagName==='INPUT')return;const s=window.getSelection&&window.getSelection();if(s&&s.rangeCount&&!s.isCollapsed)s.removeAllRanges()});
 /* Schwebende Sticks: Tippen in die linke Bildschirmhälfte greift den linken Stick, rechts den rechten.
    Die Richtung zählt sofort: Tippst du rechts neben den Stick, ist er schon nach rechts gedrückt. Liegt der Finger weiter weg,
    rückt der Stick nur so weit nach, dass der Finger am Rand in dieser Richtung liegt. Beim Loslassen gehen sie zurück an ihren Platz. */
@@ -2004,7 +2050,7 @@ function drawHud(){
 }
 
 /* ================= FLOW ================= */
-const screens=['menu','help','shop','pause','over'];
+const screens=['menu','help','shop','pause','over','rank'];
 function show(id){screens.forEach(s=>$(s).hidden=s!==id);if(id){const b=$(id).querySelector('.btn');if(b&&!isTouch)b.focus({preventScroll:true})}}
 function refreshMenu(){$('kMute').textContent=SAVE.gear==='board'?'INDY':'MUTE';document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.gear===SAVE.gear)));$('bAssist').setAttribute('aria-pressed',String(!!SAVE.assist));$('bAssist').textContent='LANDEHILFE: '+(SAVE.assist?'AN':'AUS');setT($('mCoins'),String(SAVE.coins));setT($('mBest'),String(SAVE.best));setT($('mDist'),SAVE.bestDist+' m')}
 let hintTimer=0;
@@ -2025,7 +2071,7 @@ function gameOver(){
   $('oScore').textContent=score;$('oDist').textContent=meters+' m';$('oCoins').textContent='+'+run.coins;$('oTrick').textContent=run.bestTrick?run.bestTrick+' ('+run.bestPts+')':'–';
   let msg='';if(score>SAVE.best){SAVE.best=score;msg='Neuer Highscore!'}if(meters>SAVE.bestDist){SAVE.bestDist=meters;msg=msg?msg+' Und weiteste Fahrt!':'Weiteste Fahrt bisher!'}
   $('oBest').textContent=msg||('Highscore: '+SAVE.best);
-  persist();show('over');layout();
+  persist();show('over');layout();onlineAfterRun(score,meters,run.bestTrick?run.bestTrick+' ('+run.bestPts+')':'');
 }
 function toMenu(){state='menu';$('hud').hidden=true;refreshMenu();resetRun();updCamera(0,true);show('menu');layout()}
 
@@ -2083,6 +2129,66 @@ function layout(){
 }
 addEventListener('resize',layout);
 document.addEventListener('visibilitychange',()=>{if(document.hidden){persist();if(state==='play')setPause(true)}});
+
+/* ================= ONLINE: KONTO UND RANGLISTE (Supabase) =================
+   Konten nur mit Spielername und Passwort: intern wird daraus eine Schein-Adresse, es geht keine Mail raus.
+   Lesen darf jeder, eintragen nur der angemeldete Spieler selbst (Datenbankfunktion submit_score). */
+const SB_URL='https://ixyvrtjqvluhtohjjlef.supabase.co',SB_KEY='sb_publishable_TdKXo828zrRdHgp8pLFB5g_0g1VIuMB',SB_MAIL='@spieler.sendit-game.de';
+let SESS=null;try{SESS=JSON.parse(localStorage.getItem('sendit_sess_v1')||'null')}catch(e){}
+function sessSave(s){SESS=s;try{if(s)localStorage.setItem('sendit_sess_v1',JSON.stringify(s));else localStorage.removeItem('sendit_sess_v1')}catch(e){}}
+async function sb(path,opt,auth){opt=opt||{};const h=Object.assign({'apikey':SB_KEY,'Content-Type':'application/json'},opt.headers||{});if(auth&&SESS)h.Authorization='Bearer '+SESS.access_token;
+  try{const r=await fetch(SB_URL+path,Object.assign({},opt,{headers:h}));const t=await r.text();let body=null;try{body=t?JSON.parse(t):null}catch(e){body=t}return {ok:r.ok,status:r.status,body,headers:r.headers}}
+  catch(e){return {ok:false,status:0,body:null,headers:null}}}
+const sbErr=b=>b?String(b.msg||b.message||b.error_description||b.error||b.hint||''):'';
+function sbSess(b,name){return {access_token:b.access_token,refresh_token:b.refresh_token,expires_at:Date.now()+((b.expires_in||3600)-60)*1000,uid:b.user&&b.user.id,name:name||(b.user&&b.user.user_metadata&&b.user.user_metadata.name)||''}}
+async function sbFresh(){if(!SESS)return false;if(Date.now()<SESS.expires_at)return true;
+  const r=await sb('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:SESS.refresh_token})});
+  if(r.ok){sessSave(sbSess(r.body,SESS.name));return true}if(r.status>=400&&r.status<500)sessSave(null);return false}
+const nameOk=n=>/^[A-Za-z0-9_-]{3,16}$/.test(n),sbMail=n=>n.toLowerCase()+SB_MAIL;
+async function sbSignup(name,pw){
+  const ex=await sb('/rest/v1/profiles?select=id&name=ilike.'+encodeURIComponent(name.replace(/[_%]/g,'\\$&')));
+  if(ex.ok&&ex.body&&ex.body.length)return 'Der Name ist schon vergeben.';
+  const r=await sb('/auth/v1/signup',{method:'POST',body:JSON.stringify({email:sbMail(name),password:pw,data:{name}})});
+  if(r.status===0)return 'Keine Verbindung zur Rangliste.';
+  if(r.ok&&r.body&&r.body.access_token){sessSave(sbSess(r.body,name));return ''}
+  if(r.ok)return 'Konto angelegt, aber die E-Mail-Bestätigung ist in Supabase noch an.';
+  const m=sbErr(r.body);if(/already|registered|exists|Database error/i.test(m))return 'Der Name ist schon vergeben.';
+  if(/password/i.test(m))return 'Das Passwort ist zu kurz oder zu einfach.';
+  return 'Konto ging nicht: '+m}
+async function sbLogin(name,pw){const r=await sb('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email:sbMail(name),password:pw})});
+  if(r.status===0)return 'Keine Verbindung zur Rangliste.';
+  if(r.ok){sessSave(sbSess(r.body,name));return ''}return 'Name oder Passwort stimmt nicht.'}
+async function sbSubmit(score,dist,trick){if(!await sbFresh())return false;
+  const r=await sb('/rest/v1/rpc/submit_score',{method:'POST',body:JSON.stringify({p_score:Math.round(score),p_dist:Math.round(dist),p_trick:trick||null})},true);return r.ok}
+async function sbBoard(){const r=await sb('/rest/v1/scores?select=best,best_dist,best_trick,user_id,profiles(name)&order=best.desc,updated_at.asc&limit=50');return r.ok?r.body:null}
+async function sbMyRank(){if(!SESS||!SESS.uid)return null;const me=await sb('/rest/v1/scores?select=best&user_id=eq.'+SESS.uid);
+  if(!me.ok||!me.body||!me.body.length)return null;const best=me.body[0].best;
+  const c=await sb('/rest/v1/scores?select=user_id&best=gt.'+best,{headers:{'Prefer':'count=exact','Range':'0-0'}});
+  const cr=c.headers&&c.headers.get('content-range');const n=cr?parseInt(cr.split('/')[1],10):NaN;return isNaN(n)?null:{rank:n+1,best}}
+const escH=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function rankAcc(){const on=!!SESS;$('rForm').hidden=on;$('rMe').hidden=!on;if(on)$('rMeName').textContent=SESS.name}
+async function rankLoad(){const L=$('rList');L.innerHTML='<li class="info">Lädt …</li>';
+  const rows=await sbBoard();if(!rows){L.innerHTML='<li class="info">Rangliste gerade nicht erreichbar.</li>';return}
+  if(!rows.length){L.innerHTML='<li class="info">Noch keine Einträge. Hol dir Platz 1!</li>';return}
+  L.innerHTML=rows.map((r,i)=>'<li'+(SESS&&r.user_id===SESS.uid?' class="mine"':'')+'><span class="pl">'+(i+1)+'.</span><span class="nm">'+escH(r.profiles?r.profiles.name:'?')+'</span><span class="sc">'+r.best+'</span></li>').join('');
+  if(SESS&&!rows.some(r=>r.user_id===SESS.uid)){const m=await sbMyRank();if(m)L.insertAdjacentHTML('beforeend','<li class="mine"><span class="pl">'+m.rank+'.</span><span class="nm">'+escH(SESS.name)+'</span><span class="sc">'+m.best+'</span></li>')}}
+function openRank(){$('rMsg').textContent='';rankAcc();show('rank');rankLoad()}
+async function accAction(signup){const n=$('rName').value.trim(),pw=$('rPass').value,msg=$('rMsg');
+  if(!nameOk(n)){msg.textContent='Name: 3 bis 16 Zeichen, nur Buchstaben, Zahlen, _ und -.';return}
+  if(pw.length<6){msg.textContent='Das Passwort braucht mindestens 6 Zeichen.';return}
+  msg.textContent=signup?'Konto wird angelegt …':'Anmelden …';
+  const err=signup?await sbSignup(n,pw):await sbLogin(n,pw);if(err){msg.textContent=err;return}
+  $('rPass').value='';msg.textContent=signup?'Willkommen, '+n+'!':'Angemeldet.';rankAcc();
+  if(SAVE.best>0)await sbSubmit(SAVE.best,SAVE.bestDist||0,'');rankLoad()}
+$('rForm').addEventListener('submit',e=>{e.preventDefault();accAction(false)});
+$('bSignup').onclick=()=>accAction(true);
+$('bLogout').onclick=async()=>{if(SESS)await sb('/auth/v1/logout',{method:'POST'},true);sessSave(null);rankAcc();$('rMsg').textContent='Abgemeldet.';rankLoad()};
+$('bRank').onclick=openRank;$('bRankBack').onclick=()=>{refreshMenu();show('menu')};
+async function onlineAfterRun(score,meters,trick){const o=$('oRank');
+  if(!SESS){o.textContent='Mit Konto kommst du in die Online-Rangliste (Menü → RANGLISTE).';return}
+  o.textContent='Wird in die Rangliste eingetragen …';
+  const ok=await sbSubmit(score,meters,trick);if(!ok){o.textContent=SESS?'Rangliste gerade nicht erreichbar.':'Bitte neu anmelden (Menü → RANGLISTE).';return}
+  const m=await sbMyRank();o.textContent=m?'Rangliste: Platz '+m.rank+' mit '+m.best+' Punkten':'In der Rangliste eingetragen.'}
 
 /* ================= BUTTONS ================= */
 document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.onclick=()=>{SAVE.gear=b.dataset.gear;persist();refreshMenu()});
