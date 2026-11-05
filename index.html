@@ -70,13 +70,13 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);font-size:
 #avalGlow{position:absolute;inset:0;pointer-events:none;opacity:0;background:linear-gradient(90deg,rgba(255,77,94,.55),rgba(255,77,94,0) 22%)}
 
 /* Touch pad: links GAS über einem großen Joystick (Flips/Spins/Corks), rechts Grabs und SPRUNG. Größen hängen am Bildschirm,
-   damit alles reinpasst: --s Stick, --g/--gh Grab-Taste, --j Sprung */
+   damit alles reinpasst: --s Stick, --gw/--gh GAS-Taste */
 #pad{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;width:100%;max-width:700px;box-sizing:border-box;touch-action:none;user-select:none;-webkit-user-select:none;
-  --s:min(187px,30vw);--g:min(51px,13vw);--gh:min(39px,9vw);--j:min(82px,20vw)}
+  --s:min(299px,44vw);--gw:min(161px,26vw);--gh:min(39px,9vw)}
 #pad.over{position:fixed;left:0;right:0;bottom:0;max-width:none;pointer-events:none;opacity:.82;
   padding:0 max(4.5vw,env(safe-area-inset-right,0px)) max(6vh,env(safe-area-inset-bottom,0px)) max(4.5vw,env(safe-area-inset-left,0px));
-  --s:min(187px,37vh);--g:min(51px,6.7vw);--gh:min(39px,10vh);--j:min(82px,21vh)}
-#pad.over .stick,#pad.over .rgrp,#pad.over .k{pointer-events:auto}
+  --s:min(299px,59vh);--gw:min(161px,32vh);--gh:min(39px,10vh)}
+#pad.over .stick,#pad.over .k{pointer-events:auto}
 .lgrp{display:flex;flex-direction:column;align-items:center;gap:10px}
 .stick{position:relative;width:var(--s);height:var(--s);flex:none;touch-action:none;-webkit-touch-callout:none}
 .stick .ring{position:absolute;inset:calc(var(--s)*.086);border-radius:50%;background:rgba(20,30,62,.45);box-shadow:inset 0 0 0 3px #24315a,inset 0 0 0 5px #0a0f20,0 0 0 2px #0a0f20}
@@ -92,15 +92,16 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);font-size:
 .k{font-family:var(--display);font-size:13px;color:#fff;background:#24315a;border:0;touch-action:none;cursor:pointer;
   box-shadow:inset -3px -3px 0 rgba(0,0,0,.35),inset 3px 3px 0 rgba(255,255,255,.18),0 0 0 2px #0a0f20}
 .k.on{background:#3c4f8c;transform:translateY(2px)}
-.k.gas{width:calc(var(--s)*.86);height:calc(var(--gh)*1.45);font-size:17px;color:#fff;background:rgba(255,255,255,.1);
+.k.gas{width:var(--gw);height:calc(var(--gh)*1.45);font-size:17px;color:#fff;background:rgba(255,255,255,.1);
   box-shadow:inset 0 0 0 2px rgba(255,255,255,.6),0 0 0 2px rgba(10,15,32,.6);text-shadow:0 2px 0 rgba(0,0,0,.55)}
 .k.gas.on{background:rgba(70,184,118,.4);transform:translateY(2px)}
 .rgrp{display:flex;flex-direction:column;align-items:center;gap:10px;touch-action:none;-webkit-touch-callout:none}
-.k.jump{width:var(--j);height:var(--j);border-radius:50%;background:var(--orange);color:#2a1205;font-size:11px;
+.gstick .knob{background:var(--orange);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:calc(var(--s)*.045);color:#2a1205;
   box-shadow:inset -4px -4px 0 rgba(0,0,0,.3),inset 4px 4px 0 rgba(255,255,255,.35),0 0 0 2px #0a0f20}
-.k.jump.on{background:#ff9a5c}
-.gstick .knob{background:#8a5a2c}.gstick.on .knob{background:#b0773e}
-@media (max-width:440px){.k.gas{font-size:13px}.k.jump{font-size:10px}}
+.gstick.on .knob{background:#ff9a5c}
+@media (max-width:440px){.k.gas{font-size:13px}}
+/* nirgends Text markieren oder Kopier-Menü */
+*{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 /* Screens */
 .screen{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;overflow:auto;
   background:rgba(8,12,26,.72);padding-block:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-bottom,0px));
@@ -205,11 +206,10 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
     </div>
     </div>
     <div class="rgrp">
-      <button class="k jump" data-k="jump">SPRUNG</button>
-      <div class="stick gstick" id="gstick" role="group" aria-label="Grab-Stick: oben Japan, unten Mute oder Indy, links Tail, rechts Nose">
+      <div class="stick gstick" id="gstick" role="group" aria-label="Sprung-Stick: antippen springt, halten und schieben greift: oben Japan, unten Mute oder Indy, links Tail, rechts Nose">
         <div class="ring"></div>
         <span class="lb n">JAPAN</span><span class="lb s" id="kMute">MUTE</span><span class="lb w">TAIL</span><span class="lb e">NOSE</span>
-        <div class="knob" id="gknob"></div>
+        <div class="knob" id="gknob">SPRUNG</div>
       </div>
     </div>
   </div>
@@ -265,7 +265,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
       </dl></div>
     </div>
     <p class="note">Lande parallel zum Hang. Ein 180er landet Switch, mit Twin Tips kein Problem. Lass den Grab vor der Landung los, sonst wird's sketchy. Kommst du am Gap zu kurz, fällst du ins Void. Die Ski Patrol kann keine Gaps springen: Wenn sie dir am Heck klebt, spring über den nächsten Gap und sie bleibt stehen. Mit Vollgas fährst du ihr auch davon. Den Big Air schaffst du nur mit Vollgas plus Pop.</p>
-    <p class="note">Am Handy: Mit dem Stick links steuerst du die Tricks. Oben ist Frontflip, unten Backflip, links und rechts drehst du dich, links bremst auf der Piste. Schräg oben kommt ein Misty, schräg unten ein Cork. GAS liegt links über dem Stick. Rechts liegt SPRUNG, darunter der Grab-Stick: oben Japan, unten Mute (Board: Indy), links Tail, rechts Nose. Halten heißt Grab halten, und du kannst vom SPRUNG direkt auf den Grab-Stick rutschen.</p>
+    <p class="note">Am Handy: Mit dem Stick links steuerst du die Tricks. Oben ist Frontflip, unten Backflip, links und rechts drehst du dich, links bremst auf der Piste. Schräg oben kommt ein Misty, schräg unten ein Cork. GAS liegt links über dem Stick. Der rechte Stick ist Sprung und Grab zugleich: Antippen springt, gedrückt halten und schieben greift. Oben Japan, unten Mute (Board: Indy), links Tail, rechts Nose. In der Luft springt er nicht, da zählen nur die Grabs.</p>
     <p class="note">Nach einer Weile wechselt die Strecke in die Freeride-Zone. Dort grindest du umgefallene Bäume und springst Cliffs. Cliffs halten die Ski Patrol genauso auf wie Gaps. Im Powder sinkst du ein und wirst langsamer, wenn du zu wenig Speed hast. Dafür verzeiht er schiefe Landungen. Pass auf die Steine auf: Kleine bringen dich zu Fall, gegen große Felsen ist der Run vorbei. Spring mit der Leertaste drüber.</p>
     <div class="btns"><button class="btn" id="bHelpBack">ZURÜCK</button></div>
   </div>
@@ -1433,34 +1433,31 @@ stickEl.addEventListener('pointerdown',e=>{e.preventDefault();unlockAudio();stic
 stickEl.addEventListener('pointermove',e=>{if(e.pointerId===stickId)stickMove(e)});
 ['pointerup','pointercancel','lostpointercapture'].forEach(t=>stickEl.addEventListener(t,e=>{if(e.pointerId===stickId)stickReset()}));
 stickEl.addEventListener('contextmenu',e=>e.preventDefault());
-/* Rechte Seite: SPRUNG und darunter der Grab-Stick. Oben Japan, unten Mute/Indy, links Tail, rechts Nose; halten = Grab halten.
-   Der Daumen kann vom SPRUNG direkt auf den Grab-Stick rutschen. */
-const rgrpEl=document.querySelector('#pad .rgrp'),gstickEl=$('gstick'),gknobEl=$('gknob'),jumpEl=document.querySelector('#pad .k.jump'),rHeld=new Map();
+/* Rechter Stick: Antippen = Sprung (nur auf Piste oder Rail, in der Luft nicht), gedrückt halten und schieben = Grab.
+   Oben Japan, unten Mute/Indy, links Tail, rechts Nose. */
+const gstickEl=$('gstick'),gknobEl=$('gknob');let gId=null;
 const GRAB_DIR={n:'japan',s:'mute',w:'tail',e:'nose'};
 function grabApply(x,y){const b=gstickEl.getBoundingClientRect(),dx=x-(b.left+b.width/2),dy=y-(b.top+b.height/2),R=b.width*.34,d=Math.hypot(dx,dy),m=Math.min(d,R);
   gknobEl.style.transform='translate(calc(-50% + '+(d?dx/d*m:0).toFixed(1)+'px),calc(-50% + '+(d?dy/d*m:0).toFixed(1)+'px))';
   let dir='';if(d>R*.3){const s=((Math.atan2(-dy,dx)*DEG)%360+360)%360;dir=s>=45&&s<135?'n':s>=135&&s<225?'w':s>=225&&s<315?'s':'e'}
   TC.japan=TC.nose=TC.tail=TC.mute=false;if(dir)TC[GRAB_DIR[dir]]=true;gstickEl.dataset.dir=dir}
-function grabReset(){gknobEl.style.transform='';gstickEl.dataset.dir='';gstickEl.classList.remove('on');TC.japan=TC.nose=TC.tail=TC.mute=false}
-function inGStick(x,y){const b=gstickEl.getBoundingClientRect();return Math.hypot(x-(b.left+b.width/2),y-(b.top+b.height/2))<=b.width/2}
-function onJumpBtn(x,y){const el=document.elementFromPoint(x,y);return !!(el&&el.closest&&el.closest('#pad .k.jump'))}
-function rUpdate(e){const st=rHeld.get(e.pointerId);if(!st)return;const x=e.clientX,y=e.clientY;
-  if(st.mode==='grab'){grabApply(x,y);return}
-  if(inGStick(x,y)){if(st.mode==='jump')jumpEl.classList.remove('on');st.mode='grab';gstickEl.classList.add('on');grabApply(x,y)}
-  else if(onJumpBtn(x,y)){if(st.mode!=='jump'){st.mode='jump';jumpEl.classList.add('on');jumpBuf=.14}}
-  else if(st.mode==='jump'){jumpEl.classList.remove('on');st.mode=null}}
-function rEnd(e){const st=rHeld.get(e.pointerId);if(!st)return;rHeld.delete(e.pointerId);
-  if(st.mode==='grab')grabReset();if(st.mode==='jump'&&![...rHeld.values()].some(s=>s.mode==='jump'))jumpEl.classList.remove('on')}
-rgrpEl.addEventListener('pointerdown',e=>{e.preventDefault();unlockAudio();try{rgrpEl.setPointerCapture(e.pointerId)}catch(_){}rHeld.set(e.pointerId,{mode:null});rUpdate(e)});
-rgrpEl.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&!e.buttons)return;rUpdate(e)});
-['pointerup','pointercancel','lostpointercapture'].forEach(t=>rgrpEl.addEventListener(t,rEnd));
-rgrpEl.addEventListener('contextmenu',e=>e.preventDefault());
+function grabReset(){gId=null;gknobEl.style.transform='';gstickEl.dataset.dir='';gstickEl.classList.remove('on');TC.japan=TC.nose=TC.tail=TC.mute=false}
+gstickEl.addEventListener('pointerdown',e=>{e.preventDefault();unlockAudio();gId=e.pointerId;try{gstickEl.setPointerCapture(e.pointerId)}catch(_){}
+  gstickEl.classList.add('on');if(state==='play'&&p.mode!=='air')jumpBuf=.14;grabApply(e.clientX,e.clientY)});
+gstickEl.addEventListener('pointermove',e=>{if(e.pointerId===gId)grabApply(e.clientX,e.clientY)});
+['pointerup','pointercancel','lostpointercapture'].forEach(t=>gstickEl.addEventListener(t,e=>{if(e.pointerId===gId)grabReset()}));
+gstickEl.addEventListener('contextmenu',e=>e.preventDefault());
+/* iOS/Android: langes Drücken oder Doppeltippen soll nie Text markieren oder das Kopier-Menü öffnen.
+   Auf Steuerung und Spielbild den Standard-Touch abschalten (Pointer-Events laufen trotzdem), Buttons bleiben klickbar. */
+document.addEventListener('touchstart',e=>{const t=e.target;if(t.closest&&(t.closest('#pad')||(t.closest('#stage')&&!t.closest('button'))))e.preventDefault()},{passive:false});
+document.addEventListener('selectstart',e=>e.preventDefault());
+document.addEventListener('selectionchange',()=>{const s=window.getSelection&&window.getSelection();if(s&&s.rangeCount&&!s.isCollapsed)s.removeAllRanges()});
 /* GAS links über dem Stick: halten zum Beschleunigen */
 const gasEl=document.querySelector('#pad .k.gas');
 gasEl.addEventListener('pointerdown',e=>{e.preventDefault();unlockAudio();try{gasEl.setPointerCapture(e.pointerId)}catch(_){}gasEl.classList.add('on');TC.gas=true});
 ['pointerup','pointercancel','lostpointercapture'].forEach(t=>gasEl.addEventListener(t,()=>{gasEl.classList.remove('on');TC.gas=false}));
 gasEl.addEventListener('contextmenu',e=>e.preventDefault());
-function padReset(){stickReset();grabReset();rHeld.clear();jumpEl.classList.remove('on');gasEl.classList.remove('on');for(const k in TC)TC[k]=false}
+function padReset(){stickReset();grabReset();gasEl.classList.remove('on');for(const k in TC)TC[k]=false}
 
 /* ================= AUDIO ================= */
 let AC=null,muted=false;
@@ -2010,7 +2007,7 @@ function refreshMenu(){$('kMute').textContent=SAVE.gear==='board'?'INDY':'MUTE';
 let hintTimer=0;
 function startRun(){
   unlockAudio();padReset();resetRun();updCamera(0,true);state='play';show(null);$('hud').hidden=false;if(document.activeElement)document.activeElement.blur();
-  const h=$('hint');h.hidden=false;h.style.opacity='1';h.textContent=isTouch?'GAS halten · Stick ◀ bremst · SPRUNG am Kicker-Ende · in der Luft Stick für Flips und Spins':'Shift Gas · ← Bremsen · Leertaste springen · Tricks in der Luft';
+  const h=$('hint');h.hidden=false;h.style.opacity='1';h.textContent=isTouch?'GAS halten · rechten Stick antippen = Sprung, halten und schieben = Grab · linker Stick: Flips, Spins, ◀ bremst':'Shift Gas · ← Bremsen · Leertaste springen · Tricks in der Luft';
   clearTimeout(hintTimer);hintTimer=setTimeout(()=>{h.style.opacity='0';setTimeout(()=>h.hidden=true,700)},5200);
   layout();
 }
