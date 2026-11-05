@@ -136,6 +136,17 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
 .ctrl dd{margin:0;color:#c7d4f5;font-size:20px;line-height:1}
 .note{font-size:20px;color:var(--muted);line-height:1.1;margin:0 0 18px;max-width:60ch}
 
+/* Credits und Patch Notes */
+.credits{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:18px 0 0;font-family:var(--ui);font-size:13px;color:var(--muted);letter-spacing:.04em}
+.linkbtn{font-family:var(--ui);font-size:13px;letter-spacing:.06em;color:var(--ice);background:none;border:0;padding:4px 0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.linkbtn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.notes{max-width:560px}
+.pn{max-height:min(56vh,460px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;margin:0 0 18px;padding-right:6px}
+.pn h3{font-family:var(--ui);font-weight:700;font-size:14px;letter-spacing:.1em;color:var(--gold);margin:12px 0 4px}
+.pn h3:first-child{margin-top:0}
+.pn ul{margin:0;padding-left:20px;color:#d7e2ff;font-size:20px;line-height:1.1}
+.pn li{margin:2px 0}
+
 /* Rangliste */
 .rank{max-width:820px;box-sizing:border-box;display:flex;flex-direction:column;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px)}
 .rhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex:none}
@@ -256,7 +267,28 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
         <button class="btn ghost" id="bHelp">STEUERUNG</button>
         <button class="btn ghost" id="bRank">RANGLISTE</button>
       </div>
+      <p class="credits">made by Jasper Hollberg<span aria-hidden="true">·</span><button type="button" class="linkbtn" id="bNotes">PATCH NOTES</button></p>
     </div>
+  </div>
+</section>
+
+<section id="notes" class="screen" hidden>
+  <div class="card notes">
+    <p class="eyebrow">Was ist neu</p>
+    <h2>PATCH NOTES</h2>
+    <div class="pn">
+      <h3>v1.4 · 05.11.2026</h3>
+      <ul><li>Online-Rangliste mit eigenem Konto</li><li>Butter und Nose Butter</li><li>Sprung halb so hoch, Felsen flacher</li><li>Nebliges Flutlicht, präparierte Piste, Bär läuft</li></ul>
+      <h3>v1.3</h3>
+      <ul><li>Handy: zwei Sticks, die unter dem Finger erscheinen</li><li>Rail-Swaps durch Halten, kein Zoom beim Doppeltippen</li></ul>
+      <h3>v1.2</h3>
+      <ul><li>Felsklippen mit Nebel, neue Bergketten, Stirnlampe</li></ul>
+      <h3>v1.1</h3>
+      <ul><li>Tag und Nacht, Tiere, Landehilfe, neue Lawine</li></ul>
+      <h3>v1.0</h3>
+      <ul><li>Erste Version: Park, Freeride, Ski und Snowboard, Shop</li></ul>
+    </div>
+    <div class="btns"><button class="btn ghost" id="bNotesBack">ZURÜCK</button></div>
   </div>
 </section>
 
@@ -2092,7 +2124,7 @@ function drawHud(){
 }
 
 /* ================= FLOW ================= */
-const screens=['menu','help','shop','pause','over','rank'];
+const screens=['menu','help','shop','pause','over','rank','notes'];
 function show(id){screens.forEach(s=>$(s).hidden=s!==id);if(id){const b=$(id).querySelector('.btn');if(b&&!isTouch)b.focus({preventScroll:true})}}
 function refreshMenu(){$('kMute').textContent=SAVE.gear==='board'?'INDY':'MUTE';document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.gear===SAVE.gear)));$('bAssist').setAttribute('aria-pressed',String(!!SAVE.assist));$('bAssist').textContent='LANDEHILFE: '+(SAVE.assist?'AN':'AUS');setT($('mCoins'),String(SAVE.coins));setT($('mBest'),String(SAVE.best));setT($('mDist'),SAVE.bestDist+' m')}
 let hintTimer=0;
@@ -2237,7 +2269,7 @@ async function accAction(signup){const n=$('rName').value.trim(),pw=$('rPass').v
 $('rForm').addEventListener('submit',e=>{e.preventDefault();accAction(false)});
 $('bSignup').onclick=()=>accAction(true);
 $('bLogout').onclick=async()=>{if(SESS)await sb('/auth/v1/logout',{method:'POST'},true);sessSave(null);rankAcc();$('rMsg').textContent='Abgemeldet.';rankLoad()};
-$('bRank').onclick=openRank;$('bRankBack').onclick=()=>{refreshMenu();show('menu')};
+$('bRank').onclick=openRank;$('bNotes').onclick=()=>show('notes');$('bNotesBack').onclick=()=>show('menu');$('bRankBack').onclick=()=>{refreshMenu();show('menu')};
 async function onlineAfterRun(score,meters,trick){const o=$('oRank');
   if(!SESS){o.textContent='Mit Konto kommst du in die Online-Rangliste (Menü → RANGLISTE).';return}
   o.textContent='Wird in die Rangliste eingetragen …';
