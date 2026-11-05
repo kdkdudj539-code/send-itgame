@@ -288,6 +288,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
       <div><h3>Auf der Piste</h3><dl>
         <dt><kbd>Shift</kbd></dt><dd>Gas: kräftig beschleunigen bis Vollgas</dd>
         <dt><kbd>←</kbd><kbd>A</kbd></dt><dd>Bremsen</dd>
+        <dt><kbd>↓</kbd><kbd>↑</kbd></dt><dd>Butter und Nose Butter (halten)</dd>
         <dt><kbd>Leertaste</kbd></dt><dd>Springen. Am Kicker-Ende gibt's extra Pop</dd>
       </dl></div>
       <div><h3>In der Luft</h3><dl>
@@ -311,7 +312,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
       </dl></div>
     </div>
     <p class="note">Lande parallel zum Hang. Ein 180er landet Switch, mit Twin Tips kein Problem. Lass den Grab vor der Landung los, sonst wird's sketchy. Kommst du am Gap zu kurz, fällst du ins Void. Die Ski Patrol kann keine Gaps springen: Wenn sie dir am Heck klebt, spring über den nächsten Gap und sie bleibt stehen. Mit Vollgas fährst du ihr auch davon. Den Big Air schaffst du nur mit Vollgas plus Pop.</p>
-    <p class="note">Am Handy: Mit dem Stick links steuerst du die Tricks. Oben ist Frontflip, unten Backflip, links und rechts drehst du dich, links bremst auf der Piste. Schräg oben kommt ein Misty, schräg unten ein Cork. Tippst du in die linke Bildschirmhälfte, greifst du den linken Stick, rechts den rechten. Die Richtung vom Stick zu deinem Finger zählt sofort: Tippst du rechts neben den Stick, ist er schon nach rechts gedrückt. Auf der Piste gibst du mit dem linken Stick nach rechts Gas und bremst nach links. Der rechte Stick ist Sprung und Grab zugleich: Antippen springt, gedrückt halten und schieben greift. Oben Japan, unten Mute (Board: Indy), links Tail, rechts Nose. In der Luft springt er nicht, da zählen nur die Grabs.</p>
+    <p class="note">Am Handy: Mit dem Stick links steuerst du die Tricks. Oben ist Frontflip, unten Backflip, links und rechts drehst du dich, links bremst auf der Piste. Schräg oben kommt ein Misty, schräg unten ein Cork. Tippst du in die linke Bildschirmhälfte, greifst du den linken Stick, rechts den rechten. Die Richtung vom Stick zu deinem Finger zählt sofort: Tippst du rechts neben den Stick, ist er schon nach rechts gedrückt. Auf der Piste gibst du mit dem linken Stick nach rechts Gas und bremst nach links, nach unten machst du einen Butter, nach oben einen Nose Butter. Der rechte Stick ist Sprung und Grab zugleich: Antippen springt, gedrückt halten und schieben greift. Oben Japan, unten Mute (Board: Indy), links Tail, rechts Nose. In der Luft springt er nicht, da zählen nur die Grabs.</p>
     <p class="note">Nach einer Weile wechselt die Strecke in die Freeride-Zone. Dort grindest du umgefallene Bäume und springst Cliffs. Cliffs halten die Ski Patrol genauso auf wie Gaps. Im Powder sinkst du ein und wirst langsamer, wenn du zu wenig Speed hast. Dafür verzeiht er schiefe Landungen. Pass auf die Steine auf: Kleine bringen dich zu Fall, gegen große Felsen ist der Run vorbei. Spring mit der Leertaste drüber.</p>
     <div class="btns"><button class="btn" id="bHelpBack">ZURÜCK</button></div>
   </div>
@@ -362,7 +363,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
 (()=>{
 'use strict';
 const RAD=Math.PI/180, DEG=180/Math.PI;
-const G=430, POP=190, FOOT=11, VH=342, FLIP_RATE=520, SPIN_RATE=600, CORK_SLOW=.6, STEP=1/120, VMAX=364, PARK_LEN=13000, FREE_LEN=11000;
+const G=430, POP=190, JUMP_POP=Math.round(190*Math.SQRT1_2), FOOT=11, VH=342, FLIP_RATE=520, SPIN_RATE=600, CORK_SLOW=.6, STEP=1/120, VMAX=364, PARK_LEN=13000, FREE_LEN=11000;
 let VW=608;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
@@ -956,14 +957,14 @@ function drawGapFog(cX,cY){for(const f of gapFogs){const sx=f.x-cX,sy=f.y-cY;if(
 /* ---- Freeride ---- */
 function decoTrees(x0,x1,n){for(let i=0;i<n;i++){const x=rand(x0,x1),g=groundAt(x);if(g&&isPow(g.seg))trees.push({x,y:g.y,k:Math.floor(Math.random()*3)})}}
 function fZone(z){const x=gx;seg(220,z==='free'?22:18);addSign(x+40,z==='free'?'FREERIDE ZONE':'SNOWPARK');if(z==='free')decoTrees(x+90,gx,2)}
-function addRock(x,big){const g=groundAt(x);if(!g||!isPow(g.seg))return;const w=big?rand(20,26):rand(9,12),h=big?rand(15,19):rand(5,7);rocks.push({cx:x,y:g.y,w,h,big,hit:false,spr:makeRock(Math.round(w),Math.round(h),big)})}
+function addRock(x,big){const g=groundAt(x);if(!g||!isPow(g.seg))return;const w=big?rand(17,22):rand(8,11),h=big?rand(10,13):rand(4,5);/* flacher, passend zum halb so hohen Sprung */rocks.push({cx:x,y:g.y,w,h,big,hit:false,spr:makeRock(Math.round(w),Math.round(h),big)})}
 function fFreeRun(){const x=gx,L=rand(130,230);seg(L,rand(26,34));decoTrees(x,gx,Math.floor(rand(1,4)));if(Math.random()<.5)coinRow(x+30,Math.floor(L/26),18,12);else if(Math.random()<.45)addRock(x+L*rand(.45,.75),false)}
 // Steinfeld: kleine Steine = Crash, große Felsen = Game Over. Drüber springen!
 function fRocks(){
-  const x0=gx,L=rand(300,420);seg(L,rand(26,32));decoTrees(x0,gx,2);
+  const x0=gx,L=rand(520,900);seg(L,rand(26,32));decoTrees(x0,gx,2);
   let x=x0+rand(90,130);const rn=Math.random(),n=rn<.55?1:rn<.88?2:3;
   for(let i=0;i<n&&x<gx-60;i++){const big=Math.random()<.3+difficulty()*.25;addRock(x,big);
-    x+=rand(110,170)}
+    x+=rand(330,420)}   /* Abstand > ein Sprung + Reaktion: jeder Stein bekommt seinen eigenen Sprung */
 }
 function fCliff(big){
   const huge=big==='huge',x0=gx;seg(rand(120,180),rand(27,32));decoTrees(x0,gx-40,2);
@@ -1230,8 +1231,10 @@ function applyNight(cX,cY,DS,fm){
   const lamp=fm>.05&&DS.night>=.02?headLamp():null;
   const dark=nightPass(DS,emissive,L=>{
     if(fm<.95)for(const f of floods){const hx=f.x-cX+3,hy=f.y-FLOOD_H-cY;if(hx<-220||hx>VW+220)continue;
-      const gr=L.createRadialGradient(hx+10,hy+44,6,hx+14,hy+60,175);gr.addColorStop(0,'rgba(0,0,0,'+(1-fm)+')');gr.addColorStop(.55,'rgba(0,0,0,'+(.55*(1-fm))+')');gr.addColorStop(1,'rgba(0,0,0,0)');
-      L.fillStyle=gr;L.fillRect(hx-220,hy-140,460,400)}
+      const k=1-fm;L.save();L.translate(hx+4,hy+78);L.scale(2.7,1);
+      const gr=L.createRadialGradient(0,0,0,0,0,100);gr.addColorStop(0,'rgba(0,0,0,'+(.9*k)+')');gr.addColorStop(.35,'rgba(0,0,0,'+(.7*k)+')');gr.addColorStop(.7,'rgba(0,0,0,'+(.3*k)+')');gr.addColorStop(1,'rgba(0,0,0,0)');
+      L.fillStyle=gr;L.fillRect(-100,-100,200,200);L.restore();
+      const g2=L.createRadialGradient(hx+4,hy,0,hx+4,hy,70);g2.addColorStop(0,'rgba(0,0,0,'+(.75*k)+')');g2.addColorStop(1,'rgba(0,0,0,0)');L.fillStyle=g2;L.fillRect(hx-66,hy-70,140,140)}
     if(lamp){const sx=lamp.x-cX,sy=lamp.y-cY,pr=clamp(Math.hypot(lamp.bx,lamp.by),0,1),th=Math.atan2(lamp.by,lamp.bx);
       // Lichtkegel in Blickrichtung des Kopfes; schaut der Kopf zum Spieler oder weg, bleibt nur ein runder Schein
       if(pr>.12){const len=70+165*pr,half=.36+.5*(1-pr);L.save();L.globalAlpha=fm*clamp(pr*1.4,0,1);
@@ -1244,6 +1247,18 @@ function applyNight(cX,cY,DS,fm){
     if(lamp.bz>.55){ctx.fillStyle='#fffbe6';ctx.fillRect(x-3,y-1,1,1);ctx.fillRect(x+2,y-1,1,1);ctx.fillRect(x-1,y-3,1,1);ctx.fillRect(x-1,y+2,1,1)}
     ctx.globalAlpha=1}
   return dark?lamp:null;
+}
+// Flutlicht im Schneetreiben: weiche, breite Lichtglocke nach unten und ein Dunstschein um die Lampe
+function drawFloodFog(cX,cY,a){
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  for(const f of floods){const lx=f.x-cX+4,ly=f.y-FLOOD_H-cY;if(lx<-160||lx>VW+160||ly>VH+20||ly<-120)continue;
+    // mehrere Kegel übereinander: innen hell, außen breit und schwach, dadurch weiche Ränder wie im Nebel
+    for(const [w,al] of [[70,.09],[115,.06],[165,.04]]){const H=FLOOD_H+30+w*.25,lg=ctx.createLinearGradient(0,ly,0,ly+H);
+      lg.addColorStop(0,'rgba(255,244,214,'+(al*a)+')');lg.addColorStop(.55,'rgba(255,244,214,'+(al*.45*a)+')');lg.addColorStop(1,'rgba(255,244,214,0)');
+      ctx.fillStyle=lg;ctx.beginPath();ctx.moveTo(lx-3,ly);ctx.lineTo(lx+3,ly);ctx.lineTo(lx+w,ly+H);ctx.lineTo(lx-w,ly+H);ctx.closePath();ctx.fill()}
+    const hg=ctx.createRadialGradient(lx,ly,0,lx,ly,38);hg.addColorStop(0,'rgba(255,246,220,'+(.4*a)+')');hg.addColorStop(.4,'rgba(255,246,220,'+(.12*a)+')');hg.addColorStop(1,'rgba(255,246,220,0)');
+    ctx.fillStyle=hg;ctx.fillRect(lx-38,ly-38,76,76)}
+  ctx.restore();
 }
 function drawBeam(cX,cY,lamp,a){
   const sx=lamp.x-cX,sy=lamp.y-cY,pr=clamp(Math.hypot(lamp.bx,lamp.by),0,1);if(pr<.15||a<.02)return;
@@ -1290,6 +1305,9 @@ function playerView(){
     const r=ang*RAD;comx=p.x+FOOT*Math.sin(r);comy=p.y-FOOT*Math.cos(r);
     if(rockHit){comx=p.x;comy=p.y-(p.mode==='dead'||p.tumble===90?4:10)}
     if(inAva){comx=p.x;comy=p.y-9+(p.wallSink||0)}
+    const bv=p.mode==='ground'?(p.butterVis||0):0;
+    if(Math.abs(bv)>.3){const rr=ang*RAD,d=(bv<0?-9:9)*(p.sw?-1:1),px=p.x+Math.cos(rr)*d,py=p.y+Math.sin(rr)*d,b=bv*(p.sw?-1:1)*RAD,vx=comx-px,vy=comy-py;
+      comx=px+vx*Math.cos(b)-vy*Math.sin(b);comy=py+vx*Math.sin(b)+vy*Math.cos(b);ang+=bv*(p.sw?-1:1)}
     if(p.mode==='ground'&&p.sink)comy+=p.sink;
   }
   return {pose,phi,look,ang,comx,comy,ox,oy,inPow:p.mode==='ground'&&p.sink>2.5,cork:airish&&p.corkMode?{m:p.corkMode,t:p.flipAcc}:null};
@@ -1541,6 +1559,7 @@ function footY(){if(p.mode==='air'||(p.mode==='dead'&&p.inAir))return p.y+airFoo
 function hSpeed(){return p.mode==='air'?p.vx:p.mode==='rail'||p.mode==='ground'||p.mode==='crash'?p.s*Math.cos((p.mode==='rail'?Math.atan2(p.rail.y1-p.rail.y0,p.rail.x1-p.rail.x0):(groundAt(p.x)||{a:0}).a)):p.mode==='loop'?p.s*Math.cos(p.phi):0}
 
 function launch(a,pop,sg){
+  if(p.butter)butterEnd();p.butterVis=0;
   let s=p.s;
   if(sg&&sg.req&&sg.assist&&!p.braking)s=Math.max(s,sg.req*sg.assist);
   if(sg&&sg.vmax)s=Math.min(s,sg.vmax);
@@ -1607,6 +1626,11 @@ function updGround(dt){
   let drag=.0022,acc=G*Math.sin(a)-.035*G*Math.cos(a);
   const pow=isPow(g.seg);
   p.tuck=ctrl&&inGas();p.braking=ctrl&&inL();
+  // Butter: Gewicht nach hinten (runter) hebt die Spitzen, nach vorne (hoch) die Enden
+  {const want=ctrl?(inD()?-1:inU()?1:0):0;
+    if(want!==(p.butter||0)){butterEnd();p.butter=want;p.butterT=0}
+    if(want){p.butterT+=dt;if(Math.random()<.5){const d=(want<0?-9:9)*(p.sw?-1:1);parts.push({x:p.x+Math.cos(a)*d,y:p.y+Math.sin(a)*d-1,vx:-p.s*.2+rand(-25,25),vy:-rand(20,60),life:rand(.2,.45),col:Math.random()<.6?'#ffffff':'#dce8f8',sz:Math.random()<.4?2:1,gr:300})}}
+    const tgt=want<0?-18:want>0?14:0;p.butterVis=(p.butterVis||0)+(tgt-(p.butterVis||0))*Math.min(1,dt*12)}
   p.pushT=p.tuck&&SAVE.gear!=='board'?(p.pushT||0)+dt:0;
   if(p.tuck){drag*=.55;acc+=165}
   if(pow){drag*=1.12;acc-=110*clamp(1-p.s/300,0,1)}
@@ -1622,10 +1646,12 @@ function updGround(dt){
   if(p.mode==='crash'){p.crashT-=dt;if(p.crashT>.45)p.tumble+=760*dt;else p.tumble=90;if(p.crashT<=0){p.mode='ground';p.tumble=0}}
   p.ang+=(g2.a*DEG-p.ang)*Math.min(1,dt*18);
   for(const L of loops){if(!L.done&&prevX<L.cx&&p.x>=L.cx){enterLoop(L);return}}
-  if(jumpBuf>0&&ctrl){jumpBuf=0;launch(g2.a,POP,g2.seg);return}
+  if(jumpBuf>0&&ctrl){jumpBuf=0;butterEnd();launch(g2.a,JUMP_POP,g2.seg);return}
   if(pow){if(p.s>80&&Math.random()<.85){const d=p.sw?1:-1;parts.push({x:p.x+d*7+rand(-3,3),y:p.y-rand(0,3),vx:-p.s*.18+rand(-30,30),vy:-rand(30,110)*(p.braking?1.4:1),life:rand(.4,.9),col:Math.random()<.6?'#ffffff':'#e6eefa',sz:Math.random()<.5?3:2,gr:60})}}
   else if(p.s>140&&Math.random()<(p.braking?.9:.35)){const d=p.sw?1:-1;parts.push({x:p.x+d*6,y:p.y-1,vx:-p.s*.25+rand(-30,30),vy:-rand(20,70),life:rand(.25,.5),col:Math.random()<.5?'#ffffff':'#d8e6fa',sz:1,gr:300})}
 }
+function butterEnd(){const t=p.butterT||0,b=p.butter||0;p.butter=0;p.butterT=0;
+  if(b&&t>=.35&&p.mode==='ground')addPoints(Math.round(Math.min(400,40+t*90)),(p.sw?'Switch ':'')+(b<0?'Butter':'Nose Butter'),t.toFixed(1)+'s')}
 function enterLoop(L){p.mode='loop';p.loop=L;p.phi=0;L.done=true;if(!p.braking)p.s=Math.max(p.s,Math.sqrt(6.2*G*L.R))}
 function updLoop(dt){
   const L=p.loop;
@@ -1674,7 +1700,7 @@ function updRail(dt){
   if(kr&&!p.gPrevR){swap(1);p.gHold=1}else if(kr&&p.gHold===1&&caught&&p.gRepT<=0)swap(1);
   p.gPrevL=kl;p.gPrevR=kr;
   {const dv=p.gspin-p.gspinVis,mx=1000*dt;p.gspinVis+=clamp(dv,-mx,mx)}
-  if(jumpBuf>0){jumpBuf=0;leaveRail(a,POP*.9);return}
+  if(jumpBuf>0){jumpBuf=0;leaveRail(a,JUMP_POP*.9);return}
   p.sparkT-=dt;if(p.sparkT<=0){p.sparkT=.03;const lg=r.type==='log';parts.push({x:p.x+rand(-3,3),y:p.y,vx:rand(-90,10),vy:-rand(30,90),life:rand(.15,.35),col:lg?(Math.random()<.6?'#ffffff':'#a77b4f'):(Math.random()<.5?'#ffd04a':'#ff8a3d'),sz:lg&&Math.random()<.4?2:1,gr:400});if(!lg&&Math.random()<.3)SFX.grind()}
 }
 function updAir(dt){
@@ -2046,6 +2072,7 @@ function render(dt){
   const lamp=applyNight(cX,cY,curDS,fm);
   ctx=mainCtx;ctx.drawImage(worldCv,0,0);
   if(lamp)drawBeam(cX,cY,lamp,fm*curDS.night);
+  if(curDS.night>.05&&fm<.95)drawFloodFog(cX,cY,curDS.night*(1-fm));
   drawFlakes(cX,cY,dt);
   if(state==='play'||state==='pause')drawHud();
 }
