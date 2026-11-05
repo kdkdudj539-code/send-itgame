@@ -280,7 +280,9 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
     <p class="eyebrow">Was ist neu</p>
     <h2>PATCH NOTES</h2>
     <div class="pn">
-      <h3>v2.2 · 05.11.2026</h3>
+      <h3>v2.3 · 05.11.2026</h3>
+      <ul><li>14 neue Park-Features: Kink-Rails, Rainbow, Waterfall, Roller Coaster, Treppen-Rail, A-Frame- und Battleship-Box, Auto, Picknicktisch, Pole Jam, Reifen und Fässer</li><li>Freeride-Drops: man fährt nicht mehr an der Felswand runter</li></ul>
+      <h3>v2.2</h3>
       <ul><li>Lawinenschaufel im Freeride-Rucksack: rettet dich einmal pro Lauf vor der Lawine</li><li>Switch auf die Rail heißt jetzt Switch wieder runter</li><li>Freeride: keine kleinen Steine mehr, Felsen nur noch selten</li><li>Schönere Mute-Pose auf Ski</li></ul>
       <h3>v2.1</h3>
       <ul><li>Grabs mit Zwischenbild: die Hand greift sichtbar zum Ski bzw. Brett</li></ul>
@@ -360,6 +362,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
         <dt><kbd>A</kbd><kbd>D</kbd></dt><dd>Tube und Baum: 90° drehen. Gerade drauf ist ein 50-50</dd>
         <dt>Absprung</dt><dd>Du drehst automatisch zurück in die Richtung, in der du aufgesprungen bist (Switch bleibt Switch). Mit A/D drehst du zusätzlich 180er raus</dd>
         <dt><kbd>Leertaste</kbd></dt><dd>Absprung vom Rail</dd>
+        <dt>Neue Features</dt><dd>Kink-Rails (Flat-Down, Down-Flat-Down, Flat-Down-Flat), Rainbow, Waterfall, Roller Coaster, Treppen-Rail, Boxen (A-Frame, Battleship), Auto und Picknicktisch geben Bonuspunkte. Pole Jam: einfach reinfahren. Reifen und Fässer antippen oder draufspringen</dd>
         <dt><kbd>P</kbd><kbd>Esc</kbd></dt><dd>Pause</dd>
       </dl></div>
     </div>
@@ -965,7 +968,7 @@ function makePatrol(on){
 let PATROL_SPR=[];
 
 /* ================= WORLD ================= */
-let segs=[],rails=[],loops=[],coins=[],signs=[],trees=[],rocks=[],gx=0,gy=0,sinceGap=0,lastLoopX=-9999,lastType='',curZone='park';
+let bonks=[],segs=[],rails=[],loops=[],coins=[],signs=[],trees=[],rocks=[],gx=0,gy=0,sinceGap=0,lastLoopX=-9999,lastType='',curZone='park';
 function zoneAt(x){if(x<PARK_LEN)return 'park';return ((x-PARK_LEN)%(PARK_LEN+FREE_LEN))<FREE_LEN?'free':'park'}
 const isPow=sg=>sg&&sg.zone==='free'&&sg.kind!=='rock'&&sg.kind!=='rocklip';
 const difficulty=()=>clamp(gx/25000,0,1);
@@ -977,7 +980,11 @@ function flushGapFx(){for(const g of pendGaps){const seed=g.x0*.173+g.y0*.053,fb
 function segIndexAt(x){let lo=0,hi=segs.length-1;if(hi<0||x<segs[0].x0||x>=segs[hi].x1)return -1;while(lo<=hi){const m=(lo+hi)>>1,s=segs[m];if(x<s.x0)hi=m-1;else if(x>=s.x1)lo=m+1;else return m}return -1}
 function groundAt(x){const i=segIndexAt(x);if(i<0)return null;const s=segs[i];if(s.gap)return null;return {y:s.y0+(s.y1-s.y0)*(x-s.x0)/(s.x1-s.x0),a:s.a,seg:s}}
 function gapAt(x){const i=segIndexAt(x);return i>=0&&segs[i].gap?segs[i]:null}
-const railY=(r,x)=>r.y0+(r.y1-r.y0)*(x-r.x0)/(r.x1-r.x0);
+// Rails sind Punktlisten (x aufsteigend): gerade Rails haben 2 Punkte, Kinks und Rainbows mehr
+const railPts=r=>r.pts||(r.pts=[[r.x0,r.y0],[r.x1,r.y1]]);
+function railSeg(r,x){const P=railPts(r);let i=0;while(i<P.length-2&&x>P[i+1][0])i++;return i}
+function railY(r,x){const P=railPts(r),i=railSeg(r,x),a=P[i],b=P[i+1];return a[1]+(b[1]-a[1])*(x-a[0])/(b[0]-a[0])}
+function railA(r,x){const P=railPts(r),i=railSeg(r,x),a=P[i],b=P[i+1];return Math.atan2(b[1]-a[1],b[0]-a[0])}
 function reqSpeed(aDeg,dist,drop){const th=-aDeg*RAD,c=Math.cos(th);return Math.sqrt(G*dist*dist/(2*c*c*Math.max(5,drop+dist*Math.tan(th))))}
 function flightLen(x0,y0,aDeg,s,pop,lx,ly,lDeg){
   let x=x0,y=y0,vx=s*Math.cos(aDeg*RAD),vy=s*Math.sin(aDeg*RAD)-pop;const tl=Math.tan(lDeg*RAD);
@@ -1027,6 +1034,47 @@ function fRail(tube){
   const r={x0:rx,y0:g0.y-h,x1:rx+len,y1:g1.y-h,type:tube?'tube':'rail'};rails.push(r);
   for(let x=rx+12;x<rx+len-4;x+=18)coins.push({x,y:railY(r,x)-FOOT-3,ph:Math.random()*4});
   seg(40,deg);
+}
+/* Neue Park-Features in den Formen echter Parks (von der Seite: Flat-Down, Down-Flat-Down, Flat-Down-Flat, Rainbow,
+   Waterfall, Roller Coaster, A-Frame, Battleship) plus Jibs: Auto, Picknicktisch, Pole Jam, Treppen-Rail.
+   sec = Gelände unter dem Feature als [Winkel, Länge]-Stücke, hf(u) = Höhe über dem Gelände (u = 0..1), curve = Bogen fein abtasten. */
+const BOX_COLS=['#2f7fd0','#e85d3a','#2b2e38','#3fa66b','#7e4fc4'];
+const carH=u=>u<.22?15:u<.36?15+9*smooth01((u-.22)/.14):u<.7?24:u<.8?24-8*smooth01((u-.7)/.1):16;
+const JIB={
+  fd:()=>({name:'Flat-Down',sec:[[3,rand(70,100)],[rand(26,32),rand(90,130)]],hf:()=>12,bonus:80}),
+  dfd:()=>({name:'Down-Flat-Down',sec:[[rand(22,28),rand(60,80)],[3,rand(50,70)],[rand(24,30),rand(60,80)]],hf:()=>12,bonus:120}),
+  fdf:()=>({name:'Flat-Down-Flat',sec:[[3,rand(50,70)],[rand(28,34),rand(70,90)],[3,rand(50,70)]],hf:()=>12,bonus:120}),
+  waterfall:()=>({name:'Waterfall',type:'rail',sec:[[3,45],[34,26],[3,40],[34,26],[3,40],[34,26],[3,35]],hf:()=>12,bonus:180}),
+  rainbow:()=>({name:'Rainbow',sec:[[4,rand(170,220)]],curve:16,hf:u=>10+18*Math.sin(Math.PI*u),bonus:120}),
+  wave:()=>({name:'Roller Coaster',type:'rail',sec:[[8,rand(240,290)]],curve:24,hf:u=>14+9*Math.sin(3*Math.PI*u),bonus:160}),
+  aframe:()=>({name:'A-Frame',type:'box',sec:[[3,rand(130,160)]],curve:12,hf:u=>8+20*(1-Math.abs(2*u-1)),bonus:120}),
+  battleship:()=>({name:'Battleship',type:'box',sec:[[3,rand(160,200)]],curve:16,hf:u=>8+16*clamp((1-Math.abs(2*u-1))*2.6,0,1),bonus:120}),
+  flatbox:()=>({name:'Flat Box',type:'box',sec:[[3,rand(120,170)]],hf:()=>10}),
+  downbox:()=>({name:'Down Box',type:'box',sec:[[rand(18,24),rand(150,200)]],hf:()=>10}),
+  car:()=>({name:'Auto',type:'box',look:'car',sec:[[2,86]],curve:30,hf:carH,bonus:200,coins:false}),
+  table:()=>({name:'Picknicktisch',type:'box',look:'table',sec:[[2,66]],hf:()=>12,bonus:100,coins:false}),
+  pole:()=>({name:'Pole Jam',type:'pole',look:'pole',sec:[[2,46]],hf:u=>18*u,bonus:80,coins:false}),
+  stairs:()=>({name:'Treppen-Rail',type:'rail',look:'stairs',sec:[[3,50],[30,100],[3,50]],hf:()=>13,bonus:150})};
+function fJib(key){
+  const def=JIB[key](),deg=rand(14,20);
+  if(!def.type)def.type=Math.random()<.6?'rail':'box';
+  seg(Math.max(50,90-leadCut),deg);seg(34,deg);
+  const x0=gx,xs=[x0];let stairs=null;
+  for(const [a,l] of def.sec){const sx=gx;seg(l,a);xs.push(gx);if(def.look==='stairs'&&a>20)stairs=[sx,gx]}
+  const x1=gx,L=x1-x0;
+  if(def.curve)for(let i=1;i<def.curve;i++)xs.push(x0+L*i/def.curve);
+  const pts=[...new Set(xs.map(x=>Math.round(x*100)/100))].sort((a,b)=>a-b).map(x=>{const g=groundAt(Math.min(x,x1-.01));return [x,g.y-def.hf((x-x0)/L)]});
+  const r={x0:pts[0][0],y0:pts[0][1],x1:pts[pts.length-1][0],y1:pts[pts.length-1][1],pts,type:def.type,look:def.look||null,name:def.name,bonus:def.bonus||0,
+    col:BOX_COLS[Math.floor(Math.random()*BOX_COLS.length)],stairs};
+  rails.push(r);
+  if(def.coins!==false)for(let x=r.x0+12;x<r.x1-4;x+=18)coins.push({x,y:railY(r,x)-FOOT-3,ph:Math.random()*4});
+  seg(60,deg);parkEnd=r.x1+(def.type==='pole'?240:0);   // nach dem Pole Jam fliegt man ein Stück
+}
+// Reifen und Fässer: am Boden antippen (Hüpfer) oder in der Luft draufspringen (Bonk)
+function fBonks(){
+  const deg=rand(14,20);seg(Math.max(50,90-leadCut),deg);const x0=gx+40,n=Math.random()<.5?2:3,sp=rand(110,130);seg(40+n*sp,deg);
+  for(let i=0;i<n;i++){const x=x0+i*sp,g=groundAt(x),kind=Math.random()<.5?'tire':'barrel';bonks.push({x,y:g.y,kind,w:kind==='tire'?14:10,h:kind==='tire'?10:14,hit:false,t:9})}
+  parkEnd=x0+(n-1)*sp+60;seg(40,deg);
 }
 function fGapRail(){
   const d=difficulty();seg(Math.max(90,140-leadCut),24);addSign(gx-110,'GAP RAIL');const dk=seg(50,5,'deck');dk.vmax=370;
@@ -1199,7 +1247,7 @@ function genFree(){
 }
 function pickW(o){let t=0;for(const k in o)t+=o[k];let r=Math.random()*t;for(const k in o){r-=o[k];if(r<=0)return k}return Object.keys(o)[0]}
 /* Park-Abstand in px (~1,1 s Fahrt mit Gas). PARK_LEAD: Strecke vom Anfang eines Hindernisses bis zur Rampe/Rail/Kante */
-const PARK_SPACE=380,PARK_LEAD={kicker:188,bigair:516,rail:124,tube:124,drop:150,gaprail:162,loop:254};
+const PARK_SPACE=380,PARK_LEAD={kicker:188,bigair:516,rail:124,tube:124,drop:150,gaprail:162,loop:254,kink:124,rainbow:124,box:124,car:124,table:124,pole:124,stairs:124,bonk:130,wave:124,waterfall:124};
 let parkEnd=null,leadCut=0;
 function genNext(){
   const z=zoneAt(gx);
@@ -1207,7 +1255,7 @@ function genNext(){
   if(z==='free'){genFree();return}
   const d=difficulty();let o;
   if(sinceGap>=2)o={kicker:3,drop:2,gaprail:1.1,bigair:1+d*1.5};
-  else o={kicker:3,rail:1.3,tube:2.1,drop:1.5,gaprail:.8,bigair:.8+d};
+  else o={kicker:3,rail:1.1,tube:1.6,drop:1.5,gaprail:.8,bigair:.8+d,kink:1.5,rainbow:.8,box:1.3,car:.5,table:.5,pole:.6,stairs:.6,bonk:.6,wave:.4,waterfall:.4};
   if(o[lastType])o[lastType]*=.35;
   const t=pickW(o);
   // Gleicher Abstand: vom Ende des letzten Hindernisses (Rail-Ende bzw. normale Landestelle) bis zum Anfang des nächsten
@@ -1215,14 +1263,17 @@ function genNext(){
   leadCut=0;
   if(parkEnd!==null){const L=PARK_SPACE+rand(-15,15)-(gx-parkEnd)-PARK_LEAD[t];
     if(L>8){const x=gx;seg(L,rand(14,20));if(L>140&&Math.random()<.4)coinRow(x+30,Math.floor((L-50)/24),16,12)}else leadCut=-L}
-  ({kicker:()=>fKicker(false),bigair:()=>fKicker(true),rail:()=>fRail(false),tube:()=>fRail(true),drop:fDrop,gaprail:fGapRail,loop:fLoop})[t]();
+  const pickOf=a=>a[Math.floor(Math.random()*a.length)];
+  ({kicker:()=>fKicker(false),bigair:()=>fKicker(true),rail:()=>fRail(false),tube:()=>fRail(true),drop:fDrop,gaprail:fGapRail,loop:fLoop,
+    kink:()=>fJib(pickOf(['fd','dfd','fdf'])),rainbow:()=>fJib('rainbow'),box:()=>fJib(pickOf(['aframe','battleship','flatbox','downbox'])),car:()=>fJib('car'),
+    table:()=>fJib('table'),pole:()=>fJib('pole'),stairs:()=>fJib('stairs'),bonk:fBonks,wave:()=>fJib('wave'),waterfall:()=>fJib('waterfall')})[t]();
   sinceGap=['kicker','bigair','drop','gaprail'].includes(t)?0:sinceGap+1;
   if(t==='loop')lastLoopX=gx;
   lastType=t;
   addFloods();flushGapFx();
 }
 function resetWorld(){
-  segs=[];rails=[];loops=[];coins=[];signs=[];trees=[];rocks=[];floods=[];fauna=[];cliffs=[];cliffJobs=[];gapFogs=[];pendGaps=[];mReset(1+Math.floor(Math.random()*9973));nextFloodX=-260;gx=-260;gy=0;sinceGap=0;lastLoopX=-9999;lastType='';curZone='park';
+  segs=[];rails=[];bonks=[];loops=[];coins=[];signs=[];trees=[];rocks=[];floods=[];fauna=[];cliffs=[];cliffJobs=[];gapFogs=[];pendGaps=[];mReset(1+Math.floor(Math.random()*9973));nextFloodX=-260;gx=-260;gy=0;sinceGap=0;lastLoopX=-9999;lastType='';curZone='park';
   seg(300,5,'start');seg(260,19);coinRow(120,8,16,12);
   parkEnd=null;leadCut=0;fRail(Math.random()<.5);lastType='rail';
 }
@@ -1834,6 +1885,7 @@ function land(g,fx){
 }
 function updGround(dt){
   const g=groundAt(p.x);if(!g){launch(p.ang*RAD,0,null);return}
+  if(g.seg.kind==='rock'){launch(Math.min(g.a,.35),0,null);return}   // auf einer Felswand kann man nicht fahren
   const a=g.a,ctrl=p.mode==='ground';
   let drag=.0022,acc=G*Math.sin(a)-.035*G*Math.cos(a);
   const pow=isPow(g.seg);
@@ -1858,7 +1910,13 @@ function updGround(dt){
   p.sink=(p.sink||0)+((pow?4:0)-(p.sink||0))*Math.min(1,dt*8);
   const prevX=p.x,nx=p.x+Math.cos(a)*p.s*dt,ny=p.y+Math.sin(a)*p.s*dt,g2=groundAt(nx);
   if(!g2){p.x=nx;p.y=ny;launch(a,0,g.seg);return}
+  // Kante zu einer Felswand oder sehr starker Knick: immer abheben, auch wenn der letzte Schritt die Kante nur knapp trifft
+  if(g2.seg!==g.seg&&(g2.seg.kind==='rock'||g2.a-a>.5)){p.x=nx;p.y=ny;launch(a,0,g.seg);return}
   if(g2.y>ny+1.2&&g2.a-a>.15){p.x=nx;p.y=ny;launch(a,0,g.seg);return}
+  // Pole Jam: reinfahren reicht, man rutscht die Stange hoch und poppt am Ende ab
+  for(const r of rails)if(r.type==='pole'&&p.x<r.x0&&nx>=r.x0&&p.mode==='ground'){p.x=r.x0+.2;mountRail(r);return}
+  // Reifen und Fässer am Boden: antippen = kleiner Hüpfer drüber
+  for(const b of bonks)if(!b.hit&&p.x<b.x-b.w/2&&nx>=b.x-b.w/2){b.hit=true;b.t=0;p.x=nx;p.y=ny;launch(a-.25,90,null);addPoints(150,b.kind==='tire'?'Tire Tap':'Barrel Tap');burst(b.x,b.y-b.h,8,['#ffffff','#e4eefb'],80);SFX.jump();return}
   p.x=nx;p.y=g2.y;
   if(p.mode==='crash'){p.crashT-=dt;if(p.crashT>.45)p.tumble+=760*dt;else p.tumble=90;if(p.crashT<=0){p.mode='ground';p.tumble=0}}
   p.ang+=(g2.a*DEG-p.ang)*Math.min(1,dt*18);
@@ -1880,7 +1938,7 @@ function updLoop(dt){
   if(N<0||p.s<20){launch(-p.phi,0,null);p.bailed=true;showTrick('ZU LANGSAM','Loop verpasst','bad')}
 }
 function landRail(r,fx){
-  const ra=Math.atan2(r.y1-r.y0,r.x1-r.x0),diff=norm(p.ang-ra*DEG);
+  const ra=railA(r,fx),diff=norm(p.ang-ra*DEG);
   if(Math.abs(diff)>55||p.bailed){p.bailed=true;p.noRail=r;p.vy=-80;p.vx*=.6;return false}
   scoreAir(false);
   const s=p.vx*Math.cos(ra)+p.vy*Math.sin(ra);
@@ -1894,15 +1952,18 @@ function landRail(r,fx){
   p.gspin=gs;p.gspinVis=hd?p.spin:gs;p.gHold=hd;p.gRepT=0;p.gSwaps=0;p.gParts=[];p.gLastDir=hd||1;p.gPrevL=hl;p.gPrevR=hr;gLabel();
   SFX.land();return true;
 }
+function mountRail(r){p.mode='rail';p.rail=r;if(r.type==='pole')p.s=Math.min(p.s,240);   // die Stange hoch bremst
+  p.y=railY(r,p.x);p.grindT=0;p.ang=railA(r,p.x)*DEG;p.spin=p.sw?180:0;p.gEntrySw=!!p.sw;
+  p.gspin=p.spin;p.gspinVis=p.spin;p.gHold=0;p.gRepT=0;p.gSwaps=0;p.gParts=[];p.gLastDir=1;p.gPrevL=inL();p.gPrevR=inR();p.butter=0;p.butterVis=0;p.bs=null;gLabel();SFX.land()}
 function gLabel(){
   const straight=((p.gspin%180)+180)%180===0;
-  const nm=straight?'50-50':({rail:'Rail Slide',tube:'Tube Slide',log:'Tree Slide'})[p.rail.type];
+  const nm=straight?'50-50':({rail:'Rail Slide',tube:'Tube Slide',log:'Tree Slide',box:'Box Slide',pole:'Pole Slide'})[p.rail.type];
   if(!p.gParts.includes(nm))p.gParts.push(nm);
 }
 function endGrind(){
   const t=p.grindT;if(t<=.15)return;
-  const nm=p.gParts.join(' to ')+(p.gSwaps?' · '+p.gSwaps+'x '+(p.rail.type==='rail'?'Swap':'90'):'');
-  addPoints(Math.round(t*280+p.gSwaps*120+(p.gParts.length>1?100:0)),nm,t.toFixed(1)+'s');
+  const nm=p.gParts.join(' to ')+(p.gSwaps?' · '+p.gSwaps+'x '+(p.rail.type==='rail'?'Swap':'90'):'')+(p.rail.name?' · '+p.rail.name:'');
+  addPoints(Math.round(t*280+p.gSwaps*120+(p.gParts.length>1?100:0)+(p.rail.bonus||0)),nm,t.toFixed(1)+'s');
 }
 function leaveRail(a,pop){
   endGrind();p.spin=p.gspin;launch(a,pop,null);p.fromRail=true;p.aPrevL=false;p.aPrevR=false;
@@ -1910,11 +1971,11 @@ function leaveRail(a,pop){
   {const g=p.gspin;if(((g%180)+180)%180!==0){const lo=Math.floor(g/180)*180,odd=x=>Math.abs(Math.round(x/180))%2===1,tg=odd(lo)===!!p.gEntrySw?lo:lo+180;p.spinTarget=tg;p.spinStart=tg}}
 }
 function updRail(dt){
-  const r=p.rail,a=Math.atan2(r.y1-r.y0,r.x1-r.x0);
+  const r=p.rail,a=railA(r,p.x);
   p.s+=(G*Math.sin(a)-.02*G-.0012*p.s*p.s)*dt;p.s=clamp(p.s,60,VMAX);
   p.x+=Math.cos(a)*p.s*dt;p.grindT+=dt;
-  if(p.x>=r.x1){p.y=railY(r,r.x1);leaveRail(a,0);return}
-  p.y=railY(r,p.x);p.ang=a*DEG;
+  if(p.x>=r.x1){p.y=railY(r,r.x1);leaveRail(a,r.type==='pole'?JUMP_POP*.5:0);return}   // Pole Jam: am Ende abpoppen
+  p.y=railY(r,p.x);p.ang+=(a*DEG-p.ang)*Math.min(1,dt*24);   // an Knicken weich mitdrehen
   const kl=inL(),kr=inR(),step=r.type==='rail'?180:90;
   // Swap beim Drücken; bleibt die Richtung gedrückt, dreht er nach jedem fertigen Swap weiter
   const swap=dir=>{p.gspin+=dir*step;p.gSwaps++;p.gLastDir=dir;p.gRepT=GRIND_REP;gLabel();SFX.jump()};
@@ -1968,6 +2029,9 @@ function updAir(dt){
   {const pc=poseCOM(airPose(),p.spin,SAVE.gear),k=Math.min(1,dt*10);p.cx=pc.cx;p.cy=pc.cy;p.cz=pc.cz;p.fx+=(pc.fx-p.fx)*k;p.fy+=(pc.fy-p.fy)*k;p.fz=pc.fz}
   // collisions
   const fx=footX(),fy=footY();
+  // Reifen und Fässer in der Luft antippen: Bonk, federt nach oben
+  if(p.vy>0)for(const b of bonks){const top=b.y-b.h;if(fx>=b.x-b.w/2-2&&fx<=b.x+b.w/2+2&&pfy<=top+1&&fy>=top){b.hit=true;b.t=0;p.y-=fy-top;p.vy=-Math.max(170,p.vy*.6);
+    addPoints(200,b.kind==='tire'?'Tire Bonk':'Barrel Bonk');burst(fx,top,10,['#ffffff','#e4eefb'],90);SFX.jump();break}}
   if(p.vy>0){for(const rl of rails){if(rl===p.noRail)continue;if(fx>=rl.x0&&fx<=rl.x1){const ry=railY(rl,fx),pry=railY(rl,clamp(pfx,rl.x0,rl.x1));if(pfy<=pry+1.5&&fy>=ry){if(landRail(rl,fx))return}}}}
   const g=groundAt(fx);
   if(g){
@@ -2133,7 +2197,7 @@ function update(dt){
   while(gx<cam.x+VW+900)genNext();
   pruneT-=dt;if(pruneT<=0){pruneT=1;const cut=Math.min(wall.x,cam.x,pat.on?pat.x:1e9)-500;
     while(segs.length>3&&segs[0].x1<cut)segs.shift();
-    rails=rails.filter(r=>r.x1>cut);loops=loops.filter(L=>L.cx+L.R>cut);coins=coins.filter(c=>!c.taken&&c.x>cut);signs=signs.filter(s=>s.x>cut);trees=trees.filter(t=>t.x>cut);rocks=rocks.filter(q=>q.cx>cut);floods=floods.filter(f=>f.x>cut);fauna=fauna.filter(a=>a.x>cut);cliffs=cliffs.filter(c=>c.x+c.W>cut);cliffJobs=cliffJobs.filter(c=>c.x+c.W>cut);gapFogs=gapFogs.filter(f=>f.x+f.W>cut)}
+    rails=rails.filter(r=>r.x1>cut);bonks=bonks.filter(b=>b.x>cut);loops=loops.filter(L=>L.cx+L.R>cut);coins=coins.filter(c=>!c.taken&&c.x>cut);signs=signs.filter(s=>s.x>cut);trees=trees.filter(t=>t.x>cut);rocks=rocks.filter(q=>q.cx>cut);floods=floods.filter(f=>f.x>cut);fauna=fauna.filter(a=>a.x>cut);cliffs=cliffs.filter(c=>c.x+c.W>cut);cliffJobs=cliffJobs.filter(c=>c.x+c.W>cut);gapFogs=gapFogs.filter(f=>f.x+f.W>cut)}
   if(shake>0)shake=Math.max(0,shake-dt*20);
 }
 
@@ -2184,6 +2248,11 @@ function drawRails(cX,cY){
   for(const r of rails){
     if(r.x1<cX-10||r.x0>cX+VW+10)continue;
     if(r.type==='log'){drawLog(r,cX,cY);continue}
+    if(r.look==='car'){drawCar(r,cX,cY);continue}
+    if(r.look==='table'){drawTable(r,cX,cY);continue}
+    if(r.look==='pole'){drawPoleJam(r,cX,cY);continue}
+    if(r.type==='box'){drawBox(r,cX,cY);continue}
+    if(r.stairs)drawStairs(r,cX,cY);
     const tube=r.type==='tube';
     for(let x=r.x0+6;x<r.x1;x+=tube?36:26){const sx=Math.round(x-cX),ry=Math.round(railY(r,x))-cY,g=groundAt(x),gy=g?Math.round(g.y)-cY:VH+2;
       ctx.fillStyle='#2c3448';ctx.fillRect(sx-1,ry+2,tube?4:3,gy-ry-1);ctx.fillStyle='#56627c';ctx.fillRect(sx,ry+2,1,gy-ry-1)}
@@ -2194,6 +2263,46 @@ function drawRails(cX,cY){
       else{ctx.fillStyle='#1a2133';ctx.fillRect(sx,ry-1,1,4);ctx.fillStyle='#ffffff';ctx.fillRect(sx,ry,1,1);ctx.fillStyle='#a9b4c6';ctx.fillRect(sx,ry+1,1,1)}}
   }
 }
+// Box: Kunststoff-Oberfläche, farbige Seitenwand bis zum Boden
+function drawBox(r,cX,cY){const xa=Math.max(Math.floor(r.x0),cX),xb=Math.min(Math.ceil(r.x1),cX+VW),dk=shade(r.col,-.35),lt=shade(r.col,.3);
+  for(let x=xa;x<xb;x++){const sx=x-cX,ry=Math.round(railY(r,x))-cY,g=groundAt(x),gy=g?Math.round(g.y)-cY:ry+14,edge=x-r.x0<1.5||r.x1-x<1.5;
+    ctx.fillStyle='#1a2133';ctx.fillRect(sx,ry-1,1,gy-ry+2);if(edge)continue;
+    ctx.fillStyle=r.col;ctx.fillRect(sx,ry+2,1,Math.max(0,gy-ry-2));ctx.fillStyle=dk;ctx.fillRect(sx,gy-2,1,2);ctx.fillStyle=lt;ctx.fillRect(sx,ry+5,1,1);
+    ctx.fillStyle='#eef2f7';ctx.fillRect(sx,ry,1,2)}}
+// Auto: Dach-Linie ist die Rutschfläche, Fenster, rote Karosserie, Räder
+function drawCar(r,cX,cY){const L=r.x1-r.x0,xa=Math.max(Math.floor(r.x0),cX),xb=Math.min(Math.ceil(r.x1),cX+VW);
+  for(let x=xa;x<xb;x++){const sx=x-cX,u=(x-r.x0)/L,top=Math.round(railY(r,x))-cY,g=groundAt(x),gy=g?Math.round(g.y)-cY:top+24,bl=gy-11;
+    ctx.fillStyle='#1a1d26';ctx.fillRect(sx,top-1,1,gy-top+1);if(u<.015||u>.985)continue;
+    const cab=u>.24&&u<.79,pil=Math.abs(u-.255)<.02||Math.abs(u-.535)<.012||Math.abs(u-.775)<.015;
+    if(cab&&!pil&&bl-top>2){ctx.fillStyle='#a9d8ff';ctx.fillRect(sx,top+1,1,bl-top-2);ctx.fillStyle='#e6f4ff';if(((x>>1)&7)===0)ctx.fillRect(sx,top+2,1,Math.max(1,bl-top-5))}
+    const bt=cab?(pil?top:bl-1):top;ctx.fillStyle='#d2423a';ctx.fillRect(sx,bt,1,Math.max(0,gy-3-bt));ctx.fillStyle='#ef6b5c';ctx.fillRect(sx,cab?bl-1:top,1,1);
+    ctx.fillStyle='#a8322c';ctx.fillRect(sx,gy-5,1,2);ctx.fillStyle='#2b2e38';ctx.fillRect(sx,gy-3,1,3)}
+  for(const u of [.18,.82]){const x=r.x0+L*u,sx=Math.round(x-cX),g=groundAt(x),gy=g?Math.round(g.y)-cY:0;if(sx<-6||sx>VW+6)continue;
+    for(let dy=-4;dy<=4;dy++){const w=Math.round(Math.sqrt(16-dy*dy)+.3);ctx.fillStyle='#16181f';ctx.fillRect(sx-w,gy-4+dy,w*2+1,1)}ctx.fillStyle='#9aa3b2';ctx.fillRect(sx-1,gy-5,3,3)}
+  {const sx=Math.round(r.x0+1-cX),ty=Math.round(railY(r,r.x0+1))-cY;ctx.fillStyle='#ffe58a';ctx.fillRect(sx,ty+3,2,2);
+   const ex=Math.round(r.x1-3-cX),ey=Math.round(railY(r,r.x1-3))-cY;ctx.fillStyle='#ff4d5e';ctx.fillRect(ex,ey+3,2,2)}}
+// Picknicktisch: Holzplatte mit A-Beinen
+function drawTable(r,cX,cY){const xa=Math.max(Math.floor(r.x0),cX),xb=Math.min(Math.ceil(r.x1),cX+VW);
+  for(const lx of [r.x0+9,r.x1-9])for(const d of [-6,6]){const top=railY(r,lx),g=groundAt(lx+d);if(!g)continue;
+    strokePts(ctx,[[lx-cX,top+3-cY],[lx+d-cX,g.y-cY]],3,'#3b2615');strokePts(ctx,[[lx-cX,top+3-cY],[lx+d-cX,g.y-cY]],1,'#8a5a2e')}
+  for(let x=xa;x<xb;x++){const sx=x-cX,ry=Math.round(railY(r,x))-cY;ctx.fillStyle='#2a1a0e';ctx.fillRect(sx,ry-1,1,5);ctx.fillStyle='#a0703c';ctx.fillRect(sx,ry,1,3);
+    ctx.fillStyle='#c79a5e';ctx.fillRect(sx,ry,1,1);if(((x-Math.floor(r.x0))%13)===0){ctx.fillStyle='#6e4a26';ctx.fillRect(sx,ry,1,3)}}}
+// Pole Jam: rot-weiße Stange schräg aus dem Schnee, Stütze am Ende
+function drawPoleJam(r,cX,cY){const a=[r.x0-cX,r.y0-cY],b=[r.x1-cX,r.y1-cY],g=groundAt(r.x1-3);
+  if(g){strokePts(ctx,[[b[0]-3,b[1]+1],[b[0]-3,g.y-cY]],3,'#1a2133');strokePts(ctx,[[b[0]-3,b[1]+1],[b[0]-3,g.y-cY]],1,'#56627c')}
+  strokePts(ctx,[a,b],4,'#1a2133');const n=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1]));
+  for(let i=0;i<=n;i++){const t=i/n,x=Math.round(a[0]+(b[0]-a[0])*t),y=Math.round(a[1]+(b[1]-a[1])*t);ctx.fillStyle=Math.floor(i/5)%2?'#ffffff':'#e0262f';ctx.fillRect(x,y-1,1,2)}}
+// Treppe unter dem Rail: Betonstufen im Hang
+function drawStairs(r,cX,cY){const [s0,s1]=r.stairs,xa=Math.max(Math.floor(s0),cX),xb=Math.min(Math.ceil(s1),cX+VW);
+  for(let x=xa;x<xb;x++){const k=Math.floor((x-s0)/9),xs=s0+k*9,g0=groundAt(xs+.01),g=groundAt(x);if(!g0||!g)continue;const top=Math.round(g0.y)-cY,gy=Math.round(g.y)-cY,sx=x-cX;
+    ctx.fillStyle='#8d96a4';ctx.fillRect(sx,top,1,gy-top+2);ctx.fillStyle='#c5ccd6';ctx.fillRect(sx,top,1,1);if(x-xs<1){ctx.fillStyle='#5f6774';ctx.fillRect(sx,top,1,gy-top+2)}}}
+// Reifen (gestapelt) und Fässer
+function drawBonks(cX,cY){for(const b of bonks){const sx=Math.round(b.x-cX),gy=Math.round(b.y)-cY;if(sx<-12||sx>VW+12)continue;b.t=(b.t||0)+1/60;
+  const wob=b.t<.3?Math.round(Math.sin(b.t*40)*1.5):0,x0=sx-Math.floor(b.w/2)+wob;
+  if(b.kind==='tire'){for(const yy of [gy-5,gy-10]){ctx.fillStyle='#0f1116';ctx.fillRect(x0-1,yy-1,b.w+2,7);ctx.fillStyle='#2b2e38';ctx.fillRect(x0,yy,b.w,5);ctx.fillStyle='#4a4e5c';ctx.fillRect(x0,yy,b.w,1);
+      ctx.fillStyle='#0f1116';ctx.fillRect(x0+4,yy+2,b.w-8,1)}}
+  else{ctx.fillStyle='#0f1520';ctx.fillRect(x0-1,gy-b.h-1,b.w+2,b.h+1);ctx.fillStyle='#2f6fd0';ctx.fillRect(x0,gy-b.h,b.w,b.h);ctx.fillStyle='#5b9fe4';ctx.fillRect(x0,gy-b.h,b.w,2);
+    ctx.fillStyle='#1d4e9a';ctx.fillRect(x0,gy-b.h+4,b.w,1);ctx.fillRect(x0,gy-4,b.w,1);ctx.fillStyle='#8fc0f2';ctx.fillRect(x0+2,gy-b.h+2,1,b.h-3)}}}
 function drawLog(r,cX,cY){
   for(const ex of [r.x0+7,r.x1-7]){const sx=Math.round(ex-cX),ry=Math.round(railY(r,ex))-cY,g=groundAt(ex),gy=g?Math.round(g.y)-cY:VH;
     ctx.fillStyle='#3e3f4b';ctx.fillRect(sx-4,ry+5,9,gy-ry-3);ctx.fillStyle='#62657a';ctx.fillRect(sx-3,ry+5,4,gy-ry-4);ctx.fillStyle='#ffffff';ctx.fillRect(sx-4,ry+5,9,1)}
@@ -2362,7 +2471,7 @@ function render(dt){
   // Welt: Piste, Klippen, alles Bewegliche; nachts Flutlicht und Stirnlampe
   if(!worldCv||worldCv.width!==VW){[worldCv,worldCtx]=mk(VW,VH)}
   ctx=worldCtx;ctx.clearRect(0,0,VW,VH);
-  drawTerrain(cX,cY);drawGapMist(cX,cY);drawCliffs(cX,cY);drawTrees(cX,cY);drawFauna(cX,cY);drawFloods(cX,cY);drawRocks(cX,cY);drawLoops(cX,cY);drawSigns(cX,cY);drawRails(cX,cY);drawCoins(cX,cY);drawPatrol(cX,cY);drawPlayer(cX,cY);
+  drawTerrain(cX,cY);drawGapMist(cX,cY);drawCliffs(cX,cY);drawTrees(cX,cY);drawFauna(cX,cY);drawFloods(cX,cY);drawRocks(cX,cY);drawLoops(cX,cY);drawSigns(cX,cY);drawRails(cX,cY);drawBonks(cX,cY);drawCoins(cX,cY);drawPatrol(cX,cY);drawPlayer(cX,cY);
   for(const q of parts){ctx.fillStyle=q.col;ctx.fillRect(Math.round(q.x-cX),Math.round(q.y-cY),q.sz,q.sz)}
   drawGapFog(cX,cY);drawWall(cX,cY);
   const lamp=applyNight(cX,cY,curDS,fm);
