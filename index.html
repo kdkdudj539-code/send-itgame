@@ -259,7 +259,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
       <h1>SEND<br><em>IT</em></h1>
       <p class="lede">Die Lawine schiebt von hinten, die Ski Patrol jagt dich. Spring die Gaps, steh deine Tricks, sammel Münzen.</p>
       <div class="gear" role="group" aria-label="Sportgerät wählen"><button class="gearbtn" data-gear="ski" aria-pressed="true">SKI</button><button class="gearbtn" data-gear="board" aria-pressed="false">SNOWBOARD</button></div>
-      <div class="gear"><button class="gearbtn" id="bAssist" aria-pressed="false">LANDEHILFE: AUS</button></div>
+      <div class="gear"><button class="gearbtn" id="bAssist" aria-pressed="false">LANDEHILFE: AUS</button><button class="gearbtn" id="bPack" aria-pressed="false" hidden>RUCKSACK: AUS</button></div>
       <div class="stats"><span><i class="coin"></i><b id="mCoins">0</b></span><span>Highscore<b id="mBest">0</b></span><span>Weiteste Fahrt<b id="mDist">0 m</b></span></div>
       <div class="btns">
         <button class="btn" id="bPlay">FAHREN</button>
@@ -277,7 +277,9 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
     <p class="eyebrow">Was ist neu</p>
     <h2>PATCH NOTES</h2>
     <div class="pn">
-      <h3>v1.5 · 05.11.2026</h3>
+      <h3>v1.6 · 05.11.2026</h3>
+      <ul><li>Freeride-Rucksack im Shop: Spitzhacke rettet dich einmal pro Lauf aus dem Abgrund</li><li>Mehr Abstand zwischen den Hindernissen im Park</li></ul>
+      <h3>v1.5</h3>
       <ul><li>Butter mit eigener Pose und gebogenen Ski</li><li>Nose Butter 180 und Switch Tail Butter 180</li><li>Gas nur noch mit Stick ganz rechts</li></ul>
       <h3>v1.4</h3>
       <ul><li>Online-Rangliste mit eigenem Konto</li><li>Butter und Nose Butter</li><li>Sprung halb so hoch, Felsen flacher</li><li>Nebliges Flutlicht, präparierte Piste, Bär läuft</li></ul>
@@ -348,6 +350,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
     </div>
     <p class="note">Lande parallel zum Hang. Ein 180er landet Switch, mit Twin Tips kein Problem. Lass den Grab vor der Landung los, sonst wird's sketchy. Kommst du am Gap zu kurz, fällst du ins Void. Die Ski Patrol kann keine Gaps springen: Wenn sie dir am Heck klebt, spring über den nächsten Gap und sie bleibt stehen. Mit Vollgas fährst du ihr auch davon. Den Big Air schaffst du nur mit Vollgas plus Pop.</p>
     <p class="note">Am Handy: Mit dem Stick links steuerst du die Tricks. Oben ist Frontflip, unten Backflip, links und rechts drehst du dich, links bremst auf der Piste. Schräg oben kommt ein Misty, schräg unten ein Cork. Tippst du in die linke Bildschirmhälfte, greifst du den linken Stick, rechts den rechten. Die Richtung vom Stick zu deinem Finger zählt sofort: Tippst du rechts neben den Stick, ist er schon nach rechts gedrückt. Auf der Piste gibst du mit dem linken Stick nach rechts Gas und bremst nach links, nach unten machst du einen Butter, nach oben einen Nose Butter. Gas gibt es nur, wenn du den Stick ganz nach rechts drückst. Lenkst du beim Nose Butter schräg nach oben links oder rechts, drehst du einen flachen Nose Butter 180. Fährst du switch, geht das genauso mit dem Tail Butter schräg nach unten. Der rechte Stick ist Sprung und Grab zugleich: Antippen springt, gedrückt halten und schieben greift. Oben Japan, unten Mute (Board: Indy), links Tail, rechts Nose. In der Luft springt er nicht, da zählen nur die Grabs.</p>
+    <p class="note">Freeride-Rucksack (Shop, 5000 Münzen, im Menü an- und ausschaltbar): Fällst du in einen Abgrund, hält dich einmal pro Lauf die Spitzhacke an der rechten Wand fest. Mit dem linken Stick nach oben (Pfeil hoch) kletterst du hoch, oben klickst du automatisch wieder in Ski oder Board ein.</p>
     <p class="note">Nach einer Weile wechselt die Strecke in die Freeride-Zone. Dort grindest du umgefallene Bäume und springst Cliffs. Cliffs halten die Ski Patrol genauso auf wie Gaps. Im Powder sinkst du ein und wirst langsamer, wenn du zu wenig Speed hast. Dafür verzeiht er schiefe Landungen. Pass auf die Steine auf: Kleine bringen dich zu Fall, gegen große Felsen ist der Run vorbei. Spring mit der Leertaste drüber.</p>
     <div class="btns"><button class="btn" id="bHelpBack">ZURÜCK</button></div>
   </div>
@@ -454,6 +457,9 @@ const SHOP={
     {id:'b_wood',name:'Holz Core',price:60,c:'#c08a50',a:'#6e4523'},
     {id:'b_galaxy',name:'Galaxy',price:80,c:'#5b3fa8',a:'#ff86c8'},
     {id:'b_gold',name:'Gold Edition',price:200,c:'#f2c445',a:'#6e4a10'}]},
+  pack:{label:'Rucksack',items:[
+    {id:'pk_none',name:'Ohne Rucksack',price:0,c:'#5d6680'},
+    {id:'pk_free',name:'Freeride-Rucksack',price:5000,c:'#c8442e',a:'#2b2e38',info:'Mit Spitzhacke: rettet dich einmal pro Lauf aus dem Abgrund. Im Menü an- und ausschaltbar.'}]},
   poles:{label:'Skistöcke',items:[
     {id:'po_black',name:'Carbon',price:0,c:'#8a93aa',a:'#ff7a2f'},
     {id:'po_silver',name:'Alu Silber',price:20,c:'#c3c9d4',a:'#3a6fd8'},
@@ -466,7 +472,7 @@ const SHOP={
 const CATS=Object.keys(SHOP);
 
 /* ================= SAVE ================= */
-const DEF={coins:0,best:0,bestDist:0,owned:{},equip:{helmet:'h_black',goggles:'g_orange',hoodie:'d_grey',pants:'p_khaki',skis:'s_red',board:'b_black',poles:'po_black'},gear:'ski',assist:false};
+const DEF={coins:0,best:0,bestDist:0,owned:{},equip:{helmet:'h_black',goggles:'g_orange',hoodie:'d_grey',pants:'p_khaki',skis:'s_red',board:'b_black',poles:'po_black',pack:'pk_none'},gear:'ski',assist:false};
 function loadSave(){
   try{ const s=JSON.parse(localStorage.getItem('sendit_save_v1')||'null');
     if(s&&typeof s==='object') return {coins:s.coins|0,best:s.best|0,bestDist:s.bestDist|0,owned:s.owned||{},equip:Object.assign({},DEF.equip,s.equip||{}),gear:s.gear==='board'?'board':'ski',assist:!!s.assist};
@@ -481,9 +487,9 @@ function hexRgb(h){h=h.replace('#','');return [0,2,4].map(i=>parseInt(h.slice(i,
 function shade(h,f){const c=hexRgb(h).map(v=>Math.round(f<0?v*(1+f):v+(255-v)*f));return '#'+c.map(v=>clamp(v,0,255).toString(16).padStart(2,'0')).join('')}
 function itemOf(cat,id){const L=SHOP[cat].items;return L.find(i=>i.id===id)||L[0]}
 function palette(eq){
-  const H=itemOf('helmet',eq.helmet).c, L=itemOf('goggles',eq.goggles).c, D=itemOf('hoodie',eq.hoodie).c, Pi=itemOf('pants',eq.pants), Si=itemOf('skis',eq.skis),Bi=itemOf('board',eq.board),Pl=itemOf('poles',eq.poles);
+  const H=itemOf('helmet',eq.helmet).c, L=itemOf('goggles',eq.goggles).c, D=itemOf('hoodie',eq.hoodie).c, Pi=itemOf('pants',eq.pants), Si=itemOf('skis',eq.skis),Bi=itemOf('board',eq.board),Pl=itemOf('poles',eq.poles),Pk=eq.pack&&eq.pack!=='pk_none'?itemOf('pack',eq.pack):null;
   return {O:'#121626',H,h:shade(H,-.38),l:shade(H,.5),L,M:shade(L,.65),G:'#252a39',S:'#eab58f',k:'#c38663',
-    D,d:shade(D,-.3),P:Pi.c,p:shade(Pi.c,-.28),pat:Pi.pat||null,K:Si.c,ka:Si.a,B:Bi.c,ba:Bi.a,PO:Pl.c,pa:Pl.a,boot:'#3c4356',glove:'#272b38',zip:'#eef1f7'};
+    D,d:shade(D,-.3),P:Pi.c,p:shade(Pi.c,-.28),pat:Pi.pat||null,K:Si.c,ka:Si.a,B:Bi.c,ba:Bi.a,PO:Pl.c,pa:Pl.a,pk:Pk?Pk.c:null,pka:Pk?Pk.a:null,boot:'#3c4356',glove:'#272b38',zip:'#eef1f7'};
 }
 const eqKey=eq=>CATS.map(c=>eq[c]).join(',');
 
@@ -593,6 +599,21 @@ const SKI3=(()=>{
       torso:[[-2,.5,0],[1.5,-5.5,0]],
       arms:[[[1,-5,-5],[4,-3,-2],[5,-1,2]],[[2,-5,5],[4.5,-1.5,5.5],[5.5,0,3]]],
       head:[3.5,-9.5,0]},
+    // Klettern an der Wand rechts: Ski stecken senkrecht am Rucksack, Stiefel an der Wand, Spitzhacke in der oberen Hand
+    climb0:{
+      skis:[{c:[-6,-4,-2],d:[0,-1,0],n:[-1,0,0]},{c:[-6,-4,2],d:[0,-1,0],n:[-1,0,0]}],skiKey:-6,noPoles:true,
+      boots:[[3.5,8,-3],[3,4,3]],bootWH:[4,3],
+      legs:[[[-.5,0,-3],[3,3,-3.5],[3,7,-3]],[[.5,0,3],[4,0,3.5],[2.5,3.5,3]]],noFlare:true,
+      torso:[[0,0,0],[1.5,-7,0]],
+      arms:[[[.5,-6,-5],[3,-4,-5.5],[5,-2.5,-4.5]],[[2,-6,5],[3.5,-10,5.5],[5,-13.5,4.5]]],axe:1,
+      head:[3,-11.5,0]},
+    climb1:{
+      skis:[{c:[-6,-4,-2],d:[0,-1,0],n:[-1,0,0]},{c:[-6,-4,2],d:[0,-1,0],n:[-1,0,0]}],skiKey:-6,noPoles:true,
+      boots:[[3,4,-3],[3.5,8,3]],bootWH:[4,3],
+      legs:[[[-.5,0,-3],[4,0,-3.5],[2.5,3.5,-3]],[[.5,0,3],[3,3,3.5],[3,7,3]]],noFlare:true,
+      torso:[[0,0,0],[1.5,-7,0]],
+      arms:[[[.5,-6,-5],[3,-9,-5.5],[5,-12,-4.5]],[[2,-6,5],[3.5,-6,5.5],[5,-6.5,4.5]]],axe:1,
+      head:[3,-11.5,0]},
     // Butter: Gewicht aufs Skiende, Hüfte zurück, Ski biegen sich, Arme seitlich zur Balance, Stöcke zeigen schräg nach hinten unten
     butter:{
       skis:[{c:[.5,11,-4],d:[1,0,0],flex:2.6,flexEnd:'tip'},{c:[.5,11,4],d:[1,0,0],flex:2.6,flexEnd:'tip'}],
@@ -658,6 +679,19 @@ const BOARD3=(()=>{
     tail:{...tuck,arms:[[[-1,-7,-4.5],[-6,-1,-3],[-10,5,-.5]],tuck.arms[1]]},
     cork:{...tuck,arms:[[[-1,-7,-4.5],[2,-5,-1],[4,-6,2.5]],[[1,-7,4.5],[3,-3.5,5],[4,-5.5,2]]]},
     misty:{...tuck,torso:[[0,-1,0],[2,-7,0]],arms:[[[0,-6.5,-4.5],[3,-4,-1],[5,-2,2]],[[1.5,-6.5,4.5],[4.5,-3,4.5],[5.5,-1,2.5]]],head:[3.5,-11,0]},
+    // Klettern: Board senkrecht am Rucksack
+    climb0:{board:{c:[-6,-4,0],d:[0,-1,0],n:[-1,0,0]},skiKey:-6,
+      boots:[[3.5,8,-3],[3,4,3]],bootWH:[4,3],
+      legs:[[[-.5,0,-3],[3,3,-3.5],[3,7,-3]],[[.5,0,3],[4,0,3.5],[2.5,3.5,3]]],legDark:[true,false],
+      torso:[[0,0,0],[1.5,-7,0]],
+      arms:[[[.5,-6,-5],[3,-4,-5.5],[5,-2.5,-4.5]],[[2,-6,5],[3.5,-10,5.5],[5,-13.5,4.5]]],axe:1,
+      head:[3,-11.5,0]},
+    climb1:{board:{c:[-6,-4,0],d:[0,-1,0],n:[-1,0,0]},skiKey:-6,
+      boots:[[3,4,-3],[3.5,8,3]],bootWH:[4,3],
+      legs:[[[-.5,0,-3],[4,0,-3.5],[2.5,3.5,-3]],[[.5,0,3],[3,3,3.5],[3,7,3]]],legDark:[true,false],
+      torso:[[0,0,0],[1.5,-7,0]],
+      arms:[[[.5,-6,-5],[3,-9,-5.5],[5,-12,-4.5]],[[2,-6,5],[3.5,-6,5.5],[5,-6.5,4.5]]],axe:1,
+      head:[3,-11.5,0]},
     // Butter aufs Tail: hinteres Bein gebeugt, Board biegt sich, Arme seitlich ausgestreckt
     butter:{...ride,handsBack:false,board:{c:[0,11,0],d:[1,0,0],flex:2.4,flexEnd:'tip'},
       legs:[[[-3.5,0,0],[-6,4,1.5],[-5,7,0]],[[2.5,0,0],[4.5,4,1],[5,7,0]]],
@@ -738,7 +772,7 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork){
   const lo=q=>xf(rotY(q,yL)),up=q=>xf(rotY(q,yU));
   const sL=Math.abs(Math.sin(yL*RAD)),cL=Math.abs(Math.cos(yL*RAD));
   const parts=[],skiKeys=[];
-  (board?[L.board]:L.skis).forEach((s,i)=>{
+  (board?(L.board?[L.board]:[]):L.skis).forEach((s,i)=>{
     const len=board?20:22,tip=pow?4:2,d=v3.unit(s.d);let n=s.n||[0,-1,0];n=v3.unit(v3.add(n,v3.mul(d,-v3.dot(n,d))));
     const A=v3.add(s.c,v3.mul(d,-len/2)),B=v3.add(s.c,v3.mul(d,len/2));
     // Biegung beim Butter: das gedrückte Ende bleibt am Schnee, das freie Ende biegt sich nach oben
@@ -774,6 +808,15 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork){
       if(frontF&&Math.abs(cf)<.45){g.fillStyle=P.zip;g.fillRect(Math.round(s[0]+zx-2),Math.round(s[1]+1),1,2);g.fillRect(Math.round(s[0]+zx+2),Math.round(s[1]+1),1,2);
         g.fillStyle=P.d;g.fillRect(Math.round(h[0]-5),Math.round(h[1]-3),3,1);g.fillRect(Math.round(h[0]+3),Math.round(h[1]-3),3,1)}}
   }});
+  // Rucksack: Kasten am Rücken (in Rückenrichtung des Oberkörpers), vor dem Rumpf gezeichnet, wenn der Rücken zum Spieler zeigt
+  if(P.pk&&!L.noPack){const mid=[(L.torso[0][0]+L.torso[1][0])/2,(L.torso[0][1]+L.torso[1][1])/2-.5,0],bc=up(v3.add(mid,[-3.4,0,0])),tc=up(mid),as=Math.abs(Math.sin(yU*RAD));
+    const w=Math.round(4+2.5*as),h=8;parts.push({key:bc[2]>tc[2]+.3?4.52:4.48,draw:()=>{const x=Math.round(bc[0]-w/2),y=Math.round(bc[1]-h/2);
+      rectO(g,x,y,w,h,P.pk,O);g.fillStyle=shade(P.pk,-.3);g.fillRect(x,y+h-3,w,3);g.fillStyle=shade(P.pk,.25);g.fillRect(x,y,w,1);
+      if(!L.axe){g.fillStyle=P.pka;g.fillRect(x+Math.floor(w/2),y-2,1,h);g.fillStyle='#c9ced8';g.fillRect(x+Math.floor(w/2)-1,y-2,3,1)}}})}
+  // Spitzhacke in der Hand (Klettern)
+  if(L.axe!=null){const ar=L.arms[L.axe],hd=up(ar[2]),top=up(v3.add(ar[2],[1.2,-5.5,0])),pk=up(v3.add(ar[2],[4,-4,0])),ad=up(v3.add(ar[2],[-1.2,-5.8,0]));
+    parts.push({key:9,draw:()=>{strokePts(g,[[hd[0],hd[1]],[top[0],top[1]]],3,O);strokePts(g,[[hd[0],hd[1]],[top[0],top[1]]],1,'#6b4a2f');
+      strokePts(g,[[ad[0],ad[1]],[top[0],top[1]],[pk[0],pk[1]]],3,O);strokePts(g,[[ad[0],ad[1]],[top[0],top[1]],[pk[0],pk[1]]],1,'#c9ced8')}})}
   {const q=up(L.head),hn=norm(hYaw);let kind='side',flip=false;
     if(hn>45&&hn<=135)kind='front';else if(hn>135||hn<=-135)flip=true;else if(hn<-45)kind='back';
     parts.push({key:4.6,draw:()=>drawHead(g,kind,Math.round(q[0]-5.5),Math.round(q[1]-4.5),P,flip)})}
@@ -781,7 +824,7 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork){
   L.arms.forEach((ar,i)=>{const q=ar.map(up);let key=L.armKeys&&L.armKeys[i]!=null?L.armKeys[i]:Math.max(q[1][2],q[2][2]);if(L.armBias&&L.armBias[i]&&key>0)key+=L.armBias[i];armK[i]=key;
     parts.push({key,draw:()=>{limb(g,q.map(v=>[v[0],v[1]]),3,key<-2?P.d:P.D,O);if(!L.handsBack)hand(g,[q[2][0],q[2][1]],P)}})});
   // Skistöcke: Griff in der Hand, Spitze mit Teller. Ohne feste Spitze zeigen sie entlang Unterarm schräg nach hinten unten.
-  if(!board)L.arms.forEach((ar,i)=>{
+  if(!board&&!L.noPoles)L.arms.forEach((ar,i)=>{
     const hnd=ar[2];let tip;
     if(L.poleTips)tip=L.poleTips[i];
     else{let dir=L.poleDirs&&L.poleDirs[i];if(!dir){const f=v3.unit(v3.add(hnd,v3.mul(ar[1],-1)));dir=v3.add(v3.mul(f,.4),[-.7,.7,0])}tip=v3.add(hnd,v3.mul(v3.unit(dir),16))}
@@ -1080,6 +1123,8 @@ function genNext(){
   sinceGap=['kicker','bigair','drop','gaprail'].includes(t)?0:sinceGap+1;
   if(t==='loop')lastLoopX=gx;
   lastType=t;
+  // Auslauf nach jedem Hindernis, damit nicht direkt der nächste Kicker hinter einer Rail kommt
+  {const x=gx,L=rand(170,250);seg(L,rand(14,20));if(Math.random()<.4)coinRow(x+40,Math.floor((L-60)/24),16,12)}
   if(Math.random()<.45)fRun();
   addFloods();flushGapFx();
 }
@@ -1351,6 +1396,7 @@ function headLamp(){
 // Was gerade gezeichnet wird (Pose, Drehung, Lage): gemeinsam für Figur und Stirnlampe
 function playerView(){
   const board=SAVE.gear==='board',airish=p.mode==='air'||(p.mode==='dead'&&p.inAir);
+  if(p.mode==='climb'){const fr=p.climb&&p.climb.moving?Math.floor(p.climb.anim/.22)%2:0;return {pose:'climb'+fr,phi:0,look:false,ang:0,comx:p.x,comy:p.y-9,ox:0,oy:0,inPow:false,cork:null}}
   let phi=0,pose='ride',ang=p.ang,comx,comy,look=true,ox=0,oy=0;
   if(airish){
     comx=p.x;comy=p.y;phi=p.spin;ox=p.cx||0;oy=p.cy||0;
@@ -1520,7 +1566,7 @@ function resetRun(){
   wall.x=-430;wall.v=140;
   Object.assign(pat,{on:false,next:20,x:0,y:0,s:0,a:0,state:'',t:0,sirenT:0});
   avaPuffs=[];
-  run={score:0,coins:0,bestTrick:'',bestPts:0,start:0,time:0,zone:'park'};
+  run={score:0,coins:0,bestTrick:'',bestPts:0,start:0,time:0,zone:'park',packUsed:false};
   parts=[];
   cam.x=p.x-VW*.34;cam.y=p.y-VH*.45;
   while(gx<cam.x+VW+900)genNext();
@@ -1824,9 +1870,28 @@ function updAir(dt){
     }
   }else{
     const gs=gapAt(fx);
+    if(gs&&fy>gs.y1+28&&packReady()){startClimb(gs,fy);return}
     if(gs&&fy>gs.y1+95)die('void');
     if(!gs&&fy>cam.y+VH+80)die('void');
   }
+}
+/* Freeride-Rucksack: einmal pro Lauf hält dich die Spitzhacke an der rechten Wand fest.
+   Linker Stick nach oben (oder Pfeil hoch) klettert, oben klickst du automatisch wieder ein. */
+const packReady=()=>SAVE.equip.pack==='pk_free'&&!run.packUsed;
+function startClimb(gs,fy){run.packUsed=true;
+  const wx=gs.x1,ty=clamp(fy,gs.y1+34,gs.y1+70);
+  p.climb={wx,rim:gs.y1,fromX:p.x,fromY:footY(),toY:ty,t:0,anim:0,moving:false};
+  p.mode='climb';p.vx=0;p.vy=0;p.s=0;p.spin=0;p.flipAcc=0;p.corkMode=null;p.grab=null;p.ang=0;p.sw=false;p.bs=null;p.butter=0;p.butterVis=0;
+  p.x=p.climb.fromX;p.y=p.climb.fromY;
+  showTrick('SPITZHACKE!',isTouch?'Linken Stick nach oben: klettern':'Pfeil hoch: klettern');shake=4;SFX.land();
+}
+function updClimb(dt){const c=p.climb;c.t+=dt;
+  // erst zur Wand schwingen, dann festhalten und klettern
+  if(c.t<.35){const u=smooth01(c.t/.35);p.x=c.fromX+(c.wx-5-c.fromX)*u;p.y=c.fromY+(c.toY-c.fromY)*u-Math.sin(Math.PI*u)*10;c.moving=false;return}
+  p.x=c.wx-5;c.moving=!!inU();
+  if(c.moving){c.anim+=dt;p.y-=40*dt;if(Math.random()<.15)parts.push({x:c.wx-1,y:p.y-12,vx:rand(-30,10),vy:rand(-20,30),life:.35,col:Math.random()<.5?'#ffffff':'#c9d3e4',sz:1,gr:300})}
+  if(p.y<=c.rim+2){const x=c.wx+5,g=groundAt(x);p.climb=null;p.mode='ground';p.x=x;p.y=g?g.y:c.rim;p.ang=g?g.a*DEG:0;p.s=70;p.sw=false;p.butter=0;p.butterT=0;p.bLock=false;
+    showTrick('WIEDER EINGEKLICKT!','Weiter gehts');SFX.trick()}
 }
 function die(reason){
   if(p.mode==='dead')return;
@@ -1934,6 +1999,7 @@ function update(dt){
     case 'rail':updRail(dt);break;
     case 'loop':updLoop(dt);break;
     case 'dead':updDead(dt);break;
+    case 'climb':updClimb(dt);break;
   }
   if(state!=='play')return;
   {const zg=groundAt(footX());if(zg&&zg.seg.zone!==run.zone){run.zone=zg.seg.zone;if(run.zone==='free')showTrick('FREERIDE ZONE','Powder · Tree Grinds · Drops · Steine');else showTrick('SNOWPARK','Kicker · Rails · Big Air')}}
@@ -2166,7 +2232,7 @@ function drawHud(){
 /* ================= FLOW ================= */
 const screens=['menu','help','shop','pause','over','rank','notes'];
 function show(id){screens.forEach(s=>$(s).hidden=s!==id);if(id){const b=$(id).querySelector('.btn');if(b&&!isTouch)b.focus({preventScroll:true})}}
-function refreshMenu(){$('kMute').textContent=SAVE.gear==='board'?'INDY':'MUTE';document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.gear===SAVE.gear)));$('bAssist').setAttribute('aria-pressed',String(!!SAVE.assist));$('bAssist').textContent='LANDEHILFE: '+(SAVE.assist?'AN':'AUS');setT($('mCoins'),String(SAVE.coins));setT($('mBest'),String(SAVE.best));setT($('mDist'),SAVE.bestDist+' m')}
+function refreshMenu(){$('kMute').textContent=SAVE.gear==='board'?'INDY':'MUTE';document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.gear===SAVE.gear)));$('bAssist').setAttribute('aria-pressed',String(!!SAVE.assist));{const own=!!SAVE.owned.pk_free,on=SAVE.equip.pack==='pk_free',b=$('bPack');b.hidden=!own;b.setAttribute('aria-pressed',String(on));b.textContent='RUCKSACK: '+(on?'AN':'AUS')}$('bAssist').textContent='LANDEHILFE: '+(SAVE.assist?'AN':'AUS');setT($('mCoins'),String(SAVE.coins));setT($('mBest'),String(SAVE.best));setT($('mDist'),SAVE.bestDist+' m')}
 let hintTimer=0;
 function startRun(){
   unlockAudio();padReset();resetRun();updCamera(0,true);state='play';show(null);$('hud').hidden=false;if(document.activeElement)document.activeElement.blur();
@@ -2206,7 +2272,7 @@ function renderShop(){
     b.querySelector('.nm').textContent=it.name;b.querySelector('.pr span').textContent=pr;
     b.onclick=()=>shopClick(it,b);grid.appendChild(b);
   }
-  const t=tryOn[shopCat];$('prevNote').textContent=t?'Vorschau: '+itemOf(shopCat,t).name+'. Nochmal tippen zum Kaufen.':'Tippe ein Teil an für die Vorschau.';
+  const t=tryOn[shopCat],ti=t?itemOf(shopCat,t):null;$('prevNote').textContent=ti?'Vorschau: '+ti.name+'. '+(ti.info?ti.info+' ':'')+'Nochmal tippen zum Kaufen.':'Tippe ein Teil an für die Vorschau.';
 }
 function shopClick(it,el){
   const owned=it.price===0||SAVE.owned[it.id];
@@ -2319,6 +2385,7 @@ async function onlineAfterRun(score,meters,trick){const o=$('oRank');
 /* ================= BUTTONS ================= */
 document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.onclick=()=>{SAVE.gear=b.dataset.gear;persist();refreshMenu()});
 $('bAssist').onclick=()=>{SAVE.assist=!SAVE.assist;persist();refreshMenu()};
+$('bPack').onclick=()=>{if(!SAVE.owned.pk_free)return;SAVE.equip.pack=SAVE.equip.pack==='pk_free'?'pk_none':'pk_free';persist();refreshMenu()};
 $('bPlay').onclick=startRun;$('bShop').onclick=openShop;$('bHelp').onclick=()=>show('help');$('bHelpBack').onclick=()=>show('menu');
 $('bShopBack').onclick=()=>{tryOn={};if(prevScreen==='over')show('over');else{refreshMenu();show('menu')}};
 let prevScreen='menu';
