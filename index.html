@@ -1850,6 +1850,11 @@ function update(dt){
 /* ================= RENDER ================= */
 const C={top:'#ffffff',s1:'#e7f0fc',s2:'#d0def3',s3:'#b6c9e8',s4:'#97afd8',kick:'#dbe9fc',edge:'#8aa2cc',chasm:['#33416a','#252f50','#192040','#0e1329']};
 let T=0;
+// Kordrillen-Spalten für präparierten Schnee: [Piste, Kicker] x [Bahn normal, Bahn heller] x [zwei Varianten]
+const GROOM=(()=>{const out=[];for(const kk of [0,1])for(const lane of [0,1])for(const v of [0,1]){const [c,g]=mk(1,16),dk=kk?'#c9dbf3':'#d3e1f4',lt=kk?'#e6f0fc':'#f1f6fe';
+  g.fillStyle=kk?C.kick:C.s1;g.fillRect(0,0,1,16);g.fillStyle='#dbe6f6';g.fillRect(0,2,1,1);
+  for(let k=4;k<16;k+=2){if(v&&k===8)continue;g.fillStyle=k<10?dk:'#dce7f7';g.fillRect(0,k,1,1);if(k<12){g.fillStyle=lt;g.fillRect(0,k-1,1,1)}}
+  if(lane){g.fillStyle='rgba(255,255,255,.18)';g.fillRect(0,3,1,12)}out.push(c)}return out})();
 function drawTerrain(cX,cY){
   let i=segIndexAt(cX);if(i<0){i=0;while(i<segs.length-1&&segs[i].x1<=cX)i++}
   for(let sx=0;sx<VW;sx++){
@@ -1878,11 +1883,7 @@ function drawTerrain(cX,cY){
       else if(((wi*2654435761)>>>0)%4===0){ctx.fillStyle='rgba(255,255,255,.35)';ctx.fillRect(sx,y+6,1,VH-y-6)}}
     if(fz){const b=((wi*7919)>>>0)%6===0?1:0;ctx.fillStyle=C.top;ctx.fillRect(sx,y-b,1,3+b);continue}
     // präparierter Schnee: Kordrillen der Pistenraupe, dicht unter der Oberfläche am deutlichsten
-    if(wd>=8&&y+16<VH){const kk=s.kind==='kicker',dk=kk?'#c9dbf3':'#d3e1f4',lt=kk?'#e6f0fc':'#f1f6fe',h=((wi*2654435761)>>>0);
-      ctx.fillStyle='#dbe6f6';ctx.fillRect(sx,y+2,1,1);
-      for(let k=4;k<16;k+=2){if(((h>>>(k&15))&31)===0)continue;ctx.fillStyle=k<10?dk:'#dce7f7';ctx.fillRect(sx,y+k,1,1);if(k<12){ctx.fillStyle=lt;ctx.fillRect(sx,y+k-1,1,1)}}
-      // breite Spuren nebeneinander fahrender Pistenraupen: alle paar Meter eine etwas hellere Bahn
-      if((Math.floor(wi/120)&1)===0){ctx.fillStyle='rgba(255,255,255,.18)';ctx.fillRect(sx,y+3,1,12)}}
+    if(wd>=8&&y+16<VH){const h=((wi*2654435761)>>>0);ctx.drawImage(GROOM[(s.kind==='kicker'?4:0)+((Math.floor(wi/120)&1)?2:0)+((h>>>7)&1)],sx,y)}
     ctx.fillStyle=C.top;ctx.fillRect(sx,y,1,2);
     if(s.kind==='landing'&&(wi%44)<3){ctx.fillStyle='#3a6fd8';ctx.fillRect(sx,y+2,1,1)}
     if(s.kind==='kicker'&&s.lip&&s.x1-wx<3){ctx.fillStyle='#ff7a2f';ctx.fillRect(sx,y+1,1,3)}
