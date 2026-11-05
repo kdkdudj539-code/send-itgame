@@ -280,7 +280,9 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
     <p class="eyebrow">Was ist neu</p>
     <h2>PATCH NOTES</h2>
     <div class="pn">
-      <h3>v2.3 · 05.11.2026</h3>
+      <h3>v2.4 · 05.11.2026</h3>
+      <ul><li>Drehungen mit Körper: Schultern und Kopf führen, Ski und Board ziehen nach, in der Luft und auf Rails</li><li>Weicher Übergang beim Swappen auf Rails</li></ul>
+      <h3>v2.3</h3>
       <ul><li>14 neue Park-Features: Kink-Rails, Rainbow, Waterfall, Roller Coaster, Treppen-Rail, A-Frame- und Battleship-Box, Auto, Picknicktisch, Pole Jam, Reifen und Fässer</li><li>Freeride-Drops: man fährt nicht mehr an der Felswand runter</li></ul>
       <h3>v2.2</h3>
       <ul><li>Lawinenschaufel im Freeride-Rucksack: rettet dich einmal pro Lauf vor der Lawine</li><li>Switch auf die Rail heißt jetzt Switch wieder runter</li><li>Freeride: keine kleinen Steine mehr, Felsen nur noch selten</li><li>Schönere Mute-Pose auf Ski</li></ul>
@@ -419,7 +421,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
 (()=>{
 'use strict';
 const RAD=Math.PI/180, DEG=180/Math.PI;
-const BUTTER180_T=.5,GRAB_BLEND=9,GRIND_SPIN=700,GRIND_REP=.32, G=430, POP=190, JUMP_POP=Math.round(190*Math.SQRT1_2), FOOT=11, VH=342, FLIP_RATE=520, SPIN_RATE=600, CORK_SLOW=.6, STEP=1/120, VMAX=364, PARK_LEN=13000, FREE_LEN=11000;
+const BUTTER180_T=.5,SPIN_TWIST=32,GRAB_BLEND=9,GRIND_SPIN=700,GRIND_REP=.32, G=430, POP=190, JUMP_POP=Math.round(190*Math.SQRT1_2), FOOT=11, VH=342, FLIP_RATE=520, SPIN_RATE=600, CORK_SLOW=.6, STEP=1/120, VMAX=364, PARK_LEN=13000, FREE_LEN=11000;
 let VW=608;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
@@ -818,6 +820,7 @@ function drawBoardWide(g,poly,d,n,lo,P,O){
     if(Array.isArray(A)&&Array.isArray(Z)&&A.length===Z.length)return Z.map((z,i)=>mixD(A[i],z,u));
     if(A&&Z&&typeof A==='object'&&typeof Z==='object'&&!Array.isArray(A)&&!Array.isArray(Z)){const o={};for(const k in Z)o[k]=k in A?mixD(A[k],Z[k],u):Z[k];return o}
     return Z};
+  for(const LIB of [SKI3,BOARD3])if(LIB.grind&&LIB.ride)LIB.grind_h=mixD(LIB.ride,LIB.grind,.5);   // Swaps: Zwischenschritt beim Rumdrehen
   for(const [LIB,base] of [[SKI3,'tuck'],[BOARD3,'bair']])for(const g of ['japan','nose','tail','mute'])if(LIB[g]&&LIB[base])LIB[g+'_h']=mixD(LIB[base],LIB[g],.5);
 })();
 /* Körperschwerpunkt (KSP) einer Pose: In der Luft dreht sich der Körper immer um den KSP, der auf einer Parabel fliegt.
@@ -843,10 +846,11 @@ const corkAxis=m=>{const b=(m==='cork'?45:-45)*RAD;return [Math.sin(b),0,Math.co
 function airPose(){const gv=p.gVis||0;if(p.gName&&gv>.02&&!(p.grab&&gv>=.98))return p.gName+'_h';return p.grab||(p.corkMode?p.corkMode:null)||(p.flipPoseT>0?(p.flipDir<0?'layout':'ftuck'):(SAVE.gear==='board'?'bair':'tuck'))}
 /* Zeichnet die Figur bei Drehwinkel phi (0 = Fahrtrichtung rechts, 90 = zum Spieler, 180 = Switch, 270 = vom Spieler weg).
    look: Kopf schaut die Piste runter; bei Switch dreht sich der Oberkörper mit (Blick über die Schulter). */
-function renderFigure(g,poseName,phi,look,P,gear,pow,cork){
+function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
   const board=gear==='board',LIB=board?BOARD3:SKI3,L=LIB[poseName]||LIB.ride,O=P.O;
   const k=look?smooth01((-Math.cos(phi*RAD)-.2)/.8):0;
-  const tw=(board?150:-70)*k,yL=phi,yU=phi+tw,tYaw=yU+(L.torsoFace||0),hYaw=look?0:yU;
+  // twist: beim Drehen führen Schultern und Kopf, Ski bzw. Board ziehen nach
+  const tw=(board?150:-70)*k,yL=phi,yU=phi+tw+(twist||0),tYaw=yU+(L.torsoFace||0),hYaw=look?0:yU+(twist||0)*.4;
   let xf=q=>q;
   if(cork&&cork.t){const cm=poseCOM(poseName,phi,gear),k=corkAxis(cork.m);
     xf=q=>{const v=rodrigues([q[0]-SCX-cm.cx,q[1]-SCY-cm.cy,q[2]-cm.cz],k,cork.t);return [SCX+cm.cx+v[0],SCY+cm.cy+v[1],cm.cz+v[2]]}}
@@ -934,12 +938,12 @@ function applyPattern(g,P){
   g.putImageData(id,0,0);
 }
 const sprCache=new Map();
-function getSprite(pose,phi,look,eq,gear,pow,cork){
+function getSprite(pose,phi,look,eq,gear,pow,cork,twist){
   eq=eq||SAVE.equip;gear=gear||SAVE.gear;
-  const ph=((Math.round(phi/15)*15)%360+360)%360,ck=cork?{m:cork.m,t:((Math.round(cork.t/15)*15)%360+360)%360}:null,key=pose+'|'+ph+'|'+(look?1:0)+'|'+(pow?1:0)+'|'+(ck?ck.m+ck.t:'')+'|'+gear+'|'+eqKey(eq);
+  const ph=((Math.round(phi/15)*15)%360+360)%360,ck=cork?{m:cork.m,t:((Math.round(cork.t/15)*15)%360+360)%360}:null,tq=Math.round((twist||0)/15)*15,key=pose+'|'+ph+'|'+(look?1:0)+'|'+(pow?1:0)+'|'+(ck?ck.m+ck.t:'')+'|'+gear+'|'+tq+'|'+eqKey(eq);
   let s=sprCache.get(key);if(s)return s;
   const P=palette(eq);const [c,g]=mk(SPR,SPR);
-  renderFigure(g,pose,ph,look,P,gear,pow,ck);
+  renderFigure(g,pose,ph,look,P,gear,pow,ck,tq);
   if(P.pat)applyPattern(g,P);
   if(sprCache.size>1400)sprCache.clear();
   sprCache.set(key,c);return c;
@@ -1543,17 +1547,17 @@ function playerView(){
   if(p.mode==='dig'){const d=p.dig,fr=d.t<.45?0:Math.floor((d.t-.45)/.24)%2,r=p.ang*RAD;
     return {pose:'dig'+fr,phi:0,look:false,ang:p.ang,comx:p.x+FOOT*Math.sin(r),comy:p.y-FOOT*Math.cos(r),ox:0,oy:0,inPow:false,cork:null}}
   if(p.mode==='climb'){const fr=p.climb&&p.climb.moving?Math.floor(p.climb.anim/.22)%2:0;return {pose:'climb'+fr,phi:0,look:false,ang:0,comx:p.x,comy:p.y-9,ox:0,oy:0,inPow:false,cork:null}}
-  let phi=0,pose='ride',ang=p.ang,comx,comy,look=true,ox=0,oy=0;
+  let phi=0,pose='ride',ang=p.ang,comx,comy,look=true,ox=0,oy=0,twist=0;
   if(airish){
     comx=p.x;comy=p.y;phi=p.spin;ox=p.cx||0;oy=p.cy||0;
     const settled=Math.abs(p.spin-Math.round(p.spin/90)*90)<1.5;
-    pose=airPose();look=settled&&!p.grab&&!p.corkMode;
+    pose=airPose();look=settled&&!p.grab&&!p.corkMode;twist=p.corkMode?0:(p.spinTw||0);
     if(p.corkMode)ang=p.base;
   }else{
-    phi=p.mode==='rail'?(p.gspinVis??90):(p.sw?180:0);
+    phi=p.mode==='rail'?(p.gspinVis??90):(p.sw?180:0);if(p.mode==='rail')twist=p.gTw||0;
     const bsp=p.mode==='ground'&&p.bs?smooth01(p.bs.t/BUTTER180_T):0;if(bsp)phi+=p.bs.dir*180*bsp;
     if(p.mode==='loop')look=false;
-    if(p.mode==='rail')pose=Math.abs(Math.sin(phi*RAD))>.5?'grind':'ride';
+    if(p.mode==='rail'){const sv=Math.abs(Math.sin(phi*RAD));pose=sv>.75?'grind':sv>.4?'grind_h':'ride'}
     if(p.mode==='ground'&&!board&&!p.sw&&p.tuck&&p.pushT>0)pose='push'+(Math.floor(((p.pushT/.55)%1)*8)%8);
     if(p.mode==='ground'&&(Math.abs(p.butterVis||0)>5||p.bs))pose=(p.bs?p.bs.end:p.butterVis)<0?'butter':'nbutter';
     const rockHit=p.mode==='crash'||(p.mode==='dead'&&p.deadReason==='rock');
@@ -1568,10 +1572,10 @@ function playerView(){
       comx=px+vx*Math.cos(b)-vy*Math.sin(b);comy=py+vx*Math.sin(b)+vy*Math.cos(b);ang+=bv*(p.sw?-1:1)}
     if(p.mode==='ground'&&p.sink)comy+=p.sink;
   }
-  return {pose,phi,look,ang,comx,comy,ox,oy,inPow:p.mode==='ground'&&p.sink>2.5,cork:airish&&p.corkMode?{m:p.corkMode,t:p.flipAcc}:null};
+  return {pose,phi,look,ang,comx,comy,ox,oy,twist,inPow:p.mode==='ground'&&p.sink>2.5,cork:airish&&p.corkMode?{m:p.corkMode,t:p.flipAcc}:null};
 }
 function drawPlayer(cX,cY){
-  const v=playerView(),spr=getSprite(v.pose,v.phi,v.look,null,null,v.inPow,v.cork);
+  const v=playerView(),spr=getSprite(v.pose,v.phi,v.look,null,null,v.inPow,v.cork,v.twist);
   ctx.save();ctx.translate(Math.round(v.comx-cX),Math.round(v.comy-cY));ctx.rotate(v.ang*RAD);ctx.drawImage(spr,-SCX-v.ox,-SCY-v.oy);ctx.restore();
   if(p.mode==='dig'&&p.dig.mound>.5){const hM=p.dig.mound;for(let dx=-17;dx<=17;dx++){const g=groundAt(p.x+dx);if(!g)continue;
       const u=dx/17,hh=Math.round(hM*Math.sqrt(Math.max(0,1-u*u))*(1+.12*Math.sin(dx*1.7+p.dig.t*2)));if(hh<1)continue;const x=Math.round(p.x+dx-cX),y=Math.round(g.y-cY);
@@ -1828,7 +1832,7 @@ function launch(a,pop,sg){
   if(sg&&sg.vmax)s=Math.min(s,sg.vmax);
   if(sg&&sg.kind==='kicker'&&pop)pop*=1.1;
   p.vx=Math.cos(a)*s;p.vy=Math.sin(a)*s-pop;
-  p.flipPoseT=0;p.grab=null;p.gVis=0;p.gName=null;p.corkMode=null;const r=p.ang*RAD;p.x+=FOOT*Math.sin(r);p.y-=FOOT*Math.cos(r);
+  p.flipPoseT=0;p.grab=null;p.gVis=0;p.gName=null;p.corkMode=null;p.spinTw=0;p.lastSpin=null;const r=p.ang*RAD;p.x+=FOOT*Math.sin(r);p.y-=FOOT*Math.cos(r);
   {const pc=poseCOM(airPose(),p.spin,SAVE.gear);p.x+=pc.cx*Math.cos(r)-pc.cy*Math.sin(r);p.y+=pc.cx*Math.sin(r)+pc.cy*Math.cos(r);p.cx=pc.cx;p.cy=pc.cy;p.cz=pc.cz;p.fx=pc.fx;p.fy=pc.fy;p.fz=pc.fz}
   p.mode='air';
   p.airT=0;p.base=p.ang;p.spinStart=p.spin;p.flipAcc=0;p.flipDir=0;p.flipTarget=null;p.spinDir=0;p.spinTarget=null;p.grabT={};p.grab=null;
@@ -1949,12 +1953,12 @@ function landRail(r,fx){
   let gs;
   if(hd)gs=(hd>0?Math.ceil((p.spin-off)/st):Math.floor((p.spin-off)/st))*st+off;   // Stick bleibt in Drehrichtung: Drehung läuft auf der Rail weiter
   else{gs=Math.round(p.spin/90)*90;if(r.type==='rail'&&((gs%180)+180)%180===0)gs+=90}
-  p.gspin=gs;p.gspinVis=hd?p.spin:gs;p.gHold=hd;p.gRepT=0;p.gSwaps=0;p.gParts=[];p.gLastDir=hd||1;p.gPrevL=hl;p.gPrevR=hr;gLabel();
+  p.gspin=gs;p.gspinVis=hd?p.spin:gs;p.lastGsv=null;p.gTw=p.spinTw||0;p.gHold=hd;p.gRepT=0;p.gSwaps=0;p.gParts=[];p.gLastDir=hd||1;p.gPrevL=hl;p.gPrevR=hr;gLabel();
   SFX.land();return true;
 }
 function mountRail(r){p.mode='rail';p.rail=r;if(r.type==='pole')p.s=Math.min(p.s,240);   // die Stange hoch bremst
   p.y=railY(r,p.x);p.grindT=0;p.ang=railA(r,p.x)*DEG;p.spin=p.sw?180:0;p.gEntrySw=!!p.sw;
-  p.gspin=p.spin;p.gspinVis=p.spin;p.gHold=0;p.gRepT=0;p.gSwaps=0;p.gParts=[];p.gLastDir=1;p.gPrevL=inL();p.gPrevR=inR();p.butter=0;p.butterVis=0;p.bs=null;gLabel();SFX.land()}
+  p.gspin=p.spin;p.gspinVis=p.spin;p.lastGsv=null;p.gTw=0;p.gHold=0;p.gRepT=0;p.gSwaps=0;p.gParts=[];p.gLastDir=1;p.gPrevL=inL();p.gPrevR=inR();p.butter=0;p.butterVis=0;p.bs=null;gLabel();SFX.land()}
 function gLabel(){
   const straight=((p.gspin%180)+180)%180===0;
   const nm=straight?'50-50':({rail:'Rail Slide',tube:'Tube Slide',log:'Tree Slide',box:'Box Slide',pole:'Pole Slide'})[p.rail.type];
@@ -1985,6 +1989,7 @@ function updRail(dt){
   if(kr&&!p.gPrevR){if(free)swap(1);p.gHold=1}else if(kr&&p.gHold===1&&caught&&p.gRepT<=0)swap(1);
   p.gPrevL=kl;p.gPrevR=kr;
   {const dv=p.gspin-p.gspinVis,mx=GRIND_SPIN*dt;p.gspinVis+=clamp(dv,-mx,mx)}
+  {const gv=(p.gspinVis-(p.lastGsv??p.gspinVis))/Math.max(dt,1e-4);p.lastGsv=p.gspinVis;const tg=clamp(gv/GRIND_SPIN,-1,1)*SPIN_TWIST;p.gTw=(p.gTw||0)+(tg-(p.gTw||0))*Math.min(1,dt*16)}
   if(jumpBuf>0){jumpBuf=0;leaveRail(a,JUMP_POP*.9);return}
   p.sparkT-=dt;if(p.sparkT<=0){p.sparkT=.03;const lg=r.type==='log';parts.push({x:p.x+rand(-3,3),y:p.y,vx:rand(-90,10),vy:-rand(30,90),life:rand(.15,.35),col:lg?(Math.random()<.6?'#ffffff':'#a77b4f'):(Math.random()<.5?'#ffd04a':'#ff8a3d'),sz:lg&&Math.random()<.4?2:1,gr:400});if(!lg&&Math.random()<.3)SFX.grind()}
 }
@@ -2024,7 +2029,8 @@ function updAir(dt){
       if(tl<.34&&!(up||dn)){const d=Math.round(p.flipAcc/360)*360-p.flipAcc,mx=720*dt;p.flipAcc+=clamp(d,-mx,mx);p.ang=p.base+p.flipAcc}
       if(tl<.32&&!(l||r)){const tg=p.fromRail&&p.spinTarget!=null&&((p.spinTarget%180)+180)%180===0?p.spinTarget:Math.round(p.spin/180)*180,d=tg-p.spin,mx=820*dt;p.spin+=clamp(d,-mx,mx);p.spinDir=0;p.spinTarget=p.fromRail?tg:null}
       if(tl<.14)p.grab=null}}
-  {const tg=p.grab?1:0,mx=GRAB_BLEND*dt;p.gVis=(p.gVis||0)+clamp(tg-(p.gVis||0),-mx,mx)}   // Hand braucht ca. 0,11 s zum Ski
+  {const tg=p.grab?1:0,mx=GRAB_BLEND*dt;p.gVis=(p.gVis||0)+clamp(tg-(p.gVis||0),-mx,mx)}
+  {const sv=(p.spin-(p.lastSpin??p.spin))/Math.max(dt,1e-4);p.lastSpin=p.spin;const tg=p.corkMode?0:clamp(sv/SPIN_RATE,-1,1)*SPIN_TWIST;p.spinTw=(p.spinTw||0)+(tg-(p.spinTw||0))*Math.min(1,dt*14)}   // Hand braucht ca. 0,11 s zum Ski
   // Pose bestimmt, wo der Schwerpunkt im Körper liegt; der Schwerpunkt selbst fliegt unbeirrt weiter
   {const pc=poseCOM(airPose(),p.spin,SAVE.gear),k=Math.min(1,dt*10);p.cx=pc.cx;p.cy=pc.cy;p.cz=pc.cz;p.fx+=(pc.fx-p.fx)*k;p.fy+=(pc.fy-p.fy)*k;p.fz=pc.fz}
   // collisions
