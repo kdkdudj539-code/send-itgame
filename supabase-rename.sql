@@ -32,3 +32,6 @@ end $$;
 
 revoke all on function public.rename_player(text) from public, anon;
 grant execute on function public.rename_player(text) to authenticated;
+
+-- Supabase sofort Bescheid geben, dass es die neue Funktion gibt
+notify pgrst, 'reload schema';
