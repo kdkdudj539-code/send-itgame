@@ -977,7 +977,7 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
       else{const base=skiBaseShown(s),c0=base?P.ka:P.K,col=L.skiDark&&L.skiDark[i]?shade(c0,-.2):c0;strokePts(g,sp,4,O);strokePts(g,sp,2,col)}}});
   });
   const bootKey=i=>(board?skiKeys[0]:skiKeys[i])+.01+i*.001;
-  // Skischuh: nur 1 Pixel hoch, liegt auf der oberen Farbreihe des Skis (ohne dunkle Linie dazwischen), unter dem Hosenbein; vorne schaut die Spitze raus
+  // Skischuh: nur 1 Pixel hoch, unten am Hosenbein direkt über der Skifarbe (statt der dunklen Ski-Oberkante); vorne schaut die Spitze raus
   const skiBootRow=!board&&L.skis&&L.axe==null;
   const skiBoot=i=>{const s=L.skis[i]||L.skis[0],d=v3.unit(s.d);if(skiBaseShown(s))return;let n=s.n||[0,-1,0];n=v3.unit(v3.add(n,v3.mul(d,-v3.dot(n,d))));
     const sd=[d[1]*n[2]-d[2]*n[1],d[2]*n[0]-d[0]*n[2],d[0]*n[1]-d[1]*n[0]],fl=s.flex||0,fw=v=>s.flexEnd==='tail'?(1-v)*(1-v):v*v;
@@ -988,10 +988,12 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
       const lineY=x=>Math.abs(dxs)>.5?h[1]+(t[1]-h[1])*(x-h[0])/dxs:cc[1],toeX=Math.round(t[0]);
       // darunter wieder Skifarbe (bzw. Bindung), falls die Hosenkontur auf den Ski reicht: keine dunkle Linie unter dem Schuh
       const sk=L.skiDark&&L.skiDark[i]?shade(P.K,-.2):P.K;
-      for(let x=x0;x<=x1;x++){const y=Math.round(lineY(x)+ny);g.fillStyle=Math.abs(dxs)>3&&x===toeX?lt:col;g.fillRect(x,y,1,1);
-        if(Math.abs(dxs)>3&&ny<-.7){g.fillStyle=sk;g.fillRect(x,y+1,1,1)}}}
+      for(let x=x0;x<=x1;x++){const y=Math.round(lineY(x)+2*ny);g.fillStyle=Math.abs(dxs)>3&&x===toeX?lt:col;g.fillRect(x,y,1,1);
+        if(Math.abs(dxs)>3&&ny<-.7){g.fillStyle=sk;g.fillRect(x,y+1,1,1)}
+        else{const q=g.getImageData(x,y+1,1,2).data,oc=hexRgb(O),kc=hexRgb(sk);   // von vorne: dunkle Ski-Kante direkt unter dem Schuh durch Skifarbe ersetzen
+          if(q[3]&&q[0]===oc[0]&&q[1]===oc[1]&&q[2]===oc[2]&&q[7]&&Math.abs(q[4]-kc[0])<4&&Math.abs(q[5]-kc[1])<4&&Math.abs(q[6]-kc[2])<4){g.fillStyle=sk;g.fillRect(x,y+1,1,1)}}}}
     else{const y0=Math.round(Math.min(h[1],t[1])),y1=Math.round(Math.max(h[1],t[1]));g.fillStyle=col;
-      for(let y=y0;y<=y1;y++)g.fillRect(Math.round(h[0]+(t[0]-h[0])*(y-h[1])/((t[1]-h[1])||1)+nx),y,1,1)}};
+      for(let y=y0;y<=y1;y++)g.fillRect(Math.round(h[0]+(t[0]-h[0])*(y-h[1])/((t[1]-h[1])||1)+2*nx),y,1,1)}};
   L.boots.forEach((b,i)=>{if(skiBootRow)return;const q=lo(b),w=L.bootWH?L.bootWH[0]:Math.round(6-sL),h=L.bootWH?L.bootWH[1]:(board?3:Math.round(4-sL));
     parts.push({key:bootKey(i),draw:()=>{const x=Math.round(q[0]-w/2),y=Math.round(q[1]-h/2);rectO(g,x,y,w,h,P.boot,O);if(board){g.fillStyle='#1a1d27';g.fillRect(x,y+h-1,w,1)}}})});
   let legMax=-99;
