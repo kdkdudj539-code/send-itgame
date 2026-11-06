@@ -12,3 +12,4 @@ Einmalig im Supabase SQL Editor ausführen:
 
 1. `supabase-setup.sql`: Konten und Rangliste
 2. `supabase-save.sql`: Spielstand im Konto (Münzen, gekaufte Sachen, Outfit, Bestwerte)
+3. `supabase-rename.sql`: Spielernamen ändern (Rangliste → NAME ÄNDERN; Login und Profilname ändern sich zusammen)
