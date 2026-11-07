@@ -1,8 +1,8 @@
 # SEND IT
 
-Pixel-Art Freestyle-Ski- und Snowboard-Spiel im Browser. Einfach index.html öffnen oder über GitHub Pages spielen.
+Pixel-Art Freestyle-Spiel im Browser: im Winter mit Ski oder Snowboard, im Sommer mit dem Downhill-Bike (im Menü umschaltbar). Einfach index.html öffnen oder über GitHub Pages spielen.
 
-Pixel art freestyle ski and snowboard game in your browser. Open index.html or play it on GitHub Pages. The game is in German and English: it picks your browser language, and you can switch with DE / EN in the menu.
+Pixel art freestyle game in your browser: ski or snowboard in winter, a downhill bike in summer (switch in the menu). Open index.html or play it on GitHub Pages. The game is in German and English: it picks your browser language, and you can switch with DE / EN in the menu.
 
 Schriften: Press Start 2P, Silkscreen, VT323 (SIL Open Font License, siehe fonts/).
 

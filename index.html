@@ -132,6 +132,8 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
 .gearbtn[aria-pressed="true"]{background:var(--gold);color:#2a1a05}
 .gearbtn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .langsw{display:inline-flex;gap:4px}
+.gearbtn.season[data-season="summer"][aria-pressed="true"]{background:#7cc35a;color:#10230a}
+.gearbtn.season[data-season="winter"][aria-pressed="true"]{background:#bfe0ff;color:#0d1d33}
 .btn{font-family:var(--display);font-size:13px;padding:14px 18px;background:var(--orange);color:#2a1205;border:0;cursor:pointer;
   box-shadow:inset -3px -3px 0 rgba(0,0,0,.3),inset 3px 3px 0 rgba(255,255,255,.35),0 0 0 3px #000,0 6px 0 3px #000}
 .btn:active{transform:translateY(3px);box-shadow:inset -3px -3px 0 rgba(0,0,0,.3),inset 3px 3px 0 rgba(255,255,255,.35),0 0 0 3px #000,0 3px 0 3px #000}
@@ -238,7 +240,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
       <div class="hl"><div class="lbl">SCORE</div><div class="val" id="hScore">0</div></div>
       <div class="hc">
         <div id="hudBtns"><button class="mini" id="bPause" aria-label="Pause">II</button><button class="mini" id="bMute" aria-label="Ton an oder aus">♪</button><button class="mini jibb" id="bJibb" type="button" aria-pressed="false" aria-label="Jib-Modus: Butter mit dem linken Stick an oder aus">JIB</button></div>
-        <div id="hAval" class="warn aval" hidden>LAWINE <b id="hAvalD">0 m</b></div>
+        <div id="hAval" class="warn aval" hidden><span id="hAvalT">LAWINE</span> <b id="hAvalD">0 m</b></div>
       </div>
       <div class="hr"><div class="val"><i class="coin"></i><span id="hCoins">0</span></div><div class="lbl" id="hDist">0 m</div></div>
     </div>
@@ -270,10 +272,11 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
   <div class="card menu">
     <canvas class="pv" id="pvMenu" width="64" height="64" aria-label="Dein Fahrer"></canvas>
     <div>
-      <p class="eyebrow">Ski &amp; Snowboard · Snowpark Escape</p>
+      <p class="eyebrow" id="mEyebrow">Ski &amp; Snowboard · Snowpark Escape</p>
       <h1>SEND<br><em>IT</em></h1>
-      <p class="lede">Die Lawine schiebt von hinten, die Ski Patrol jagt dich. Spring die Gaps, steh deine Tricks, sammel Münzen.</p>
-      <div class="gear" role="group" aria-label="Sportgerät wählen"><button class="gearbtn" data-gear="ski" aria-pressed="true">SKI</button><button class="gearbtn" data-gear="board" aria-pressed="false">SNOWBOARD</button></div>
+      <p class="lede" id="mLede">Die Lawine schiebt von hinten, die Ski Patrol jagt dich. Spring die Gaps, steh deine Tricks, sammel Münzen.</p>
+      <div class="gear" role="group" aria-label="Saison wählen"><button class="gearbtn season" data-season="winter" aria-pressed="true">❄ WINTER</button><button class="gearbtn season" data-season="summer" aria-pressed="false">☀ SOMMER</button></div>
+      <div class="gear" id="gearRow" role="group" aria-label="Sportgerät wählen"><button class="gearbtn" data-gear="ski" aria-pressed="true">SKI</button><button class="gearbtn" data-gear="board" aria-pressed="false">SNOWBOARD</button></div>
       <div class="gear"><button class="gearbtn" id="bAssist" aria-pressed="false">LANDEHILFE: AUS</button><button class="gearbtn" id="bMusic" aria-pressed="true">MUSIK: AN</button><button class="gearbtn" id="bPack" aria-pressed="false" hidden>RUCKSACK: AUS</button><span class="langsw" role="group" aria-label="Sprache"><button class="gearbtn" data-lang="de" aria-pressed="true" aria-label="Deutsch">DE</button><button class="gearbtn" data-lang="en" aria-pressed="false" aria-label="English">EN</button></span></div>
       <p class="acct" id="mAcct"></p>
       <div class="stats"><span><i class="coin"></i><b id="mCoins">0</b></span><span>Highscore<b id="mBest">0</b></span><span>Weiteste Fahrt<b id="mDist">0 m</b></span></div>
@@ -293,6 +296,8 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
     <p class="eyebrow">Was ist neu</p>
     <h2>PATCH NOTES</h2>
     <div class="pn">
+      <h3>v4.0 · 07.11.2026</h3>
+      <ul><li>Sommer-Saison: im Menü zwischen Winter (Ski und Snowboard) und Sommer (Downhill-Bike) wählen</li><li>Downhill-Bike mit Tretanimation beim Gasgeben, Fullface-Helm und Drehungen in 3D mit vielen Bildern</li><li>Bike-Tricks statt Grabs: Whip, Table Top, Superman, No-Hander, Can-Can, Nac-Nac, X-Up, One-Footer</li><li>Manual und Nose Manual statt Butter (am Handy im Jib-Modus), Fakie statt Switch</li><li>Sommer-Welt: grüne Almen, Laub- und Nadelwald, Bikepark mit Dirt Jumps, Tables, Drops und Rollers, Erdgräben statt Gletscherspalten, Baumstämme zum Drüberspringen im Freeride</li><li>Mure statt Lawine, Ranger auf dem Quad statt Ski Patrol, Kühe und Bike-Ständer auf der Alm</li><li>Shop: Bike in neun Farben, im Sommer heißen die Skischuhe Schuhe</li><li>Fix: der Butter-Cooldown greift wieder, wenn man über eine Kante oder einen Kicker abhebt</li></ul>
       <h3>v3.1 · 05.11.2026</h3>
       <ul><li>Freeride-Rucksack: neues Verbandszeug bei Fels-Crashs (verarzten, um den Stein laufen, weiterfahren); pro Lauf rettet er nur noch einmal, je nachdem, was dich zuerst erwischt</li><li>Freeride: Ski Patrol nur noch hier und etwas seltener, neue Baumstamm-Pole-Jams und kleine Bäume hinter Powder-Kickern mit Landung im tiefen Powder</li><li>Handy: Gas und Bremse sind jetzt kleine durchsichtige Knöpfe (GAS links neben dem rechten Stick, BREMSE rechts neben dem linken), der linke Stick spannt am Boden nur noch Drehungen vor</li><li>Handy: Butter nur noch im Jib-Modus, ein- und ausschalten mit dem Knopf JIB oben neben dem Ton-Symbol (Standard: aus)</li><li>Handy: Stick links oder rechts spannt wie beim Controller eine Drehung vor, die beim Absprung sofort losgeht, auch mit Gas oder Bremse</li><li>Handy: Stick reagiert zuverlässiger (mehrere Finger, Richtungen flackern nicht mehr), Cork und Misty klappen auch direkt aus dem Gas heraus</li><li>Controller: Bremsen mit dem unteren Knopf (Switch: B), und wer den Stick kurz vor dem Ende einer Rail hält, dreht sich beim Absprung sofort</li><li>Controller: Beim Halten von R2 geht der Fahrer in die Knie, so siehst du, dass der Sprung geladen ist</li><li>Controller: gesprungen wird beim Loslassen von R2</li><li>Controller: Butter auf dem rechten Stick, Drehungen mit dem linken Stick vorspannen, Gas auf dem rechten Knopf (Switch: A)</li><li>Controller: Menüs mit Stick und Knöpfen, Gas mit dem unteren Knopf rechts, Grabs nur mit gehaltenem R1</li><li>Controller-Steuerung für Switch Pro, Xbox und PlayStation: linker Stick wie am Handy, R2 springt, rechter Stick greift</li><li>Neu im Shop: Skistöcke ganz schwarz mit dunkelgrauen Tellern, Rucksack Schwarz-Grau, Bommelmütze Schwarz mit dunkelgrauem Bommel</li><li>Spielernamen ändern: Rangliste → NAME ÄNDERN; danach meldest du dich mit dem neuen Namen an, Passwort und Spielstand bleiben</li><li>Ski: Oberseite einfarbig ohne Streifen, die zweite Farbe ist jetzt der Belag (sieht man bei Corks und Mistys)</li><li>Skischuhe im Shop (z. B. Türkis): 1 Pixel hoch direkt auf dem Ski unter der Hose, vorne schaut die Spitze raus</li><li>Gap Rail: längere Absprungfläche, die Rail fängt früher an und hört später auf, nur noch zwei Stützen (keine Stangen mehr in den Abgrund)</li><li>Freeride-Rucksack kostet jetzt 10000 Münzen</li><li>Neue Grabs auf Ski, rechter Stick schräg: Truck Driver (beide Hände an die Spitzen, Ski biegen sich), Venom, Octograb und ein echter Japan; der bisherige Japan heißt jetzt Blunt</li><li>Hoodie in allen Posen schlank, auch bei Drehungen und beim Switch-Fahren; Hose am Bund so breit wie der Oberkörper und etwas schmaler</li><li>Nach einem Butter kein sofortiger Flip, Cork oder Misty, wenn man den Stick weiter hält (Spins gehen sofort)</li><li>Ski Patrol: kleiner Hinweis am linken Bildrand, wenn sie von hinten kommt (mit Abstand); die Anzeige oben in der Mitte ist weg</li></ul>
       <h3>v3.0</h3>
@@ -400,6 +405,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
         <dt><kbd>P</kbd><kbd>Esc</kbd></dt><dd>Pause</dd>
       </dl></div>
     </div>
+    <p class="note">Sommer (Downhill-Bike): Im Menü auf SOMMER stellen. Gesteuert wird genau wie im Winter, nur mit dem Bike: Mit Gas trittst du in die Pedale. Statt Grabs gibt es Bike-Tricks: J/1 Superman, K/2 Whip, L/3 No-Hander, I/4 Table Top, U/5 One-Footer, O/6 X-Up, N/7 Nac-Nac, M/8 Can-Can (Handy und Controller: rechter Stick wie bei den Grabs). Statt Butter fährst du Manual (↓, auf dem Hinterrad) und Nose Manual (↑, auf dem Vorderrad), am Handy im Jib-Modus. Flips, Spins, Cork und Misty gehen wie gewohnt, Drehungen vorspannen auch. Im Bikepark gibt es Dirt Jumps, Tables, Drops und Rollers statt Rails. Im Freeride warten Felsdrops, Felsen und umgestürzte Baumstämme: drüberspringen, sonst liegst du. Von hinten rollt die Mure, im Freeride jagt dich der Ranger auf dem Quad. Fährst du nach einem 180er rückwärts, heißt das Fakie.</p>
     <p class="note">Lande parallel zum Hang. Ein 180er landet Switch, mit Twin Tips kein Problem. Lass den Grab vor der Landung los, sonst wird's sketchy. Kommst du am Gap zu kurz, fällst du ins Void. Die Ski Patrol kann keine Gaps springen: Wenn sie dir am Heck klebt, spring über den nächsten Gap und sie bleibt stehen. Mit Vollgas fährst du ihr auch davon. Den Big Air schaffst du nur mit Vollgas plus Pop.</p>
     <p class="note">Am Handy: Mit dem Stick links steuerst du die Tricks. Oben ist Frontflip, unten Backflip, links und rechts drehst du dich, links bremst auf der Piste. Schräg oben kommt ein Misty, schräg unten ein Cork. Tippst du in die linke Bildschirmhälfte, greifst du den linken Stick, rechts den rechten. Die Richtung vom Stick zu deinem Finger zählt sofort: Tippst du rechts neben den Stick, ist er schon nach rechts gedrückt. Gas gibst du mit dem durchsichtigen Knopf GAS links neben dem rechten Stick, bremsen mit BREMSE rechts neben dem linken Stick (jeweils gedrückt halten). Butter gibt es im Jib-Modus: Tippst du oben neben dem Ton-Symbol auf JIB, bleibt er an, bis du wieder drauftippst. Dann machst du nach unten einen Butter, nach oben einen Nose Butter. Hältst du den linken Stick auf der Piste nach links oder rechts, spannst du eine Drehung vor, die beim Absprung sofort losgeht. Lenkst du beim Nose Butter schräg nach oben links oder rechts, drehst du einen flachen Nose Butter 180. Fährst du switch, geht das genauso mit dem Tail Butter schräg nach unten. Der rechte Stick ist Sprung und Grab zugleich: Antippen springt, gedrückt halten und schieben greift. Oben Blunt (Board: Japan), unten Mute (Board: Indy), links Tail, rechts Nose. Auf Ski gibt es schräg noch vier: oben rechts Truck Driver, unten rechts Venom, unten links Octograb, oben links Japan. In der Luft springt er nicht, da zählen nur die Grabs.</p>
     <p class="note">Controller (Switch Pro, Xbox, PlayStation): Gas gibst du mit dem rechten Knopf (Xbox: B, PlayStation: Kreis, Switch: A). Gesprungen wird, wenn du R2 (Xbox: RT, Switch: ZR) loslässt. Bremsen tust du mit dem unteren Knopf (Xbox: A, PlayStation: Kreuz, Switch: B). Am Boden spannst du mit dem linken Stick nach links oder rechts eine Drehung vor, die beim Absprung sofort losgeht, auch am Ende einer Rail. In der Luft macht der linke Stick Flips, Spins, Cork und Misty, auf Rails die Swaps. Der rechte Stick macht am Boden die Butter: unten Butter, oben Nose Butter, schräg oben links oder rechts Nose Butter 180 (switch: schräg unten Tail Butter 180). Greifen: R1 (Xbox: RB, Switch: R) halten und den rechten Stick schieben: oben Blunt, unten Mute, links Tail, rechts Nose, auf Ski schräg Truck Driver, Venom, Octograb und Japan. Start (Options, +) pausiert. In den Menüs wählst du mit dem linken Stick oder Steuerkreuz aus, bestätigst mit dem unteren Knopf und gehst mit dem rechten Knopf zurück.</p>
@@ -526,6 +532,16 @@ const SHOP={
     {id:'b_wood',name:'Holz Core',price:60,c:'#c08a50',a:'#6e4523'},
     {id:'b_galaxy',name:'Galaxy',price:80,c:'#5b3fa8',a:'#ff86c8'},
     {id:'b_gold',name:'Gold Edition',price:200,c:'#f2c445',a:'#6e4a10'}]},
+  bike:{label:'Bike',items:[
+    {id:'bk_red',name:'Rot',price:0,c:'#d63a3a',a:'#2b2e38'},
+    {id:'bk_black',name:'Stealth',price:30,c:'#33363f',a:'#ff7a2f'},
+    {id:'bk_white',name:'Weiß',price:40,c:'#e8ecf2',a:'#2f7fd0'},
+    {id:'bk_lime',name:'Lime',price:50,c:'#b8f03c',a:'#2b2e38'},
+    {id:'bk_blue',name:'Racing Blau',price:55,c:'#2f6fd0',a:'#f2c445'},
+    {id:'bk_orange',name:'Orange',price:60,c:'#ff7a2f',a:'#2b2e38'},
+    {id:'bk_raw',name:'Raw Alu',price:80,c:'#b9bfc9',a:'#d63a3a'},
+    {id:'bk_purple',name:'Lila',price:90,c:'#7e4fc4',a:'#86e0bf'},
+    {id:'bk_gold',name:'Gold',price:200,c:'#f2c445',a:'#2b2e38'}]},
   pack:{label:'Rucksack',items:[
     {id:'pk_none',name:'Ohne Rucksack',price:0,c:'#5d6680'},
     {id:'pk_free',name:'Freeride-Rucksack',price:10000,c:'#c8442e',a:'#2b2e38',info:'Mit Spitzhacke, Lawinenschaufel und Verbandszeug: rettet dich einmal pro Lauf, je nachdem, was dich zuerst erwischt: Abgrund, Lawine oder Fels. Im Menü an- und ausschaltbar.'},
@@ -559,14 +575,19 @@ const SHOP={
 const CATS=Object.keys(SHOP);
 
 /* ================= SAVE ================= */
-const DEF={coins:0,best:0,bestDist:0,owned:{},equip:{helmet:'h_black',goggles:'g_orange',hoodie:'d_grey',pants:'p_khaki',skis:'s_red',board:'b_black',poles:'po_black',pack:'pk_none',beanie:'bn_black',boots:'bt_black'},gear:'ski',assist:false,packLast:'pk_free',music:true};
+const DEF={coins:0,best:0,bestDist:0,owned:{},equip:{helmet:'h_black',goggles:'g_orange',hoodie:'d_grey',pants:'p_khaki',skis:'s_red',board:'b_black',poles:'po_black',pack:'pk_none',beanie:'bn_black',boots:'bt_black',bike:'bk_red'},gear:'ski',season:'winter',assist:false,packLast:'pk_free',music:true};
 // Stand prüfen und auffüllen (vom Gerät oder aus dem Konto). t = letzte Änderung, uid = Konto, zu dem der Stand gehört, sc = Münzen beim letzten Abgleich mit dem Konto
 function normSave(s){s=s&&typeof s==='object'?s:{};const ob=v=>v&&typeof v==='object'&&!Array.isArray(v);
   return {coins:Math.max(0,s.coins|0),best:Math.max(0,s.best|0),bestDist:Math.max(0,s.bestDist|0),owned:ob(s.owned)?Object.assign({},s.owned):{},
-    equip:Object.assign({},DEF.equip,ob(s.equip)?s.equip:{}),gear:s.gear==='board'?'board':'ski',assist:!!s.assist,music:s.music!==false,packLast:typeof s.packLast==='string'?s.packLast:'pk_free',lang:s.lang==='en'||s.lang==='de'?s.lang:null,
+    equip:Object.assign({},DEF.equip,ob(s.equip)?s.equip:{}),gear:s.gear==='board'?'board':'ski',season:s.season==='summer'?'summer':'winter',assist:!!s.assist,music:s.music!==false,packLast:typeof s.packLast==='string'?s.packLast:'pk_free',lang:s.lang==='en'||s.lang==='de'?s.lang:null,
     t:+s.t||0,uid:typeof s.uid==='string'?s.uid:null,sc:Math.max(0,s.sc|0)}}
 function loadSave(){try{const s=JSON.parse(localStorage.getItem('sendit_save_v1')||'null');if(s&&typeof s==='object')return normSave(s)}catch(e){}return normSave(DEF)}
 const SAVE=loadSave();
+/* Saison: Winter = Ski/Snowboard, Sommer = Downhill-Bike. GEAR ist das Sportgerät, mit dem gerade gefahren und gezeichnet wird. */
+let SUMMER=SAVE.season==='summer';
+const gearOf=()=>SUMMER?'bike':SAVE.gear;
+let GEAR=gearOf(),FOOTG=GEAR==='bike'?16:11;   // FOOTG: Hüfte über dem Boden (Bike: in Angriffshaltung über den Pedalen)
+function setGear(){GEAR=gearOf();FOOTG=GEAR==='bike'?16:11}
 let cloudHook=null;   // wird vom Online-Teil gesetzt: nach jeder Änderung den Stand ins Konto laden
 function writeSave(){try{localStorage.setItem('sendit_save_v1',JSON.stringify(SAVE))}catch(e){}}
 function persist(){SAVE.t=Date.now();writeSave();if(cloudHook)cloudHook()}
@@ -577,7 +598,7 @@ function persist(){SAVE.t=Date.now();writeSave();if(cloudHook)cloudHook()}
 const LANG_AUTO=/^de\b/i.test((navigator.languages&&navigator.languages[0])||navigator.language||'de')?'de':'en';
 let LANG=SAVE.lang||LANG_AUTO;
 const TX=(de,en)=>LANG==='en'?en:de;
-const EN={"Freeride-Rucksack: neues Verbandszeug bei Fels-Crashs (verarzten, um den Stein laufen, weiterfahren); pro Lauf rettet er nur noch einmal, je nachdem, was dich zuerst erwischt": "Freeride backpack: new first aid kit for rock crashes (patch up, walk around the rock, ride on); it now only saves you once per run, from whatever gets you first", "Freeride: Ski Patrol nur noch hier und etwas seltener, neue Baumstamm-Pole-Jams und kleine Bäume hinter Powder-Kickern mit Landung im tiefen Powder": "Freeride: the ski patrol only shows up here and a bit less often, new log pole jams, and small trees behind powder kickers with a landing in deep powder", "Handy: Gas und Bremse sind jetzt kleine durchsichtige Knöpfe (GAS links neben dem rechten Stick, BREMSE rechts neben dem linken), der linke Stick spannt am Boden nur noch Drehungen vor": "Phone: speed and brake are now small see-through buttons (GAS left of the right stick, BRAKE right of the left one), on the slope the left stick only winds up spins", "BREMSE": "BRAKE", "Bremsen (halten)": "Brake (hold)", "Gas (halten)": "Speed (hold)", "Handy: Butter nur noch im Jib-Modus, ein- und ausschalten mit dem Knopf JIB oben neben dem Ton-Symbol (Standard: aus)": "Phone: butters only in Jib mode, switched on and off with the JIB button at the top next to the sound symbol (off by default)", "Jib-Modus: Butter mit dem linken Stick an oder aus": "Jib mode: butters on the left stick on or off", "Handy: Stick links oder rechts spannt wie beim Controller eine Drehung vor, die beim Absprung sofort losgeht, auch mit Gas oder Bremse": "Phone: holding the stick left or right winds up a spin like on a controller, starting right at takeoff, even while speeding up or braking", "Handy: Stick reagiert zuverlässiger (mehrere Finger, Richtungen flackern nicht mehr), Cork und Misty klappen auch direkt aus dem Gas heraus": "Phone: the stick reacts more reliably (several fingers, directions no longer flicker), and corks and mistys work straight out of full speed", "Controller: Bremsen mit dem unteren Knopf (Switch: B), und wer den Stick kurz vor dem Ende einer Rail hält, dreht sich beim Absprung sofort": "Controller: brake with the bottom face button (Switch: B), and holding the stick just before the end of a rail spins you right at takeoff", "Controller: Beim Halten von R2 geht der Fahrer in die Knie, so siehst du, dass der Sprung geladen ist": "Controller: your rider crouches while you hold R2, so you can see the jump is loaded", "Controller: gesprungen wird beim Loslassen von R2": "Controller: you jump when you release R2", "Controller: Butter auf dem rechten Stick, Drehungen mit dem linken Stick vorspannen, Gas auf dem rechten Knopf (Switch: A)": "Controller: butters on the right stick, wind up spins with the left stick, speed on the right face button (Switch: A)", "Controller: Menüs mit Stick und Knöpfen, Gas mit dem unteren Knopf rechts, Grabs nur mit gehaltenem R1": "Controller: menus with stick and buttons, speed with the bottom face button, grabs only while holding R1", "Controller (Switch Pro, Xbox, PlayStation): Gas gibst du mit dem rechten Knopf (Xbox: B, PlayStation: Kreis, Switch: A). Gesprungen wird, wenn du R2 (Xbox: RT, Switch: ZR) loslässt. Bremsen tust du mit dem unteren Knopf (Xbox: A, PlayStation: Kreuz, Switch: B). Am Boden spannst du mit dem linken Stick nach links oder rechts eine Drehung vor, die beim Absprung sofort losgeht, auch am Ende einer Rail. In der Luft macht der linke Stick Flips, Spins, Cork und Misty, auf Rails die Swaps. Der rechte Stick macht am Boden die Butter: unten Butter, oben Nose Butter, schräg oben links oder rechts Nose Butter 180 (switch: schräg unten Tail Butter 180). Greifen: R1 (Xbox: RB, Switch: R) halten und den rechten Stick schieben: oben Blunt, unten Mute, links Tail, rechts Nose, auf Ski schräg Truck Driver, Venom, Octograb und Japan. Start (Options, +) pausiert. In den Menüs wählst du mit dem linken Stick oder Steuerkreuz aus, bestätigst mit dem unteren Knopf und gehst mit dem rechten Knopf zurück.": "Controller (Switch Pro, Xbox, PlayStation): speed up with the right face button (Xbox: B, PlayStation: Circle, Switch: A). You jump when you release R2 (Xbox: RT, Switch: ZR). Brake with the bottom face button (Xbox: A, PlayStation: Cross, Switch: B). On the slope, push the left stick left or right to wind up a spin that starts right at takeoff, also at the end of a rail. In the air the left stick does flips, spins, corks and mistys, on rails the swaps. On the slope the right stick does the butters: down butter, up nose butter, diagonally up left or right nose butter 180 (switch: diagonally down for a tail butter 180). Grabs: hold R1 (Xbox: RB, Switch: R) and push the right stick: up Blunt, down Mute, left Tail, right Nose, and on skis diagonally Truck Driver, Venom, Octograb and Japan. Start (Options, +) pauses. In the menus, pick with the left stick or d-pad, confirm with the bottom face button and go back with the right face button.", "Controller-Steuerung für Switch Pro, Xbox und PlayStation: linker Stick wie am Handy, R2 springt, rechter Stick greift": "Controller support for Switch Pro, Xbox and PlayStation: left stick like on a phone, R2 jumps, right stick grabs", "Neu im Shop: Skistöcke ganz schwarz mit dunkelgrauen Tellern, Rucksack Schwarz-Grau, Bommelmütze Schwarz mit dunkelgrauem Bommel": "New in the shop: all-black poles with dark grey baskets, black-grey backpack, black pom beanie with a dark grey pom", "Spielernamen ändern: Rangliste → NAME ÄNDERN; danach meldest du dich mit dem neuen Namen an, Passwort und Spielstand bleiben": "Change your player name: Leaderboard → CHANGE NAME; afterwards you log in with the new name, password and progress stay", "NAME ÄNDERN": "CHANGE NAME", "Neuer Spielername": "New player name", "SPEICHERN": "SAVE", "ABBRECHEN": "CANCEL", "Ski: Oberseite einfarbig ohne Streifen, die zweite Farbe ist jetzt der Belag (sieht man bei Corks und Mistys)": "Skis: one-colour topsheet without a stripe, the second colour is now the base (you see it in corks and mistys)", "Skischuhe im Shop (z. B. Türkis): 1 Pixel hoch direkt auf dem Ski unter der Hose, vorne schaut die Spitze raus": "Ski boots in the shop (e.g. turquoise): 1 pixel high right on the ski under the pants, with the toe sticking out in front", "Gap Rail: längere Absprungfläche, die Rail fängt früher an und hört später auf, nur noch zwei Stützen (keine Stangen mehr in den Abgrund)": "Gap rail: longer takeoff deck, the rail starts earlier and ends later, only two supports (no more poles into the abyss)", "Freeride-Rucksack kostet jetzt 10000 Münzen": "The freeride backpack now costs 10000 coins", "Neue Grabs auf Ski, rechter Stick schräg: Truck Driver (beide Hände an die Spitzen, Ski biegen sich), Venom, Octograb und ein echter Japan; der bisherige Japan heißt jetzt Blunt": "New grabs on skis, right stick diagonals: Truck Driver (both hands on the tips, skis flex), Venom, Octograb and a real Japan; the old Japan is now called Blunt", "Blunt Grab (Board: Japan)": "Blunt grab (board: Japan)", "Japan Grab (Ski)": "Japan grab (skis)", "Truck Driver: beide Hände an die Skispitzen (Ski)": "Truck Driver: both hands on the ski tips (skis)", "Octograb (Ski)": "Octograb (skis)", "Venom (Ski)": "Venom (skis)", "Ski Patrol: kleiner Hinweis am linken Bildrand, wenn sie von hinten kommt (mit Abstand); die Anzeige oben in der Mitte ist weg": "Ski patrol: small marker at the left edge of the screen when it is coming from behind (with distance); the badge at the top center is gone", "Nach einem Butter kein sofortiger Flip, Cork oder Misty, wenn man den Stick weiter hält (Spins gehen sofort)": "After a butter, holding the stick no longer flips, corks or mistys right away (spins still work instantly)", "Hoodie in allen Posen schlank, auch bei Drehungen und beim Switch-Fahren; Hose am Bund so breit wie der Oberkörper und etwas schmaler": "Slim hoodie in every pose, including spins and riding switch; pants as wide as the upper body at the waist and a bit slimmer", "LAWINE": "AVALANCHE", "SPRUNG": "JUMP", "Die Lawine schiebt von hinten, die Ski Patrol jagt dich. Spring die Gaps, steh deine Tricks, sammel Münzen.": "The avalanche is pushing from behind and the ski patrol is chasing you. Jump the gaps, land your tricks, grab the coins.", "LANDEHILFE: AUS": "LANDING ASSIST: OFF", "MUSIK: AN": "MUSIC: ON", "RUCKSACK: AUS": "BACKPACK: OFF", "Highscore": "High score", "Weiteste Fahrt": "Longest run", "FAHREN": "RIDE", "STEUERUNG": "CONTROLS", "RANGLISTE": "LEADERBOARD", "Was ist neu": "What's new", "Englisch: im Menü zwischen Deutsch und Englisch wechseln": "English: switch between German and English in the menu", "Afterbangs sind reiner Style: keine Punkte, keine Anzeige": "Afterbangs are pure style now: no points, no label", "Pistenraupe neu: grau, mit Fräse, Ketten, Kabine und Räumschild. Die Rutschfläche ist genau die sichtbare Oberkante, man kann hinten über die Fräse reinfahren, Stürze landen oben auf der Raupe und die Ski Patrol bleibt an ihr hängen": "New snowcat: grey, with tiller, tracks, cab and blade. The grind surface is exactly its visible top edge, you can ride on over the tiller at the back, crashes land on top of the cat, and the ski patrol gets stuck behind it", "Start auf der Alm: Hütte, Leute, Blaskapelle mit eigener Polka; man fährt automatisch los, ab der Piste steuerst du (Sprung überspringt)": "Start at the alpine hut: crowd and brass band with its own polka; you ride off automatically and take control on the slope (jump skips)", "Polka blendet beim Wegfahren in die Spielmusik über": "The polka fades into the game music as you ride away", "Gaps im Park sind jetzt Gletscherspalten mit Eiswänden und Eiszapfen": "Park gaps are now glacier crevasses with ice walls and icicles", "Eigene Musik: winterlicher Chiptune mit Glockenspiel, läuft in Schleife, im Menü abschaltbar": "Own soundtrack: wintery chiptune with glockenspiel, loops, can be turned off in the menu", "Bäume im Freeride stecken im Schnee und sehen alle anders aus": "Freeride trees sit in the snow and all look different", "Tiere im Tiefschnee ohne Kasten um die Beine": "Animals in deep snow without a box around their legs", "Afterbangs: nur noch Shifty, Lean Back, Hands Behind Back": "Afterbangs: only Shifty, Lean Back, Hands Behind Back", "Afterbangs: nach sauberen Landungen kurz lässig (Shifty, Lean Back, Hands Behind Back)": "Afterbangs: a moment of style after clean landings (Shifty, Lean Back, Hands Behind Back)", "Grind-Geräusche je nach Material": "Grind sounds depending on the material", "Pistenraupe statt Auto, Pole Jam blau und abgenutzt": "Snowcat instead of a car, pole jam blue and worn", "Drehungen mit Körper: Schultern und Kopf führen, Ski und Board ziehen nach, in der Luft und auf Rails": "Spins with the whole body: shoulders and head lead, skis and board follow, in the air and on rails", "Weicher Übergang beim Swappen auf Rails": "Smooth transition when swapping on rails", "14 neue Park-Features: Kink-Rails, Rainbow, Waterfall, Roller Coaster, Treppen-Rail, A-Frame- und Battleship-Box, Auto, Picknicktisch, Pole Jam, Reifen und Fässer": "14 new park features: kink rails, rainbow, waterfall, roller coaster, stair rail, A-frame and battleship box, car, picnic table, pole jam, tires and barrels", "Freeride-Drops: man fährt nicht mehr an der Felswand runter": "Freeride drops: you no longer ride down the cliff face", "Lawinenschaufel im Freeride-Rucksack: rettet dich einmal pro Lauf vor der Lawine": "Avalanche shovel in the freeride backpack: saves you from the avalanche once per run", "Switch auf die Rail heißt jetzt Switch wieder runter": "Switch onto a rail now means switch off it again", "Freeride: keine kleinen Steine mehr, Felsen nur noch selten": "Freeride: no more small stones, rocks are rare now", "Schönere Mute-Pose auf Ski": "Nicer mute pose on skis", "Grabs mit Zwischenbild: die Hand greift sichtbar zum Ski bzw. Brett": "Grabs with an in-between frame: you can see the hand reach for the ski or board", "Spielstand im Konto: Münzen, gekaufte Sachen, Outfit und Bestwerte sind auf jedem Gerät dabei": "Progress in your account: coins, purchases, outfit and best scores on every device", "Neue Lawine: riesige Pulverwolke mit großem Kopf vorne": "New avalanche: huge powder cloud with a big head at the front", "Switch mit Gas: kein Stockeinsatz mehr": "Riding switch with speed: no more pole pushing", "Swaps auf Rails etwas langsamer": "Rail swaps a bit slower", "Mit Drehung auf die Rail und Stick halten: Drehung läuft auf der Rail weiter": "Spin onto a rail and hold the stick: the spin continues on the rail", "Park: gleichmäßige Abstände, kleine Kicker ohne Gap entfernt": "Park: even spacing, small kickers without a gap removed", "Ohne Helm fahren: Beanie, Bommelmütze und Fisherman in vielen Farben": "Ride without a helmet: beanie, pom beanie and fisherman in lots of colors", "Rucksack in sieben weiteren Farben, jetzt auch von der Seite sichtbar": "Backpack in seven more colors, now also visible from the side", "Kopf dreht sich bei Corks mit": "The head turns along in corks", "Freeride-Rucksack im Shop: Spitzhacke rettet dich einmal pro Lauf aus dem Abgrund": "Freeride backpack in the shop: the ice axe saves you from the abyss once per run", "Mehr Abstand zwischen den Hindernissen im Park": "More space between the obstacles in the park", "Butter mit eigener Pose und gebogenen Ski": "Butters with their own pose and flexed skis", "Nose Butter 180 und Switch Tail Butter 180": "Nose butter 180 and switch tail butter 180", "Gas nur noch mit Stick ganz rechts": "Speed boost only with the stick all the way right", "Online-Rangliste mit eigenem Konto": "Online leaderboard with your own account", "Butter und Nose Butter": "Butter and nose butter", "Sprung halb so hoch, Felsen flacher": "Jumps half as high, flatter rocks", "Nebliges Flutlicht, präparierte Piste, Bär läuft": "Foggy floodlights, groomed slope, the bear walks", "Handy: zwei Sticks, die unter dem Finger erscheinen": "Phone: two sticks that appear under your finger", "Rail-Swaps durch Halten, kein Zoom beim Doppeltippen": "Rail swaps by holding, no zoom on double tap", "Felsklippen mit Nebel, neue Bergketten, Stirnlampe": "Rock cliffs with fog, new mountain ranges, headlamp", "Tag und Nacht, Tiere, Landehilfe, neue Lawine": "Day and night, animals, landing assist, new avalanche", "Erste Version: Park, Freeride, Ski und Snowboard, Shop": "First version: park, freeride, ski and snowboard, shop", "ZURÜCK": "BACK", "Mit Konto landet dein Bestwert in der Rangliste, und dein Spielstand (Münzen, gekaufte Sachen, Outfit, Bestwerte) ist auf jedem Gerät dabei. Nur Spielername und Passwort, keine E-Mail. Merk dir das Passwort gut, es lässt sich nicht zurücksetzen.": "With an account your best score goes on the leaderboard, and your progress (coins, purchases, outfit, best scores) is with you on every device. Just a player name and password, no email. Remember your password, it can't be reset.", "ANMELDEN": "LOG IN", "KONTO ERSTELLEN": "CREATE ACCOUNT", "Angemeldet als": "Logged in as", "ABMELDEN": "LOG OUT", "Lädt …": "Loading …", "So fährst du": "How to ride", "Auf der Piste": "On the slope", "Gas: kräftig beschleunigen bis Vollgas": "Speed: accelerate hard up to full speed", "Bremsen": "Brake", "Butter und Nose Butter (halten)": "Butter and nose butter (hold)", "Nose Butter 180 (switch: ↓ + Spin für Tail Butter 180)": "Nose butter 180 (switch: ↓ + spin for tail butter 180)", "Leertaste": "Space", "Springen. Am Kicker-Ende gibt's extra Pop": "Jump. Extra pop at the end of a kicker", "In der Luft": "In the air", "Cork (gleichzeitig drücken)": "Cork (press together)", "Misty (gleichzeitig drücken)": "Misty (press together)", "Draufspringen": "Jump on", "Slide, Punkte pro Sekunde. Drehst du beim Aufspringen und hältst A/D weiter, drehst du auf der Rail weiter": "Slide, points per second. Spin onto it and keep holding A/D to keep spinning on the rail", "Rail: 180er Swap, halten dreht weiter": "Rail: 180 swap, hold to keep spinning", "Tube und Baum: 90° drehen. Gerade drauf ist ein 50-50": "Tube and tree: turn 90°. Straight on is a 50-50", "Absprung": "Pop off", "Du drehst automatisch zurück in die Richtung, in der du aufgesprungen bist (Switch bleibt Switch). Mit A/D drehst du zusätzlich 180er raus": "You automatically turn back to the direction you jumped on in (switch stays switch). Use A/D to spin an extra 180 out", "Absprung vom Rail": "Pop off the rail", "Neue Features": "Features", "Kink-Rails (Flat-Down, Down-Flat-Down, Flat-Down-Flat), Rainbow, Waterfall, Roller Coaster, Treppen-Rail, Boxen (A-Frame, Battleship), Pistenraupe und Picknicktisch geben Bonuspunkte. Pistenraupe und Pole Jam: einfach reinfahren, die Raupe hält auch die Ski Patrol auf. Reifen und Fässer antippen oder draufspringen": "Kink rails (flat-down, down-flat-down, flat-down-flat), rainbow, waterfall, roller coaster, stair rail, boxes (A-frame, battleship), snowcat and picnic table give bonus points. Snowcat and pole jam: just ride in, and the snowcat also stops the ski patrol. Tap tires and barrels or jump onto them", "Lande parallel zum Hang. Ein 180er landet Switch, mit Twin Tips kein Problem. Lass den Grab vor der Landung los, sonst wird's sketchy. Kommst du am Gap zu kurz, fällst du ins Void. Die Ski Patrol kann keine Gaps springen: Wenn sie dir am Heck klebt, spring über den nächsten Gap und sie bleibt stehen. Mit Vollgas fährst du ihr auch davon. Den Big Air schaffst du nur mit Vollgas plus Pop.": "Land parallel to the slope. A 180 lands switch, no problem with twin tips. Let go of the grab before you land or it gets sketchy. Come up short at a gap and you fall into the void. The ski patrol can't jump gaps: if it's right on your tail, jump the next gap and it gets stuck. You can also outrun it at full speed. You only clear the big air with full speed plus pop.", "Am Handy: Mit dem Stick links steuerst du die Tricks. Oben ist Frontflip, unten Backflip, links und rechts drehst du dich, links bremst auf der Piste. Schräg oben kommt ein Misty, schräg unten ein Cork. Tippst du in die linke Bildschirmhälfte, greifst du den linken Stick, rechts den rechten. Die Richtung vom Stick zu deinem Finger zählt sofort: Tippst du rechts neben den Stick, ist er schon nach rechts gedrückt. Gas gibst du mit dem durchsichtigen Knopf GAS links neben dem rechten Stick, bremsen mit BREMSE rechts neben dem linken Stick (jeweils gedrückt halten). Butter gibt es im Jib-Modus: Tippst du oben neben dem Ton-Symbol auf JIB, bleibt er an, bis du wieder drauftippst. Dann machst du nach unten einen Butter, nach oben einen Nose Butter. Hältst du den linken Stick auf der Piste nach links oder rechts, spannst du eine Drehung vor, die beim Absprung sofort losgeht. Lenkst du beim Nose Butter schräg nach oben links oder rechts, drehst du einen flachen Nose Butter 180. Fährst du switch, geht das genauso mit dem Tail Butter schräg nach unten. Der rechte Stick ist Sprung und Grab zugleich: Antippen springt, gedrückt halten und schieben greift. Oben Blunt (Board: Japan), unten Mute (Board: Indy), links Tail, rechts Nose. Auf Ski gibt es schräg noch vier: oben rechts Truck Driver, unten rechts Venom, unten links Octograb, oben links Japan. In der Luft springt er nicht, da zählen nur die Grabs.": "On a phone: the left stick controls your tricks. Up is a frontflip, down a backflip, left and right spin you, and left brakes on the slope. Diagonally up gives a misty, diagonally down a cork. Tap the left half of the screen to grab the left stick, the right half for the right stick. The direction from the stick to your finger counts right away: tap to the right of the stick and it is already pushed right. Hold the see-through GAS button left of the right stick for speed and BRAKE right of the left stick to brake. Butters need Jib mode: tap JIB at the top next to the sound symbol and it stays on until you tap it again. Then push down for a butter and up for a nose butter. Holding the left stick left or right on the slope winds up a spin that starts right at takeoff. Steer diagonally up left or right during a nose butter to spin a flat nose butter 180. Riding switch, it works the same with a tail butter diagonally down. The right stick is jump and grab in one: tap to jump, hold and slide to grab. Up Blunt (board: Japan), down Mute (board: Indy), left Tail, right Nose. On skis there are four more diagonally: up right Truck Driver, down right Venom, down left Octograb, up left Japan. In the air it doesn't jump, only the grabs count there.", "Freeride-Rucksack (Shop, 10000 Münzen, im Menü an- und ausschaltbar): Fällst du in einen Abgrund, hält dich die Spitzhacke an der rechten Wand fest. Mit dem linken Stick nach oben (Pfeil hoch) kletterst du hoch, oben klickst du automatisch wieder in Ski oder Board ein. Erwischt dich die Lawine, gräbst du dich mit der Lawinenschaufel wieder aus. Crashst du an einem Felsen, verarztest du dich mit dem Verbandszeug, läufst um den Stein und fährst weiter. Der Rucksack rettet dich aber nur einmal pro Lauf: Es zählt, was dich zuerst erwischt.": "Freeride backpack (shop, 10000 coins, can be switched on and off in the menu): if you fall into an abyss, the ice axe holds you on the right wall. Push the left stick up (arrow up) to climb, and at the top you click back into your skis or board automatically. If the avalanche catches you, you dig yourself out with the avalanche shovel. If you crash into a rock, you patch yourself up with the first aid kit, walk around the rock and ride on. The backpack only saves you once per run though: whatever gets you first counts.", "Nach einer Weile wechselt die Strecke in die Freeride-Zone. Nur dort jagt dich die Ski Patrol. Du grindest umgefallene Bäume, fährst Baumstamm-Pole-Jams (einfach reinfahren, am Ende poppst du ab) und springst Cliffs. Hinter natürlichen Powder-Kickern stehen kleine Bäume: Drüber springen und im tiefen Powder landen, dagegen fahren wirft dich ab. Cliffs halten die Ski Patrol genauso auf wie Gaps. Im Powder sinkst du ein und wirst langsamer, wenn du zu wenig Speed hast. Dafür verzeiht er schiefe Landungen. Pass auf die Felsen auf: Dagegen ist der Run vorbei. Spring mit der Leertaste drüber.": "After a while the course changes to the freeride zone. Only there does the ski patrol chase you. You grind fallen trees, ride log pole jams (just ride in and pop off the end) and jump cliffs. Small trees stand behind natural powder kickers: jump over them and land in the deep powder, riding into one throws you off. Cliffs stop the ski patrol just like gaps do. In powder you sink in and slow down if you don't have enough speed, but it forgives crooked landings. Watch out for rocks: hit one and the run is over. Jump over them with Space.", "Tippe ein Teil an für die Vorschau.": "Tap an item to preview it.", "FERTIG": "DONE", "Kurz durchatmen": "Take a breath", "WEITER": "RESUME", "AUFGEBEN": "GIVE UP", "Distanz": "Distance", "Münzen": "Coins", "Bester Trick": "Best trick", "NOCHMAL": "AGAIN", "MENÜ": "MENU", "Spielfeld": "Game area", "Ton an oder aus": "Sound on or off", "Joystick: oben Frontflip, unten Backflip, links und rechts Spin, schräg oben Misty, schräg unten Cork": "Joystick: up frontflip, down backflip, left and right spin, diagonally up misty, diagonally down cork", "Sprung-Stick: antippen springt, halten und schieben greift: oben Blunt, unten Mute oder Indy, links Tail, rechts Nose, auf Ski schräg oben rechts Truck Driver, unten rechts Venom, unten links Octograb, oben links Japan": "Jump stick: tap to jump, hold and slide to grab: up Blunt, down Mute or Indy, left Tail, right Nose, on skis diagonally up right Truck Driver, down right Venom, down left Octograb, up left Japan", "Dein Fahrer": "Your rider", "Sportgerät wählen": "Choose your gear", "Spielername": "Player name", "Passwort, mind. 6 Zeichen": "Password, at least 6 characters", "Passwort": "Password", "Vorschau": "Preview", "Sprache": "Language"};
+const EN={"Sommer-Saison: im Menü zwischen Winter (Ski und Snowboard) und Sommer (Downhill-Bike) wählen": "Summer season: choose between winter (ski and snowboard) and summer (downhill bike) in the menu", "Downhill-Bike mit Tretanimation beim Gasgeben, Fullface-Helm und Drehungen in 3D mit vielen Bildern": "Downhill bike with a pedaling animation when you speed up, full-face helmet and 3D spins with lots of frames", "Bike-Tricks statt Grabs: Whip, Table Top, Superman, No-Hander, Can-Can, Nac-Nac, X-Up, One-Footer": "Bike tricks instead of grabs: whip, table top, superman, no-hander, can-can, nac-nac, X-up, one-footer", "Manual und Nose Manual statt Butter (am Handy im Jib-Modus), Fakie statt Switch": "Manuals and nose manuals instead of butters (Jib mode on a phone), fakie instead of switch", "Sommer-Welt: grüne Almen, Laub- und Nadelwald, Bikepark mit Dirt Jumps, Tables, Drops und Rollers, Erdgräben statt Gletscherspalten, Baumstämme zum Drüberspringen im Freeride": "Summer world: green alpine meadows, mixed forest, a bike park with dirt jumps, tables, drops and rollers, earth ravines instead of crevasses, fallen logs to jump in the freeride zone", "Mure statt Lawine, Ranger auf dem Quad statt Ski Patrol, Kühe und Bike-Ständer auf der Alm": "Mudslide instead of an avalanche, a ranger on a quad instead of the ski patrol, cows and bike racks at the hut", "Shop: Bike in neun Farben, im Sommer heißen die Skischuhe Schuhe": "Shop: the bike in nine colors, in summer the ski boots become shoes", "Fix: der Butter-Cooldown greift wieder, wenn man über eine Kante oder einen Kicker abhebt": "Fix: the butter cooldown works again when you take off over an edge or a kicker", "Sommer (Downhill-Bike): Im Menü auf SOMMER stellen. Gesteuert wird genau wie im Winter, nur mit dem Bike: Mit Gas trittst du in die Pedale. Statt Grabs gibt es Bike-Tricks: J/1 Superman, K/2 Whip, L/3 No-Hander, I/4 Table Top, U/5 One-Footer, O/6 X-Up, N/7 Nac-Nac, M/8 Can-Can (Handy und Controller: rechter Stick wie bei den Grabs). Statt Butter fährst du Manual (↓, auf dem Hinterrad) und Nose Manual (↑, auf dem Vorderrad), am Handy im Jib-Modus. Flips, Spins, Cork und Misty gehen wie gewohnt, Drehungen vorspannen auch. Im Bikepark gibt es Dirt Jumps, Tables, Drops und Rollers statt Rails. Im Freeride warten Felsdrops, Felsen und umgestürzte Baumstämme: drüberspringen, sonst liegst du. Von hinten rollt die Mure, im Freeride jagt dich der Ranger auf dem Quad. Fährst du nach einem 180er rückwärts, heißt das Fakie.": "Summer (downhill bike): switch the menu to SUMMER. You ride exactly like in winter, just on a bike: speeding up means pedaling. Instead of grabs there are bike tricks: J/1 Superman, K/2 Whip, L/3 No-Hander, I/4 Table Top, U/5 One-Footer, O/6 X-Up, N/7 Nac-Nac, M/8 Can-Can (phone and controller: right stick, same as the grabs). Instead of butters you ride manuals (↓, on the back wheel) and nose manuals (↑, on the front wheel), on a phone in Jib mode. Flips, spins, corks and mistys work as usual, and so does winding up spins. The bike park has dirt jumps, tables, drops and rollers instead of rails. In the freeride zone there are rock drops, rocks and fallen logs: jump them or you go down. The mudslide rolls in from behind, and in the freeride zone the ranger chases you on a quad. Rolling backwards after a 180 is called fakie.", "☀ SOMMER": "☀ SUMMER", "❄ WINTER": "❄ WINTER", "Saison wählen": "Choose season", "Freeride-Rucksack: neues Verbandszeug bei Fels-Crashs (verarzten, um den Stein laufen, weiterfahren); pro Lauf rettet er nur noch einmal, je nachdem, was dich zuerst erwischt": "Freeride backpack: new first aid kit for rock crashes (patch up, walk around the rock, ride on); it now only saves you once per run, from whatever gets you first", "Freeride: Ski Patrol nur noch hier und etwas seltener, neue Baumstamm-Pole-Jams und kleine Bäume hinter Powder-Kickern mit Landung im tiefen Powder": "Freeride: the ski patrol only shows up here and a bit less often, new log pole jams, and small trees behind powder kickers with a landing in deep powder", "Handy: Gas und Bremse sind jetzt kleine durchsichtige Knöpfe (GAS links neben dem rechten Stick, BREMSE rechts neben dem linken), der linke Stick spannt am Boden nur noch Drehungen vor": "Phone: speed and brake are now small see-through buttons (GAS left of the right stick, BRAKE right of the left one), on the slope the left stick only winds up spins", "BREMSE": "BRAKE", "Bremsen (halten)": "Brake (hold)", "Gas (halten)": "Speed (hold)", "Handy: Butter nur noch im Jib-Modus, ein- und ausschalten mit dem Knopf JIB oben neben dem Ton-Symbol (Standard: aus)": "Phone: butters only in Jib mode, switched on and off with the JIB button at the top next to the sound symbol (off by default)", "Jib-Modus: Butter mit dem linken Stick an oder aus": "Jib mode: butters on the left stick on or off", "Handy: Stick links oder rechts spannt wie beim Controller eine Drehung vor, die beim Absprung sofort losgeht, auch mit Gas oder Bremse": "Phone: holding the stick left or right winds up a spin like on a controller, starting right at takeoff, even while speeding up or braking", "Handy: Stick reagiert zuverlässiger (mehrere Finger, Richtungen flackern nicht mehr), Cork und Misty klappen auch direkt aus dem Gas heraus": "Phone: the stick reacts more reliably (several fingers, directions no longer flicker), and corks and mistys work straight out of full speed", "Controller: Bremsen mit dem unteren Knopf (Switch: B), und wer den Stick kurz vor dem Ende einer Rail hält, dreht sich beim Absprung sofort": "Controller: brake with the bottom face button (Switch: B), and holding the stick just before the end of a rail spins you right at takeoff", "Controller: Beim Halten von R2 geht der Fahrer in die Knie, so siehst du, dass der Sprung geladen ist": "Controller: your rider crouches while you hold R2, so you can see the jump is loaded", "Controller: gesprungen wird beim Loslassen von R2": "Controller: you jump when you release R2", "Controller: Butter auf dem rechten Stick, Drehungen mit dem linken Stick vorspannen, Gas auf dem rechten Knopf (Switch: A)": "Controller: butters on the right stick, wind up spins with the left stick, speed on the right face button (Switch: A)", "Controller: Menüs mit Stick und Knöpfen, Gas mit dem unteren Knopf rechts, Grabs nur mit gehaltenem R1": "Controller: menus with stick and buttons, speed with the bottom face button, grabs only while holding R1", "Controller (Switch Pro, Xbox, PlayStation): Gas gibst du mit dem rechten Knopf (Xbox: B, PlayStation: Kreis, Switch: A). Gesprungen wird, wenn du R2 (Xbox: RT, Switch: ZR) loslässt. Bremsen tust du mit dem unteren Knopf (Xbox: A, PlayStation: Kreuz, Switch: B). Am Boden spannst du mit dem linken Stick nach links oder rechts eine Drehung vor, die beim Absprung sofort losgeht, auch am Ende einer Rail. In der Luft macht der linke Stick Flips, Spins, Cork und Misty, auf Rails die Swaps. Der rechte Stick macht am Boden die Butter: unten Butter, oben Nose Butter, schräg oben links oder rechts Nose Butter 180 (switch: schräg unten Tail Butter 180). Greifen: R1 (Xbox: RB, Switch: R) halten und den rechten Stick schieben: oben Blunt, unten Mute, links Tail, rechts Nose, auf Ski schräg Truck Driver, Venom, Octograb und Japan. Start (Options, +) pausiert. In den Menüs wählst du mit dem linken Stick oder Steuerkreuz aus, bestätigst mit dem unteren Knopf und gehst mit dem rechten Knopf zurück.": "Controller (Switch Pro, Xbox, PlayStation): speed up with the right face button (Xbox: B, PlayStation: Circle, Switch: A). You jump when you release R2 (Xbox: RT, Switch: ZR). Brake with the bottom face button (Xbox: A, PlayStation: Cross, Switch: B). On the slope, push the left stick left or right to wind up a spin that starts right at takeoff, also at the end of a rail. In the air the left stick does flips, spins, corks and mistys, on rails the swaps. On the slope the right stick does the butters: down butter, up nose butter, diagonally up left or right nose butter 180 (switch: diagonally down for a tail butter 180). Grabs: hold R1 (Xbox: RB, Switch: R) and push the right stick: up Blunt, down Mute, left Tail, right Nose, and on skis diagonally Truck Driver, Venom, Octograb and Japan. Start (Options, +) pauses. In the menus, pick with the left stick or d-pad, confirm with the bottom face button and go back with the right face button.", "Controller-Steuerung für Switch Pro, Xbox und PlayStation: linker Stick wie am Handy, R2 springt, rechter Stick greift": "Controller support for Switch Pro, Xbox and PlayStation: left stick like on a phone, R2 jumps, right stick grabs", "Neu im Shop: Skistöcke ganz schwarz mit dunkelgrauen Tellern, Rucksack Schwarz-Grau, Bommelmütze Schwarz mit dunkelgrauem Bommel": "New in the shop: all-black poles with dark grey baskets, black-grey backpack, black pom beanie with a dark grey pom", "Spielernamen ändern: Rangliste → NAME ÄNDERN; danach meldest du dich mit dem neuen Namen an, Passwort und Spielstand bleiben": "Change your player name: Leaderboard → CHANGE NAME; afterwards you log in with the new name, password and progress stay", "NAME ÄNDERN": "CHANGE NAME", "Neuer Spielername": "New player name", "SPEICHERN": "SAVE", "ABBRECHEN": "CANCEL", "Ski: Oberseite einfarbig ohne Streifen, die zweite Farbe ist jetzt der Belag (sieht man bei Corks und Mistys)": "Skis: one-colour topsheet without a stripe, the second colour is now the base (you see it in corks and mistys)", "Skischuhe im Shop (z. B. Türkis): 1 Pixel hoch direkt auf dem Ski unter der Hose, vorne schaut die Spitze raus": "Ski boots in the shop (e.g. turquoise): 1 pixel high right on the ski under the pants, with the toe sticking out in front", "Gap Rail: längere Absprungfläche, die Rail fängt früher an und hört später auf, nur noch zwei Stützen (keine Stangen mehr in den Abgrund)": "Gap rail: longer takeoff deck, the rail starts earlier and ends later, only two supports (no more poles into the abyss)", "Freeride-Rucksack kostet jetzt 10000 Münzen": "The freeride backpack now costs 10000 coins", "Neue Grabs auf Ski, rechter Stick schräg: Truck Driver (beide Hände an die Spitzen, Ski biegen sich), Venom, Octograb und ein echter Japan; der bisherige Japan heißt jetzt Blunt": "New grabs on skis, right stick diagonals: Truck Driver (both hands on the tips, skis flex), Venom, Octograb and a real Japan; the old Japan is now called Blunt", "Blunt Grab (Board: Japan)": "Blunt grab (board: Japan)", "Japan Grab (Ski)": "Japan grab (skis)", "Truck Driver: beide Hände an die Skispitzen (Ski)": "Truck Driver: both hands on the ski tips (skis)", "Octograb (Ski)": "Octograb (skis)", "Venom (Ski)": "Venom (skis)", "Ski Patrol: kleiner Hinweis am linken Bildrand, wenn sie von hinten kommt (mit Abstand); die Anzeige oben in der Mitte ist weg": "Ski patrol: small marker at the left edge of the screen when it is coming from behind (with distance); the badge at the top center is gone", "Nach einem Butter kein sofortiger Flip, Cork oder Misty, wenn man den Stick weiter hält (Spins gehen sofort)": "After a butter, holding the stick no longer flips, corks or mistys right away (spins still work instantly)", "Hoodie in allen Posen schlank, auch bei Drehungen und beim Switch-Fahren; Hose am Bund so breit wie der Oberkörper und etwas schmaler": "Slim hoodie in every pose, including spins and riding switch; pants as wide as the upper body at the waist and a bit slimmer", "LAWINE": "AVALANCHE", "SPRUNG": "JUMP", "Die Lawine schiebt von hinten, die Ski Patrol jagt dich. Spring die Gaps, steh deine Tricks, sammel Münzen.": "The avalanche is pushing from behind and the ski patrol is chasing you. Jump the gaps, land your tricks, grab the coins.", "LANDEHILFE: AUS": "LANDING ASSIST: OFF", "MUSIK: AN": "MUSIC: ON", "RUCKSACK: AUS": "BACKPACK: OFF", "Highscore": "High score", "Weiteste Fahrt": "Longest run", "FAHREN": "RIDE", "STEUERUNG": "CONTROLS", "RANGLISTE": "LEADERBOARD", "Was ist neu": "What's new", "Englisch: im Menü zwischen Deutsch und Englisch wechseln": "English: switch between German and English in the menu", "Afterbangs sind reiner Style: keine Punkte, keine Anzeige": "Afterbangs are pure style now: no points, no label", "Pistenraupe neu: grau, mit Fräse, Ketten, Kabine und Räumschild. Die Rutschfläche ist genau die sichtbare Oberkante, man kann hinten über die Fräse reinfahren, Stürze landen oben auf der Raupe und die Ski Patrol bleibt an ihr hängen": "New snowcat: grey, with tiller, tracks, cab and blade. The grind surface is exactly its visible top edge, you can ride on over the tiller at the back, crashes land on top of the cat, and the ski patrol gets stuck behind it", "Start auf der Alm: Hütte, Leute, Blaskapelle mit eigener Polka; man fährt automatisch los, ab der Piste steuerst du (Sprung überspringt)": "Start at the alpine hut: crowd and brass band with its own polka; you ride off automatically and take control on the slope (jump skips)", "Polka blendet beim Wegfahren in die Spielmusik über": "The polka fades into the game music as you ride away", "Gaps im Park sind jetzt Gletscherspalten mit Eiswänden und Eiszapfen": "Park gaps are now glacier crevasses with ice walls and icicles", "Eigene Musik: winterlicher Chiptune mit Glockenspiel, läuft in Schleife, im Menü abschaltbar": "Own soundtrack: wintery chiptune with glockenspiel, loops, can be turned off in the menu", "Bäume im Freeride stecken im Schnee und sehen alle anders aus": "Freeride trees sit in the snow and all look different", "Tiere im Tiefschnee ohne Kasten um die Beine": "Animals in deep snow without a box around their legs", "Afterbangs: nur noch Shifty, Lean Back, Hands Behind Back": "Afterbangs: only Shifty, Lean Back, Hands Behind Back", "Afterbangs: nach sauberen Landungen kurz lässig (Shifty, Lean Back, Hands Behind Back)": "Afterbangs: a moment of style after clean landings (Shifty, Lean Back, Hands Behind Back)", "Grind-Geräusche je nach Material": "Grind sounds depending on the material", "Pistenraupe statt Auto, Pole Jam blau und abgenutzt": "Snowcat instead of a car, pole jam blue and worn", "Drehungen mit Körper: Schultern und Kopf führen, Ski und Board ziehen nach, in der Luft und auf Rails": "Spins with the whole body: shoulders and head lead, skis and board follow, in the air and on rails", "Weicher Übergang beim Swappen auf Rails": "Smooth transition when swapping on rails", "14 neue Park-Features: Kink-Rails, Rainbow, Waterfall, Roller Coaster, Treppen-Rail, A-Frame- und Battleship-Box, Auto, Picknicktisch, Pole Jam, Reifen und Fässer": "14 new park features: kink rails, rainbow, waterfall, roller coaster, stair rail, A-frame and battleship box, car, picnic table, pole jam, tires and barrels", "Freeride-Drops: man fährt nicht mehr an der Felswand runter": "Freeride drops: you no longer ride down the cliff face", "Lawinenschaufel im Freeride-Rucksack: rettet dich einmal pro Lauf vor der Lawine": "Avalanche shovel in the freeride backpack: saves you from the avalanche once per run", "Switch auf die Rail heißt jetzt Switch wieder runter": "Switch onto a rail now means switch off it again", "Freeride: keine kleinen Steine mehr, Felsen nur noch selten": "Freeride: no more small stones, rocks are rare now", "Schönere Mute-Pose auf Ski": "Nicer mute pose on skis", "Grabs mit Zwischenbild: die Hand greift sichtbar zum Ski bzw. Brett": "Grabs with an in-between frame: you can see the hand reach for the ski or board", "Spielstand im Konto: Münzen, gekaufte Sachen, Outfit und Bestwerte sind auf jedem Gerät dabei": "Progress in your account: coins, purchases, outfit and best scores on every device", "Neue Lawine: riesige Pulverwolke mit großem Kopf vorne": "New avalanche: huge powder cloud with a big head at the front", "Switch mit Gas: kein Stockeinsatz mehr": "Riding switch with speed: no more pole pushing", "Swaps auf Rails etwas langsamer": "Rail swaps a bit slower", "Mit Drehung auf die Rail und Stick halten: Drehung läuft auf der Rail weiter": "Spin onto a rail and hold the stick: the spin continues on the rail", "Park: gleichmäßige Abstände, kleine Kicker ohne Gap entfernt": "Park: even spacing, small kickers without a gap removed", "Ohne Helm fahren: Beanie, Bommelmütze und Fisherman in vielen Farben": "Ride without a helmet: beanie, pom beanie and fisherman in lots of colors", "Rucksack in sieben weiteren Farben, jetzt auch von der Seite sichtbar": "Backpack in seven more colors, now also visible from the side", "Kopf dreht sich bei Corks mit": "The head turns along in corks", "Freeride-Rucksack im Shop: Spitzhacke rettet dich einmal pro Lauf aus dem Abgrund": "Freeride backpack in the shop: the ice axe saves you from the abyss once per run", "Mehr Abstand zwischen den Hindernissen im Park": "More space between the obstacles in the park", "Butter mit eigener Pose und gebogenen Ski": "Butters with their own pose and flexed skis", "Nose Butter 180 und Switch Tail Butter 180": "Nose butter 180 and switch tail butter 180", "Gas nur noch mit Stick ganz rechts": "Speed boost only with the stick all the way right", "Online-Rangliste mit eigenem Konto": "Online leaderboard with your own account", "Butter und Nose Butter": "Butter and nose butter", "Sprung halb so hoch, Felsen flacher": "Jumps half as high, flatter rocks", "Nebliges Flutlicht, präparierte Piste, Bär läuft": "Foggy floodlights, groomed slope, the bear walks", "Handy: zwei Sticks, die unter dem Finger erscheinen": "Phone: two sticks that appear under your finger", "Rail-Swaps durch Halten, kein Zoom beim Doppeltippen": "Rail swaps by holding, no zoom on double tap", "Felsklippen mit Nebel, neue Bergketten, Stirnlampe": "Rock cliffs with fog, new mountain ranges, headlamp", "Tag und Nacht, Tiere, Landehilfe, neue Lawine": "Day and night, animals, landing assist, new avalanche", "Erste Version: Park, Freeride, Ski und Snowboard, Shop": "First version: park, freeride, ski and snowboard, shop", "ZURÜCK": "BACK", "Mit Konto landet dein Bestwert in der Rangliste, und dein Spielstand (Münzen, gekaufte Sachen, Outfit, Bestwerte) ist auf jedem Gerät dabei. Nur Spielername und Passwort, keine E-Mail. Merk dir das Passwort gut, es lässt sich nicht zurücksetzen.": "With an account your best score goes on the leaderboard, and your progress (coins, purchases, outfit, best scores) is with you on every device. Just a player name and password, no email. Remember your password, it can't be reset.", "ANMELDEN": "LOG IN", "KONTO ERSTELLEN": "CREATE ACCOUNT", "Angemeldet als": "Logged in as", "ABMELDEN": "LOG OUT", "Lädt …": "Loading …", "So fährst du": "How to ride", "Auf der Piste": "On the slope", "Gas: kräftig beschleunigen bis Vollgas": "Speed: accelerate hard up to full speed", "Bremsen": "Brake", "Butter und Nose Butter (halten)": "Butter and nose butter (hold)", "Nose Butter 180 (switch: ↓ + Spin für Tail Butter 180)": "Nose butter 180 (switch: ↓ + spin for tail butter 180)", "Leertaste": "Space", "Springen. Am Kicker-Ende gibt's extra Pop": "Jump. Extra pop at the end of a kicker", "In der Luft": "In the air", "Cork (gleichzeitig drücken)": "Cork (press together)", "Misty (gleichzeitig drücken)": "Misty (press together)", "Draufspringen": "Jump on", "Slide, Punkte pro Sekunde. Drehst du beim Aufspringen und hältst A/D weiter, drehst du auf der Rail weiter": "Slide, points per second. Spin onto it and keep holding A/D to keep spinning on the rail", "Rail: 180er Swap, halten dreht weiter": "Rail: 180 swap, hold to keep spinning", "Tube und Baum: 90° drehen. Gerade drauf ist ein 50-50": "Tube and tree: turn 90°. Straight on is a 50-50", "Absprung": "Pop off", "Du drehst automatisch zurück in die Richtung, in der du aufgesprungen bist (Switch bleibt Switch). Mit A/D drehst du zusätzlich 180er raus": "You automatically turn back to the direction you jumped on in (switch stays switch). Use A/D to spin an extra 180 out", "Absprung vom Rail": "Pop off the rail", "Neue Features": "Features", "Kink-Rails (Flat-Down, Down-Flat-Down, Flat-Down-Flat), Rainbow, Waterfall, Roller Coaster, Treppen-Rail, Boxen (A-Frame, Battleship), Pistenraupe und Picknicktisch geben Bonuspunkte. Pistenraupe und Pole Jam: einfach reinfahren, die Raupe hält auch die Ski Patrol auf. Reifen und Fässer antippen oder draufspringen": "Kink rails (flat-down, down-flat-down, flat-down-flat), rainbow, waterfall, roller coaster, stair rail, boxes (A-frame, battleship), snowcat and picnic table give bonus points. Snowcat and pole jam: just ride in, and the snowcat also stops the ski patrol. Tap tires and barrels or jump onto them", "Lande parallel zum Hang. Ein 180er landet Switch, mit Twin Tips kein Problem. Lass den Grab vor der Landung los, sonst wird's sketchy. Kommst du am Gap zu kurz, fällst du ins Void. Die Ski Patrol kann keine Gaps springen: Wenn sie dir am Heck klebt, spring über den nächsten Gap und sie bleibt stehen. Mit Vollgas fährst du ihr auch davon. Den Big Air schaffst du nur mit Vollgas plus Pop.": "Land parallel to the slope. A 180 lands switch, no problem with twin tips. Let go of the grab before you land or it gets sketchy. Come up short at a gap and you fall into the void. The ski patrol can't jump gaps: if it's right on your tail, jump the next gap and it gets stuck. You can also outrun it at full speed. You only clear the big air with full speed plus pop.", "Am Handy: Mit dem Stick links steuerst du die Tricks. Oben ist Frontflip, unten Backflip, links und rechts drehst du dich, links bremst auf der Piste. Schräg oben kommt ein Misty, schräg unten ein Cork. Tippst du in die linke Bildschirmhälfte, greifst du den linken Stick, rechts den rechten. Die Richtung vom Stick zu deinem Finger zählt sofort: Tippst du rechts neben den Stick, ist er schon nach rechts gedrückt. Gas gibst du mit dem durchsichtigen Knopf GAS links neben dem rechten Stick, bremsen mit BREMSE rechts neben dem linken Stick (jeweils gedrückt halten). Butter gibt es im Jib-Modus: Tippst du oben neben dem Ton-Symbol auf JIB, bleibt er an, bis du wieder drauftippst. Dann machst du nach unten einen Butter, nach oben einen Nose Butter. Hältst du den linken Stick auf der Piste nach links oder rechts, spannst du eine Drehung vor, die beim Absprung sofort losgeht. Lenkst du beim Nose Butter schräg nach oben links oder rechts, drehst du einen flachen Nose Butter 180. Fährst du switch, geht das genauso mit dem Tail Butter schräg nach unten. Der rechte Stick ist Sprung und Grab zugleich: Antippen springt, gedrückt halten und schieben greift. Oben Blunt (Board: Japan), unten Mute (Board: Indy), links Tail, rechts Nose. Auf Ski gibt es schräg noch vier: oben rechts Truck Driver, unten rechts Venom, unten links Octograb, oben links Japan. In der Luft springt er nicht, da zählen nur die Grabs.": "On a phone: the left stick controls your tricks. Up is a frontflip, down a backflip, left and right spin you, and left brakes on the slope. Diagonally up gives a misty, diagonally down a cork. Tap the left half of the screen to grab the left stick, the right half for the right stick. The direction from the stick to your finger counts right away: tap to the right of the stick and it is already pushed right. Hold the see-through GAS button left of the right stick for speed and BRAKE right of the left stick to brake. Butters need Jib mode: tap JIB at the top next to the sound symbol and it stays on until you tap it again. Then push down for a butter and up for a nose butter. Holding the left stick left or right on the slope winds up a spin that starts right at takeoff. Steer diagonally up left or right during a nose butter to spin a flat nose butter 180. Riding switch, it works the same with a tail butter diagonally down. The right stick is jump and grab in one: tap to jump, hold and slide to grab. Up Blunt (board: Japan), down Mute (board: Indy), left Tail, right Nose. On skis there are four more diagonally: up right Truck Driver, down right Venom, down left Octograb, up left Japan. In the air it doesn't jump, only the grabs count there.", "Freeride-Rucksack (Shop, 10000 Münzen, im Menü an- und ausschaltbar): Fällst du in einen Abgrund, hält dich die Spitzhacke an der rechten Wand fest. Mit dem linken Stick nach oben (Pfeil hoch) kletterst du hoch, oben klickst du automatisch wieder in Ski oder Board ein. Erwischt dich die Lawine, gräbst du dich mit der Lawinenschaufel wieder aus. Crashst du an einem Felsen, verarztest du dich mit dem Verbandszeug, läufst um den Stein und fährst weiter. Der Rucksack rettet dich aber nur einmal pro Lauf: Es zählt, was dich zuerst erwischt.": "Freeride backpack (shop, 10000 coins, can be switched on and off in the menu): if you fall into an abyss, the ice axe holds you on the right wall. Push the left stick up (arrow up) to climb, and at the top you click back into your skis or board automatically. If the avalanche catches you, you dig yourself out with the avalanche shovel. If you crash into a rock, you patch yourself up with the first aid kit, walk around the rock and ride on. The backpack only saves you once per run though: whatever gets you first counts.", "Nach einer Weile wechselt die Strecke in die Freeride-Zone. Nur dort jagt dich die Ski Patrol. Du grindest umgefallene Bäume, fährst Baumstamm-Pole-Jams (einfach reinfahren, am Ende poppst du ab) und springst Cliffs. Hinter natürlichen Powder-Kickern stehen kleine Bäume: Drüber springen und im tiefen Powder landen, dagegen fahren wirft dich ab. Cliffs halten die Ski Patrol genauso auf wie Gaps. Im Powder sinkst du ein und wirst langsamer, wenn du zu wenig Speed hast. Dafür verzeiht er schiefe Landungen. Pass auf die Felsen auf: Dagegen ist der Run vorbei. Spring mit der Leertaste drüber.": "After a while the course changes to the freeride zone. Only there does the ski patrol chase you. You grind fallen trees, ride log pole jams (just ride in and pop off the end) and jump cliffs. Small trees stand behind natural powder kickers: jump over them and land in the deep powder, riding into one throws you off. Cliffs stop the ski patrol just like gaps do. In powder you sink in and slow down if you don't have enough speed, but it forgives crooked landings. Watch out for rocks: hit one and the run is over. Jump over them with Space.", "Tippe ein Teil an für die Vorschau.": "Tap an item to preview it.", "FERTIG": "DONE", "Kurz durchatmen": "Take a breath", "WEITER": "RESUME", "AUFGEBEN": "GIVE UP", "Distanz": "Distance", "Münzen": "Coins", "Bester Trick": "Best trick", "NOCHMAL": "AGAIN", "MENÜ": "MENU", "Spielfeld": "Game area", "Ton an oder aus": "Sound on or off", "Joystick: oben Frontflip, unten Backflip, links und rechts Spin, schräg oben Misty, schräg unten Cork": "Joystick: up frontflip, down backflip, left and right spin, diagonally up misty, diagonally down cork", "Sprung-Stick: antippen springt, halten und schieben greift: oben Blunt, unten Mute oder Indy, links Tail, rechts Nose, auf Ski schräg oben rechts Truck Driver, unten rechts Venom, unten links Octograb, oben links Japan": "Jump stick: tap to jump, hold and slide to grab: up Blunt, down Mute or Indy, left Tail, right Nose, on skis diagonally up right Truck Driver, down right Venom, down left Octograb, up left Japan", "Dein Fahrer": "Your rider", "Sportgerät wählen": "Choose your gear", "Spielername": "Player name", "Passwort, mind. 6 Zeichen": "Password, at least 6 characters", "Passwort": "Password", "Vorschau": "Preview", "Sprache": "Language"};
 const I18N=[];
 (function i18nCollect(){const nk=s=>s.replace(/\s+/g,' ').trim();
   const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
@@ -588,25 +609,25 @@ function applyLang(){document.documentElement.lang=LANG;
   for(const o of I18N){const v=LANG==='en'?o.en:o.de;if(o.n)o.n.nodeValue=v;else o.el.setAttribute(o.a,v)}
   document.querySelectorAll('.gearbtn[data-lang]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LANG)))}
 // Shop-Namen auf Englisch (fehlt ein Eintrag, ist der Name schon englisch)
-const CAT_EN={helmet:'Helmet',beanie:'Beanie',goggles:'Goggles',hoodie:'Zip Hoodie',pants:'Baggy Pants',skis:'Twin Tips',board:'Snowboard',pack:'Backpack',poles:'Poles',boots:'Ski Boots'};
+const CAT_EN={helmet:'Helmet',beanie:'Beanie',goggles:'Goggles',hoodie:'Zip Hoodie',pants:'Baggy Pants',skis:'Twin Tips',board:'Snowboard',bike:'Bike',pack:'Backpack',poles:'Poles',boots:'Ski Boots'};
 const SHOP_EN={h_none:'No Helmet (Beanie)',h_black:'Matte Black',h_white:'Chalk White',h_orange:'Safety Orange',h_lilac:'Lilac',
   bn_black:'Beanie Black',bn_grey:'Beanie Grey',bn_red:'Beanie Red',bn_pom_white:'Pom Beanie White',bn_pom_red:'Pom Beanie Red',bn_pom_navy:'Pom Beanie Navy',bn_pom_pink:'Pom Beanie Pink',bn_pom_green:'Pom Beanie Forest',bn_pom_black:'Pom Beanie Black',
   bn_fish_mustard:'Fisherman Mustard',bn_fish_lilac:'Fisherman Lilac',d_grey:'Heather Grey',d_black:'Black',d_forest:'Forest Green',d_purple:'Purple',d_red:'Red',d_neon:'Neon Yellow',
   p_black:'Black',p_white:'White',p_camo:'Snow Camo',s_red:'Red / White',s_wood:'Wood Topsheet',b_wood:'Wood Core',
   pk_none:'No Backpack',pk_free:'Freeride Backpack',pk_black:'Backpack Black',pk_navy:'Backpack Navy',pk_olive:'Backpack Olive',pk_orange:'Backpack Orange',pk_mint:'Backpack Mint',pk_purple:'Backpack Purple',pk_stealth:'Backpack Black-Grey',pk_yellow:'Backpack Yellow',
-  po_silver:'Alu Silver',po_white:'White',po_red:'Red',po_bamboo:'Bamboo',po_stealth:'Black',bt_black:'Black',bt_turq:'Turquoise',bt_white:'White',bt_red:'Red',bt_lilac:'Lilac'};
+  bk_red:'Red',bk_white:'White',bk_blue:'Racing Blue',bk_raw:'Raw Alloy',bk_purple:'Purple',po_silver:'Alu Silver',po_white:'White',po_red:'Red',po_bamboo:'Bamboo',po_stealth:'Black',bt_black:'Black',bt_turq:'Turquoise',bt_white:'White',bt_red:'Red',bt_lilac:'Lilac'};
 const INFO_EN={pk_free:'With ice axe, avalanche shovel and first aid kit: saves you once per run from whatever gets you first: the abyss, the avalanche or a rock. Can be switched on and off in the menu.'};
 const RAIL_EN={'Pistenraupe':'Snowcat','Picknicktisch':'Picnic Table','Treppen-Rail':'Stair Rail'};
-const catName=c=>LANG==='en'?CAT_EN[c]||SHOP[c].label:SHOP[c].label,itName=it=>LANG==='en'?SHOP_EN[it.id]||it.name:it.name,itInfo=it=>LANG==='en'?INFO_EN[it.id]||it.info:it.info;
+const catName=c=>SUMMER&&c==='boots'?TX('Schuhe','Shoes'):LANG==='en'?CAT_EN[c]||SHOP[c].label:SHOP[c].label,itName=it=>LANG==='en'?SHOP_EN[it.id]||it.name:it.name,itInfo=it=>LANG==='en'?INFO_EN[it.id]||it.info:it.info;
 
 /* ================= COLORS ================= */
 function hexRgb(h){h=h.replace('#','');return [0,2,4].map(i=>parseInt(h.slice(i,i+2),16))}
 function shade(h,f){const c=hexRgb(h).map(v=>Math.round(f<0?v*(1+f):v+(255-v)*f));return '#'+c.map(v=>clamp(v,0,255).toString(16).padStart(2,'0')).join('')}
 function itemOf(cat,id){const L=SHOP[cat].items;return L.find(i=>i.id===id)||L[0]}
 function palette(eq){
-  const H=itemOf('helmet',eq.helmet).c, L=itemOf('goggles',eq.goggles).c, D=itemOf('hoodie',eq.hoodie).c, Pi=itemOf('pants',eq.pants), Si=itemOf('skis',eq.skis),Bi=itemOf('board',eq.board),Pl=itemOf('poles',eq.poles),Pk=eq.pack&&eq.pack!=='pk_none'?itemOf('pack',eq.pack):null,Bn=itemOf('beanie',eq.beanie),noHelm=eq.helmet==='h_none';
+  const H=itemOf('helmet',eq.helmet).c, L=itemOf('goggles',eq.goggles).c, D=itemOf('hoodie',eq.hoodie).c, Pi=itemOf('pants',eq.pants), Si=itemOf('skis',eq.skis),Bi=itemOf('board',eq.board),Pl=itemOf('poles',eq.poles),Pk=eq.pack&&eq.pack!=='pk_none'?itemOf('pack',eq.pack):null,Bn=itemOf('beanie',eq.beanie),Bk=itemOf('bike',eq.bike||'bk_red'),noHelm=eq.helmet==='h_none';
   return {O:'#121626',H,h:shade(H,-.38),l:shade(H,.5),L,M:shade(L,.65),G:'#252a39',S:'#eab58f',k:'#c38663',
-    D,d:shade(D,-.3),P:Pi.c,p:shade(Pi.c,-.28),pat:Pi.pat||null,K:Si.c,ka:Si.a,B:Bi.c,ba:Bi.a,PO:Pl.c,pa:Pl.a,pk:Pk?Pk.c:null,pka:Pk?Pk.a:null,hat:noHelm?Bn.model:null,N:Bn.c,n:shade(Bn.c,-.22),C:Bn.a||shade(Bn.c,-.15),Q:Bn.pom||'#ffffff',q:shade(Bn.pom||'#ffffff',-.2),R:'#3b2a20',boot:'#3c4356',bootC:itemOf('boots',eq.boots||'bt_black').c,glove:'#272b38',zip:'#eef1f7'};
+    D,d:shade(D,-.3),P:Pi.c,p:shade(Pi.c,-.28),pat:Pi.pat||null,K:Si.c,ka:Si.a,B:Bi.c,ba:Bi.a,PO:Pl.c,pa:Pl.a,pk:Pk?Pk.c:null,pka:Pk?Pk.a:null,hat:noHelm?Bn.model:null,N:Bn.c,n:shade(Bn.c,-.22),C:Bn.a||shade(Bn.c,-.15),Q:Bn.pom||'#ffffff',q:shade(Bn.pom||'#ffffff',-.2),R:'#3b2a20',boot:'#3c4356',bootC:itemOf('boots',eq.boots||'bt_black').c,glove:'#272b38',zip:'#eef1f7',BK:Bk.c,bka:Bk.a};
 }
 const eqKey=eq=>CATS.map(c=>eq[c]).join(',');
 
@@ -656,6 +677,10 @@ const HEADS={
     "..OkkkkkO..",
     "...OOOOO..."]
 };
+// Downhill: Fullface-Helm mit Kinnbügel, darüber die Brille
+const HEADS_FF={side:["...OOOOO...","..OHHlHHO..",".OHHlHHHHO.",".OHHHHHHHhO","OGGGGGLLLLO","OGGGGLMLLLO",".OHHHkSSHHO","..OHHHHHHHO","...OOOOOOO."],
+  front:["...OOOOO...","..OHHlHHO..",".OHHlHHHHO.",".OHHHHHHHO.","OGLLLLLLLGO","OGLMLLLLLGO",".OHSSSSSHO.","..OHHHHHO..","...OOOOO..."],
+  back:["...OOOOO...","..OHHlHHO..",".OHhHhHhHO.",".OHHHHHHHO.","OGGGGGGGGGO","OGGGGGGGGGO",".OHHHHHHHO.","..OHHHHHO..","...OOOOO..."]};
 /* Mützen statt Helm. X = Strick (wird zu senkrechten Rippen N/n), C Umschlag, Q/q Bommel, R Haare.
    classic = Slouch-Beanie (hängt nach hinten), pom = Bommelmütze, fish = kurze Fisherman-Mütze */
 const BN_FIT={side:["...OOOOO...","..OXXXXXO..",".OXXXXXXXO.",".OCCCCCCCCO","OGGGGGLLLLO","OGGGGLMLLLO",".OkSSSSSSO.","..OkSSSSO..","...OOOOO..."],
@@ -671,7 +696,7 @@ const BN_RAW={
     back:["...OOOOO...","..OXXXXXO..",".OCCCCCCCO.",".ORRRRRRRO.","OGGGGGGGGGO","OGGGGGGGGGO",".ORRRRRRRO.","..OkkkkkO..","...OOOOO..."]}};
 const BEANIES=Object.fromEntries(Object.entries(BN_RAW).map(([k,v])=>[k,Object.fromEntries(Object.entries(v).map(([kk,m])=>[kk,m.map(r=>r.replace(/X/g,(_,i)=>i%2?'n':'N'))]))]));
 /* rot = Vierteldrehungen im Uhrzeigersinn (Corks), gedreht um die Kopfmitte; Mützen-Aufbau wächst immer Richtung Kopf-oben */
-function drawHead(g,kind,x,y,P,flip,rot){const m=P.hat?BEANIES[P.hat][kind]:HEADS[kind],e=m.length-9,X=x+5,Y=y+4;
+function drawHead(g,kind,x,y,P,flip,rot){const m=P.hat?BEANIES[P.hat][kind]:P.ff?HEADS_FF[kind]:HEADS[kind],e=m.length-9,X=x+5,Y=y+4;
   for(let r=0;r<m.length;r++)for(let c=0;c<m[r].length;c++){const ch=m[r][c];if(ch==='.')continue;
     const dc=(flip?m[r].length-1-c:c)-5,dr=r-4-e;let sx=dc,sy=dr;
     if(rot===1){sx=-dr;sy=dc}else if(rot===2){sx=-dc;sy=-dr}else if(rot===3){sx=dr;sy=-dc}
@@ -958,17 +983,126 @@ function drawBoardWide(g,poly,d,n,lo,P,O){
    const brd={...BOARD3.ride,handsBack:false,armKeys:null,board:{c:[9,4,0],d:[0,0,1],n:[0,-1,0]},boots:[[9,.5,-4.5],[9,.5,4.5]],legs:legs(2.5),torso:[[-.5,0,0],[-1,-7,0]],head:[1,-10.6,0]};
    BOARD3.sit0={...brd,arms:armsA};BOARD3.sit1={...brd,arms:armsB}}   // Board: der obere Grab bleibt ein Japan
 })();
+/* ================= DOWNHILL-BIKE =================
+   Das Bike ist ein Teil der 3D-Figur wie Ski und Brett. Im Bike: Tretlager = 0, x vorne, y unten, z rechts (zum Spieler).
+   Eine Bike-Pose sagt, wo das Tretlager relativ zur Hüfte sitzt (o) und wie das Bike gedreht ist: pitch (Nase hoch), yaw (Heck schwenkt,
+   Whip), roll (kippt flach, Table Top), Drehpunkt piv, Lenkeinschlag steer, Kurbelwinkel crank. Füße stehen auf den Pedalen, Hände am Lenker,
+   außer eine Pose legt Bein oder Arm selbst fest (legsX/armsX); Knie und Ellbogen rechnet eine kleine IK. */
+const BK={wr:6,ra:[-10,-1,0],fa:[11.2,-1,0],sc:[-2.4,-7,0],ss:[-2.6,-6,0],ht:[6,-9.6,0],hb:[7.9,-6.2,0],crank:3,ped:2.8,thigh:6.5,shin:6.2,uarm:4.6,farm:4.2,grip:[6.7,-10.8],foot:16};
+const BK_SA=v3.unit([BK.hb[0]-BK.ht[0],BK.hb[1]-BK.ht[1],0]);
+function bikeXf(bk){const R=d=>(d||0)*RAD,piv=bk.piv||[0,0,0],o=bk.o||[1.6,11,0],st=bk.steer||0;
+  const cr=Math.cos(R(bk.roll)),sr=Math.sin(R(bk.roll)),cw=Math.cos(R(bk.yaw)),sw=Math.sin(R(bk.yaw)),cp=Math.cos(R(bk.pitch)),sp=Math.sin(R(bk.pitch));
+  const rot=v=>{let x=v[0],y=v[1],z=v[2],y1=y*cr-z*sr,z1=y*sr+z*cr;y=y1;z=z1;let x1=x*cw+z*sw;z1=-x*sw+z*cw;x=x1;z=z1;x1=x*cp+y*sp;y1=-x*sp+y*cp;return [x1,y1,z]};
+  const F=q=>st?v3.add(BK.ht,rodrigues(v3.add(q,v3.mul(BK.ht,-1)),BK_SA,st)):q;
+  return {P:q=>v3.add(o,v3.add(rot(v3.add(q,v3.mul(piv,-1))),piv)),F,dirB:v=>rot(v),dir:v=>rot(st?rodrigues(v,BK_SA,st):v)}}
+// Zwei-Gelenk-IK: Knie/Ellbogen zwischen Anfang H und Ende F, Beugung in Richtung D
+function ik2(H,F,a,b,D){const d=v3.add(F,v3.mul(H,-1)),L=Math.hypot(d[0],d[1],d[2])||1e-6,u=v3.mul(d,1/L);
+  if(L>=a+b)return v3.add(H,v3.mul(u,a));
+  const x=(a*a-b*b+L*L)/(2*L),h=Math.sqrt(Math.max(0,a*a-x*x));
+  let n=v3.add(D,v3.mul(u,-v3.dot(D,u)));const nl=Math.hypot(n[0],n[1],n[2]);n=nl<1e-6?[0,-1,0]:v3.mul(n,1/nl);
+  return v3.add(H,v3.add(v3.mul(u,x),v3.mul(n,h)))}
+const BIKE_SOLVED=new WeakMap();
+function bikeSolve(L0){let L=BIKE_SOLVED.get(L0);if(L)return L;
+  const bk=L0.bike||{o:[1.6,11,0]},X=bikeXf(bk),th=(bk.crank||0)*RAD,c=BK.crank;
+  const ped=[X.P([-c*Math.cos(th),-c*Math.sin(th),-BK.ped]),X.P([c*Math.cos(th),c*Math.sin(th),BK.ped])];   // links, rechts
+  const grip=[X.P(X.F([BK.grip[0],BK.grip[1],-4.2])),X.P(X.F([BK.grip[0],BK.grip[1],4.2]))];
+  const fw=X.dirB([1,0,0]),kD=v3.add(fw,[0,-.5,0]);
+  const t1=L0.torso[1],hips=L0.hips||[[-.4,0,-2.4],[.4,0,2.4]],sh=L0.shoulders||[[t1[0]-.6,t1[1]+.6,-4.4],[t1[0]+.2,t1[1]+.6,4.4]];
+  const legs=[0,1].map(i=>L0.legsX&&L0.legsX[i]||[hips[i],ik2(hips[i],ped[i],BK.thigh,BK.shin,kD),ped[i]]);
+  const arms=[0,1].map(i=>L0.armsX&&L0.armsX[i]||[sh[i],ik2(sh[i],grip[i],BK.uarm,BK.farm,[-.35,.55,i?.9:-.9]),grip[i]]);
+  L=Object.assign({},L0,{legs,arms,boots:legs.map(l=>l[2]),bootWH:[4,2],noFlare:true,noPoles:true,handLo:[0,1].map(i=>!(L0.armsX&&L0.armsX[i])),_X:X,_ped:ped});
+  BIKE_SOLVED.set(L0,L);return L}
+// Bike zeichnen: Teile mit Tiefe (key) wie die Gliedmaßen, damit Beine, Bike und Arme richtig voreinander liegen
+function bikeParts(g,L,lo,P,O,parts){const X=L._X,bk=L.bike||{},W=q=>lo(X.P(q)),WF=q=>lo(X.P(X.F(q)));
+  const tube=(A,B,w,col,ko)=>parts.push({key:(A[2]+B[2])/2+(ko||0),draw:()=>limb(g,[[A[0],A[1]],[B[0],B[1]]],w,col,O)});
+  // Laufräder: Kreise in der Bike-Ebene (von der Seite rund, von vorne ein Strich), dunkler Reifen, helle Felge, Nabe
+  const wheel=front=>{const ex=front?X.dir([1,0,0]):X.dirB([1,0,0]),ey=front?X.dir([0,1,0]):X.dirB([0,1,0]),C=front?X.P(X.F(BK.fa)):X.P(BK.ra);
+    const ring=r=>{const a=[];for(let i=0;i<=24;i++){const t=i/24*Math.PI*2,q=lo(v3.add(C,v3.add(v3.mul(ex,r*Math.cos(t)),v3.mul(ey,r*Math.sin(t)))));a.push([q[0],q[1]])}return a};
+    const cc=lo(C),tyre=ring(BK.wr),rim=ring(BK.wr-1.5);
+    parts.push({key:cc[2]-.6,draw:()=>{strokePts(g,tyre,2,O);strokePts(g,rim,1,'#8e96a6');g.fillStyle=O;g.fillRect(Math.round(cc[0])-1,Math.round(cc[1])-1,2,2)}})};
+  wheel(false);wheel(true);
+  const bb=W([0,0,0]),sc=W(BK.sc),ss=W(BK.ss),ra=W(BK.ra),ht=W(BK.ht),hb=W(BK.hb);
+  tube(ra,bb,1,P.BK,-.1);tube(ss,ra,1,P.BK,-.1);                                   // Kettenstreben, Sitzstreben
+  tube(bb,sc,2,P.BK);tube(sc,ht,2,P.BK);tube(bb,hb,3,P.BK);tube(ht,hb,3,P.BK,.05);  // Sitzrohr, Oberrohr, Unterrohr, Steuerrohr
+  tube(W([.8,-3.2,0]),W([3.2,-7.8,0]),2,P.bka,.08);                                // Dämpfer
+  tube(W([-2.5,-7.1,0]),W([-2.8,-7.9,0]),1,'#2b2e38',.02);tube(W([-4.6,-8.2,0]),W([-1.4,-8,0]),2,'#22252e',.03);   // Sattelstütze, Sattel
+  // Doppelbrücken-Gabel: zwei Holme links und rechts vom Vorderrad, dreht mit der Lenkung
+  for(const z of [-1.9,1.9]){tube(WF([5.7,-10.3,z]),WF([BK.fa[0],BK.fa[1],z]),2,'#2b2e38');tube(WF([8.3,-5.4,z]),WF([BK.fa[0]-.2,BK.fa[1]-.6,z]),1,P.bka,.01)}
+  const gx=BK.grip[0],gy=BK.grip[1];tube(WF([5.9,-10.3,0]),WF([gx+.1,gy+.2,0]),1,'#2b2e38',.05);tube(WF([gx,gy,-5]),WF([gx,gy,5]),1,'#2b2e38',.06);   // Vorbau, Lenker
+  for(const s of [-1,1])tube(WF([gx,gy,s*3.6]),WF([gx,gy,s*5]),2,'#1c1f27',.07);                                                    // Griffe
+  // Kurbeln und Pedale
+  const th=(bk.crank||0)*RAD,c=BK.crank;
+  for(const s of [-1,1]){const e=W([s*c*Math.cos(th),s*c*Math.sin(th),s*1.5]),pd=W([s*c*Math.cos(th),s*c*Math.sin(th),s*BK.ped]);
+    tube(W([0,0,s*1.2]),e,1,'#3b3f4b',.02);parts.push({key:pd[2]-.02,draw:()=>rectO(g,Math.round(pd[0])-1,Math.round(pd[1]),3,1,'#4a4f5c',O)})}
+  {const cr=W([0,0,1]);parts.push({key:cr[2]+.01,draw:()=>{g.fillStyle=O;g.fillRect(Math.round(cr[0])-1,Math.round(cr[1])-1,3,3);g.fillStyle='#8e96a6';g.fillRect(Math.round(cr[0]),Math.round(cr[1]),1,1)}})}   // Kettenblatt
+}
+/* Bike-Posen. Tricks liegen auf denselben Stick-Richtungen wie die Grabs:
+   blunt = Superman, truck = X-Up, nose = Whip, venom = Can-Can, mute = Table Top, octo = Nac-Nac, tail = No-Hander, japan = One-Footer */
+const BIKE3=(()=>{
+  const B=(o,x)=>Object.assign({o:o||[1.6,11,0]},x||{}),T=(a,b,y0)=>[[-.5,y0||0,0],[a,b,0]];
+  // Punkte einer Pose nach unten schieben (z. B. aufrecht stehen statt auf den Pedalen), Richtungen bleiben
+  const SH=(o,dy)=>Array.isArray(o)&&o.length===3&&typeof o[0]==='number'?[o[0],o[1]+dy,o[2]]:Array.isArray(o)?o.map(v=>SH(v,dy)):o;
+  // Angriffshaltung: Beine fast gestreckt, Hüfte hinten über dem Tretlager, Oberkörper weit nach vorne zum Lenker
+  const ride={bike:B(),torso:T(4.6,-5.6),head:[6.8,-9,0]};
+  const tuck={bike:B([1.4,10.2,0]),torso:T(4.8,-5.4),head:[7,-8.8,0]};   // in der Luft: Bike etwas angezogen
+  const L={ride,tuck,
+    // R2 halten: Hüfte tiefer, Räder bleiben am Boden
+    crouch:{bike:B(),hips:[[-.4,2.6,-2.4],[.4,2.6,2.4]],torso:T(5,-2.8,2.6),head:[7.4,-6.2,0]},
+    layout:{bike:B([2,11,0],{pitch:8}),torso:T(3,-6.4),head:[5,-10.2,0]},
+    ftuck:{bike:B([1.2,9.6,0],{pitch:-8}),torso:T(5.4,-4.4),head:[7.8,-7.4,0]},
+    cork:{bike:B([1.4,10.2,0],{roll:14,yaw:-10}),torso:T(4.8,-5.4),head:[7,-8.8,0]},
+    misty:{bike:B([1.4,10.2,0],{roll:-14,yaw:10}),torso:T(4.8,-5.4),head:[7,-8.8,0]},
+    // Jib-Modus: Manual (Hinterrad, Gewicht hinten, Arme lang) und Nose Manual (Vorderrad, über dem Lenker)
+    butter:{bike:B([4,11,0]),torso:T(1.8,-6.8),head:[4,-10.6,0]},
+    nbutter:{bike:B([-.8,11,0]),torso:T(5.8,-4.4),head:[8.4,-7.6,0]},
+    // Afterbangs: zurücklehnen, eine Hand winkt
+    ab_lean:{bike:B([2.8,11,0]),torso:T(2.4,-6.6),head:[4.6,-10.4,0]},
+    ab_back:{bike:B(),torso:T(3.4,-6.4),head:[5.6,-10,0],armsX:[null,[[3.4,-5.8,4.4],[4,-9.2,6.4],[4.8,-12.6,7.2]]]},
+    // Tricks (Richtungen wie die Grabs)
+    nose:{bike:B([1.4,10.2,0],{yaw:-58,roll:34,piv:[6,-9,0]}),torso:T(4.8,-5.4),head:[7,-8.8,0]},                // Whip: Heck schwenkt raus, Bike kippt
+    mute:{bike:B([1.4,9.6,0],{yaw:-18,roll:72,piv:[6,-9,0]}),torso:T(4.4,-5.6),head:[6.6,-9,0]},                 // Table Top: Bike liegt flach
+    blunt:{bike:B([3.6,11.2,0],{pitch:-6}),torso:T(6.6,-3),head:[9.8,-5.4,0],                                     // Superman: Beine lang nach hinten
+      legsX:[[[-.4,0,-2.2],[-6.4,-.6,-2.4],[-12.6,-1.2,-2.6]],[[.4,0,2.2],[-6.4,-1,2.4],[-12.6,-1.6,2.6]]]},
+    tail:{bike:B([1.8,10.6,0]),torso:T(3,-6.6),head:[4.8,-10.4,0],                                               // No-Hander: Arme weit auseinander
+      armsX:[[[2.4,-6,-4.4],[1.8,-9,-7.4],[1.2,-11.8,-9]],[[3.2,-6,4.4],[2.6,-9,7.4],[2,-11.8,9]]]},
+    venom:{bike:B([1.4,10.2,0],{roll:8}),torso:T(4.4,-5.6),head:[6.6,-9,0],legsX:[[[-.4,0,-2.4],[4.4,-1.2,2.8],[10,1,7]],null]},         // Can-Can
+    octo:{bike:B([1.4,10.2,0],{roll:-6}),torso:T(4.4,-5.6),head:[6.6,-9,0],legsX:[null,[[.4,0,2.4],[-5,-1.4,5.2],[-11.4,1,8]]]},        // Nac-Nac
+    truck:{bike:B([1.4,10.2,0],{steer:150}),torso:T(4.6,-5.6),head:[6.8,-9,0]},                                  // X-Up: Lenker fast ganz rum
+    japan:{bike:B([1.4,10.2,0]),torso:T(4.4,-5.6),head:[6.6,-9,0],legsX:[null,[[.4,0,2.4],[5,2.6,5],[10.4,5.6,8]]]},                   // One-Footer
+    grind:ride};
+  // Treten im Stehen: acht Bilder pro Kurbelumdrehung, die Hüfte sinkt etwas ab, Oberkörper wippt mit
+  for(let k=0;k<8;k++){const a=k*45,b=Math.sin(a*RAD*2)*.4;L['push'+k]={bike:B([1.6,11,0],{crank:a}),hips:[[-.4,2+b,-2.4],[.4,2+b,2.4]],torso:T(5,-4+b,2+b),head:[7.2,-7.4+b,0]}}
+  // Verbandszeug: im Dreck sitzen, das Bike liegt hinter dir; danach um den Stein schieben (aufrecht, Hüfte 12,5 über dem Boden)
+  {const legs=[[[-.5,0,-3],[4.5,-3.5,-3.5],[9,.5,-4]],[[.5,0,3],[5,-3.5,3.5],[9,.5,4]]],lying=B([3,.8,-10],{roll:-80});
+   L.sit0={bike:lying,legsX:legs,torso:[[-.5,0,0],[-1,-7,0]],head:[1,-10.6,0],armsX:[[[-1,-6,-5],[2.5,-4.5,-6],[4.5,-3.5,-3.5]],[[0,-6,5],[3,-3,6],[5,-2.5,2.5]]]};
+   L.sit1={bike:lying,legsX:legs,torso:[[-.5,0,0],[-1,-7,0]],head:[1,-10.6,0],armsX:[[[-1,-6,-5],[3,-3,-6],[5,-2,-3]],[[0,-6,5],[2.5,-4.5,6],[4,-4,2.5]]]}}
+  {for(let k=0;k<4;k++){const s=[1,0,-1,0][k],lg=(i,f)=>{const hip=i?[.4,0,2.4]:[-.4,0,-2.4],z=i?2.6:-2.6;return [hip,[2*f+.4,6.2,z],[3.4*f,12.2,z*1.08]]};
+     L['walk'+k]=SH({torso:T(1.6,-7.2),head:[3.4,-11,0],legsX:[lg(0,s),lg(1,-s)],armsX:[null,[[1.8,-6.6,4.4],[2,-3.4,5.2],[2.4,-.4,5.4]]]},3.6);L['walk'+k].bike=B([2.4,11,-5.6])}}
+  // Lawinenschaufel (Mure): das Bike steht hinter dir; Spitzhacke: das Bike hängt senkrecht am Rucksack
+  for(const k of ['dig0','dig1']){const S=SKI3[k];L[k]=SH({torso:S.torso,head:S.head,armsX:S.arms,legsX:[[[-2,0,-3],[1,6.2,-3.5],[-1,12.2,-4]],[[0,0,3],[3,6.2,3.5],[1,12.2,4]]]},3.6);
+    Object.assign(L[k],{shovel:S.shovel,shovelDir:S.shovelDir,bike:B([-9,11,-8])})}
+  for(const k of ['climb0','climb1']){const S=SKI3[k];L[k]={bike:B([-6.5,-3,-2.5],{pitch:90}),torso:S.torso,head:S.head,armsX:S.arms,axe:S.axe,legsX:S.legs}}
+  // Zwischenbilder (halb zwischen zwei Posen), wie bei Ski und Board
+  const mixD=(A,Z,u)=>{if(typeof A==='number'&&typeof Z==='number')return A+(Z-A)*u;
+    if(Array.isArray(A)&&Array.isArray(Z)&&A.length===Z.length)return Z.map((z,i)=>mixD(A[i],z,u));
+    if(A&&Z&&typeof A==='object'&&typeof Z==='object'&&!Array.isArray(A)&&!Array.isArray(Z)){const o={};for(const k in Z)o[k]=k in A?mixD(A[k],Z[k],u):Z[k];return o}
+    return Z};
+  for(const g of ['blunt','japan','nose','tail','mute','truck','venom','octo'])L[g+'_h']=mixD(tuck,L[g],.5);
+  for(const k of ['ab_back','ab_lean','crouch'])L[k+'_h']=mixD(ride,L[k],.5);
+  return L})();
 /* Körperschwerpunkt (KSP) einer Pose: In der Luft dreht sich der Körper immer um den KSP, der auf einer Parabel fliegt.
    Gewichte grob nach Körperanteilen: Rumpf 43, Kopf 7, Oberschenkel je 10, Unterschenkel+Fuß je 6, Arme je 5, Ski+Schuhe zusammen ca. 11. */
 const comCache=new Map();
+const LIBOF=g=>g==='board'?BOARD3:g==='bike'&&typeof BIKE3!=='undefined'?BIKE3:SKI3;
 function poseCOM(poseName,phi,gear){
   const ph=((Math.round(phi/15)*15)%360+360)%360,key=poseName+'|'+gear+'|'+ph;let c=comCache.get(key);if(c)return c;
-  const board=gear==='board',LIB=board?BOARD3:SKI3,L=LIB[poseName]||LIB.ride;
+  const board=gear==='board',bike=gear==='bike',LIB=LIBOF(gear),L=bike?bikeSolve(LIB[poseName]||LIB.ride):LIB[poseName]||LIB.ride;
   let sx=0,sy=0,sz=0,sw=0;const add=(q,w)=>{sx+=q[0]*w;sy+=q[1]*w;sz+=q[2]*w;sw+=w},mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2];
   add(L.head,7);add(mid(L.torso[0],L.torso[1]),43);
   for(const ar of L.arms){add(mid(ar[0],ar[1]),3);add(mid(ar[1],ar[2]),2)}
   for(const lg of L.legs){add(mid(lg[0],lg[1]),10);add(mid(lg[1],lg[2]),6)}
-  const eq=board?[L.board]:L.skis;let fy=-99,fa=0,fb=0;
+  const eq=bike?[]:board?[L.board]:L.skis;let fy=-99,fa=0,fb=0;
+  if(bike){const X=L._X,ra=X.P(BK.ra),fr=X.P(X.F(BK.fa));add(X.P([0,-3,0]),14);fy=Math.max(ra[1],fr[1])+BK.wr;fa=(ra[0]+fr[0])/2;fb=(ra[2]+fr[2])/2}
   for(const s of eq){add(s.c,(board?7:3.5));const dd=v3.unit(s.d),hl=(board?10:11);fy=Math.max(fy,s.c[1]+Math.abs(dd[1])*hl*.4);fa+=s.c[0]/eq.length;fb+=s.c[2]/eq.length}
   for(const b of L.boots)add(b,2);
   const q=rotY([sx/sw,sy/sw,sz/sw],ph),f=rotY([fa,fy,fb],ph);
@@ -978,11 +1112,11 @@ function poseCOM(poseName,phi,gear){
 function rodrigues(v,k,deg){const t=deg*RAD,c=Math.cos(t),s=Math.sin(t),kv=v3.dot(k,v);
   return [v[0]*c+(k[1]*v[2]-k[2]*v[1])*s+k[0]*kv*(1-c),v[1]*c+(k[2]*v[0]-k[0]*v[2])*s+k[1]*kv*(1-c),v[2]*c+(k[0]*v[1]-k[1]*v[0])*s+k[2]*kv*(1-c)]}
 const corkAxis=m=>{const b=(m==='cork'?45:-45)*RAD;return [Math.sin(b),0,Math.cos(b)]};
-function airPose(){const gv=p.gVis||0;if(p.gName&&gv>.02&&!(p.grab&&gv>=.98))return p.gName+'_h';return p.grab||(p.corkMode?p.corkMode:null)||(p.flipPoseT>0?(p.flipDir<0?'layout':'ftuck'):(SAVE.gear==='board'?'bair':'tuck'))}
+function airPose(){const gv=p.gVis||0;if(p.gName&&gv>.02&&!(p.grab&&gv>=.98))return p.gName+'_h';return p.grab||(p.corkMode?p.corkMode:null)||(p.flipPoseT>0?(p.flipDir<0?'layout':'ftuck'):(GEAR==='board'?'bair':'tuck'))}
 /* Zeichnet die Figur bei Drehwinkel phi (0 = Fahrtrichtung rechts, 90 = zum Spieler, 180 = Switch, 270 = vom Spieler weg).
    look: Kopf schaut die Piste runter; bei Switch dreht sich der Oberkörper mit (Blick über die Schulter). */
 function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
-  const board=gear==='board',LIB=board?BOARD3:SKI3,L=LIB[poseName]||LIB.ride,O=P.O;
+  const board=gear==='board',bike=gear==='bike',LIB=LIBOF(gear),L=bike?bikeSolve(LIB[poseName]||LIB.ride):LIB[poseName]||LIB.ride,O=P.O;
   const k=look?smooth01((-Math.cos(phi*RAD)-.2)/.8):0;
   // twist: beim Drehen führen Schultern und Kopf, Ski bzw. Board ziehen nach
   const tw=(board?150:-70)*k,yL=phi,yU=phi+tw+(twist||0),tYaw=yU+(L.torsoFace||0),hYaw=look?0:yU+(twist||0)*.4;
@@ -993,7 +1127,7 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
   const sL=Math.abs(Math.sin(yL*RAD)),cL=Math.abs(Math.cos(yL*RAD));
   const parts=[],skiKeys=[];
   const skiBaseShown=s=>{const d=v3.unit(s.d);let n=s.n||[0,-1,0];n=v3.unit(v3.add(n,v3.mul(d,-v3.dot(n,d))));const a=lo(s.c),b=lo(v3.add(s.c,n));return b[2]-a[2]<-.35};
-  (board?(L.board?[L.board]:[]):L.skis).forEach((s,i)=>{
+  (board?(L.board?[L.board]:[]):bike?[]:L.skis).forEach((s,i)=>{
     const len=board?20:22,tip=pow?4:2,d=v3.unit(s.d);let n=s.n||[0,-1,0];n=v3.unit(v3.add(n,v3.mul(d,-v3.dot(n,d))));
     const A=v3.add(s.c,v3.mul(d,-len/2)),B=v3.add(s.c,v3.mul(d,len/2));
     // Biegung beim Butter: das gedrückte Ende bleibt am Schnee, das freie Ende biegt sich nach oben
@@ -1006,9 +1140,10 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
       if(board){drawBoardWide(g,P3,d,n,lo,P,O);const a1=lo(v3.add(v3.add(A,v3.mul(d,3)),v3.mul(n,-1))),b1=lo(v3.add(v3.add(B,v3.mul(d,-3)),v3.mul(n,-1)));strokePts(g,[[a1[0],a1[1]],[b1[0],b1[1]]],1,P.ba)}
       else{const base=skiBaseShown(s),c0=base?P.ka:P.K,col=L.skiDark&&L.skiDark[i]?shade(c0,-.2):c0;strokePts(g,sp,4,O);strokePts(g,sp,2,col)}}});
   });
+  if(bike){bikeParts(g,L,lo,P,O,parts);skiKeys[0]=lo(L._ped[0])[2];skiKeys[1]=lo(L._ped[1])[2]}   // Bike statt Ski, Schuhe auf den Pedalen
   const bootKey=i=>(board?skiKeys[0]:skiKeys[i])+.01+i*.001;
   // Skischuh: nur 1 Pixel hoch, unten am Hosenbein direkt über der Skifarbe (statt der dunklen Ski-Oberkante); vorne schaut die Spitze raus
-  const skiBootRow=!board&&L.skis&&L.axe==null;
+  const skiBootRow=!board&&!bike&&L.skis&&L.axe==null;
   const skiBoot=i=>{const s=L.skis[i]||L.skis[0],d=v3.unit(s.d);if(skiBaseShown(s))return;let n=s.n||[0,-1,0];n=v3.unit(v3.add(n,v3.mul(d,-v3.dot(n,d))));
     const sd=[d[1]*n[2]-d[2]*n[1],d[2]*n[0]-d[0]*n[2],d[0]*n[1]-d[1]*n[0]],fl=s.flex||0,fw=v=>s.flexEnd==='tail'?(1-v)*(1-v):v*v;
     const SP=(u,w)=>lo(v3.add(v3.add(s.c,v3.add(v3.mul(d,u),v3.mul(sd,w||0))),v3.mul(n,fl*fw((u+11)/22))));
@@ -1025,13 +1160,13 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
     else{const y0=Math.round(Math.min(h[1],t[1])),y1=Math.round(Math.max(h[1],t[1]));g.fillStyle=col;
       for(let y=y0;y<=y1;y++)g.fillRect(Math.round(h[0]+(t[0]-h[0])*(y-h[1])/((t[1]-h[1])||1)+2*nx),y,1,1)}};
   L.boots.forEach((b,i)=>{if(skiBootRow)return;const q=lo(b),w=L.bootWH?L.bootWH[0]:Math.round(6-sL),h=L.bootWH?L.bootWH[1]:(board?3:Math.round(4-sL));
-    parts.push({key:bootKey(i),draw:()=>{const x=Math.round(q[0]-w/2),y=Math.round(q[1]-h/2);rectO(g,x,y,w,h,P.boot,O);if(board){g.fillStyle='#1a1d27';g.fillRect(x,y+h-1,w,1)}}})});
+    parts.push({key:bootKey(i),draw:()=>{const x=Math.round(q[0]-w/2),y=Math.round(q[1]-h/2);rectO(g,x,y,w,h,bike?P.bootC:P.boot,O);if(board){g.fillStyle='#1a1d27';g.fillRect(x,y+h-1,w,1)}}})});
   let legMax=-99;
   // Hose: Hüftpunkte zur Mitte gerückt, damit die Hose am Bund so breit ist wie der Oberkörper; Beine etwas schmaler
   const hipC=v3.mul(v3.add(L.legs[0][0],L.legs[1][0]),.5),hipIn=j=>v3.add(hipC,v3.mul(v3.add(j,v3.mul(hipC,-1)),.5));
   L.legs.forEach((lg,i)=>{const q=lg.map((j,n)=>lo(n?j:hipIn(j)));const key=Math.max(Math.max(q[1][2],q[2][2])-.5,bootKey(i)+.02);legMax=Math.max(legMax,key);
     const dark=L.legDark?L.legDark[i]:key<-2;
-    parts.push({key,draw:()=>{const col=dark?P.p:P.P;limb(g,q.map(v=>[v[0],v[1]]),5,col,O);if(!L.noFlare&&cL>.5){g.fillStyle=col;g.fillRect(Math.round(q[2][0]-3),Math.round(q[2][1])-2,6,2)}}});
+    parts.push({key,draw:()=>{const col=dark?P.p:P.P;limb(g,q.map(v=>[v[0],v[1]]),bike?3:5,col,O);if(!L.noFlare&&cL>.5){g.fillStyle=col;g.fillRect(Math.round(q[2][0]-3),Math.round(q[2][1])-2,6,2)}}});
     if(skiBootRow)parts.push({key:key+.001,draw:()=>skiBoot(i)})});
   {const h0=lo(hipIn(L.legs[0][0])),h1=lo(hipIn(L.legs[1][0]));
     if(board&&cL>.5)parts.push({key:legMax+.001,draw:()=>{const x0=Math.round(Math.min(h0[0],h1[0])),x1=Math.round(Math.max(h0[0],h1[0]));g.fillStyle=P.P;g.fillRect(x0,Math.round(h0[1])-2,x1-x0+1,4)}});
@@ -1071,7 +1206,9 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
     let hr=0;if(cork&&cork.t){const t=up(v3.add(L.head,[0,-4,0])),dx=t[0]-q[0],dy=t[1]-q[1];if(dx*dx+dy*dy>2.2)hr=((Math.round(Math.atan2(dx,-dy)/(Math.PI/2))%4)+4)%4}
     parts.push({key:4.6,draw:()=>drawHead(g,kind,Math.round(q[0]-5.5),Math.round(q[1]-4.5),P,flip,hr)})}
   const armK=[];
-  L.arms.forEach((ar,i)=>{const q=ar.map(up);let key=L.armKeys&&L.armKeys[i]!=null?L.armKeys[i]:Math.max(q[1][2],q[2][2]);if(L.armBias&&L.armBias[i]&&key>0)key+=L.armBias[i];armK[i]=key;
+  // Bike: die Hand bleibt am Lenker (dreht mit dem Bike), die Schulter mit dem Oberkörper
+  const hl=(j,n,i)=>{if(!(L.handLo&&L.handLo[i]))return up(j);if(n===2)return lo(j);if(n===1){const a=up(j),b=lo(j);return [(a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2]}return up(j)};
+  L.arms.forEach((ar,i)=>{const q=ar.map((j,n)=>hl(j,n,i));let key=L.armKeys&&L.armKeys[i]!=null?L.armKeys[i]:Math.max(q[1][2],q[2][2]);if(L.armBias&&L.armBias[i]&&key>0)key+=L.armBias[i];armK[i]=key;
     parts.push({key,draw:()=>{limb(g,q.map(v=>[v[0],v[1]]),3,key<-2?P.d:P.D,O);if(!L.handsBack)hand(g,[q[2][0],q[2][1]],P)}})});
   // Skistöcke: Griff in der Hand, Spitze mit Teller. Ohne feste Spitze zeigen sie entlang Unterarm schräg nach hinten unten.
   if(!board&&!L.noPoles)L.arms.forEach((ar,i)=>{
@@ -1095,17 +1232,34 @@ function applyPattern(g,P){
 }
 const sprCache=new Map();
 function getSprite(pose,phi,look,eq,gear,pow,cork,twist){
-  eq=eq||SAVE.equip;gear=gear||SAVE.gear;
+  eq=eq||SAVE.equip;gear=gear||GEAR;
   const ph=((Math.round(phi/15)*15)%360+360)%360,ck=cork?{m:cork.m,t:((Math.round(cork.t/15)*15)%360+360)%360}:null,tq=Math.round((twist||0)/15)*15,key=pose+'|'+ph+'|'+(look?1:0)+'|'+(pow?1:0)+'|'+(ck?ck.m+ck.t:'')+'|'+gear+'|'+tq+'|'+eqKey(eq);
   let s=sprCache.get(key);if(s)return s;
-  const P=palette(eq);const [c,g]=mk(SPR,SPR);
+  const P=palette(eq);if(gear==='bike'&&!P.hat)P.ff=true;const [c,g]=mk(SPR,SPR);
   renderFigure(g,pose,ph,look,P,gear,pow,ck,tq);
   if(P.pat)applyPattern(g,P);
   if(sprCache.size>1400)sprCache.clear();
   sprCache.set(key,c);return c;
 }
 /* Patrol snowmobile */
+function makeQuad(on){const [c,g]=mk(32,28),O='#121626';g.translate(0,4);
+  const wheel=x=>{for(let y=-4;y<=4;y++){const w=Math.round(Math.sqrt(16-y*y));g.fillStyle=O;g.fillRect(x-w-1,19+y,w*2+3,1)}
+    for(let y=-3;y<=3;y++){const w=Math.round(Math.sqrt(9-y*y));g.fillStyle='#2b2e38';g.fillRect(x-w,19+y,w*2+1,1)}g.fillStyle='#8e96a6';g.fillRect(x-1,18,2,2)};
+  wheel(7);wheel(24);
+  rectO(g,4,13,24,3,'#3a6b34',O);rectO(g,2,10,9,3,'#4f9a48',O);rectO(g,20,10,10,3,'#4f9a48',O);   // Rahmen, Kotflügel hinten und vorne
+  g.fillStyle='#7cc36f';g.fillRect(3,10,7,1);g.fillRect(21,10,8,1);
+  rectO(g,9,9,8,3,'#2b2e38',O);                                        // Sitz
+  g.fillStyle='#8e96a6';g.fillRect(22,5,1,5);g.fillRect(21,5,4,1);     // Lenker
+  g.fillStyle='#fff6b0';g.fillRect(29,12,1,2);                         // Scheinwerfer
+  rectO(g,9,1,6,8,'#5b6e2e',O);g.fillStyle='#e8d36a';g.fillRect(10,4,4,1);   // Ranger: grüne Jacke mit Streifen
+  limb(g,[[13,3],[17,5],[21,6]],2,'#5b6e2e',O);
+  g.fillStyle='#3b3f4f';g.fillRect(10,9,4,4);                          // Bein
+  rectO(g,9,-3,6,4,'#f1c9a5',O);g.fillStyle='#1b1d26';g.fillRect(13,-2,1,1);
+  g.fillStyle='#6b4a2f';g.fillRect(7,-4,10,1);g.fillRect(9,-7,6,3);g.fillStyle='#4a3220';g.fillRect(9,-5,6,1);   // Ranger-Hut
+  g.fillStyle=O;g.fillRect(2,3,3,6);rectO(g,2,1,3,3,on?'#ffb020':'#6a4a10',O);   // Rundumleuchte hinten
+  return c}
 function makePatrol(on){
+  if(SUMMER)return makeQuad(on);
   const [c,g]=mk(32,28);const O='#121626';
   g.translate(0,4);
   rectO(g,4,15,15,5,'#2a2d36',O);g.fillStyle='#4f5564';for(let i=0;i<5;i++)g.fillRect(5+i*3,17,2,1);
@@ -1138,7 +1292,10 @@ function gapSeg(len,drop){segs.push({x0:gx,y0:gy,x1:gx+len,y1:gy+drop,a:0,gap:tr
    dahinter die gegenüberliegende Eiswand mit Schneerand, Eiszapfen an den Kanten, nach unten immer dunkler bis ins Schwarzblau.
    Wird wie die Felswände in kleinen Schritten vorberechnet; unterhalb des Bildes wird die letzte Zeile bis zum Bildrand wiederholt. */
 let pendGaps=[],crevs=[];
-const ICE=['#d4eff9','#a6dcf1','#74c3e7','#4aa1d6','#2f7cbd','#1f5e9f','#154680','#0e3263','#0a2149','#071834'].map(hexRgb);
+const CRV_W={top:[255,255,255],top2:[234,243,253],firn:[212,236,248],rim2:[200,226,244],ic:[[255,255,255],[233,248,255],[166,220,241]]},
+  CRV_S={top:[110,162,74],top2:[84,135,58],firn:[124,92,58],rim2:[96,72,46],ic:[[62,44,28],[86,62,40],[74,54,34]]};
+const EARTH=['#b48a5e','#9c764d','#856240','#6e5034','#5a412a','#483421','#3a2a1b','#2d2015','#22180f','#18110a'].map(hexRgb);
+const ICE_W=['#d4eff9','#a6dcf1','#74c3e7','#4aa1d6','#2f7cbd','#1f5e9f','#154680','#0e3263','#0a2149','#071834'].map(hexRgb);
 function flushGapFx(){for(const g of pendGaps){const xa=g.x0,xb=g.x1,ya=g.y0,yb=g.y1,x0=Math.floor(xa-40),x1=Math.ceil(xb+40),y0=Math.floor(Math.min(ya,yb)-8),y1=Math.ceil(Math.max(ya,yb)+230);
   const c={x:x0,y:y0,W:x1-x0,H:y1-y0,spr:null};c.job=paintCrevJob({x0,y0,W:c.W,H:c.H,xa,xb,ya,yb,seed:xa*.173+ya*.053},c);crevs.push(c);cliffJobs.push(c)}pendGaps=[]}
 function* paintCrevJob(o,out){
@@ -1147,6 +1304,7 @@ function* paintCrevJob(o,out){
   const jag=(s,d)=>2.2*Math.sin(d*.21+s)+1.4*Math.sin(d*.53+s*2.3)+.8*Math.sin(d*1.37+s*4.1);
   const put=(x,y,col)=>{const i=(y*W+x)*4;D[i]=col[0];D[i+1]=col[1];D[i+2]=col[2];D[i+3]=255};
   // Eisfarbe nach Tiefe (0..1), mit Bayer-Raster zwischen den Stufen
+  const ICE=SUMMER?EARTH:ICE_W,CK=SUMMER?CRV_S:CRV_W;
   const iceAt=(t,x,y)=>{const f=clamp(t,0,1)*(ICE.length-1),k=Math.floor(f),fr=f-k;return ICE[Math.min(ICE.length-1,k+((BAYER[y&3][x&3]+.5)/16<fr?1:0))]};
   for(let y=0;y<H;y++){const wy=y0+y+.5,dL=wy-ya,dR=wy-yb;
     const faceL=xa+(dL<0?0:jag(seed,dL)+Math.min(dL,30)*.05)+(dL>=0&&dL<4?2:0),faceR=xb-(dR<0?0:jag(seed+7,dR)+Math.min(dR,30)*.05)-(dR>=0&&dR<4?2:0);
@@ -1156,20 +1314,20 @@ function* paintCrevJob(o,out){
         const d=wy-top,dist=left?faceL-wx:wx-faceR,lip=left?ya:yb,band=12+Math.min(Math.max(0,wy-lip),80)*.2;
         if(dist>band+5)continue;
         if(dist>band&&(BAYER[y&3][x&3]+.5)/16<(dist-band)/5)continue;   // weich in den normalen Schnee über
-        if(d<5+(BAYER[y&3][x&3]>11?1:0)){put(x,y,d<2.5?[255,255,255]:[234,243,253]);continue}   // Schneedecke
-        if(d<9){put(x,y,[212,236,248]);continue}                                                  // Firn
+        if(d<5+(BAYER[y&3][x&3]>11?1:0)){put(x,y,d<2.5?CK.top:CK.top2);continue}   // Schneedecke bzw. Grasnarbe
+        if(d<9){put(x,y,CK.firn);continue}                                                  // Firn
         const st=.035*Math.sin(wy*.36+1.6*Math.sin(wx*.045+seed))+(.5-hash01(Math.floor(wy/3)*1.7+seed))*.03;   // Schichten im Eis
         let t=(wy-lip-6)/260+st-.04;if(dist<1.6&&wy-lip<70)t-=.1;   // Wand leuchtet oben türkis, helle Kante
         const crack=hash01(Math.floor((wy+wx*.6)/2)*.37+seed)>.985;put(x,y,iceAt(crack?t+.18:t,x,y));continue}
       // Innenraum: gegenüberliegende Eiswand, oben mit Schneerand
       const rim=ya+(yb-ya)*(wx-xa)/(xb-xa);if(wy<rim)continue;const dr=wy-rim;
-      if(dr<2){put(x,y,[255,255,255]);continue}if(dr<3.5){put(x,y,[200,226,244]);continue}
+      if(dr<2){put(x,y,CK.top);continue}if(dr<3.5){put(x,y,CK.rim2);continue}
       const side=Math.min(wx-faceL,faceR-wx),vs=.018*Math.sin(wx*.9+seed)+.012*Math.sin(wx*2.3+seed*2),lay=.03*Math.sin(wy*.3+1.3*Math.sin(wx*.035+seed*2));   // Schmelzrinnen, Schichten
       put(x,y,iceAt(.3+dr/110+vs+lay+(side<1.6?.22:clamp(.12-side/30,0,.12)),x,y))}   // tiefer und dunkler als die Wände, Schattenkante an der Wand
     if(y%10===9)yield}
   // Eiszapfen unter den Schneekanten
   for(const [face,lip,dir,s0] of [[xa,ya,1,seed],[xb,yb,-1,seed+3]])for(let k=0;k<5;k++){const ix=Math.round(face-x0+dir*(1+k*1.6+hash01(s0+k)*1.2)),len=2+Math.floor(hash01(s0*1.3+k*2.1)*6),iy=Math.round(lip-y0+6);
-    for(let j=0;j<len;j++)if(ix>=0&&ix<W&&iy+j>=0&&iy+j<H)put(ix,iy+j,j===len-1?[255,255,255]:j<2?[233,248,255]:[166,220,241])}
+    for(let j=0;j<len;j++)if(ix>=0&&ix<W&&iy+j>=0&&iy+j<H)put(ix,iy+j,j===len-1?CK.ic[0]:j<2?CK.ic[1]:CK.ic[2])}
   g.putImageData(id,0,0);out.spr=c}
 function drawCrevasses(cX,cY){for(const c of crevs){const sx=c.x-cX,sy=c.y-cY;if(sx>VW||sx+c.W<0||sy>VH)continue;if(!c.spr)while(c.job&&!c.job.next().done);if(!c.spr)continue;
   ctx.drawImage(c.spr,sx,sy);let y=sy+c.H;if(y<-6)y+=Math.floor((-y)/6)*6;for(;y<VH;y+=6)ctx.drawImage(c.spr,0,c.H-6,c.W,6,sx,y,c.W,6)}}
@@ -1191,7 +1349,7 @@ function addSign(){} // Schilder entfernt: die Kamera zeigt genug voraus
 function addPole(x,y){signs.push({x,y,pole:true})}
 function coinRow(x0,n,sp,h){for(let i=0;i<n;i++){const x=x0+i*sp,g=groundAt(x);if(g)coins.push({x,y:g.y-h,ph:Math.random()*4})}}
 function coinArc(x0,y0,aDeg,s,maxD,maxN){
-  let vx=s*Math.cos(aDeg*RAD),vy=s*Math.sin(aDeg*RAD),x=x0,y=y0-FOOT,n=0;
+  let vx=s*Math.cos(aDeg*RAD),vy=s*Math.sin(aDeg*RAD),x=x0,y=y0-FOOTG,n=0;
   for(let i=0;i<80&&n<maxN;i++){const dt=.075;x+=vx*dt;vy+=G*dt;y+=vy*dt;if(x>x0+maxD)break;if(i>0){coins.push({x,y,ph:Math.random()*4});n++}}
 }
 function fKicker(big){
@@ -1301,7 +1459,7 @@ function fLoop(){
    helle Oberseiten, dunkle Unterseiten), einzelne Risse, etwas Schnee auf Absätzen, Wechte an der Kante.
    In Spalten steigt Nebel auf, die Wände verschwinden darin. */
 let cliffs=[],gapFogs=[];
-const ROCK_T=['#30333f','#434757','#5a5e70','#73778b','#9094a8'].map(hexRgb),ROCK_O=hexRgb('#22242e'),RSNOW=hexRgb('#eef4fd'),RSNOW2=hexRgb('#cfdcef');
+const ROCK_T=['#30333f','#434757','#5a5e70','#73778b','#9094a8'].map(hexRgb),ROCK_O=hexRgb('#22242e');let RSNOW,RSNOW2;
 // Zackenlinie entlang der Wand: stückweise linear, ab und zu ein weit vorstehender Absatz
 function jagLine(seed,len,lo,hi){const pts=[];let d=0,k=0;
   while(d<len+30){const r=mh(seed+k*1.91);pts.push([d,lo+(hi-lo)*(r<.18?1:r*.8)]);d+=6+mh(seed+k*3.3)*13;k++}
@@ -1309,6 +1467,7 @@ function jagLine(seed,len,lo,hi){const pts=[];let d=0,k=0;
 // Wird als Job in kleinen Portionen gezeichnet (ein paar Zeilen pro Bild), damit große Klippen nicht ruckeln
 function* paintCliffJob(o,out){
   const {x0,y0,W,H,face,seed}=o,[c,g]=mk(W,H),id=g.createImageData(W,H),u32=new Uint32Array(id.data.buffer);
+  RSNOW=hexRgb(SUMMER?'#6ea24a':'#eef4fd');RSNOW2=hexRgb(SUMMER?'#54873a':'#cfdcef');   // Absätze: Schnee bzw. Gras
   const pack=v=>((255<<24)|(v[2]<<16)|(v[1]<<8)|v[0])>>>0;
   const fx=new Float32Array(H),ix=new Float32Array(H),ty=new Float32Array(W),by=new Float32Array(W);
   for(let j=0;j<H;j++){fx[j]=o.rowFace(y0+j+.5);ix[j]=o.rowInner(y0+j+.5)}
@@ -1335,7 +1494,7 @@ function* paintCliffJob(o,out){
     u32[j*W+i]=pack(col)}}
   g.putImageData(id,0,0);
   if(o.corn){const cx=Math.round(o.corn.x-x0),cy=Math.round(o.corn.y-y0);
-    [3,3,2,1].forEach((len,r)=>{g.fillStyle=r<2?'#ffffff':'#d5e1f1';for(let k=0;k<len;k++)g.fillRect(cx+face*k,cy+r,1,1)})}
+    [3,3,2,1].forEach((len,r)=>{g.fillStyle=SUMMER?(r<2?'#6ea24a':'#54873a'):(r<2?'#ffffff':'#d5e1f1');for(let k=0;k<len;k++)g.fillRect(cx+face*k,cy+r,1,1)})}
   out.spr=c;
 }
 let cliffJobs=[];
@@ -1370,7 +1529,7 @@ function addCliffGap(lipX,lipY,gap,drop){
 function makeGapFog(xa,xb,ya,yb,seed){
   const x0=Math.floor(xa-16),W=Math.ceil(xb+16)-x0,y0=Math.floor(ya-14),H=Math.ceil(yb)-y0,[c,g]=mk(W,H+8),id=g.createImageData(W,H+8),D=id.data;
   const pf=[];for(let x=xa+mh(seed)*10,k=0;x<=xb;k++){pf.push({x,y:ya-2+mh(seed+k*1.7)*18,r:14+mh(seed+k*2.3)*14});x+=20+mh(seed+k*3.1)*22}
-  const A=[232,239,248],B=[246,249,253],tops=new Float32Array(W),near=[];
+  const A=SUMMER?[205,219,212]:[232,239,248],B=SUMMER?[224,234,228]:[246,249,253],tops=new Float32Array(W),near=[];
   for(let x=0;x<W;x++){const wx=x0+x+.5;tops[x]=ya+3*Math.sin(wx*.07+seed)+2*Math.sin(wx*.17+seed*3);near.push(pf.filter(q=>Math.abs(wx-q.x)<q.r))}
   for(let y=0;y<H+8;y++){const tile=y>=H,wy=tile?yb:y0+y+.5,yw=tile?(y-H):y,sl=10+3*Math.sin(yw*.23+seed),sr=10+3*Math.sin(yw*.19+seed*2);
     for(let x=0;x<W;x++){const wx=x0+x+.5;
@@ -1450,7 +1609,7 @@ function fLogJam(){
    gelandet wird in einem flachen Feld mit tiefem Powder. Wer nicht bremst, kommt mit dem Kicker sicher drüber. */
 const JT_REQ=235;let JT_SPR=null;
 function jtSprites(){if(JT_SPR)return JT_SPR;JT_SPR=[];
-  for(let i=0;i<6;i++){const h=15+i,w=Math.round(h*.42)+1,[c,g]=mk(w*2+6,h+6);drawTreeVar(g,w+2,h+5,h,w,TREE_COLS[i%TREE_COLS.length],.85,3,i*3+7);JT_SPR.push({c,w,h,base:h+5})}
+  for(let i=0;i<6;i++){const h=15+i,w=Math.round(h*.42)+1,[c,g]=mk(w*2+6,h+6);drawTreeVar(g,w+2,h+5,h,w,TREE_COLS[i%TREE_COLS.length],SUMMER?0:.85,3,i*3+7);JT_SPR.push({c,w,h,base:h+5})}
   return JT_SPR}
 function addJumpTree(x){const g=groundAt(x);if(!g)return;const S=jtSprites(),k=Math.floor(Math.random()*S.length);const gl=groundAt(x-S[k].w),gr=groundAt(x+S[k].w),ft=Math.max(g.y+1,gl?gl.y:g.y,gr?gr.y:g.y);jtrees.push({x,y:g.y,ft,k,h:S[k].h,w:S[k].w,f:Math.random()<.5,hit:false})}   // ft: Fuß wie gezeichnet
 function fTreeJump(){
@@ -1464,25 +1623,55 @@ function fTreeJump(){
   seg(clamp(flightLen(lipX,lipY,la,VMAX,JUMP_POP,gx,gy,6)+90,260,560),6,'deep');   // flaches Feld, tiefer Powder
   seg(70,16,'deep');
 }
+/* ---- Sommer ---- */
+// Tabletop: Kicker, flacher Tisch, Landung. Kein Gap: wer zu kurz springt, landet auf dem Tisch (Case).
+function fTable(){
+  const d=difficulty();seg(Math.max(60,110-leadCut),rand(15,19));
+  const steps=[-10,-18,-26],ks=[];for(const a of steps)ks.push(seg(11,a,'kicker'));ks[ks.length-1].lip=true;
+  const lipX=gx,lipY=gy,la=steps[2],tl=rand(70,110)+d*40;
+  seg(tl,4,'deck');
+  const req=reqSpeed(la,tl+26,tl*Math.tan(4*RAD)+4);ks.forEach(s=>{s.req=req;s.assist=.86;s.vmax=VMAX});
+  coinArc(lipX,lipY,la,req*1.04,tl+80,7);
+  const fl=flightLen(lipX,lipY,la,VMAX,JUMP_POP*1.1,gx,gy,28);parkEnd=gx+fl;
+  seg(clamp(fl+80,200,560),28,'landing');seg(60,13);
+}
+// Rollers wie im Pumptrack: weiche Wellen, mit Schwung hebst du kurz ab
+function fRollers(){const n=Math.random()<.5?3:4;seg(Math.max(50,90-leadCut),rand(14,18));const x0=gx;
+  for(let i=0;i<n;i++){seg(14,4);seg(16,-14);seg(12,-4);seg(10,14);seg(18,32);seg(14,22)}
+  seg(40,16);parkEnd=gx;coinRow(x0+30,Math.floor((gx-x0-50)/28),28,22)}
+// Umgestürzte Baumstämme quer über dem Trail (von der Seite die Schnittfläche): drüberspringen, sonst Sturz
+let LOG_SPR=null;
+function logSprites(){if(LOG_SPR)return LOG_SPR;LOG_SPR=[];
+  for(const r of [4,5]){const S=r*2+3,[c,g]=mk(S,S),cx=S/2,cy=S/2;
+    for(let y=0;y<S;y++)for(let x=0;x<S;x++){const dd=Math.hypot(x+.5-cx,y+.5-cy);if(dd>r+1)continue;
+      g.fillStyle=dd>r?'#2a1d14':dd>r-1.2?'#5a3d26':((Math.floor(dd*1.6))%2?'#c9a06e':'#b48a58');g.fillRect(x,y,1,1)}
+    g.fillStyle='#6f9549';g.fillRect(Math.round(cx-2),Math.round(cy-r-1),4,1);g.fillStyle='#8a6440';g.fillRect(Math.floor(cx),Math.floor(cy),1,1);
+    LOG_SPR.push({c,r,S})}
+  return LOG_SPR}
+function addLogObs(x){const g=groundAt(x);if(!g)return;const L=logSprites(),k=Math.random()<.5?0:1,r=L[k].r;jtrees.push({x,y:g.y,ft:g.y+1,k,h:r*2,w:r+.5,f:false,hit:false,shape:'log'})}
+function fLogObs(){const x0=gx,L=rand(300,420);seg(L,rand(25,30));decoTrees(x0,gx,2);
+  let x=x0+rand(110,150);const n=Math.random()<.6?1:2;for(let i=0;i<n&&x<gx-60;i++){addLogObs(x);x+=rand(150,190)}}
 function genFree(){
   const fx0=gx;
-  const o=sinceGap>=2?{cliff:2,bigcliff:1,hugecliff:.5,cliffgap:2}:{run:1.3,cliff:1.8,bigcliff:.8,hugecliff:.45,cliffgap:1.3,logs:2.2,rocks:.35,logjam:1.1,treejump:1.3};
+  const o=sinceGap>=2?{cliff:2,bigcliff:1,hugecliff:.5,cliffgap:2}:SUMMER?{run:1.3,cliff:1.8,bigcliff:.8,hugecliff:.45,cliffgap:1.3,rocks:.45,treejump:1.3,logobs:1.8}   // Sommer: keine Grinds
+    :{run:1.3,cliff:1.8,bigcliff:.8,hugecliff:.45,cliffgap:1.3,logs:2.2,rocks:.35,logjam:1.1,treejump:1.3};
   if(o[lastType])o[lastType]*=.35;const t=pickW(o);
-  ({run:fFreeRun,cliff:()=>fCliff(false),bigcliff:()=>fCliff(true),hugecliff:()=>fCliff('huge'),cliffgap:fCliffGap,logs:fLogs,rocks:fRocks,logjam:fLogJam,treejump:fTreeJump})[t]();
+  ({run:fFreeRun,cliff:()=>fCliff(false),bigcliff:()=>fCliff(true),hugecliff:()=>fCliff('huge'),cliffgap:fCliffGap,logs:fLogs,rocks:fRocks,logjam:fLogJam,treejump:fTreeJump,logobs:fLogObs})[t]();
   sinceGap=['cliff','bigcliff','hugecliff','cliffgap'].includes(t)?0:sinceGap+1;lastType=t;
   if(Math.random()<.5)fFreeRun();
   addFauna(fx0,gx);
 }
 function pickW(o){let t=0;for(const k in o)t+=o[k];let r=Math.random()*t;for(const k in o){r-=o[k];if(r<=0)return k}return Object.keys(o)[0]}
 /* Park-Abstand in px (~1,1 s Fahrt mit Gas). PARK_LEAD: Strecke vom Anfang eines Hindernisses bis zur Rampe/Rail/Kante */
-const PARK_SPACE=380,PARK_LEAD={kicker:188,bigair:516,rail:124,tube:124,drop:150,gaprail:180,loop:254,kink:124,rainbow:124,box:124,cat:124,table:124,pole:124,stairs:124,bonk:130,wave:124,waterfall:124};
+const PARK_SPACE=380,PARK_LEAD={rollers:90,kicker:188,bigair:516,rail:124,tube:124,drop:150,gaprail:180,loop:254,kink:124,rainbow:124,box:124,cat:124,table:124,pole:124,stairs:124,bonk:130,wave:124,waterfall:124};
 let parkEnd=null,leadCut=0;
 function genNext(){
   const z=zoneAt(gx);
   if(z!==curZone){curZone=z;fZone(z);sinceGap=0;lastType='';parkEnd=null;return}
   if(z==='free'){genFree();return}
   const d=difficulty();let o;
-  if(sinceGap>=2)o={kicker:3,drop:2,gaprail:1.1,bigair:1+d*1.5};
+  if(sinceGap>=2)o=SUMMER?{kicker:3,drop:2,bigair:1+d*1.5}:{kicker:3,drop:2,gaprail:1.1,bigair:1+d*1.5};
+  else if(SUMMER)o={kicker:3,drop:1.5,bigair:.8+d,table:2.2,rollers:1.3};   // Bikepark: Dirt Jumps, Tables, Drops, Rollers, keine Rails
   else o={kicker:3,rail:1.1,tube:1.6,drop:1.5,gaprail:.8,bigair:.8+d,kink:1.5,rainbow:.8,box:1.3,cat:.5,table:.5,pole:.6,stairs:.6,bonk:.6,wave:.4,waterfall:.4};
   if(o[lastType])o[lastType]*=.35;
   const t=pickW(o);
@@ -1494,7 +1683,7 @@ function genNext(){
   const pickOf=a=>a[Math.floor(Math.random()*a.length)];
   ({kicker:()=>fKicker(false),bigair:()=>fKicker(true),rail:()=>fRail(false),tube:()=>fRail(true),drop:fDrop,gaprail:fGapRail,loop:fLoop,
     kink:()=>fJib(pickOf(['fd','dfd','fdf'])),rainbow:()=>fJib('rainbow'),box:()=>fJib(pickOf(['aframe','battleship','flatbox','downbox'])),cat:()=>fJib('cat'),
-    table:()=>fJib('table'),pole:()=>fJib('pole'),stairs:()=>fJib('stairs'),bonk:fBonks,wave:()=>fJib('wave'),waterfall:()=>fJib('waterfall')})[t]();
+    table:()=>SUMMER?fTable():fJib('table'),rollers:fRollers,pole:()=>fJib('pole'),stairs:()=>fJib('stairs'),bonk:fBonks,wave:()=>fJib('wave'),waterfall:()=>fJib('waterfall')})[t]();
   sinceGap=['kicker','bigair','drop','gaprail'].includes(t)?0:sinceGap+1;
   if(t==='loop')lastLoopX=gx;
   lastType=t;
@@ -1503,7 +1692,7 @@ function genNext(){
 function resetWorld(){
   segs=[];rails=[];bonks=[];loops=[];coins=[];signs=[];trees=[];rocks=[];jtrees=[];floods=[];fauna=[];cliffs=[];cliffJobs=[];gapFogs=[];pendGaps=[];crevs=[];mReset(1+Math.floor(Math.random()*9973));nextFloodX=-260;gx=-260;gy=0;sinceGap=0;lastLoopX=-9999;lastType='';curZone='park';
   gx=ALM_X0;seg(ALM_END-ALM_X0,2,'alm');seg(160,6,'start');seg(260,19);coinRow(120,8,16,12);makeAlmDeco();
-  parkEnd=null;leadCut=0;fRail(Math.random()<.5);lastType='rail';
+  parkEnd=null;leadCut=0;if(SUMMER){fRollers();lastType='rollers'}else{fRail(Math.random()<.5);lastType='rail'}   // Sommer: Start mit Rollers statt Rail
 }
 function makeLoopImg(R){
   const S=R*2+24,[c,g]=mk(S,S),cx=S/2,cy=S/2;
@@ -1540,18 +1729,29 @@ function treeRow(W,H,n,hmin,hmax,col,snow){
   return c;
 }
 function drawSpruce(g,X,base,h,maxW,cols){
-  cols=cols||['#183429','#24493b'];
+  cols=cols||(SUMMER?['#24452a','#2f5934']:['#183429','#24493b']);
   g.fillStyle='#3a2a1e';g.fillRect(X,base-3,2,3);
   for(let r=0;r<h;r++){const y=base-3-r,t=r/h,tier=r%6,w=Math.max(1,Math.round(maxW*(1-t)*(1-tier/6*.5)));
     g.fillStyle=cols[0];g.fillRect(X+1-w,y,w*2,1);g.fillStyle=cols[1];g.fillRect(X+1-w,y,Math.max(1,w),1);
-    if(tier===0&&r>2){g.fillStyle='#eef4fb';g.fillRect(X+1-w,y,Math.max(1,Math.round(w*.9)),1)}}
-  g.fillStyle='#f4f8fd';g.fillRect(X,base-3-h,2,2);
+    if(tier===0&&r>2&&!SUMMER){g.fillStyle='#eef4fb';g.fillRect(X+1-w,y,Math.max(1,Math.round(w*.9)),1)}}
+  if(!SUMMER){g.fillStyle='#f4f8fd';g.fillRect(X,base-3-h,2,2)}
 }
 function spruceRow(W,H,n,hmin,hmax,cols){
   const [c,g]=mk(W,H),list=[];
   for(let i=0;i<n;i++)list.push({x:Math.floor(Math.random()*W),h:Math.floor(rand(hmin,hmax)),b:H-2-Math.floor(Math.random()*8)});
   list.sort((a,b)=>a.b-b.b);
   for(const t of list)for(const o of [0,W,-W]){const X=t.x+o;if(X<-20||X>W+20)continue;drawSpruce(g,X,t.b,t.h,Math.max(3,t.h*.2),cols)}
+  return c;
+}
+// Sommer: Laubbäume als runde Kronen (mehrere Kugeln, oben links Licht)
+function leafRow(W,H,n,hmin,hmax,cols){
+  const [c,g]=mk(W,H),list=[];
+  for(let i=0;i<n;i++)list.push({x:Math.floor(Math.random()*W),h:Math.floor(rand(hmin,hmax)),b:H-2-Math.floor(Math.random()*7)});
+  list.sort((a,b)=>a.b-b.b);
+  for(const t of list)for(const o of [0,W,-W]){const X=t.x+o,r=Math.max(3,t.h*.42);if(X<-30||X>W+30)continue;
+    g.fillStyle='#3b2a20';g.fillRect(X,t.b-Math.round(t.h*.45),2,Math.round(t.h*.45));
+    for(const [dx,dy,rr,ci] of [[0,-t.h+r,r,0],[-r*.6,-t.h+r*1.5,r*.8,0],[r*.6,-t.h+r*1.5,r*.8,0],[-r*.3,-t.h+r*.8,r*.6,1]]){const cx=X+1+dx,cy=t.b+dy;
+      for(let yy=-Math.ceil(rr);yy<=Math.ceil(rr);yy++){const w=Math.round(Math.sqrt(Math.max(0,rr*rr-yy*yy)));g.fillStyle=cols[ci];g.fillRect(Math.round(cx-w),Math.round(cy+yy),w*2+1,1)}}}
   return c;
 }
 function makeCloud(W,H){
@@ -1574,11 +1774,17 @@ const MLAY=[
   {par:.115,y:158,H:80, cell:50, h0:14,h1:56, snow:0,  tree:.85,ts:8,rough:1,  depth:.14,f0:.54}
 ];
 // Farben je Tageszeit: Dunst (Nebel), nahe Felsfarbe, Licht, Schnee, Schneeschatten, Bäume
-const MPAL=[
+let MPAL;const MPAL_W=[
   {haze:'#cadcf2',near:'#3c5a82',light:'#f4f8ff',snow:'#ffffff',snowSh:'#b9cbe6',tree:'#253c5a'},
   {haze:'#f2b894',near:'#583a60',light:'#ffd2a6',snow:'#ffe6d2',snowSh:'#d9a2a6',tree:'#3a2442'},
   {haze:'#213159',near:'#070c1a',light:'#2e3e68',snow:'#50628d',snowSh:'#36466d',tree:'#04070f'}
 ];
+const MPAL_S=[
+  {haze:'#c4dbe9',near:'#3f6b3d',light:'#a2d07a',snow:'#a3a8b0',snowSh:'#6d737c',tree:'#26442b'},
+  {haze:'#f2b894',near:'#4d4a3a',light:'#ffd2a6',snow:'#c79e8a',snowSh:'#8c6c6c',tree:'#2e2a22'},
+  {haze:'#213159',near:'#070c1a',light:'#2e3e68',snow:'#3e4a62',snowSh:'#2c3650',tree:'#04070f'}
+];
+MPAL=SUMMER?MPAL_S:MPAL_W;
 const mh=n=>{const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x)};
 function vn(x,s){const i=Math.floor(x),f=x-i,u=f*f*(3-2*f);return mh(i*1.317+s)*(1-u)+mh((i+1)*1.317+s)*u}
 const mPk=MLAY.map(()=>new Map()),mCache=new Map(),mLuts={};
@@ -1646,10 +1852,17 @@ function drawMountains(cX,DS){
   if(mCache.size>40)for(const [k,ch] of mCache)if(T-ch.t>2)mCache.delete(k);
 }
 // Talboden: weich aus dem Dunst heraus gerastert statt harter Kante
-function makeValley(){const y0=Math.round(VH*.62)+12,F=10,[c,g]=mk(VW,VH-y0);g.fillStyle='#dde8f6';
+function makeValley(){const y0=Math.round(VH*.62)+12,F=10,[c,g]=mk(VW,VH-y0);g.fillStyle=SUMMER?'#93bf6a':'#dde8f6';
   for(let y=0;y<F;y++){const t=(y+.5)/F;for(let x=0;x<VW;x++)if((BAYER[y&3][x&3]+.5)/16<t)g.fillRect(x,y,1,1)}
   g.fillRect(0,F,VW,VH);return c}
 function rebuildBg(){
+  if(SUMMER){   // Sommer: kräftiger blauer Himmel, Laubwald und Fichten ohne Schnee, grünes Tal
+    BG.skyDay=gradSky(['#2b6cc4','#3779cc','#4687d4','#5796dc','#69a6e3','#7fb6ea','#99c7f0','#b4d8f5','#cbe6f8']);
+    BG.skyDusk=gradSky(['#2a2e6b','#4a3a84','#7a4a8f','#b5568a','#e06a6f','#f48a5a','#f9ad62','#fcd08a','#fde3b0']);
+    BG.skyNight=gradSky(['#04060f','#060a19','#091024','#0c152f','#101b3a','#142144','#19294f','#1f3159','#263a63'],true);
+    BG.treesB=leafRow(520,56,60,12,28,['#3f6e3b','#4f8247']);BG.treesF=leafRow(560,74,40,22,52,['#2f5a30','#3f7039']);
+    BG.ftreesB=spruceRow(520,70,64,14,40,['#2f5b38','#3a6b42']);BG.ftreesF=spruceRow(560,100,48,30,86);
+    BG.clouds=[makeCloud(70,20),makeCloud(48,15),makeCloud(92,24),makeCloud(60,18)];BG.valley=makeValley();BG.sky=1;return}
   BG.skyDay=gradSky(['#2f63b8','#3a72c4','#4a82cf','#5b93d9','#6fa4e2','#86b6ea','#a1c8f1','#bdd9f6','#d4e6fa']);
   BG.skyDusk=gradSky(['#2a2e6b','#4a3a84','#7a4a8f','#b5568a','#e06a6f','#f48a5a','#f9ad62','#fcd08a','#fde3b0']);
   BG.skyNight=gradSky(['#04060f','#060a19','#091024','#0c152f','#101b3a','#142144','#19294f','#1f3159','#263a63'],true);
@@ -1751,7 +1964,7 @@ function drawBeam(cX,cY,lamp,a){
 /* Stirnlampe: Kopfposition und Blickrichtung kommen aus derselben 3D-Rechnung wie die Figur (Pose, Spin, Cork,
    Flip-Winkel, Sturz). Die Lampe sitzt vorne am Helm, der Strahl zeigt leicht nach unten in Blickrichtung. */
 function figHead(pose,ph,look,gear,ck){
-  const board=gear==='board',LIB=board?BOARD3:SKI3,L=LIB[pose]||LIB.ride;
+  const board=gear==='board',LIB=LIBOF(gear),L=LIB[pose]||LIB.ride;
   const k=look?smooth01((-Math.cos(ph*RAD)-.2)/.8):0,yU=ph+(board?150:-70)*k,hY=look?0:yU;
   let xf=q=>q,xd=v=>v;
   if(ck&&ck.t){const cm=poseCOM(pose,ph,gear),ax=corkAxis(ck.m);xd=v=>rodrigues(v,ax,ck.t);
@@ -1761,21 +1974,22 @@ function figHead(pose,ph,look,gear,ck){
 }
 function headLamp(){
   const v=playerView(),ph=((Math.round(v.phi/15)*15)%360+360)%360,ck=v.cork?{m:v.cork.m,t:((Math.round(v.cork.t/15)*15)%360+360)%360}:null;
-  const h=figHead(v.pose,ph,v.look,SAVE.gear,ck),r=v.ang*RAD,c=Math.cos(r),s=Math.sin(r);
+  const h=figHead(v.pose,ph,v.look,GEAR,ck),r=v.ang*RAD,c=Math.cos(r),s=Math.sin(r);
   const lx=h.q[0]+h.f[0]*3.6+h.up[0]*1.6-SCX-v.ox,ly=h.q[1]+h.f[1]*3.6+h.up[1]*1.6-SCY-v.oy;
   return {x:Math.round(v.comx)+lx*c-ly*s,y:Math.round(v.comy)+lx*s+ly*c,bx:h.beam[0]*c-h.beam[1]*s,by:h.beam[0]*s+h.beam[1]*c,bz:h.beam[2],front:h.f[2]>-.35};
 }
 // Was gerade gezeichnet wird (Pose, Drehung, Lage): gemeinsam für Figur und Stirnlampe
 function playerView(){
-  const board=SAVE.gear==='board',airish=p.mode==='air'||(p.mode==='dead'&&p.inAir);
+  const board=GEAR==='board',bike=GEAR==='bike',airish=p.mode==='air'||(p.mode==='dead'&&p.inAir);
   if(p.mode==='dig'){const d=p.dig,fr=d.t<.45?0:Math.floor((d.t-.45)/.24)%2,r=p.ang*RAD;
-    return {pose:'dig'+fr,phi:0,look:false,ang:p.ang,comx:p.x+FOOT*Math.sin(r),comy:p.y-FOOT*Math.cos(r),ox:0,oy:0,inPow:false,cork:null}}
+    return {pose:'dig'+fr,phi:0,look:false,ang:p.ang,comx:p.x+FOOTG*Math.sin(r),comy:p.y-FOOTG*Math.cos(r),ox:0,oy:0,inPow:false,cork:null}}
   if(p.mode==='heal'){const h=p.heal,t=h.t,r=p.ang*RAD,tW=HEAL_FALL+HEAL_FIX+HEAL_UP;
     if(t<HEAL_FALL){const u=smooth01(Math.min(1,t/.35));return {pose:'tuck',phi:0,look:false,ang:p.ang-90*u,comx:p.x-2*u,comy:p.y-4-7*(1-u)-6*Math.sin(Math.PI*u),ox:0,oy:0,inPow:false,cork:null}}   // prallt zurück, landet auf dem Rücken
     if(t<HEAL_FALL+HEAL_FIX){const fr=Math.floor((t-HEAL_FALL)/.2)%2;return {pose:'sit'+fr,phi:0,look:false,ang:p.ang,comx:p.x+3*Math.sin(r),comy:p.y-3*Math.cos(r),ox:0,oy:0,inPow:false,cork:null}}   // verbinden
-    const cx=p.x+FOOT*Math.sin(r),cy=p.y-FOOT*Math.cos(r);
+    const cx=p.x+FOOTG*Math.sin(r),cy=p.y-FOOTG*Math.cos(r);
     if(t<tW)return {pose:t-HEAL_FALL-HEAL_FIX<HEAL_UP*.5?'crouch':'crouch_h',phi:0,look:true,ang:p.ang,comx:cx,comy:cy,ox:0,oy:0,inPow:false,cork:null};   // aufstehen
-    if(SAVE.gear==='board'){const ph=(h.walk/.32)%1;return {pose:ph<.2||ph>.85?'crouch':'ride',phi:0,look:true,ang:p.ang,comx:cx,comy:cy-3.5*Math.sin(Math.PI*clamp((ph-.2)/.65,0,1)),ox:0,oy:0,inPow:false,cork:null}}   // Board: um den Stein hüpfen
+    if(GEAR==='board'){const ph=(h.walk/.32)%1;return {pose:ph<.2||ph>.85?'crouch':'ride',phi:0,look:true,ang:p.ang,comx:cx,comy:cy-3.5*Math.sin(Math.PI*clamp((ph-.2)/.65,0,1)),ox:0,oy:0,inPow:false,cork:null}}   // Board: um den Stein hüpfen
+    if(bike)return {pose:'walk'+(Math.floor(h.walk/.2)%4),phi:0,look:true,ang:p.ang,comx:cx,comy:cy,ox:0,oy:0,inPow:false,cork:null};   // Bike: um den Stein schieben
     return {pose:'push'+(Math.floor(((h.walk/.55)%1)*8)%8),phi:0,look:true,ang:p.ang,comx:cx,comy:cy,ox:0,oy:0,inPow:false,cork:null}}   // Ski: um den Stein laufen
   if(p.mode==='climb'){const fr=p.climb&&p.climb.moving?Math.floor(p.climb.anim/.22)%2:0;return {pose:'climb'+fr,phi:0,look:false,ang:0,comx:p.x,comy:p.y-9,ox:0,oy:0,inPow:false,cork:null}}
   let phi=0,pose='ride',ang=p.ang,comx,comy,look=true,ox=0,oy=0,twist=0;
@@ -1794,16 +2008,16 @@ function playerView(){
     if(p.mode==='ground'&&(Math.abs(p.butterVis||0)>5||p.bs))pose=(p.bs?p.bs.end:p.butterVis)<0?'butter':'nbutter';
     if(p.mode==='ground'&&p.ab){const k=p.ab.kind,t=p.ab.t,d=p.ab.dur;
       if(k==='shifty'){twist=42*p.ab.dir*Math.sin(Math.PI*smooth01(t/d));look=false}
-      else{const L=board?BOARD3:SKI3;if(L[k])pose=(t<.12||t>d-.12)?k+'_h':k}}
+      else{const L=LIBOF(GEAR);if(L[k])pose=(t<.12||t>d-.12)?k+'_h':k}}
     const rockHit=p.mode==='crash'||(p.mode==='rail'&&p.rCrash>0)||(p.mode==='dead'&&p.deadReason==='rock');
     if(rockHit){pose='tuck';ang=p.ang+(p.mode==='dead'?90:p.tumble);look=false;phi=0;twist=0}
     const inAva=p.mode==='dead'&&p.deadReason==='wall';
     if(inAva){pose=(Math.floor(p.deadT*2.5)%2)?'layout':'tuck';ang=p.ang+(p.wTumble||0);look=false;phi=0}
-    const r=ang*RAD;comx=p.x+FOOT*Math.sin(r);comy=p.y-FOOT*Math.cos(r);
+    const r=ang*RAD;comx=p.x+FOOTG*Math.sin(r);comy=p.y-FOOTG*Math.cos(r);
     if(rockHit){comx=p.x;comy=p.y-(p.mode==='dead'||p.tumble===90?4:10)}
     if(inAva){comx=p.x;comy=p.y-9+(p.wallSink||0)}
     const bv=p.mode==='ground'?(p.butterVis||0)*(1-bsp):0;
-    if(Math.abs(bv)>.3){const rr=ang*RAD,d=(bv<0?-9:9)*(p.sw?-1:1),px=p.x+Math.cos(rr)*d,py=p.y+Math.sin(rr)*d,b=bv*(p.sw?-1:1)*RAD,vx=comx-px,vy=comy-py;
+    if(Math.abs(bv)>.3){const rr=ang*RAD,d=(bike?(bv<0?-8.4:12.8):(bv<0?-9:9))*(p.sw?-1:1),px=p.x+Math.cos(rr)*d,py=p.y+Math.sin(rr)*d,b=bv*(p.sw?-1:1)*RAD,vx=comx-px,vy=comy-py;
       comx=px+vx*Math.cos(b)-vy*Math.sin(b);comy=py+vx*Math.sin(b)+vy*Math.cos(b);ang+=bv*(p.sw?-1:1)}
     if(p.mode==='ground'&&p.sink)comy+=p.sink;
   }
@@ -1825,7 +2039,7 @@ function drawPlayer(cX,cY){
       ctx.globalAlpha=1-u;ctx.fillStyle=k===1?'#ffffff':'#7be08f';ctx.fillRect(x,y-1,1,3);ctx.fillRect(x-1,y,3,1);ctx.globalAlpha=1}
     // beim Vorbeilaufen steht der Stein vor dir: du gehst hinter ihm herum
     if(t>=tW&&h.rock)drawRock1(h.rock,cX,cY)}
-  if(p.mode==='ground'&&p.sink>1.2){const sk=Math.round(p.sink);for(let dx=-18;dx<=18;dx++){const g=groundAt(p.x+dx);if(!g||!isPow(g.seg))continue;const x=Math.round(p.x+dx-cX),y=Math.round(g.y)-cY;ctx.fillStyle='#ffffff';ctx.fillRect(x,y,1,3);ctx.fillStyle='#eef4fd';ctx.fillRect(x,y+3,1,sk+3)}}
+  if(p.mode==='ground'&&p.sink>1.2&&!SUMMER){const sk=Math.round(p.sink);for(let dx=-18;dx<=18;dx++){const g=groundAt(p.x+dx);if(!g||!isPow(g.seg))continue;const x=Math.round(p.x+dx-cX),y=Math.round(g.y)-cY;ctx.fillStyle='#ffffff';ctx.fillRect(x,y,1,3);ctx.fillStyle='#eef4fd';ctx.fillRect(x,y+3,1,sk+3)}}
 }
 
 /* ================= FLUTLICHT (PARK) ================= */
@@ -1852,7 +2066,7 @@ function drawHouse(x,base,w,h,white,church,seed){
     ctx.fillStyle=O;ctx.fillRect(tx+2,base-th-10,1,3);ctx.fillRect(tx+1,base-th-9,3,1)}
   rectO(ctx,x,base-h,w,h,wall,O);ctx.fillStyle=wallD;ctx.fillRect(x,base-2,w,2);
   const rh=Math.ceil(w/2)+1;
-  for(let r=0;r<rh;r++){const half=Math.max(0,Math.round((w/2+1)*(r+1)/rh));ctx.fillStyle=O;ctx.fillRect(x+Math.round(w/2)-half-1,base-h-rh+r,half*2+2,1);ctx.fillStyle=r<rh-1?'#f4f8ff':'#c7d4e8';ctx.fillRect(x+Math.round(w/2)-half,base-h-rh+r,half*2,1)}
+  for(let r=0;r<rh;r++){const half=Math.max(0,Math.round((w/2+1)*(r+1)/rh));ctx.fillStyle=O;ctx.fillRect(x+Math.round(w/2)-half-1,base-h-rh+r,half*2+2,1);ctx.fillStyle=SUMMER?(r<rh-1?'#a64b2f':'#7a3420'):(r<rh-1?'#f4f8ff':'#c7d4e8');ctx.fillRect(x+Math.round(w/2)-half,base-h-rh+r,half*2,1)}
   const lit=night>.3&&hash01(seed+.5)<.85;
   for(let wx=x+2;wx<x+w-2;wx+=4){ctx.fillStyle=lit?'#ffd36b':'#3d4a66';ctx.fillRect(wx,base-h+2,2,2);if(lit)emissiveBg.push({x:wx+1,y:base-h+3,r:3})}
   const chx=x+w-4;ctx.fillStyle=O;ctx.fillRect(chx,base-h-rh+1,2,3);
@@ -1904,7 +2118,7 @@ function faunaSprite(type,fr,run){const key=type+fr+(run?'r':'');if(FAUNA_SPR[ke
       ...leg(13.5,22,sw,B),...leg(32.5,22,-sw,B),
       {x:38,y:15,rx:6,ry:5,col:B},{x:43,y:17,rx:3,ry:2.3,col:N},{x:35.6,y:10.2,rx:1.9,ry:1.6,col:B},{x:39.6,y:10.6,rx:1.7,ry:1.5,col:B}];
     c=paintCreature(47,30,parts,'#140c06',g=>{g.fillStyle='#000';g.fillRect(40,14,1,1);g.fillRect(45,16,1,1);g.fillStyle=L;g.fillRect(16,8,10,1)})}
-  else{const W='#eef2f8',S='#cdd5e2',P='#ffffff',l=run&&fr?-2:0;
+  else{const W=SUMMER?'#a07a52':'#eef2f8',S=SUMMER?'#7d5c3a':'#cdd5e2',P='#ffffff',l=run&&fr?-2:0;
     const parts=[{x:6.2,y:12+l,rx:4,ry:3.8,col:W},{x:10,y:11+l,rx:run?7:6,ry:4,r:-.15,col:W},{x:16,y:8+l,rx:3,ry:2.5,r:.2,col:W},
       {x:15.4,y:3.2+l,rx:1,ry:3.6,r:-.25,col:W},{x:17.2,y:3.6+l,rx:.9,ry:3.4,r:.05,col:W},
       {x:run&&fr?16.5:14,y:15+l,rx:.9,ry:2.2,r:run?(fr?-.6:.3):0,col:S},{x:run&&fr?1.5:5.6,y:16+(run&&fr?-1:0),rx:3,ry:1,col:S,flat:1},{x:2.6,y:10+l,rx:1.6,ry:1.6,col:P,flat:1}];
@@ -1941,7 +2155,7 @@ function makeRock(w,h,big){
     g.fillStyle='#6b6f80';g.fillRect(x0,r+1,x1-x0,1);
     g.fillStyle='#878b9c';g.fillRect(x0,r+1,Math.max(1,Math.round((x1-x0)*.35)),1);
     g.fillStyle='#545767';g.fillRect(x1-Math.max(1,Math.round((x1-x0)*.25)),r+1,Math.max(1,Math.round((x1-x0)*.25)),1);
-    if(u>(big?.72:.6)){g.fillStyle='#ffffff';g.fillRect(x0,r+1,Math.max(1,Math.round((x1-x0)*.8)),1)}}
+    if(u>(big?.72:.6)){g.fillStyle=SUMMER?(u>.86?'#7aa452':'#5f8a40'):'#ffffff';g.fillRect(x0,r+1,Math.max(1,Math.round((x1-x0)*.8)),1)}}
   if(big){g.fillStyle='#3f4250';g.fillRect(Math.round(w*.55),Math.round(h*.45),1,3);g.fillRect(Math.round(w*.55)+1,Math.round(h*.45)+3,1,2)}
   return c;
 }
@@ -1955,8 +2169,20 @@ function drawTreeVar(g,X,base,h,maxW,cols,snow,tr,seed){
   for(let r=0;r<ch;r++){const y=base-tr-r,t=r/ch,tier=r%6,j=1+.18*(hash01(seed*7.3+Math.floor(r/6)*1.9)-.5),w=Math.max(1,Math.round(maxW*(1-t)*(1-tier/6*.5)*j));
     g.fillStyle=cols[0];g.fillRect(X+1-w,y,w*2,1);g.fillStyle=cols[1];g.fillRect(X+1-w,y,Math.max(1,w),1);
     if(tier===0&&r>2&&hash01(seed*3.1+r*.7)<snow){g.fillStyle='#eef4fb';g.fillRect(X+1-w,y,Math.max(1,Math.round(w*(.6+.4*snow))),1)}}
-  g.fillStyle='#f4f8fd';g.fillRect(X,base-tr-ch,2,2)}
+  if(!SUMMER){g.fillStyle='#f4f8fd';g.fillRect(X,base-tr-ch,2,2)}}
+// Laubbaum (Buche/Ahorn): Stamm, runde Krone aus mehreren Kugeln, Licht oben links, Schatten unten rechts
+function drawLeafVar(g,X,base,h,w,cols,seed){const tr=Math.round(h*.42);g.fillStyle='#4a3424';g.fillRect(X,base-tr,2,tr);g.fillStyle='#6a4c34';g.fillRect(X,base-tr,1,tr);
+  const blobs=[[0,-h+w*.9,w*.95],[-w*.55,-h+w*1.5,w*.7],[w*.55,-h+w*1.45,w*.72],[0,-h+w*1.75,w*.62]];
+  for(const [dx,dy,r] of blobs){const cx=X+1+dx,cy=base+dy;for(let yy=-Math.ceil(r);yy<=Math.ceil(r);yy++){const ww=Math.round(Math.sqrt(Math.max(0,r*r-yy*yy)));
+    for(let xx=-ww;xx<=ww;xx++){const u=xx/r,v=yy/r,lit=u+v<-.55,dark=u+v>.6,n=hash01(seed*3.7+Math.floor(cx+xx)*.31+Math.floor(cy+yy)*.57);
+      g.fillStyle=dark?cols[0]:lit&&n<.8?cols[2]:n<.12?cols[0]:cols[1];g.fillRect(Math.round(cx+xx),Math.round(cy+yy),1,1)}}}}
 function makeTreeSprites(){TREE_SPR=[];
+  if(SUMMER){const LC=[['#2e5a2c','#3f7a38','#5b9a46'],['#355f2a','#4a7d33','#6aa346'],['#2c5530','#3c703c','#56904d']];
+    for(let i=0;i<14;i++){const h=Math.round(34+hash01(i*4.7+1)*58);
+      if(i%3===1){const w=Math.round(h*(.3+hash01(i*2.3+5)*.08)),[c,g]=mk(w*2+8,h+6);drawLeafVar(g,w+3,h+5,h,w,LC[i%3],i+1);TREE_SPR.push({c,w,tr:Math.round(h*.42),base:h+5})}
+      else{const pine=i%5===4,w=Math.ceil(h*(pine?.17:.17+hash01(i*2.3+5)*.12)),tr=pine?Math.round(h*.22):3,cols=TREE_COLS[i%TREE_COLS.length],[c,g]=mk(w*2+6,h+6);
+        drawTreeVar(g,w+2,h+5,h,w,cols,0,tr,i+1);TREE_SPR.push({c,w,tr,base:h+5})}}
+    return}
   for(let i=0;i<14;i++){const h=Math.round(34+hash01(i*4.7+1)*58),pine=i%5===4,w=Math.ceil(h*(pine?.17:.17+hash01(i*2.3+5)*.12)),tr=pine?Math.round(h*.22):3,
     cols=TREE_COLS[i%TREE_COLS.length],snow=.25+hash01(i*9.1+2)*.75,[c,g]=mk(w*2+6,h+6);
     drawTreeVar(g,w+2,h+5,h,w,cols,snow,tr,i+1);TREE_SPR.push({c,w,tr,base:h+5})}}
@@ -1983,8 +2209,10 @@ function makeHut(){const W=132,H=100,[c,g]=mk(W,H),R=almR(g),yr=x=>Math.round(40
   for(const ch of 'ALM'){const m=L[ch];m.forEach((row,j)=>{for(let i=0;i<row.length;i++)if(row[i]==='#')R(lx+i,47+j,1,1,'#3b2414')});lx+=m[0].length+2}
   R(14,62,104,2,'#5e3a1f');for(let x=16;x<118;x+=5)R(x,64,1,6,'#5e3a1f');R(14,69,104,2,'#5e3a1f');   // Balkon
   R(16,59,100,3,'#7a4a28');for(let x=16;x<116;x++){if(hash01(x*2.3+.1)<.55)R(x,56+Math.floor(hash01(x*1.1)*2),1,1,hash01(x*4.7)<.5?'#e0262f':'#ff6b6b');if(hash01(x*3.9+.7)<.5)R(x,58,1,1,'#3fa66b')}
-  R(92,8,9,16,'#6b6f7a');R(92,8,9,2,'#ffffff');R(93,13,7,1,'#555a66');R(93,18,7,1,'#555a66');   // Kamin
-  for(let x=0;x<W;x++){const y=yr(x);R(x,y-1,1,5,'#3b2414');R(x,y-5,1,4,'#ffffff');R(x,y-1,1,1,'#d7e6f6');if(x%7===3&&Math.abs(x-66)>18)R(x,y+4,1,2+Math.floor(hash01(x)*3),'#d7f0fb')}
+  R(92,8,9,16,'#6b6f7a');R(92,8,9,2,SUMMER?'#4f535e':'#ffffff');R(93,13,7,1,'#555a66');R(93,18,7,1,'#555a66');   // Kamin
+  for(let x=0;x<W;x++){const y=yr(x);R(x,y-1,1,5,'#3b2414');
+    if(SUMMER){R(x,y-5,1,4,(x>>1)%2?'#5a5f6b':'#4b505b');R(x,y-5,1,1,'#6c717d')}   // Schindeldach
+    else{R(x,y-5,1,4,'#ffffff');R(x,y-1,1,1,'#d7e6f6');if(x%7===3&&Math.abs(x-66)>18)R(x,y+4,1,2+Math.floor(hash01(x)*3),'#d7f0fb')}}
   return c}
 function makeFlag(fr){const [c,g]=mk(26,58),R=almR(g);R(2,2,2,56,'#c9ced8');R(2,2,1,56,'#ffffff');R(1,0,4,3,'#e8b830');
   for(let i=0;i<20;i++){const dy=Math.round(1.6*Math.sin(i*.45+fr*2.1)*(i/20));for(let j=0;j<13;j++){const u=i+2*j,v=i-2*j,blue=((Math.floor(u/6)+Math.floor(v/6))&1)===1;R(4+i,4+j+dy,1,1,blue?'#2f8fd8':'#ffffff')}}
@@ -2012,7 +2240,17 @@ function makeSkiRack(){const [c,g]=mk(34,28),R=almR(g);R(0,16,34,2,'#6e4a26');R(
   const cols=['#d2423a','#2f7fd0','#f2c445','#3fa66b','#ff86c8','#2b2e38'];for(let i=0;i<6;i++){const x=4+i*4.5|0;R(x,2+(i%2),2,24-(i%2),cols[i]);R(x,2+(i%2),2,1,'#ffffff')}return c}
 function makeSnowman(){const [c,g]=mk(18,30),R=almR(g),ball=(cx,cy,r)=>{for(let y=-r;y<=r;y++){const w=Math.round(Math.sqrt(r*r-y*y));R(cx-w,cy+y,w*2+1,1,y>r*.4?'#d4e0ef':'#ffffff')}};
   ball(9,23,7);ball(9,13,5);ball(9,6,4);R(5,1,9,2,'#2b2e38');R(7,-2,5,4,'#2b2e38');R(8,5,1,1,'#1b1d26');R(10,5,1,1,'#1b1d26');R(11,6,4,1,'#ff7a2f');R(4,9,10,2,'#d2423a');return c}
-function makeAlmSprites(){ALM_SPR={hut:makeHut(),flag:[0,1,2].map(makeFlag),rack:makeSkiRack(),snowman:makeSnowman()}}
+// Sommer: Kuh (Fleckvieh mit Glocke) statt Schneemann, Bike-Ständer statt Ski-Ständer
+function makeCow(){const B='#f2ece0',P='#8a4b2a',parts=[{x:6,y:19,rx:1.4,ry:4,col:B},{x:9,y:19,rx:1.4,ry:4,col:B},{x:21,y:19,rx:1.4,ry:4,col:B},{x:24,y:19,rx:1.4,ry:4,col:B},
+    {x:15,y:13,rx:10.5,ry:5.4,col:B},{x:27.5,y:10.5,rx:3.6,ry:3,r:.35,col:B},{x:30,y:12.2,rx:2,ry:1.6,col:'#e8b8a0',flat:1},{x:3.6,y:12,rx:.8,ry:3.2,r:-.35,col:B}];
+  return paintCreature(34,26,parts,'#2a1d14',g=>{g.fillStyle=P;g.fillRect(10,9,5,4);g.fillRect(18,11,4,4);g.fillRect(12,15,3,2);g.fillRect(26,8,2,2);
+    g.fillStyle='#000';g.fillRect(27,9,1,1);g.fillStyle='#e8dcbb';g.fillRect(25,6,1,2);g.fillRect(28,6,1,2);g.fillStyle='#e8b830';g.fillRect(26,14,2,2);
+    g.fillStyle='#2a1d14';for(const x of [5,8,20,23])g.fillRect(x,22,2,1)})}
+function makeBikeRack(){const [c,g]=mk(34,28),R=almR(g);R(0,9,34,2,'#6e4a26');R(2,9,2,19,'#5e3a1f');R(30,9,2,19,'#5e3a1f');
+  const cols=['#d63a3a','#2f6fd0','#b8f03c'];for(let i=0;i<3;i++){const x=5+i*9,col=cols[i];
+    for(const wy of [13,24]){for(let a=0;a<12;a++){const t=a/12*6.283;g.fillStyle='#22252e';g.fillRect(Math.round(x+2+Math.cos(t)*3),Math.round(wy+Math.sin(t)*3),1,1)}}   // Räder (hängend)
+    R(x+2,13,1,11,col);R(x+1,15,2,1,col);R(x+3,20,1,4,col)}return c}
+function makeAlmSprites(){ALM_SPR={hut:makeHut(),flag:[0,1,2].map(makeFlag),rack:SUMMER?makeBikeRack():makeSkiRack(),snowman:SUMMER?makeCow():makeSnowman()}}
 function makeAlmDeco(){almDeco=[];const pick=a=>a[Math.floor(Math.random()*a.length)];const add=o=>{const g=groundAt(o.x),g2=groundAt(o.x+(o.w||0));if(g){o.y=Math.max(g.y,g2?g2.y:g.y);almDeco.push(o)}};
   add({t:'hut',x:ALM_HUT,w:132});add({t:'flag',x:-790});
   add({t:'p',x:-772,pose:'tuba',jk:'',hat:''});add({t:'p',x:-758,pose:'acc',jk:'',hat:''});add({t:'p',x:-744,pose:'trump',jk:'',hat:''});
@@ -2062,7 +2300,7 @@ const GRAB_KEYS=[['blunt','KeyJ','Digit1'],['nose','KeyK','Digit2'],['tail','Key
 const SKI_ONLY_GRABS={japan:1,truck:1,octo:1,venom:1};
 let jibb=false;   // Handy: Jib-Modus, Standard aus; bleibt an, bis man wieder drückt
 const bU=()=>!p.auto&&(K.ArrowUp||K.KeyW||(TC.up&&jibb)||GP.up),bD=()=>!p.auto&&(K.ArrowDown||K.KeyS||(TC.down&&jibb)||GP.down);   // Butter-Eingaben
-function inGrab(){let g=null;for(const [k,a,b] of GRAB_KEYS)if(K[a]||K[b]){g=k;break}if(!g)g=TC.g||GP.g||null;return g&&SAVE.gear==='board'&&SKI_ONLY_GRABS[g]?null:g}
+function inGrab(){let g=null;for(const [k,a,b] of GRAB_KEYS)if(K[a]||K[b]){g=k;break}if(!g)g=TC.g||GP.g||null;return g&&GEAR==='board'&&SKI_ONLY_GRABS[g]?null:g}
 addEventListener('keydown',e=>{
   if(e.target&&e.target.tagName==='INPUT')return;
   const c=e.code;unlockAudio();
@@ -2107,7 +2345,7 @@ const GRAB_DIR={n:'blunt',ne:'truck',e:'nose',se:'venom',s:'mute',sw:'octo',w:'t
 function grabApply(x,y){const b=gstickEl.getBoundingClientRect(),dx=x-(b.left+b.width/2),dy=y-(b.top+b.height/2),R=b.width*.34,d=Math.hypot(dx,dy),m=Math.min(d,R);
   gknobEl.style.transform='translate(calc(-50% + '+(d?dx/d*m:0).toFixed(1)+'px),calc(-50% + '+(d?dy/d*m:0).toFixed(1)+'px))';
   let dir='';if(d>R*.2){const s=((Math.atan2(-dy,dx)*DEG)%360+360)%360;
-    dir=SAVE.gear==='board'?(s>=45&&s<135?'n':s>=135&&s<225?'w':s>=225&&s<315?'s':'e'):['e','ne','n','nw','w','sw','s','se'][Math.floor(((s+22.5)%360)/45)]}
+    dir=GEAR==='board'?(s>=45&&s<135?'n':s>=135&&s<225?'w':s>=225&&s<315?'s':'e'):['e','ne','n','nw','w','sw','s','se'][Math.floor(((s+22.5)%360)/45)]}
   TC.g=dir?GRAB_DIR[dir]:null;gstickEl.dataset.g=dir}
 function grabReset(){gId=null;gknobEl.style.transform='';gstickEl.style.transform='';gstickEl.dataset.g='';gstickEl.classList.remove('on');TC.g=null}
 gstickEl.addEventListener('contextmenu',e=>e.preventDefault());
@@ -2330,9 +2568,9 @@ document.addEventListener('pointerdown',()=>{if(!AC||AC.state!=='running'||!MUS.
 
 /* ================= GAME LOGIC ================= */
 const PAT_MAX=Math.round(VMAX*.79);
-const GRAB_NAMES={blunt:'Blunt',japan:'Japan',nose:'Nose Grab',tail:'Tail Grab',mute:'Mute',truck:'Truck Driver',venom:'Venom',octo:'Octograb'},BOARD_GRAB_NAMES={mute:'Indy',blunt:'Japan'};
+const GRAB_NAMES={blunt:'Blunt',japan:'Japan',nose:'Nose Grab',tail:'Tail Grab',mute:'Mute',truck:'Truck Driver',venom:'Venom',octo:'Octograb'},BOARD_GRAB_NAMES={mute:'Indy',blunt:'Japan'},BIKE_GRAB_NAMES={blunt:'Superman',truck:'X-Up',nose:'Whip',venom:'Can-Can',mute:'Table Top',octo:'Nac-Nac',tail:'No-Hander',japan:'One-Footer'};   // Bike: Tricks statt Grabs
 // In der Luft ist (p.x,p.y) der Körperschwerpunkt. Die Füße liegen je nach Pose woanders relativ dazu.
-function airFoot(){let v=[(p.fx||0)-(p.cx||0),(p.fy??FOOT)-(p.cy||0),(p.fz||0)-(p.cz||0)],a=p.ang;
+function airFoot(){let v=[(p.fx||0)-(p.cx||0),(p.fy??FOOTG)-(p.cy||0),(p.fz||0)-(p.cz||0)],a=p.ang;
   if(p.corkMode){v=rodrigues(v,corkAxis(p.corkMode),p.flipAcc);a=p.base}
   const r=a*RAD;return [v[0]*Math.cos(r)-v[1]*Math.sin(r),v[0]*Math.sin(r)+v[1]*Math.cos(r)]}
 function footX(){if(p.mode==='air'||(p.mode==='dead'&&p.inAir))return p.x+airFoot()[0];return p.x}
@@ -2352,11 +2590,11 @@ function launch(a,pop,sg){
   if(sg&&sg.vmax)s=Math.min(s,sg.vmax);
   if(sg&&sg.kind==='kicker'&&pop)pop*=1.1;
   p.vx=Math.cos(a)*s;p.vy=Math.sin(a)*s-pop;
-  p.flipPoseT=0;p.grab=null;p.gVis=0;p.gName=null;p.corkMode=null;p.spinTw=0;p.lastSpin=null;p.ab=null;const r=p.ang*RAD;p.x+=FOOT*Math.sin(r);p.y-=FOOT*Math.cos(r);
-  {const pc=poseCOM(airPose(),p.spin,SAVE.gear);p.x+=pc.cx*Math.cos(r)-pc.cy*Math.sin(r);p.y+=pc.cx*Math.sin(r)+pc.cy*Math.cos(r);p.cx=pc.cx;p.cy=pc.cy;p.cz=pc.cz;p.fx=pc.fx;p.fy=pc.fy;p.fz=pc.fz}
+  p.flipPoseT=0;p.grab=null;p.gVis=0;p.gName=null;p.corkMode=null;p.spinTw=0;p.lastSpin=null;p.ab=null;const r=p.ang*RAD;p.x+=FOOTG*Math.sin(r);p.y-=FOOTG*Math.cos(r);
+  {const pc=poseCOM(airPose(),p.spin,GEAR);p.x+=pc.cx*Math.cos(r)-pc.cy*Math.sin(r);p.y+=pc.cx*Math.sin(r)+pc.cy*Math.cos(r);p.cx=pc.cx;p.cy=pc.cy;p.cz=pc.cz;p.fx=pc.fx;p.fy=pc.fy;p.fz=pc.fz}
   p.mode='air';
   p.airT=0;p.base=p.ang;p.spinStart=p.spin;p.flipAcc=0;p.flipDir=0;p.flipTarget=null;p.spinDir=0;p.spinTarget=null;p.grabT={};p.grab=null;
-  p.bailed=false;p.wallHit=false;p.fromRail=false;p.bigAir=!!(sg&&sg.big);p.takeoffSwitch=p.sw;p.spinLock=!p.auto&&(K.ArrowLeft||K.KeyA||K.ArrowRight||K.KeyD)&&!inU()&&!inD();p.diagT=0;   // Handy und Controller: vorgespannte Drehung startet sofortp.flipCD=wasButter?BUTTER_FLIP_CD:0;
+  p.bailed=false;p.wallHit=false;p.fromRail=false;p.bigAir=!!(sg&&sg.big);p.takeoffSwitch=p.sw;p.spinLock=!p.auto&&(K.ArrowLeft||K.KeyA||K.ArrowRight||K.KeyD)&&!inU()&&!inD();p.diagT=0;p.flipCD=wasButter?BUTTER_FLIP_CD:0;   // Handy und Controller: vorgespannte Drehung startet sofort
   if(pop)SFX.jump();
 }
 function landingGuess(){
@@ -2376,11 +2614,11 @@ function scoreAir(sketchy){
   const sd=Math.abs(p.spin-p.spinStart),spinDeg=p.fromRail?Math.round(sd/90)*90:Math.floor((sd+40)/180)*180,flips=Math.round(Math.abs(p.flipAcc)/360);
   const grabs=Object.keys(p.grabT).filter(k=>p.grabT[k]>=.18);
   let pts=0;const nm=[];
-  if(p.takeoffSwitch&&(spinDeg||flips||grabs.length))nm.push('Switch');
+  if(p.takeoffSwitch&&(spinDeg||flips||grabs.length))nm.push(GEAR==='bike'?'Fakie':'Switch');
   const corked=!!p.corkMode&&flips>0;
   if(flips){nm.push((flips>=3?'Triple ':flips===2?'Double ':'')+(corked?(p.corkMode==='cork'?'Cork':'Misty'):(p.flipAcc<0?'Backflip':'Frontflip')));pts+=flips*450}
   if(spinDeg){nm.push(p.fromRail?spinDeg+' Out':String(spinDeg));pts+=spinDeg/180*130}
-  for(const k of grabs){nm.push(SAVE.gear==='board'&&BOARD_GRAB_NAMES[k]||GRAB_NAMES[k]);pts+=150+Math.round(p.grabT[k]*120)}
+  for(const k of grabs){nm.push(GEAR==='board'&&BOARD_GRAB_NAMES[k]||GEAR==='bike'&&BIKE_GRAB_NAMES[k]||GRAB_NAMES[k]);pts+=150+Math.round(p.grabT[k]*120)}
   if(flips&&spinDeg)pts*=corked?1.6:1.3;
   if(p.airT>.9)pts+=(p.airT-.9)*160;
   if(!nm.length){if(p.airT>1.05)nm.push('Big Air');else return false}
@@ -2396,14 +2634,14 @@ function crash(s,why,pow){
 }
 function land(g,fx){
   const gDeg=g.a*DEG,diff=norm(p.ang-gDeg),m=((p.spin%180)+180)%180;
-  const pow=isPow(g.seg);
+  const pow=isPow(g.seg)&&!SUMMER;   // Tiefschnee nur im Winter
   const ok=Math.abs(diff)<(pow?62:46)&&(m<38||m>142)&&!p.bailed&&!p.wallHit;
   const s=p.vx*Math.cos(g.a)+p.vy*Math.sin(g.a);
   p.x=fx;p.y=g.y;p.mode='ground';
   if(ok){
     p.spin=Math.round(p.spin/180)*180;p.sw=Math.abs(Math.round(p.spin/180))%2===1;p.ang=gDeg;
     const sketchy=!!p.grab;p.s=clamp(s*(sketchy?.8:1),70,VMAX);
-    if(!pow&&p.vy>420&&Math.abs(g.a)<.12){p.s*=.7;showTrick('FLAT LANDING',TX('Autsch','Ouch'),'bad')}else{const sc=scoreAir(sketchy);if(!sketchy&&(sc||(p.fromRail&&p.grindPts)))startAfterbang()}
+    if(!pow&&g.seg.kind!=='deep'&&p.vy>420&&Math.abs(g.a)<.12){p.s*=.7;showTrick('FLAT LANDING',TX('Autsch','Ouch'),'bad')}else{const sc=scoreAir(sketchy);if(!sketchy&&(sc||(p.fromRail&&p.grindPts)))startAfterbang()}
     SFX.land();if(pow){const dp=g.seg.kind==='deep';powderBurst(fx,g.y,(dp?44:26)+Math.min(30,p.vy/14),dp?170:130);p.sink=dp?9:5;shake=Math.min(2,p.vy/250)}else{burst(fx,g.y,10,['#ffffff','#e4eefb'],90);shake=Math.min(4,p.vy/160)}
   }else crash(s,null,pow);
 }
@@ -2412,7 +2650,7 @@ function updGround(dt){
   if(g.seg.kind==='rock'){launch(Math.min(g.a,.35),0,null);return}   // auf einer Felswand kann man nicht fahren
   const a=g.a,ctrl=p.mode==='ground';
   let drag=.0022,acc=G*Math.sin(a)-.035*G*Math.cos(a);
-  const pow=isPow(g.seg);
+  const pow=isPow(g.seg)&&!SUMMER;   // Tiefschnee nur im Winter
   p.tuck=ctrl&&(inGas()||!!p.auto);p.braking=ctrl&&(!p.auto&&(K.ArrowLeft||K.KeyA)&&!inU()&&!inD()||!!GP.brake||!p.auto&&!!TC.brake);
   // Afterbang: was beim Landen schon gedrückt war, zählt erst nach dem Loslassen; ein neuer Druck (außer Gas) bricht ab
   if(p.ab){const cur=(inU()?1:0)|(inD()?2:0)|(inL()?4:0)|(inR()&&!inGas()?8:0),fresh=cur&~p.ab.held;p.ab.held&=cur;
@@ -2424,10 +2662,10 @@ function updGround(dt){
     // Butter 180: auf dem vorderen Ende (regulär die Nose, switch das Tail) schräg lenken = flach um 180° drehen
     const lead=p.sw?-1:1;
     if(!p.bs&&ctrl&&want===lead&&p.butterT>.1&&(inL()||inR())){p.bs={dir:(inR()?1:-1)*(p.sw?-1:1),t:0,end:want};SFX.jump()}
-    if(p.bs){p.bs.t+=dt;if(p.bs.t>=BUTTER180_T){const nm=p.sw?'Switch Tail Butter 180':'Nose Butter 180';p.sw=!p.sw;p.bs=null;p.butter=0;p.butterT=0;p.butterVis=0;p.bLock=true;addPoints(320,nm)}}
+    if(p.bs){p.bs.t+=dt;if(p.bs.t>=BUTTER180_T){const nm=GEAR==='bike'?(p.sw?'Fakie Manual 180':'Nose Manual 180'):p.sw?'Switch Tail Butter 180':'Nose Butter 180';p.sw=!p.sw;p.bs=null;p.butter=0;p.butterT=0;p.butterVis=0;p.bLock=true;addPoints(320,nm)}}
     if(want){p.butterT+=dt;if(Math.random()<.5){const d=(want<0?-9:9)*(p.sw?-1:1);parts.push({x:p.x+Math.cos(a)*d,y:p.y+Math.sin(a)*d-1,vx:-p.s*.2+rand(-25,25),vy:-rand(20,60),life:rand(.2,.45),col:Math.random()<.6?'#ffffff':'#dce8f8',sz:Math.random()<.4?2:1,gr:300})}}
-    const tgt=p.bs?0:want<0?-14:want>0?12:0;p.butterVis=(p.butterVis||0)+(tgt-(p.butterVis||0))*Math.min(1,dt*12)}
-  p.pushT=p.tuck&&SAVE.gear!=='board'&&!p.sw&&!p.ab?(p.pushT||0)+dt:0;   // Switch und Afterbang: kein Stockeinsatz
+    const tgt=p.bs?0:want<0?(GEAR==='bike'?-24:-14):want>0?(GEAR==='bike'?16:12):0;p.butterVis=(p.butterVis||0)+(tgt-(p.butterVis||0))*Math.min(1,dt*12)}
+  p.pushT=p.tuck&&GEAR!=='board'&&!p.sw&&!p.ab?(p.pushT||0)+dt:0;   // Switch und Afterbang: kein Stockeinsatz
   if(p.tuck){drag*=.55;acc+=165}
   if(pow){drag*=g.seg.kind==='deep'?1.25:1.12;acc-=110*clamp(1-p.s/300,0,1)}   // tiefer Powder bremst etwas mehr
   if(p.braking)acc-=260;
@@ -2461,7 +2699,7 @@ function startAfterbang(){
   p.ab={kind:k,t:0,dur:1.05,dir:Math.random()<.5?1:-1,held:(inU()?1:0)|(inD()?2:0)|(inL()?4:0)|(inR()&&!inGas()?8:0)};
 }
 function butterEnd(){const t=p.butterT||0,b=p.butter||0;p.butter=0;p.butterT=0;
-  if(b&&t>=.35&&p.mode==='ground')addPoints(Math.round(Math.min(400,40+t*90)),(p.sw?'Switch ':'')+(b<0?'Butter':'Nose Butter'),t.toFixed(1)+'s')}
+  if(b&&t>=.35&&p.mode==='ground')addPoints(Math.round(Math.min(400,40+t*90)),(p.sw?(GEAR==='bike'?'Fakie ':'Switch '):'')+(GEAR==='bike'?(b<0?'Manual':'Nose Manual'):(b<0?'Butter':'Nose Butter')),t.toFixed(1)+'s')}
 function enterLoop(L){p.mode='loop';p.loop=L;p.phi=0;L.done=true;if(!p.braking)p.s=Math.max(p.s,Math.sqrt(6.2*G*L.R))}
 function updLoop(dt){
   const L=p.loop;
@@ -2571,7 +2809,7 @@ function updAir(dt){
   {const tg=p.grab?1:0,mx=GRAB_BLEND*dt;p.gVis=(p.gVis||0)+clamp(tg-(p.gVis||0),-mx,mx)}
   {const sv=(p.spin-(p.lastSpin??p.spin))/Math.max(dt,1e-4);p.lastSpin=p.spin;const tg=p.corkMode?0:clamp(sv/SPIN_RATE,-1,1)*SPIN_TWIST;p.spinTw=(p.spinTw||0)+(tg-(p.spinTw||0))*Math.min(1,dt*14)}   // Hand braucht ca. 0,11 s zum Ski
   // Pose bestimmt, wo der Schwerpunkt im Körper liegt; der Schwerpunkt selbst fliegt unbeirrt weiter
-  {const pc=poseCOM(airPose(),p.spin,SAVE.gear),k=Math.min(1,dt*10);p.cx=pc.cx;p.cy=pc.cy;p.cz=pc.cz;p.fx+=(pc.fx-p.fx)*k;p.fy+=(pc.fy-p.fy)*k;p.fz=pc.fz}
+  {const pc=poseCOM(airPose(),p.spin,GEAR),k=Math.min(1,dt*10);p.cx=pc.cx;p.cy=pc.cy;p.cz=pc.cz;p.fx+=(pc.fx-p.fx)*k;p.fy+=(pc.fy-p.fy)*k;p.fz=pc.fz}
   // collisions
   const fx=footX(),fy=footY();
   // Reifen und Fässer in der Luft antippen: Bonk, federt nach oben
@@ -2624,7 +2862,7 @@ function startDig(){run.packUsed=true;
   p.mode='dig';p.dig={t:0,mound:15};p.vx=0;p.vy=0;p.s=0;p.spin=0;p.flipAcc=0;p.corkMode=null;p.grab=null;p.gVis=0;p.sw=false;p.bs=null;p.butter=0;p.butterVis=0;p.sink=0;
   wall.x=p.x-470;whiteout=1;shake=6;SFX.die();
   burst(p.x,p.y-8,40,['#ffffff','#e3ecf8','#c9d6e8'],160);
-  showTrick(TX('VERSCHÜTTET!','BURIED!'),TX('Lawinenschaufel raus','Shovel out!'),'bad');
+  showTrick(TX('VERSCHÜTTET!','BURIED!'),SUMMER?TX('Schaufel raus','Shovel out!'):TX('Lawinenschaufel raus','Shovel out!'),'bad');
 }
 function updDig(dt){const d=p.dig;d.t+=dt;whiteout=Math.max(0,whiteout-dt*2.2);
   if(d.t>.45){const k=(d.t-.45)/1.15;d.mound=15*(1-smooth01(k));
@@ -2659,8 +2897,8 @@ function die(reason){
   p.inAir=p.mode==='air';
   if(reason==='wall'){p.inAir=false;p.x=fx0;const g=groundAt(fx0);if(g){p.y=g.y;p.ang=g.a*DEG}p.wallSink=0;p.wTumble=0;p.sink=0}
   p.mode='dead';p.deadReason=reason;p.deadT=0;SFX.die();shake=reason==='void'?0:8;
-  if(reason==='patrol')showTrick('BUSTED!','Ski Patrol','bad');
-  if(reason==='wall')showTrick(TX('LAWINE!','AVALANCHE!'),'','bad');
+  if(reason==='patrol')showTrick('BUSTED!',SUMMER?'Ranger':'Ski Patrol','bad');
+  if(reason==='wall')showTrick(SUMMER?TX('MURE!','MUDSLIDE!'):TX('LAWINE!','AVALANCHE!'),'','bad');
   if(reason==='rock'){showTrick(TX('FELS!','ROCK!'),TX('Voll dagegen','Straight into it'),'bad');burst(p.x,p.y-6,30,['#ffffff','#8d91a3','#e3ecf8'],170)}
 }
 function updRocks(){
@@ -2683,11 +2921,11 @@ function updJTrees(){
   const fx=footX(),fy=footY();
   for(const q of jtrees){
     if(q.hit)continue;const hw=q.w;if(fx<q.x-hw||fx>q.x+hw)continue;
-    const u=Math.abs(fx-q.x)/hw,top=q.ft-q.h*(1-u)*.95;if(fy<=top)continue;
+    const u=Math.abs(fx-q.x)/hw,top=q.shape==='log'?q.ft-q.h*.5-Math.sqrt(Math.max(0,1-u*u))*q.h*.5:q.ft-q.h*(1-u)*.95;if(fy<=top)continue;
     q.hit=true;const g=groundAt(fx),wasAir=p.mode==='air',s=wasAir?Math.hypot(p.vx,p.vy):p.s;
     if(wasAir&&g){p.x=fx;p.y=g.y;p.mode='ground';p.ang=g.a*DEG}
-    burst(q.x,q.y-q.h*.6,18,['#ffffff','#eef4fb','#2b5a43'],120);
-    if(p.mode!=='crash')crash(s,TX('BAUM!','TREE!'),true);
+    burst(q.x,q.y-q.h*.6,18,q.shape==='log'?['#c9a06e','#8a6440','#5a3d26']:['#ffffff','#eef4fb','#2b5a43'],120);
+    if(p.mode!=='crash')crash(s,q.shape==='log'?TX('BAUMSTAMM!','LOG!'):TX('BAUM!','TREE!'),!SUMMER);
     return}
 }
 function updDead(dt){
@@ -2723,7 +2961,7 @@ function updPatrol(dt){
     pat.next-=dt;
     if(pat.next<=0&&p.mode!=='dead'){
       const sx=fx-300,g=groundAt(sx);
-      if(g&&zoneAt(sx)==='free'&&!gapBetween(sx,fx)&&p.mode!=='loop'){Object.assign(pat,{on:true,state:'chase',x:sx,y:g.y,a:g.a,s:Math.min(PAT_MAX,Math.max(240,hSpeed()+60)),sirenT:0});showTrick('SKI PATROL!',TX('Spring einen Gap oder gib Vollgas','Jump a gap or go full speed'),'bad')}
+      if(g&&zoneAt(sx)==='free'&&!gapBetween(sx,fx)&&p.mode!=='loop'){Object.assign(pat,{on:true,state:'chase',x:sx,y:g.y,a:g.a,s:Math.min(PAT_MAX,Math.max(240,hSpeed()+60)),sirenT:0});showTrick(SUMMER?'RANGER!':'SKI PATROL!',TX('Spring einen Gap oder gib Vollgas','Jump a gap or go full speed'),'bad')}
       else pat.next=1.2;
     }
     return;
@@ -2749,7 +2987,7 @@ function updPatrol(dt){
   }else if(pat.state==='stuck'){pat.t-=dt;if(pat.t<=0){pat.on=false;pat.next=rand(24,38)}}
 }
 function updCoins(){
-  let cx,cy;if(p.mode==='air'){cx=p.x;cy=p.y}else{const r=p.ang*RAD;cx=p.x+FOOT*Math.sin(r);cy=p.y-FOOT*Math.cos(r)}
+  let cx,cy;if(p.mode==='air'){cx=p.x;cy=p.y}else{const r=p.ang*RAD;cx=p.x+FOOTG*Math.sin(r);cy=p.y-FOOTG*Math.cos(r)}
   for(const c of coins){if(c.taken)continue;const dx=c.x-cx,dy=c.y-cy;if(dx*dx+dy*dy<110){c.taken=true;run.coins++;SAVE.coins++;run.score+=10;SFX.coin();for(let i=0;i<5;i++)parts.push({x:c.x,y:c.y,vx:rand(-60,60),vy:rand(-80,10),life:.3,col:'#ffe68a',sz:1,gr:200})}}
 }
 function burst(x,y,n,cols,sp){for(let i=0;i<n;i++)parts.push({x,y,vx:rand(-sp,sp),vy:-rand(20,sp*1.2),life:rand(.3,.7),col:cols[i%cols.length],sz:Math.random()<.3?2:1,gr:380})}
@@ -2781,7 +3019,7 @@ function update(dt){
   }
   if(state==='play'&&p.mode==='rail'&&p.rail){if(!grindSnd||grindSnd.rail!==p.rail)grindStart(railMat(p.rail),p.rail);grindUpdate(p.s)}else if(grindSnd)grindStop();
   if(state!=='play')return;
-  {const zg=groundAt(footX());if(zg&&zg.seg.zone!==run.zone){run.zone=zg.seg.zone;if(run.zone==='free')showTrick('FREERIDE ZONE',TX('Powder · Tree Grinds · Drops · Felsen','Powder · Tree Grinds · Drops · Rocks'));else showTrick('SNOWPARK','Kicker · Rails · Big Air')}}
+  {const zg=groundAt(footX());if(zg&&zg.seg.zone!==run.zone){run.zone=zg.seg.zone;if(run.zone==='free')showTrick(SUMMER?'FREERIDE':'FREERIDE ZONE',SUMMER?TX('Trails · Drops · Baumstämme · Felsen','Trails · Drops · Logs · Rocks'):TX('Powder · Tree Grinds · Drops · Felsen','Powder · Tree Grinds · Drops · Rocks'));else showTrick(SUMMER?'BIKEPARK':'SNOWPARK',SUMMER?'Dirt Jumps · Tables · Big Air':'Kicker · Rails · Big Air')}}
   updRocks();updJTrees();updFauna(dt);updWall(dt);updPatrol(dt);if(p.mode!=='dead')updCoins();updParts(dt);updCamera(dt);
   while(gx<cam.x+VW+900)genNext();
   pruneT-=dt;if(pruneT<=0){pruneT=1;const cut=Math.min(wall.x,cam.x,pat.on?pat.x:1e9)-500;
@@ -2798,7 +3036,36 @@ const GROOM=(()=>{const out=[];for(const kk of [0,1])for(const lane of [0,1])for
   g.fillStyle=kk?C.kick:C.s1;g.fillRect(0,0,1,16);g.fillStyle='#dbe6f6';g.fillRect(0,2,1,1);
   for(let k=4;k<16;k+=2){if(v&&k===8)continue;g.fillStyle=k<10?dk:'#dce7f7';g.fillRect(0,k,1,1);if(k<12){g.fillStyle=lt;g.fillRect(0,k-1,1,1)}}
   if(lane){g.fillStyle='rgba(255,255,255,.18)';g.fillRect(0,3,1,12)}out.push(c)}return out})();
+/* Sommer: Bikepark = festgefahrene Dirt-Strecke (hell, darunter Erdschichten), Freeride und Alm = Gras auf Waldboden mit Blumen.
+   Steinchen und Wurzeln in der Erde, an den Spalten ein dunkler Erdrand. */
+const CS={dirtTop:'#c9a271',dirtTop2:'#a9814f',dirt:['#a07a50','#86643f','#6d5133','#553f29'],kick:'#b38653',grass:'#5f9b3c',grassL:'#7fba52',grassD:'#4a7f30',soil:['#6c5536','#58452c','#463723','#352a1b'],lip:'#7a4f2a'};
+function drawTerrainS(cX,cY){
+  let i=segIndexAt(cX);if(i<0){i=0;while(i<segs.length-1&&segs[i].x1<=cX)i++}
+  for(let sx=0;sx<VW;sx++){
+    const wx=cX+sx+.5;while(i<segs.length-1&&wx>=segs[i].x1)i++;
+    const s=segs[i];if(!s||wx<s.x0||wx>=s.x1||s.gap)continue;
+    const wi=cX+sx,d=wi&1,h=((wi*2654435761)>>>0),green=s.zone==='free'||s.kind==='alm'||s.kind==='start'||s.kind==='deep',L=green?CS.soil:CS.dirt;
+    if(s.kind==='rock'){const yr=Math.round(s.y0)-cY,yf=Math.round(s.y1)+20-cY;if(yf>=VH)continue;
+      ctx.fillStyle=L[0];ctx.fillRect(sx,yf,1,VH-yf+1);ctx.fillStyle=L[1];ctx.fillRect(sx,Math.max(yf,yr+16+d),1,VH);ctx.fillStyle=L[2];ctx.fillRect(sx,Math.max(yf,yr+44+d*2),1,VH);ctx.fillStyle=L[3];ctx.fillRect(sx,Math.max(yf,yr+88+d*2),1,VH);continue}
+    const y=Math.round(s.y0+(s.y1-s.y0)*(wx-s.x0)/(s.x1-s.x0))-cY;if(y>=VH)continue;
+    let wd=99;if(!green){const nx=segs[i+1],pv=segs[i-1];if(nx&&nx.gap&&s.x1-wx<8)wd=s.x1-wx;else if(pv&&pv.gap&&wx-s.x0<8)wd=wx-s.x0}
+    ctx.fillStyle=green?L[0]:(s.kind==='kicker'?CS.kick:L[0]);ctx.fillRect(sx,y,1,VH-y+1);
+    ctx.fillStyle=L[1];ctx.fillRect(sx,y+16+d,1,VH);ctx.fillStyle=L[2];ctx.fillRect(sx,y+44+d*2,1,VH);ctx.fillStyle=L[3];ctx.fillRect(sx,y+88+d*2,1,VH);
+    if(h%53===0){ctx.fillStyle='#8f877a';ctx.fillRect(sx,y+6+(h>>>8)%22,2,1)}else if(h%71===0){ctx.fillStyle='#3e2c1c';ctx.fillRect(sx,y+5+(h>>>9)%14,1,2)}   // Steinchen, Wurzeln
+    if(wd<8&&y+4<VH){ctx.globalAlpha=.42*(1-wd/8);ctx.fillStyle='#2e2116';ctx.fillRect(sx,y+4,1,VH-y-4);ctx.globalAlpha=1}
+    if(green){const b=h%5===0?2:h%3===0?1:0,pb=s.kind==='deep'?Math.max(0,Math.round(1.6+1.3*Math.sin(wi*.17)+.9*Math.sin(wi*.41+1.3))):0;
+      ctx.fillStyle=CS.grassD;ctx.fillRect(sx,y+2,1,2);ctx.fillStyle=CS.grass;ctx.fillRect(sx,y-b-pb,1,2+b+pb);
+      if(h%7===0){ctx.fillStyle=CS.grassL;ctx.fillRect(sx,y-b-pb,1,1)}
+      if(h%97===0){const k=(h>>>5)%3;ctx.fillStyle=k===0?'#f2d24a':k===1?'#ffffff':'#c87ad8';ctx.fillRect(sx,y-b-pb-1,1,1)}   // Blumen
+      continue}
+    ctx.fillStyle=CS.dirtTop;ctx.fillRect(sx,y,1,2);ctx.fillStyle=CS.dirtTop2;ctx.fillRect(sx,y+2,1,1);
+    if(h%9<2){ctx.fillStyle='#b48d5e';ctx.fillRect(sx,y+1,1,1)}
+    if(h%23===0&&s.kind!=='kicker'){ctx.fillStyle=CS.grass;ctx.fillRect(sx,y-1,1,1)}   // Grasbüschel am Streckenrand
+    if(s.kind==='kicker'&&s.lip&&s.x1-wx<3){ctx.fillStyle=CS.lip;ctx.fillRect(sx,y,1,3)}   // Holzkante am Absprung
+  }
+}
 function drawTerrain(cX,cY){
+  if(SUMMER){drawTerrainS(cX,cY);return}
   let i=segIndexAt(cX);if(i<0){i=0;while(i<segs.length-1&&segs[i].x1<=cX)i++}
   for(let sx=0;sx<VW;sx++){
     const wx=cX+sx+.5;while(i<segs.length-1&&wx>=segs[i].x1)i++;
@@ -3000,7 +3267,9 @@ function drawTrees(cX,cY){for(const t of trees){const V=TREE_SPR[t.k]||TREE_SPR[
   const g0=groundAt(t.x),gl=groundAt(t.x-V.w),gr=groundAt(t.x+V.w),y0=g0?g0.y:t.y,low=Math.max(gl?gl.y:y0,gr?gr.y:y0);
   const foot=Math.max(y0+2,low+2-(V.tr-3)),sx=Math.round(t.x-cX-W/2),sy=Math.round(foot-cY-V.base);if(sx>VW||sx+W<0||sy>VH||sy+sp.height<0)continue;
   ctx.save();clipAboveGround(sx,sy-2,W,cX,cY,1);if(t.f){ctx.translate(sx*2+W,0);ctx.scale(-1,1)}ctx.drawImage(sp,sx,sy);ctx.restore()}}
-function drawJTrees(cX,cY){if(!jtrees.length)return;const S=jtSprites();for(const q of jtrees){const V=S[q.k],sp=V.c,W=sp.width;
+function drawJTrees(cX,cY){if(!jtrees.length)return;const S=jtSprites();for(const q of jtrees){
+  if(q.shape==='log'){const L=logSprites()[q.k],sx=Math.round(q.x-cX-L.S/2),sy=Math.round(q.ft-cY-L.r*2-1.5);if(sx>VW||sx+L.S<0||sy>VH||sy+L.S<0)continue;ctx.drawImage(L.c,sx,sy);continue}
+  const V=S[q.k],sp=V.c,W=sp.width;
   const g0=groundAt(q.x),gl=groundAt(q.x-V.w),gr=groundAt(q.x+V.w),y0=g0?g0.y:q.y,low=Math.max(gl?gl.y:y0,gr?gr.y:y0);
   const foot=Math.max(y0+1,low),sx=Math.round(q.x-cX-W/2),sy=Math.round(foot-cY-V.base);if(sx>VW||sx+W<0||sy>VH||sy+sp.height<0)continue;
   ctx.save();clipAboveGround(sx,sy-2,W,cX,cY,1);if(q.f){ctx.translate(sx*2+W,0);ctx.scale(-1,1)}ctx.drawImage(sp,sx,sy);ctx.restore()}}
@@ -3022,15 +3291,15 @@ function drawLifts(cX,alpha){
     const mA=Math.max(0,Math.floor(x0-span*.2)),mB=Math.min(VW,Math.ceil(x0+span*1.48));
     const bot=Math.round(yb+8);
     for(let x=mA;x<=mB;x++){const yi=Math.round(surf(x)),u=(x-x0)/span;if(yi>=bot)continue;
-      ctx.fillStyle=u<1?'#eaf1fb':'#c3d2e8';ctx.fillRect(x,yi,1,bot-yi);
-      const f0=Math.max(yi,bot-9);ctx.fillStyle=u<1?'#e2ebf8':'#cfdaec';ctx.fillRect(x,f0,1,bot-f0);
-      ctx.fillStyle=u<1?'#ffffff':'#dde7f5';ctx.fillRect(x,yi,1,1)}
-    for(let j=0;j<3;j++){ctx.fillStyle='#ffffff';for(let t=0;t<1;t+=.004){const x=x0+span*(1-t*.98)+Math.sin(t*7+j*2.1)*span*.05+(j-1)*span*.06;if(x<mA||x>mB)continue;const yi=surf(x);const yy=yi+(bot-yi)*t*(.75+j*.08);ctx.fillRect(Math.round(x),Math.round(yy),2,1)}}
+      ctx.fillStyle=SUMMER?(u<1?'#80b65b':'#6a9a4c'):(u<1?'#eaf1fb':'#c3d2e8');ctx.fillRect(x,yi,1,bot-yi);
+      const f0=Math.max(yi,bot-9);ctx.fillStyle=SUMMER?(u<1?'#76aa52':'#62914a'):(u<1?'#e2ebf8':'#cfdaec');ctx.fillRect(x,f0,1,bot-f0);
+      ctx.fillStyle=SUMMER?(u<1?'#98cc6e':'#7aac58'):(u<1?'#ffffff':'#dde7f5');ctx.fillRect(x,yi,1,1)}
+    for(let j=0;j<3;j++){ctx.fillStyle=SUMMER?'#c9a06a':'#ffffff';for(let t=0;t<1;t+=.004){const x=x0+span*(1-t*.98)+Math.sin(t*7+j*2.1)*span*.05+(j-1)*span*.06;if(x<mA||x>mB)continue;const yi=surf(x);const yy=yi+(bot-yi)*t*(.75+j*.08);ctx.fillRect(Math.round(x),Math.round(yy),2,1)}}
     // einzelne Tannen an den unteren Hängen statt eines Waldbands
     for(let j=0;j<46;j++){if(hash01(k*57.3+j*1.37)>.55)continue;const tx=Math.round(x0-span*.12+hash01(k*11.1+j*2.9)*span*1.5);if(tx<mA||tx>mB)continue;
       const yi=surf(tx);if(yi>bot-4)continue;const ty=Math.round(yi+(bot-yi)*(.45+.5*hash01(k*3.7+j*5.3))),th=3+Math.floor(hash01(k+j*7.7)*4);
-      ctx.fillStyle=(tx-x0)/span<1?'#3a5d70':'#33526a';for(let r=0;r<th;r++){const w=Math.max(0,Math.round((th-r)*.35));ctx.fillRect(tx-w,ty-r,w*2+1,1)}
-      ctx.fillStyle='#f4f8fd';ctx.fillRect(tx,ty-th,1,1)}
+      ctx.fillStyle=SUMMER?'#2e5a33':(tx-x0)/span<1?'#3a5d70':'#33526a';for(let r=0;r<th;r++){const w=Math.max(0,Math.round((th-r)*.35));ctx.fillRect(tx-w,ty-r,w*2+1,1)}
+      if(!SUMMER){ctx.fillStyle='#f4f8fd';ctx.fillRect(tx,ty-th,1,1)}}
     const nT=Math.max(2,Math.round(span/80));
     for(let i=1;i<nT;i++){const u=i/nT,tx=Math.round(x0+span*u),ty=Math.round(cyl(u,0));ctx.fillStyle='#3e4558';ctx.fillRect(tx-1,ty,2,Math.round(surf(tx)+2-ty));ctx.fillRect(tx-3,ty-1,7,2)}
     ctx.fillStyle='#2f3546';for(const o of [0,3])for(let x=0;x<=span;x++)ctx.fillRect(Math.round(x0+x),Math.round(cyl(x/span,o)),1,1);
@@ -3082,7 +3351,10 @@ function drawPatrol(cX,cY){
 /* Lawine als Pulverwolke wie auf Fotos: viele Blumenkohl-Ballen, oben hell, unten bläulicher Schatten.
    Ballen entstehen unten an der Front, steigen an der Stirn hoch, wachsen und fallen langsam zurück: vorne türmt sich ein großer Kopf.
    Alles aus der Zeit T berechnet (kein Zustand), Ballen-Sprites einmal vorgerendert. Die Kollision bleibt avaH. */
-const AVA_TONE=['#ffffff','#eff3f9','#dce4ee','#c2cede','#a2b1c7'].map(hexRgb),AVA_FILL='#d3dce8';
+let AVA_TONE,AVA_C;
+function avaColors(){AVA_TONE=(SUMMER?['#a8875e','#8f704c','#77593d','#5f4631','#4a3626']:['#ffffff','#eff3f9','#dce4ee','#c2cede','#a2b1c7']).map(hexRgb);
+  AVA_C=SUMMER?{fill:'#6f553b',mid:'#5c4531',sh:'#4a3826',d1:'#5b5249',d2:'#7f6e5b'}:{fill:'#d3dce8',mid:'#c2cede',sh:'#a2b1c7',d1:'#8f9fb8',d2:'#a9b7cc'}}
+avaColors();
 const AVA_L=(()=>{const v=[.38,-.82,.3],n=Math.hypot(...v);return v.map(x=>x/n)})();
 const AVA_RATE=14,AVA_DMAX=420,AVA_HMAX=128,avaSpr=new Map();
 const avaR=r=>r<12?Math.max(2,Math.round(r)):r<26?Math.round(r/2)*2:Math.min(57,Math.round(r/3)*3);
@@ -3112,8 +3384,8 @@ function drawWall(cX,cY){
   // Füllung hinter den Ballen, damit kein Himmel durchscheint
   {const xa=Math.max(0,Math.round(wall.x-AVA_DMAX-cX)),xb=Math.min(VW,wsx-14);
     for(let sx=xa;sx<xb;sx++){const wx=cX+sx+.5,gw=avaGround(wx);if(gw==null)continue;const gy=Math.round(gw-cY),top=Math.round(gw-cY-avaEnv(wall.x-wx)*.62),mid=Math.round(top+(gy-top)*.55);
-      ctx.fillStyle=AVA_FILL;ctx.fillRect(sx,top,1,mid-top);ctx.fillStyle='#c2cede';ctx.fillRect(sx,mid,1,gy-mid+3);
-      ctx.fillStyle=AVA_FILL;for(let y=mid;y<mid+4;y++)if(BAYER[y&3][sx&3]<(mid+4-y)*4)ctx.fillRect(sx,y,1,1)}}
+      ctx.fillStyle=AVA_C.fill;ctx.fillRect(sx,top,1,mid-top);ctx.fillStyle=AVA_C.mid;ctx.fillRect(sx,mid,1,gy-mid+3);
+      ctx.fillStyle=AVA_C.fill;for(let y=mid;y<mid+4;y++)if(BAYER[y&3][sx&3]<(mid+4-y)*4)ctx.fillRect(sx,y,1,1)}}
   // Ballen: entstehen an der Front, fallen zurück, steigen und wachsen
   const L=[],k1=Math.floor(T*AVA_RATE),k0=k1-Math.ceil(AVA_RATE*(AVA_DMAX+5)/13);
   for(let k=k0;k<=k1;k++){const a=T-k/AVA_RATE;if(a<0)continue;
@@ -3133,18 +3405,21 @@ function drawWall(cX,cY){
   for(const q of L){const s=puffSprite(avaR(q.r),q.v);ctx.drawImage(s,Math.round(q.x-s.width/2),Math.round(q.y-s.height/2))}
   // Kontaktschatten am Boden und Brocken, die vorne aus der Walze kullern
   {const xa=Math.max(0,Math.round(wall.x-AVA_DMAX-cX)),xb=Math.min(VW,wsx+6);
-    for(let sx=xa;sx<xb;sx++){const wx=cX+sx+.5,gw=avaGround(wx);if(gw==null)continue;const gy=Math.round(gw-cY);ctx.fillStyle=wx>wall.x-4?'#c2cede':'#a2b1c7';ctx.fillRect(sx,gy-1,1,2)}
+    for(let sx=xa;sx<xb;sx++){const wx=cX+sx+.5,gw=avaGround(wx);if(gw==null)continue;const gy=Math.round(gw-cY);ctx.fillStyle=wx>wall.x-4?AVA_C.mid:AVA_C.sh;ctx.fillRect(sx,gy-1,1,2)}
     for(let i=0;i<16;i++){const d=((i*13.7+T*(34+i*2.3))%74)-6,wx=wall.x-d,gw=avaGround(wx);if(gw==null)continue;
-      const hh=Math.abs(Math.sin(T*(4+i*.37)+i*1.9))*(4+(i%5)*2.4),sz=i%4===0?2:1;ctx.fillStyle=i%3===0?'#8f9fb8':'#a9b7cc';ctx.fillRect(Math.round(wx-cX),Math.round(gw-cY-1-hh),sz,sz)}}
+      const hh=Math.abs(Math.sin(T*(4+i*.37)+i*1.9))*(4+(i%5)*2.4),sz=i%4===0?2:1;ctx.fillStyle=i%3===0?AVA_C.d1:AVA_C.d2;ctx.fillRect(Math.round(wx-cX),Math.round(gw-cY-1-hh),sz,sz)}}
 }
 function initFlakes(){flakes=[];for(let i=0;i<140;i++)flakes.push({x:Math.random()*VW,y:Math.random()*VH,z:rand(.4,1.2),o:Math.random()*6})}
 let lastCX=0,lastCY=0;
 function drawFlakes(cX,cY,dt){
   const dx=cX-lastCX,dy=cY-lastCY;lastCX=cX;lastCY=cY;
-  for(const f of flakes){f.x-=dx*f.z*.6;f.y-=dy*f.z*.6;f.y+=dt*22*f.z;f.x+=Math.sin(T*1.3+f.o)*dt*8;
+  for(const f of flakes){f.x-=dx*f.z*.6;f.y-=dy*f.z*.6;f.y+=dt*(SUMMER?-5:22)*f.z;f.x+=Math.sin(T*1.3+f.o)*dt*8;
     if(f.x<0)f.x+=VW;if(f.x>=VW)f.x-=VW;if(f.y<0)f.y+=VH;if(f.y>=VH)f.y-=VH;
+    if(SUMMER){if(f.o>1.2)continue;ctx.fillStyle=f.z>1?'#fff6d2':'#f1f3e4';ctx.fillRect(Math.round(f.x),Math.round(f.y),1,1);continue}   // Sommer: nur ein paar Pollen
     ctx.fillStyle=f.z>1?'#ffffff':'#e6efff';const s=f.z>1?2:1;ctx.fillRect(Math.round(f.x),Math.round(f.y),s,s)}
 }
+// Sommer: Schneefarben der Partikel (Spray, Landung, Sturz) als Staub und Erde zeichnen
+const DIRT_MAP={'#ffffff':'#d2b386','#e3ecf8':'#b08a5e','#dce8f8':'#c4a274','#e6eefa':'#b8956a','#d8e6fa':'#c9a97c','#dbe8fa':'#a98559','#b9cdea':'#8e6c47','#e4eefb':'#bf9d70','#eef4fb':'#9a7a52','#c9d6e8':'#8a6a46','#d8e3f2':'#c4a274','#eef2f7':'#b08a5e','#e9eef6':'#d9cbb5','#d3dff0':'#a98559','#cdd5e2':'#8e6c47','#e3e9f2':'#b8956a'};
 function render(dt){
   T+=dt;runCliffJobs(2.5);
   let cX=Math.round(cam.x),cY=Math.round(cam.y);
@@ -3170,7 +3445,7 @@ function render(dt){
   if(!worldCv||worldCv.width!==VW){[worldCv,worldCtx]=mk(VW,VH)}
   ctx=worldCtx;ctx.clearRect(0,0,VW,VH);
   drawTerrain(cX,cY);drawAlm(cX,cY);drawCrevasses(cX,cY);drawGapMist(cX,cY);drawCliffs(cX,cY);drawTrees(cX,cY);drawFauna(cX,cY);drawFloods(cX,cY);drawRocks(cX,cY);drawJTrees(cX,cY);drawLoops(cX,cY);drawSigns(cX,cY);drawRails(cX,cY);drawBonks(cX,cY);drawCoins(cX,cY);drawPatrol(cX,cY);drawPlayer(cX,cY);
-  for(const q of parts){ctx.fillStyle=q.col;ctx.fillRect(Math.round(q.x-cX),Math.round(q.y-cY),q.sz,q.sz)}
+  for(const q of parts){ctx.fillStyle=SUMMER&&DIRT_MAP[q.col]||q.col;ctx.fillRect(Math.round(q.x-cX),Math.round(q.y-cY),q.sz,q.sz)}
   drawGapFog(cX,cY);drawWall(cX,cY);
   const lamp=applyNight(cX,cY,curDS,fm);
   ctx=mainCtx;ctx.drawImage(worldCv,0,0);
@@ -3178,7 +3453,7 @@ function render(dt){
   if(curDS.night>.05&&fm<.95)drawFloodFog(cX,cY,curDS.night*(1-fm));
   drawFlakes(cX,cY,dt);
   if(state==='play'||state==='pause')drawPatrolPointer(cX,cY);
-  if(whiteout>0){ctx.fillStyle='rgba(255,255,255,'+whiteout.toFixed(3)+')';ctx.fillRect(0,0,VW,VH)}
+  if(whiteout>0){ctx.fillStyle=(SUMMER?'rgba(92,66,40,':'rgba(255,255,255,')+whiteout.toFixed(3)+')';ctx.fillRect(0,0,VW,VH)}
   if(state==='play'||state==='pause')drawHud();
 }
 
@@ -3198,7 +3473,21 @@ function drawHud(){
 /* ================= FLOW ================= */
 const screens=['menu','help','shop','pause','over','rank','notes'];
 function show(id){screens.forEach(s=>$(s).hidden=s!==id);if(id){const b=$(id).querySelector('.btn');if(b&&!isTouch)b.focus({preventScroll:true})}}
-function refreshMenu(){if(cloudHook)cloudShow();$('kMute').textContent=SAVE.gear==='board'?'INDY':'MUTE';$('kUp').textContent=SAVE.gear==='board'?'JAPAN':'BLUNT';gstickEl.classList.toggle('brd',SAVE.gear==='board');document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.gear===SAVE.gear)));$('bAssist').setAttribute('aria-pressed',String(!!SAVE.assist));{const own=!!SAVE.owned.pk_free,on=!!SAVE.equip.pack&&SAVE.equip.pack!=='pk_none',b=$('bPack');b.hidden=!own;b.setAttribute('aria-pressed',String(on));const ON=TX('AN','ON'),OFF=TX('AUS','OFF');b.textContent=TX('RUCKSACK: ','BACKPACK: ')+(on?ON:OFF)}$('bAssist').textContent=TX('LANDEHILFE: ','LANDING ASSIST: ')+(SAVE.assist?TX('AN','ON'):TX('AUS','OFF'));$('bMusic').textContent=TX('MUSIK: ','MUSIC: ')+(SAVE.music!==false?TX('AN','ON'):TX('AUS','OFF'));$('bMusic').setAttribute('aria-pressed',String(SAVE.music!==false));setT($('mCoins'),String(SAVE.coins));setT($('mBest'),String(SAVE.best));setT($('mDist'),SAVE.bestDist+' m')}
+/* Saisonwechsel: alles, was nach Schnee oder Sommer aussieht, neu bauen (Hintergrund, Bäume, Alm, Ranger), Bild-Caches leeren, neue Welt */
+function seasonVisuals(){MPAL=SUMMER?MPAL_S:MPAL_W;avaColors()}
+function applySeason(){SUMMER=SAVE.season==='summer';setGear();
+  sprCache.clear();comCache.clear();mCache.clear();for(const k in mLuts)delete mLuts[k];avaSpr.clear();JT_SPR=null;for(const k in FAUNA_SPR)delete FAUNA_SPR[k];
+  if(typeof seasonVisuals==='function')seasonVisuals();
+  rebuildBg();makeTreeSprites();makeAlmSprites();PATROL_SPR=[makePatrol(true),makePatrol(false)];initFlakes();
+  resetRun();updCamera(0,true);refreshMenu()}
+const PAD_LB={n:['BLUNT','SUPER'],ne:['TRUCK','X-UP'],e:['NOSE','WHIP'],se:['VENOM','CAN-CAN'],s:['MUTE','TABLE'],sw:['OCTO','NAC-NAC'],w:['TAIL','NOHAND'],nw:['JAPAN','1-FOOT']};
+function padLabels(){for(const d in PAD_LB){const el=document.querySelector('#gstick .lb.'+d);if(el)el.textContent=GEAR==='bike'?PAD_LB[d][1]:PAD_LB[d][0]}
+  if(GEAR==='board'){$('kMute').textContent='INDY';$('kUp').textContent='JAPAN'}gstickEl.classList.toggle('brd',GEAR==='board')}
+function refreshMenu(){if(cloudHook)cloudShow();setT($('hAvalT'),SUMMER?TX('MURE','MUDSLIDE'):TX('LAWINE','AVALANCHE'));
+  document.querySelectorAll('.gearbtn[data-season]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.season===SAVE.season)));$('gearRow').hidden=SUMMER;
+  setT($('mEyebrow'),SUMMER?TX('Downhill MTB · Bikepark Escape','Downhill MTB · Bike Park Escape'):TX('Ski & Snowboard · Snowpark Escape','Ski & Snowboard · Snowpark Escape'));
+  setT($('mLede'),SUMMER?TX('Die Mure rollt von hinten, der Ranger jagt dich. Spring die Gaps, steh deine Tricks, sammel Münzen.','The mudslide is rolling in from behind and the ranger is chasing you. Jump the gaps, land your tricks, grab the coins.')
+    :TX('Die Lawine schiebt von hinten, die Ski Patrol jagt dich. Spring die Gaps, steh deine Tricks, sammel Münzen.','The avalanche is pushing from behind and the ski patrol is chasing you. Jump the gaps, land your tricks, grab the coins.'));padLabels();document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.gear===SAVE.gear)));$('bAssist').setAttribute('aria-pressed',String(!!SAVE.assist));{const own=!!SAVE.owned.pk_free,on=!!SAVE.equip.pack&&SAVE.equip.pack!=='pk_none',b=$('bPack');b.hidden=!own;b.setAttribute('aria-pressed',String(on));const ON=TX('AN','ON'),OFF=TX('AUS','OFF');b.textContent=TX('RUCKSACK: ','BACKPACK: ')+(on?ON:OFF)}$('bAssist').textContent=TX('LANDEHILFE: ','LANDING ASSIST: ')+(SAVE.assist?TX('AN','ON'):TX('AUS','OFF'));$('bMusic').textContent=TX('MUSIK: ','MUSIC: ')+(SAVE.music!==false?TX('AN','ON'):TX('AUS','OFF'));$('bMusic').setAttribute('aria-pressed',String(SAVE.music!==false));setT($('mCoins'),String(SAVE.coins));setT($('mBest'),String(SAVE.best));setT($('mDist'),SAVE.bestDist+' m')}
 let hintTimer=0;
 function showHint(txt,ms){const h=$('hint');h.hidden=false;h.style.opacity='1';h.textContent=txt;clearTimeout(hintTimer);hintTimer=setTimeout(()=>{h.style.opacity='0';setTimeout(()=>h.hidden=true,700)},ms)}
 // Ende der Alm-Ausfahrt: ab hier steuert man selbst (überspringen = direkt ans Ende des Plateaus)
@@ -3217,8 +3506,8 @@ function gameOver(){
   if(state!=='play')return;
   state='over';$('hud').hidden=true;$('avalGlow').style.opacity='0';clearTimeout(hintTimer);$('hint').hidden=true;
   const meters=Math.max(0,Math.floor(footX()/10)),score=run.score+meters;
-  const reasons=LANG==='en'?{rock:['Full speed into a rock','ROCK!'],quit:['Gave up','RUN OVER'],void:['Came up short','FELL INTO THE VOID'],wall:['The avalanche was faster','BURIED'],patrol:['The ski patrol got you','BUSTED']}
-    :{rock:['Volle Kanne gegen einen Felsen','FELS!'],quit:['Aufgegeben','RUN BEENDET'],void:['Zu kurz gesprungen','INS VOID GEFALLEN'],wall:['Die Lawine war schneller','ÜBERROLLT'],patrol:['Die Ski Patrol hat dich','ERWISCHT']};
+  const reasons=LANG==='en'?{rock:['Full speed into a rock','ROCK!'],quit:['Gave up','RUN OVER'],void:['Came up short','FELL INTO THE VOID'],wall:SUMMER?['The mudslide was faster','BURIED']:['The avalanche was faster','BURIED'],patrol:SUMMER?['The ranger got you','BUSTED']:['The ski patrol got you','BUSTED']}
+    :{rock:['Volle Kanne gegen einen Felsen','FELS!'],quit:['Aufgegeben','RUN BEENDET'],void:['Zu kurz gesprungen','INS VOID GEFALLEN'],wall:SUMMER?['Die Mure war schneller','VERSCHÜTTET']:['Die Lawine war schneller','ÜBERROLLT'],patrol:SUMMER?['Der Ranger hat dich','ERWISCHT']:['Die Ski Patrol hat dich','ERWISCHT']};
   const [r1,r2]=reasons[p.deadReason]||['Game Over','GAME OVER'];
   $('oReason').textContent=r1;$('oTitle').textContent=r2;
   $('oScore').textContent=score;$('oDist').textContent=meters+' m';$('oCoins').textContent='+'+run.coins;$('oTrick').textContent=run.bestTrick?run.bestTrick+' ('+run.bestPts+')':'–';
@@ -3234,7 +3523,8 @@ function openShop(){tryOn={};$('shopMsg').textContent='';show('shop');renderShop
 function renderShop(){
   setT($('sCoins'),String(SAVE.coins));
   const tabs=$('tabs');tabs.innerHTML='';
-  for(const c of CATS){const b=document.createElement('button');b.className='tab';b.role='tab';b.textContent=catName(c);b.setAttribute('aria-selected',c===shopCat);b.onclick=()=>{shopCat=c;renderShop()};tabs.appendChild(b)}
+  const cats=CATS.filter(c=>SUMMER?!['skis','board','poles'].includes(c):c!=='bike');if(!cats.includes(shopCat))shopCat='helmet';
+  for(const c of cats){const b=document.createElement('button');b.className='tab';b.role='tab';b.textContent=catName(c);b.setAttribute('aria-selected',c===shopCat);b.onclick=()=>{shopCat=c;renderShop()};tabs.appendChild(b)}
   const grid=$('grid');grid.innerHTML='';
   for(const it of SHOP[shopCat].items){
     const owned=it.price===0||SAVE.owned[it.id],eq=SAVE.equip[shopCat]===it.id,sel=tryOn[shopCat]===it.id;
@@ -3261,11 +3551,11 @@ function shopClick(it,el){
 }
 function drawPreview(id,eq,gear,pushAnim){
   const c=$(id);if(!c||c.closest('.screen').hidden)return;const g=c.getContext('2d');g.imageSmoothingEnabled=false;
-  g.clearRect(0,0,64,64);g.fillStyle='#ffffff';g.fillRect(0,50,64,14);g.fillStyle='#d0def3';g.fillRect(0,56,64,8);g.fillStyle='#b6c9e8';g.fillRect(0,61,64,3);
+  g.clearRect(0,0,64,64);g.fillStyle=SUMMER?'#6ea24a':'#ffffff';g.fillRect(0,50,64,14);g.fillStyle=SUMMER?'#8a6a45':'#d0def3';g.fillRect(0,56,64,8);g.fillStyle=SUMMER?'#6d5133':'#b6c9e8';g.fillRect(0,61,64,3);
   const seq=[['ride',0,true],['ride',90,true],['ride',180,true],['ride',270,true],['blunt',0,false],['mute',0,false],['nose',60,false],['tail',0,false]];
   let [pose,phi,look]=seq[Math.floor(T/.9)%seq.length];
   if(pushAnim){pose='push'+(Math.floor(((T/.55)%1)*8)%8);phi=0;look=false}
-  g.drawImage(getSprite(pose,phi,look,eq,gear),32-SCX,(pose==='ride'||pushAnim?39:36)-SCY);
+  g.drawImage(getSprite(pose,phi,look,eq,gear),32-SCX,((gear||GEAR)==='bike'?(pose==='ride'?36:32):pose==='ride'||pushAnim?39:36)-SCY);
 }
 
 /* ================= LAYOUT ================= */
@@ -3377,7 +3667,7 @@ $('bRank').onclick=openRank;$('bNotes').onclick=()=>show('notes');$('bNotesBack'
    seit dem letzten Abgleich dazukam oder ausgegeben wurde), Outfit und Einstellungen vom zuletzt geänderten Gerät.
    Wer ohne Konto gespielt hat und sich anmeldet, nimmt seinen Fortschritt ins Konto mit. Der Stand eines anderen Kontos auf
    diesem Gerät wird dagegen nie übernommen. */
-const CLOUD_KEYS=['coins','best','bestDist','owned','equip','gear','assist','packLast','music','lang','t'];
+const CLOUD_KEYS=['coins','best','bestDist','owned','equip','gear','season','assist','packLast','music','lang','t'];
 let cloudState='',cloudTimer=0,cloudRun=null,cloudAgain=false;
 function cloudData(s){const o={};for(const k of CLOUD_KEYS)o[k]=s[k];return o}
 function cloudMerge(local,cloud,uid){
@@ -3385,7 +3675,7 @@ function cloudMerge(local,cloud,uid){
   if(!cloud)return Object.assign({},local,{uid,sc:local.coins});
   const base=mine?local.sc:0,newer=local.t>cloud.t?local:cloud,coins=Math.max(0,cloud.coins+local.coins-base);
   return {coins,best:Math.max(cloud.best,local.best),bestDist:Math.max(cloud.bestDist,local.bestDist),owned:Object.assign({},cloud.owned,local.owned),
-    equip:Object.assign({},newer.equip),gear:newer.gear,assist:newer.assist,packLast:newer.packLast,music:newer.music,lang:newer.lang||(newer===local?cloud:local).lang||null,t:Math.max(local.t,cloud.t),uid,sc:coins}}
+    equip:Object.assign({},newer.equip),gear:newer.gear,season:newer.season,assist:newer.assist,packLast:newer.packLast,music:newer.music,lang:newer.lang||(newer===local?cloud:local).lang||null,t:Math.max(local.t,cloud.t),uid,sc:coins}}
 function cloudSoon(ms){if(!SESS)return;clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>{cloudTimer=0;cloudSync()},ms==null?1500:ms)}
 async function cloudSync(){
   if(!SESS)return;
@@ -3402,9 +3692,9 @@ async function cloudSync(){
     // Was während des Abgleichs auf dem Gerät passiert ist (Kauf, Lauf zu Ende), obendrauf rechnen und gleich nochmal abgleichen
     const now=normSave(SAVE);
     if(now.t!==before.t){m.coins=Math.max(0,m.coins+now.coins-before.coins);m.owned=Object.assign(m.owned,now.owned);m.best=Math.max(m.best,now.best);m.bestDist=Math.max(m.bestDist,now.bestDist);
-      m.equip=now.equip;m.gear=now.gear;m.assist=now.assist;m.packLast=now.packLast;m.music=now.music;m.lang=now.lang||m.lang;m.t=now.t;cloudAgain=true}
+      m.equip=now.equip;m.gear=now.gear;m.season=now.season;m.assist=now.assist;m.packLast=now.packLast;m.music=now.music;m.lang=now.lang||m.lang;m.t=now.t;cloudAgain=true}
     Object.assign(SAVE,m);writeSave();cloudState='ok';if(SAVE.lang&&SAVE.lang!==LANG){LANG=SAVE.lang;applyLang()}
-    if(state==='menu')refreshMenu();if(!$('shop').hidden)renderShop()})();
+    if(state==='menu'){if((SAVE.season==='summer')!==SUMMER)applySeason();else refreshMenu()}if(!$('shop').hidden)renderShop()})();
   try{await cloudRun}finally{cloudRun=null;cloudShow();if(cloudAgain){cloudAgain=false;cloudSoon(400)}}
 }
 function cloudShow(){
@@ -3421,7 +3711,8 @@ async function onlineAfterRun(score,meters,trick){const o=$('oRank');
   const m=await sbMyRank();o.textContent=m?TX('Rangliste: Platz '+m.rank+' mit '+m.best+' Punkten','Leaderboard: rank '+m.rank+' with '+m.best+' points'):TX('In der Rangliste eingetragen.','Added to the leaderboard.')}
 
 /* ================= BUTTONS ================= */
-document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.onclick=()=>{SAVE.gear=b.dataset.gear;persist();refreshMenu()});
+document.querySelectorAll('.gearbtn[data-gear]').forEach(b=>b.onclick=()=>{SAVE.gear=b.dataset.gear;setGear();persist();refreshMenu()});
+document.querySelectorAll('.gearbtn[data-season]').forEach(b=>b.onclick=()=>{if(SAVE.season===b.dataset.season)return;SAVE.season=b.dataset.season;persist();applySeason()});
 $('bAssist').onclick=()=>{SAVE.assist=!SAVE.assist;persist();refreshMenu()};
 document.querySelectorAll('.gearbtn[data-lang]').forEach(b=>b.onclick=()=>{LANG=b.dataset.lang;SAVE.lang=LANG;persist();applyLang();refreshMenu()});
 $('bMusic').onclick=()=>{SAVE.music=SAVE.music===false;persist();refreshMenu();unlockAudio();musicSync()};
@@ -3468,7 +3759,7 @@ function pollGamepads(){
     // rechter Stick: mit gehaltenem R1 Grabs, sonst am Boden Butter (unten), Nose Butter (oben), schräg = Butter 180
     const rx=ax[2]||0,ry=ax[3]||0;let bu=false,bd=false,bl=false,br=false;
     if(Math.hypot(rx,ry)>.45){const s=((Math.atan2(-ry,rx)*DEG)%360+360)%360;
-      if(bt(5))GP.g=GRAB_DIR[SAVE.gear==='board'?(s>=45&&s<135?'n':s>=135&&s<225?'w':s>=225&&s<315?'s':'e'):['e','ne','n','nw','w','sw','s','se'][Math.floor(((s+22.5)%360)/45)]];
+      if(bt(5))GP.g=GRAB_DIR[GEAR==='board'?(s>=45&&s<135?'n':s>=135&&s<225?'w':s>=225&&s<315?'s':'e'):['e','ne','n','nw','w','sw','s','se'][Math.floor(((s+22.5)%360)/45)]];
       else{const near=c=>Math.abs(((s-c+540)%360)-180)<=24;if(near(90))bu=true;else if(near(270))bd=true;else if(!near(0)&&!near(180)){bu=s<180;bd=!bu;br=s<90||s>270;bl=!br}}}
     // am Boden: linker Stick links/rechts spannt die Drehung vor (geht beim Absprung sofort los); gebremst wird mit dem unteren Knopf
     if(p.mode==='ground'||p.mode==='crash'){GP.wind=GP.left?-1:GP.right?1:0;GP.brake=now.a;GP.up=bu;GP.down=bd;GP.left=bl;GP.right=br}
@@ -3492,7 +3783,7 @@ function frame(t){
   else{acc=0;if(grindSnd)grindStop(true);if(state==='menu'){cam.x+=dt*18;while(gx<cam.x+VW+900)genNext()}}
   render(dt);musicMix();
   if(state==='menu')drawPreview('pvMenu');
-  if(!$('shop').hidden)drawPreview('pvShop',Object.assign({},SAVE.equip,tryOn,shopCat==='beanie'?{helmet:'h_none'}:{}),shopCat==='board'?'board':(shopCat==='skis'||shopCat==='poles'||shopCat==='boots')?'ski':SAVE.gear,shopCat==='poles');
+  if(!$('shop').hidden)drawPreview('pvShop',Object.assign({},SAVE.equip,tryOn,shopCat==='beanie'?{helmet:'h_none'}:{}),SUMMER?'bike':shopCat==='board'?'board':(shopCat==='skis'||shopCat==='poles'||shopCat==='boots')?'ski':SAVE.gear,!SUMMER&&shopCat==='poles');
   requestAnimationFrame(frame);
 }
 function start(){
