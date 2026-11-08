@@ -467,7 +467,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
 'use strict';
 const RAD=Math.PI/180, DEG=180/Math.PI;
 const BUTTER180_T=.5,SPIN_TWIST=32,GRAB_BLEND=9,GRIND_SPIN=700,GRIND_REP=.32, G=430, POP=190, JUMP_POP=Math.round(190*Math.SQRT1_2), FOOT=11, VH=342, FLIP_RATE=520, SPIN_RATE=600, CORK_SLOW=.6, STEP=1/120, VMAX=364, PARK_LEN=13000, FREE_LEN=11000;
-let VW=608;const RS=2;   // Bildpunkte pro Welt-Pixel: die Welt wird 2x vergrößert, das Bike nutzt die feineren Pixel
+let VW=608;const RS=3;   // Bildpunkte pro Welt-Pixel: die Welt wird 3x vergrößert; ein Bike-Pixel ist 2 Bildpunkte (2/3 Welt-Pixel)
 const rand=(a,b)=>a+Math.random()*(b-a);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 const norm=d=>((d+180)%360+360)%360-180;
@@ -1110,9 +1110,9 @@ function bikeSolve(L0){let L=BIKE_SOLVED.get(L0);if(L)return L;
 // Das Bike wird in K-facher Auflösung gezeichnet (K=3 im Spiel: ein Bike-Pixel ist ein Drittel Welt-Pixel), jedes Teil in seiner Shop-Farbe:
 // Stollenreifen mit Flanke, Felgen, gekreuzte Speichen, Bremsscheiben mit Sätteln, Rahmen mit Licht, Schatten und Schriftzug, Doppelbrücken-Gabel,
 // Stahlfeder-Dämpfer mit einzelnen Windungen, Vorbau, Lenker, Griffe, Bremshebel und -leitung, Sattel, Kettenführung, Kette, Schaltwerk, Kurbeln, Pedale mit Pins.
-function bikeParts(g,L,lo,P,O,parts){const X=L._X,bk=L.bike||{},AX=bkAx(bk),K=g._K||1,R=w=>Math.max(.55,w*K),FINE=K>=3;
+function bikeParts(g,L,lo,P,O,parts){const X=L._X,bk=L.bike||{},AX=bkAx(bk),SK=g._K||1,Q=SK>=3?2:1,K=SK/Q,R=w=>Math.max(.55,w*K),FINE=K>=3,WA=(P.wf||0)*7.5*RAD;   // Bike-Raster: Q Bildpunkte pro Bike-Pixel; WA = Raddrehung
   const W=q=>{const r=lo(X.P(q));return [r[0]*K,r[1]*K,r[2]]},WF=q=>{const r=lo(X.P(X.F(q)));return [r[0]*K,r[1]*K,r[2]]};
-  const add=(key,f)=>parts.push({key,draw:()=>{g.save();g.setTransform(1,0,0,1,0,0);f();g.restore()}});
+  const add=(key,f)=>parts.push({key,draw:()=>{g.save();g.setTransform(Q,0,0,Q,0,0);f();g.restore()}});
   const sh3=c=>{const hi=shade(c,.3),dk=shade(c,-.32);return (u,v,up)=>up>.4?hi:up<-.45?dk:c};
   const dot=(C,r,col)=>capsule(g,C,C,r,r,col);
   const tube=(A,B,w,col,ko,extra)=>add((A[2]+B[2])/2+(ko||0),()=>{const r=R(w),f=sh3(col);capsule(g,A,B,r+1,r+1,O);capsule(g,A,B,r,r,extra?(u,v,up)=>extra(u,v,up)||f(u,v,up):f)});
@@ -1127,20 +1127,20 @@ function bikeParts(g,L,lo,P,O,parts){const X=L._X,bk=L.bike||{},AX=bkAx(bk),K=g.
       if(rho>rMax)continue;const col=f(rho,Math.atan2(b,a),rho>.05?Math.min(1.2,rho/Math.max(.01,Math.hypot(dx,dy))):.3);if(col){g.fillStyle=col;g.fillRect(x,y,1,1)}}};
   const edgeOn=pl=>Math.abs(pl.det)<.22*pl.lx*pl.ly;
   // Räder
-  const wheel=front=>{const pl=plane(front?X.P(X.F(AX.fa)):X.P(AX.ra),front),wr=BK.wr,rTi=wr-1.05,rR=wr-1.9,KN=FINE?34:26,NS=FINE?20:16;
+  const wheel=front=>{const pl=plane(front?X.P(X.F(AX.fa)):X.P(AX.ra),front),wr=BK.wr,rTi=wr-1.5,rR=wr-2.3,KN=FINE?32:24,NS=16;
     const TR=P.TR,TS=P.TS,TRk=shade(P.TR,.14),RM=P.RM,RMh=shade(P.RM,.4),RMd=shade(P.RM,-.4),SPK=P.SPK,DSC='#c3c8d1',DSh='#7f8794',HUB='#2a2d35',HUBh='#8e96a6',CAS='#9aa1ad';
     add(pl.c[2]-.6,()=>{
       if(edgeOn(pl)){const A=pl.lx>pl.ly?pl.ex:pl.ey,l=Math.max(pl.lx,pl.ly),r=wr*l,u=[A[0]/l,A[1]/l],P0=[pl.c[0]-u[0]*r,pl.c[1]-u[1]*r],P1=[pl.c[0]+u[0]*r,pl.c[1]+u[1]*r];
         capsule(g,P0,P1,R(.55)+1,R(.55)+1,O);capsule(g,P0,P1,R(.55),R(.55),(uu)=>Math.floor(uu*r)%3?TR:TRk);dot(pl.c,R(.3),HUB);return}
-      for(let i=0;i<NS;i++){const t0=i/NS*Math.PI*2;line(onPl(pl,.6,t0),onPl(pl,rR,t0+(i&1?.55:-.55)),SPK)}   // gekreuzte Speichen
-      rast(pl,wr+1.2,(rho,t,px)=>{const rO=Math.cos(t*KN)>.1?wr+.34:wr;
+      for(let i=0;i<NS;i++){const t0=i/NS*Math.PI*2+WA;line(onPl(pl,.6,t0),onPl(pl,rR,t0+(i&1?.55:-.55)),SPK)}   // gekreuzte Speichen
+      rast(pl,wr+1.2,(rho,t,px)=>{const tw=t-WA,rO=Math.cos(tw*KN)>.1?wr+.34:wr;
         if(rho>rO+px)return null;if(rho>rO)return O;if(rho>wr)return TRk;   // Stollen
-        if(rho>rTi)return rho>rTi+.42?TR:TS;                                  // Lauffläche, Flanke
+        if(rho>rTi)return rho>rTi+.62?TR:TS;                                  // Lauffläche, Flanke
         if(rho>rTi-px)return RMd;if(rho>rR+px)return RM;if(rho>rR)return RMh;if(rho>rR-px)return O;   // Felge
         if(rho<.6)return rho<.26?HUBh:HUB;                                     // Nabe
-        if(!front&&rho<1.12)return Math.cos(t*(FINE?14:9))>.5||rho<.8?CAS:'#5a606c';   // Ritzelpaket
-        if(rho>1.45&&rho<1.95)return rho>1.6&&rho<1.8&&Math.cos(t*(FINE?9:6))>.45?DSh:DSC;   // Bremsscheibe mit Löchern
-        if(front&&rho>.6&&rho<1.45&&Math.cos(t*5)>.6)return DSh;
+        if(!front&&rho<1.12)return Math.cos(tw*(FINE?16:8))>.5||rho<.8?CAS:'#5a606c';   // Ritzelpaket
+        if(rho>1.45&&rho<1.95)return rho>1.6&&rho<1.8&&Math.cos(tw*8)>.45?DSh:DSC;   // Bremsscheibe mit Löchern
+        if(front&&rho>.6&&rho<1.45&&Math.cos(tw*8)>.6)return DSh;
         return null})});
     // Bremssattel am Scheibenrand
     const ang=front?-2.35:-1.0,M=onPl(pl,1.95,ang),T0=onPl(pl,1.95,ang-.32),T1=onPl(pl,1.95,ang+.32);
@@ -1431,17 +1431,17 @@ function applyPattern(g,P,K){K=K||1;const N=SPR*K;
   g.putImageData(id,0,0);
 }
 const sprCache=new Map();let sprW=0;   // Speicher der Bild-Caches in 1x-Sprite-Einheiten
-function getSprite(pose,phi,look,eq,gear,pow,cork,twist,K){
-  eq=eq||SAVE.equip;gear=gear||GEAR;K=K||(gear==='bike'?RS:1);
-  const ph=((Math.round(phi/15)*15)%360+360)%360,ck=cork?{m:cork.m,t:((Math.round(cork.t/15)*15)%360+360)%360}:null,tq=Math.round((twist||0)/15)*15,key=pose+'|'+ph+'|'+(look?1:0)+'|'+(pow?1:0)+'|'+(ck?ck.m+ck.t:'')+'|'+gear+'|'+tq+'|'+eqKey(eq)+'|'+K;
+function getSprite(pose,phi,look,eq,gear,pow,cork,twist,K,wf){
+  eq=eq||SAVE.equip;gear=gear||GEAR;K=K||(gear==='bike'?RS:1);wf=gear==='bike'?(wf||0):0;
+  const ph=((Math.round(phi/15)*15)%360+360)%360,ck=cork?{m:cork.m,t:((Math.round(cork.t/15)*15)%360+360)%360}:null,tq=Math.round((twist||0)/15)*15,key=pose+'|'+ph+'|'+(look?1:0)+'|'+(pow?1:0)+'|'+(ck?ck.m+ck.t:'')+'|'+gear+'|'+tq+'|'+eqKey(eq)+'|'+K+'|'+wf;
   let s=sprCache.get(key);if(s){sprCache.delete(key);sprCache.set(key,s);return s}
-  const P=palette(eq);if(gear==='bike'){const Ji=itemOf('jersey',eq.jersey||'j_black');P.D=Ji.c;P.d=shade(Ji.c,-.3);P.J2=Ji.a;P.pk=null;{const Pr=eq.prot&&eq.prot!=='pr_none'?itemOf('prot',eq.prot):null;P.pr=Pr?Pr.c:null;P.pra=Pr?Pr.a:null}{const a=hexRgb(Ji.a),b=hexRgb(P.H),lum=(b[0]*.3+b[1]*.59+b[2]*.11)/255;const la=(a[0]*.3+a[1]*.59+a[2]*.11)/255;P.J=la>lum+.25?Ji.a:shade(P.H,lum>.5?-.3:.5)}if(!P.hat)P.ff=true;
+  const P=palette(eq);P.wf=wf;if(gear==='bike'){const Ji=itemOf('jersey',eq.jersey||'j_black');P.D=Ji.c;P.d=shade(Ji.c,-.3);P.J2=Ji.a;P.pk=null;{const Pr=eq.prot&&eq.prot!=='pr_none'?itemOf('prot',eq.prot):null;P.pr=Pr?Pr.c:null;P.pra=Pr?Pr.a:null}{const a=hexRgb(Ji.a),b=hexRgb(P.H),lum=(b[0]*.3+b[1]*.59+b[2]*.11)/255;const la=(a[0]*.3+a[1]*.59+a[2]*.11)/255;P.J=la>lum+.25?Ji.a:shade(P.H,lum>.5?-.3:.5)}if(!P.hat)P.ff=true;
     {const it=c=>itemOf(c,eq[c]),Fo=it('bfork'),Sh=it('bshock'),Ri=it('brim'),Ti=it('btire'),Ba=it('bbar'),Sa=it('bsad'),Pe=it('bped');   // Bike-Teile aus dem Shop
      P.FK=Fo.c;P.FL=Fo.a;P.SHK=Sh.c;P.RM=Ri.c;P.SPK=Ri.a;P.TR=Ti.c;P.TS=Ti.a;P.GR=Ba.c;P.BR=Ba.a;P.SD=Sa.c;P.PD=Pe.c;P.CR=Pe.a}}
   const [c,g]=mk(SPR*K,SPR*K);g.setTransform(K,0,0,K,0,0);g._K=K;c.hi=K>1;c.K=K;
   renderFigure(g,pose,ph,look,P,gear,pow,ck,tq);
   if(P.pat)applyPattern(g,P,K);
-  sprW+=K*K;while(sprW>2600&&sprCache.size){const [k0,c0]=sprCache.entries().next().value;sprCache.delete(k0);sprW-=(c0.K||1)**2}
+  sprW+=K*K;while(sprW>3400&&sprCache.size){const [k0,c0]=sprCache.entries().next().value;sprCache.delete(k0);sprW-=(c0.K||1)**2}
   sprCache.set(key,c);return c;
 }
 /* Patrol snowmobile */
@@ -2234,7 +2234,7 @@ function shadeLayer(g,sx,sy,sw,sh,dw,dh){const DS=curDS;g.save();g.setTransform(
   if(DS.dusk>.02){g.fillStyle='rgba(255,128,80,'+(.15*DS.dusk)+')';g.fillRect(0,0,dw,dh)}
   if(lightOn&&lightCv)g.drawImage(lightCv,sx,sy,sw,sh,0,0,dw,dh);g.restore()}
 function drawPlayer(cX,cY){
-  const v=playerView(),spr=getSprite(v.pose,v.phi,v.look,null,null,v.inPow,v.cork,v.twist);
+  const v=playerView(),spr=getSprite(v.pose,v.phi,v.look,null,null,v.inPow,v.cork,v.twist,0,GEAR==='bike'?((Math.floor((p.wheelA||0)/7.5)%6)+6)%6:0);
   if(spr.hi){const tx=Math.round(v.comx-cX),ty=Math.round(v.comy-cY),S=PLH*2*RS;
     if(!plCv){[plCv,plCtx]=mk(S,S);[afterCv,afterCtx]=mk(VW,VH)}
     plCtx.setTransform(1,0,0,1,0,0);plCtx.globalCompositeOperation='source-over';plCtx.clearRect(0,0,S,S);
@@ -2863,6 +2863,7 @@ function land(g,fx){
   }else crash(s,null,pow);
 }
 function updGround(dt){
+  if(GEAR==='bike')p.wheelA=((p.wheelA||0)+(p.sw?-1:1)*Math.min(Math.abs(p.s||0)*8.8,700)*dt)%360;   // Räder drehen mit (schnell gedeckelt, sonst flimmert es)
   const g=groundAt(p.x);if(!g){launch(p.ang*RAD,0,null);return}
   if(g.seg.kind==='rock'){launch(Math.min(g.a,.35),0,null);return}   // auf einer Felswand kann man nicht fahren
   const a=g.a,ctrl=p.mode==='ground';
@@ -3782,9 +3783,9 @@ function shopClick(it,el){
 }
 function drawPreview(id,eq,gear,pushAnim,bikeOnly){
   const c=$(id);if(!c||c.closest('.screen').hidden)return;
-  if(bikeOnly){const N=96,K=RS;if(c.width!==N){c.width=N;c.height=N}const g=c.getContext('2d');g.imageSmoothingEnabled=false;g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,N,N);   // nur das Bike, in Spiel-Pixeln, füllt die Vorschau
-    g.fillStyle='#6ea24a';g.fillRect(0,75,N,21);g.fillStyle='#8a6a45';g.fillRect(0,84,N,12);g.fillStyle='#6d5133';g.fillRect(0,92,N,4);
-    g.drawImage(getSprite('_bike',0,false,eq,'bike',false,null,0,K),Math.round(N/2-(SCX+5)*K),Math.round(77-(SCY+FOOTG)*K));return}
+  if(bikeOnly){const N=48*RS,K=RS;if(c.width!==N){c.width=N;c.height=N}const g=c.getContext('2d');g.imageSmoothingEnabled=false;g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,N,N);   // nur das Bike, in Spiel-Pixeln, füllt die Vorschau
+    g.fillStyle='#6ea24a';g.fillRect(0,Math.round(N*.781),N,N);g.fillStyle='#8a6a45';g.fillRect(0,Math.round(N*.875),N,N);g.fillStyle='#6d5133';g.fillRect(0,Math.round(N*.958),N,N);
+    g.drawImage(getSprite('_bike',0,false,eq,'bike',false,null,0,K),Math.round(N/2-(SCX+5)*K),Math.round(N*.802-(SCY+FOOTG)*K));return}
   if(c.width!==64*RS){c.width=64*RS;c.height=64*RS}const g=c.getContext('2d');g.imageSmoothingEnabled=false;g.setTransform(RS,0,0,RS,0,0);
   g.clearRect(0,0,64,64);g.fillStyle=SUMMER?'#6ea24a':'#ffffff';g.fillRect(0,50,64,14);g.fillStyle=SUMMER?'#8a6a45':'#d0def3';g.fillRect(0,56,64,8);g.fillStyle=SUMMER?'#6d5133':'#b6c9e8';g.fillRect(0,61,64,3);
   const seq=[['ride',0,true],['ride',90,true],['ride',180,true],['ride',270,true],['blunt',0,false],['mute',0,false],['nose',60,false],['tail',0,false]];
