@@ -1214,17 +1214,27 @@ const BIKE3=(()=>{
     ab_back:{bike:B(),torso:T(3.4,-6.4),head:[5.6,-10,0],armsX:[null,[[3.4,-5.8,4.4],[4,-9.2,6.4],[4.8,-12.6,7.2]]]},
     // Afterbang Sommer: Gabel und Dämpfer federn tief ein, Rahmen und Fahrer sinken, die Räder bleiben am Boden
     ab_sag:{bike:B([1.6,11+BK_SAG,0],{sag:BK_SAG}),hips:[[-.4,BK_SAG+.6,-2.4],[.4,BK_SAG+.6,2.4]],torso:T(5.9,-2.6,BK_SAG+.6),head:[8.5,-5.6,0]},
-    // Tricks (Richtungen wie die Grabs)
-    nose:{bike:B([1.4,10.2,0],{yaw:-58,roll:34,piv:[9,-11,0]}),torso:T(5.4,-5.2),head:[7.6,-8.6,0]},                // Whip: Heck schwenkt raus, Bike kippt
-    mute:{bike:B([1.4,9.6,0],{yaw:-18,roll:72,piv:[9,-11,0]}),torso:T(5,-5.4),head:[7.2,-8.8,0]},                 // Table Top: Bike liegt flach
-    blunt:{bike:B([3.6,11.2,0],{pitch:-6}),torso:T(6.6,-3),head:[9.8,-5.4,0],                                     // Superman: Beine lang nach hinten
-      legsX:[[[-.4,0,-2.2],[-6.4,-.6,-2.4],[-12.6,-1.2,-2.6]],[[.4,0,2.2],[-6.4,-1,2.4],[-12.6,-1.6,2.6]]]},
-    tail:{bike:B([1.8,10.6,0]),torso:T(3,-6.6),head:[4.8,-10.4,0],                                               // No-Hander: Arme weit auseinander
-      armsX:[[[2.4,-6,-4.4],[1.8,-9,-7.4],[1.2,-11.8,-9]],[[3.2,-6,4.4],[2.6,-9,7.4],[2,-11.8,9]]]},
-    venom:{bike:B([1.4,10.2,0],{roll:8}),torso:T(4.4,-5.6),head:[6.6,-9,0],legsX:[[[-.4,0,-2.4],[4.4,-1.2,2.8],[10,1,7]],null]},         // Can-Can
-    octo:{bike:B([1.4,10.2,0],{roll:-6}),torso:T(4.4,-5.6),head:[6.6,-9,0],legsX:[null,[[.4,0,2.4],[-5,-1.4,5.2],[-11.4,1,8]]]},        // Nac-Nac
-    truck:{bike:B([1.4,10.2,0],{steer:150}),torso:T(5.4,-5.4),head:[7.6,-8.8,0]},                                  // X-Up: Lenker fast ganz rum
-    japan:{bike:B([1.4,10.2,0]),torso:T(4.4,-5.6),head:[6.6,-9,0],legsX:[null,[[.4,0,2.4],[5,2.6,5],[10.4,5.6,8]]]},                   // One-Footer
+    // Tricks (Richtungen wie die Grabs). Jede Pose hat eine Tweak-Pose (_max), in die der Trick beim Halten weiter hineingeht.
+    nose:{bike:B([1.2,10,0],{yaw:-118,roll:56,steer:-18,piv:[8,-10,0]}),torso:T(5,-5.6),head:[7.4,-9,0]},          // Whip: Heck fliegt über 90° quer raus, Bike kippt, Gegenlenken
+    nose_max:{bike:B([1.2,9.8,0],{yaw:-140,roll:66,steer:-28,piv:[8,-10,0]}),torso:T(4.8,-5.8),head:[7.2,-9.2,0]},
+    mute:{bike:B([1.6,9,0],{yaw:-26,roll:82,piv:[8,-10,0]}),torso:T(4.6,-5),head:[7,-8.4,0]},                      // Table Top: Bike liegt flach, hochgezogen
+    mute_max:{bike:B([1.6,8.4,0],{yaw:-32,roll:94,piv:[8,-10,0]}),torso:T(4.4,-4.8),head:[6.8,-8.2,0]},
+    blunt:{bike:B([4.2,11.6,0],{pitch:-8}),torso:T(7.2,-2.6),head:[10.4,-4.8,0],                                   // Superman: Beine lang nach hinten, Körper flach über dem Bike
+      legsX:[[[-.4,0,-2.2],[-6.6,-1.4,-2.4],[-12.8,-2.6,-2.6]],[[.4,0,2.2],[-6.6,-1.8,2.4],[-12.8,-3,2.6]]]},
+    blunt_max:{bike:B([4.6,12,0],{pitch:-10}),torso:T(7.6,-2.2),head:[10.8,-4.2,0],
+      legsX:[[[-.4,0,-2.2],[-6.4,-2.6,-2.6],[-12.6,-4.8,-3]],[[.4,0,2.2],[-6.4,-3,2.6],[-12.6,-5.2,3]]]},
+    tail:{bike:B([1.8,10.8,0]),torso:T(2.6,-6.8),head:[4.2,-10.8,0],                                               // No-Hander: Arme weit auseinander, Brust raus
+      armsX:[[[2.2,-6.2,-4.4],[1.4,-9.4,-7.8],[.6,-12.4,-9.6]],[[3,-6.2,4.4],[2.2,-9.4,7.8],[1.4,-12.4,9.6]]]},
+    tail_max:{bike:B([1.8,11.2,0]),torso:T(2,-7),head:[3.4,-11.2,0],
+      armsX:[[[1.6,-6.4,-4.4],[.4,-9.8,-8.4],[-.6,-13,-10.4]],[[2.4,-6.4,4.4],[1.2,-9.8,8.4],[.2,-13,10.4]]]},
+    venom:{bike:B([1.4,10.2,0],{roll:10}),torso:T(4.4,-5.6),head:[6.6,-9,0],legsX:[[[-.4,0,-2.4],[4.4,-1.2,2.8],[10,1,7]],null]},         // Can-Can: Bein über das Oberrohr nach vorne raus
+    venom_max:{bike:B([1.4,10.2,0],{roll:14}),torso:T(4.2,-5.8),head:[6.4,-9.2,0],legsX:[[[-.4,0,-2.4],[5,-2,3.4],[11,-1,8.4]],null]},
+    octo:{bike:B([1.4,10.2,0],{roll:-8}),torso:T(4.4,-5.6),head:[6.6,-9,0],legsX:[null,[[.4,0,2.4],[-5,-1.4,5.2],[-11.4,1,8]]]},        // Nac-Nac: Bein über das Hinterrad nach hinten
+    octo_max:{bike:B([1.4,10.2,0],{roll:-12}),torso:T(4.6,-5.4),head:[6.8,-8.8,0],legsX:[null,[[.4,0,2.4],[-5.4,-2.4,5.8],[-12,-.6,9.2]]]},
+    truck:{bike:B([1.4,10.2,0],{steer:150,yaw:-8}),torso:T(5.4,-5.4),head:[7.6,-8.8,0]},                          // X-Up: Lenker fast ganz rum, Arme gekreuzt
+    truck_max:{bike:B([1.4,10.2,0],{steer:174,yaw:-12}),torso:T(5.2,-5.6),head:[7.4,-9,0]},
+    japan:{bike:B([1.4,10.2,0]),torso:T(4.4,-5.6),head:[6.6,-9,0],legsX:[null,[[.4,0,2.4],[5,2.6,5],[10.4,5.6,8]]]},                   // One-Footer: Fuß raus
+    japan_max:{bike:B([1.4,10.2,0],{roll:6}),torso:T(4.2,-5.8),head:[6.4,-9.2,0],legsX:[null,[[.4,0,2.4],[5.4,1.6,5.8],[11,3.6,9.4]]]},
     grind:ride};
   // Treten im Stehen: acht Bilder pro Kurbelumdrehung, die Hüfte sinkt etwas ab, Oberkörper wippt mit
   for(let k=0;k<8;k++){const a=k*45,b=Math.sin(a*RAD*2)*.4;L['push'+k]={bike:B([1.6,11,0],{crank:a}),hips:[[-.4,2+b,-2.4],[.4,2+b,2.4]],torso:T(5.8,-3.6+b,2+b),head:[8.2,-7+b,0]}}
@@ -1244,6 +1254,13 @@ const BIKE3=(()=>{
     if(A&&Z&&typeof A==='object'&&typeof Z==='object'&&!Array.isArray(A)&&!Array.isArray(Z)){const o={};for(const k in Z)o[k]=k in A?mixD(A[k],Z[k],u):Z[k];return o}
     return Z};
   for(const g of ['blunt','japan','nose','tail','mute','truck','venom','octo'])L[g+'_h']=mixD(tuck,L[g],.5);
+  {const DH=[[-.4,0,-2.4],[.4,0,2.4]],mv=(a,b,u)=>a.map((x,i)=>x+(b[i]-x)*u);
+   const mixBk=(a,b,u)=>{const o={o:mv(a.o||[1.6,11,0],b.o||[1.6,11,0],u),piv:b.piv||a.piv};for(const k of ['yaw','roll','pitch','steer','crank'])o[k]=(a[k]||0)+((b[k]||0)-(a[k]||0))*u;return o};
+   const frame=(A,Z,u)=>{const SA=bikeSolve(A),lim=(k,s)=>[0,1].map(i=>Z[k]&&Z[k][i]?mixD(SA[s][i],Z[k][i],u):null);
+     return {bike:mixBk(A.bike,Z.bike,u),torso:mixD(A.torso,Z.torso,u),head:mixD(A.head,Z.head,u),hips:mixD(A.hips||DH,Z.hips||DH,u),legsX:lim('legsX','legs'),armsX:lim('armsX','arms')}};
+   const ease=u=>u*u*(3-2*u);
+   for(const g of ['blunt','japan','nose','tail','mute','truck','venom','octo']){for(let k=1;k<8;k++)L[g+'#'+k]=frame(tuck,L[g],ease(k/8));L[g+'#8']=L[g];
+     const M=L[g+'_max']||L[g];L[g+'#9']=frame(L[g],M,.5);L[g+'#10']=M}}
   for(const k of ['ab_back','ab_lean','crouch'])L[k+'_h']=mixD(ride,L[k],.5);
   L.ab_sag_h=mixD(ride,L.ab_sag,.5);L.ab_sag_h.bike.sag=BK_SAG/2;
   L._bike=Object.assign({},ride,{noRider:true});
@@ -1270,7 +1287,9 @@ function poseCOM(poseName,phi,gear){
 function rodrigues(v,k,deg){const t=deg*RAD,c=Math.cos(t),s=Math.sin(t),kv=v3.dot(k,v);
   return [v[0]*c+(k[1]*v[2]-k[2]*v[1])*s+k[0]*kv*(1-c),v[1]*c+(k[2]*v[0]-k[0]*v[2])*s+k[1]*kv*(1-c),v[2]*c+(k[0]*v[1]-k[1]*v[0])*s+k[2]*kv*(1-c)]}
 const corkAxis=m=>{const b=(m==='cork'?45:-45)*RAD;return [Math.sin(b),0,Math.cos(b)]};
-function airPose(){const gv=p.gVis||0;if(p.gName&&gv>.02&&!(p.grab&&gv>=.98))return p.gName+'_h';return p.grab||(p.corkMode?p.corkMode:null)||(p.flipPoseT>0?(p.flipDir<0?'layout':'ftuck'):(GEAR==='board'?'bair':'tuck'))}
+function airPose(){const gv=p.gVis||0;
+  if(GEAR==='bike'&&p.gName&&gv>.02){const q=smooth01(gv)*8+(p.gTk||0)*2;return p.gName+'#'+Math.max(1,Math.min(10,Math.round(q)))}   // Bike: 10 Bilder je Trick
+  if(p.gName&&gv>.02&&!(p.grab&&gv>=.98))return p.gName+'_h';return p.grab||(p.corkMode?p.corkMode:null)||(p.flipPoseT>0?(p.flipDir<0?'layout':'ftuck'):(GEAR==='board'?'bair':'tuck'))}
 /* Zeichnet die Figur bei Drehwinkel phi (0 = Fahrtrichtung rechts, 90 = zum Spieler, 180 = Switch, 270 = vom Spieler weg).
    look: Kopf schaut die Piste runter; bei Switch dreht sich der Oberkörper mit (Blick über die Schulter). */
 function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
@@ -2788,7 +2807,7 @@ function launch(a,pop,sg){
   if(sg&&sg.vmax)s=Math.min(s,sg.vmax);
   if(sg&&sg.kind==='kicker'&&pop)pop*=1.1;
   p.vx=Math.cos(a)*s;p.vy=Math.sin(a)*s-pop;
-  p.flipPoseT=0;p.grab=null;p.gVis=0;p.gName=null;p.corkMode=null;p.spinTw=0;p.lastSpin=null;p.ab=null;const r=p.ang*RAD;p.x+=FOOTG*Math.sin(r);p.y-=FOOTG*Math.cos(r);
+  p.flipPoseT=0;p.grab=null;p.gVis=0;p.gTk=0;p.gName=null;p.corkMode=null;p.spinTw=0;p.lastSpin=null;p.ab=null;const r=p.ang*RAD;p.x+=FOOTG*Math.sin(r);p.y-=FOOTG*Math.cos(r);
   {const pc=poseCOM(airPose(),p.spin,GEAR);p.x+=pc.cx*Math.cos(r)-pc.cy*Math.sin(r);p.y+=pc.cx*Math.sin(r)+pc.cy*Math.cos(r);p.cx=pc.cx;p.cy=pc.cy;p.cz=pc.cz;p.fx=pc.fx;p.fy=pc.fy;p.fz=pc.fz}
   p.mode='air';
   p.airT=0;p.base=p.ang;p.spinStart=p.spin;p.flipAcc=0;p.flipDir=0;p.flipTarget=null;p.spinDir=0;p.spinTarget=null;p.grabT={};p.grab=null;
@@ -3006,7 +3025,8 @@ function updAir(dt){
       if(tl<.34&&!(up||dn)){const d=Math.round(p.flipAcc/360)*360-p.flipAcc,mx=720*dt;p.flipAcc+=clamp(d,-mx,mx);p.ang=p.base+p.flipAcc}
       if(tl<.32&&!(l||r)){const tg=p.fromRail&&p.spinTarget!=null&&((p.spinTarget%180)+180)%180===0?p.spinTarget:Math.round(p.spin/180)*180,d=tg-p.spin,mx=820*dt;p.spin+=clamp(d,-mx,mx);p.spinDir=0;p.spinTarget=p.fromRail?tg:null}
       if(tl<.14)p.grab=null}}
-  {const tg=p.grab?1:0,mx=GRAB_BLEND*dt;p.gVis=(p.gVis||0)+clamp(tg-(p.gVis||0),-mx,mx)}
+  {const tg=p.grab?1:0,mx=(GEAR==='bike'?5:GRAB_BLEND)*dt;p.gVis=(p.gVis||0)+clamp(tg-(p.gVis||0),-mx,mx);
+   const tk=p.grab&&p.grab===p.gName&&p.gVis>=.98?1:0;p.gTk=(p.gTk||0)+clamp(tk-(p.gTk||0),-6*dt,2.8*dt)}   // Tweak: gehaltener Trick geht noch weiter rein
   {const sv=(p.spin-(p.lastSpin??p.spin))/Math.max(dt,1e-4);p.lastSpin=p.spin;const tg=p.corkMode?0:clamp(sv/SPIN_RATE,-1,1)*SPIN_TWIST;p.spinTw=(p.spinTw||0)+(tg-(p.spinTw||0))*Math.min(1,dt*14)}   // Hand braucht ca. 0,11 s zum Ski
   // Pose bestimmt, wo der Schwerpunkt im Körper liegt; der Schwerpunkt selbst fliegt unbeirrt weiter
   {const pc=poseCOM(airPose(),p.spin,GEAR),k=Math.min(1,dt*10);p.cx=pc.cx;p.cy=pc.cy;p.cz=pc.cz;p.fx+=(pc.fx-p.fx)*k;p.fy+=(pc.fy-p.fy)*k;p.fz=pc.fz}
