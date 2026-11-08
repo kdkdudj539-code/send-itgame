@@ -2792,7 +2792,7 @@ function launch(a,pop,sg){
   {const pc=poseCOM(airPose(),p.spin,GEAR);p.x+=pc.cx*Math.cos(r)-pc.cy*Math.sin(r);p.y+=pc.cx*Math.sin(r)+pc.cy*Math.cos(r);p.cx=pc.cx;p.cy=pc.cy;p.cz=pc.cz;p.fx=pc.fx;p.fy=pc.fy;p.fz=pc.fz}
   p.mode='air';
   p.airT=0;p.base=p.ang;p.spinStart=p.spin;p.flipAcc=0;p.flipDir=0;p.flipTarget=null;p.spinDir=0;p.spinTarget=null;p.grabT={};p.grab=null;
-  p.bailed=false;p.wallHit=false;p.fromRail=false;p.bigAir=!!(sg&&sg.big);p.takeoffSwitch=p.sw;p.spinLock=!p.auto&&(K.ArrowLeft||K.KeyA||K.ArrowRight||K.KeyD)&&!inU()&&!inD();p.diagT=0;p.flipCD=wasButter?BUTTER_FLIP_CD:0;   // Handy und Controller: vorgespannte Drehung startet sofort
+  p.bailed=false;p.wallHit=false;p.fromRail=false;p.bigAir=!!(sg&&sg.big);p.takeoffSwitch=p.sw;p.corkHold=0;p.spinLock=!p.auto&&(K.ArrowLeft||K.KeyA||K.ArrowRight||K.KeyD)&&!inU()&&!inD();p.diagT=0;p.flipCD=wasButter?BUTTER_FLIP_CD:0;   // Handy und Controller: vorgespannte Drehung startet sofort
   if(pop)SFX.jump();
 }
 function landingGuess(){
@@ -2996,7 +2996,8 @@ function updAir(dt){
     const ns=p.spin+p.spinDir*SPIN_RATE*cs*dt;
     if((p.spinDir>0&&ns>=p.spinTarget)||(p.spinDir<0&&ns<=p.spinTarget)){p.spin=p.spinTarget;p.spinDir=0;p.spinTarget=null}else p.spin=ns;
   }
-  if(!p.corkMode&&(up||dn)&&(l||r)&&Math.abs(norm(p.flipAcc))<45)p.corkMode=dn?'cork':'misty';
+  p.corkHold=(up||dn)&&(l||r)?(p.corkHold||0)+dt:0;   // Cork/Misty erst, wenn kurz schräg gehalten wird, nicht beim Durchrutschen über die Schräge (sonst dreht ein Spin plötzlich langsamer)
+  if(!p.corkMode&&p.corkHold>=.07&&Math.abs(norm(p.flipAcc))<45)p.corkMode=dn?'cork':'misty';
   const gr=inGrab();p.grab=gr;if(gr)p.grabT[gr]=(p.grabT[gr]||0)+dt;
   if(gr&&gr!==p.gName){if((p.gVis||0)>.5)p.gVis=.5;p.gName=gr}
   // Landehilfe: kurz vor dem Aufsetzen Flip und Spin auf die nächste landbare Stellung drehen und den Grab loslassen
