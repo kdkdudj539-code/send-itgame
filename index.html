@@ -1125,23 +1125,34 @@ function bikeParts(g,L,lo,P,O,parts){const X=L._X,bk=L.bike||{},AX=bkAx(bk),SK=g
   const rast=(pl,rMax,f)=>{const {c,ex,ey,det}=pl,wx=(Math.abs(ex[0])+Math.abs(ey[0]))*rMax+2,wy=(Math.abs(ex[1])+Math.abs(ey[1]))*rMax+2;
     for(let y=Math.floor(c[1]-wy);y<=Math.ceil(c[1]+wy);y++)for(let x=Math.floor(c[0]-wx);x<=Math.ceil(c[0]+wx);x++){const dx=x+.5-c[0],dy=y+.5-c[1],a=(dx*ey[1]-dy*ey[0])/det,b=(ex[0]*dy-ex[1]*dx)/det,rho=Math.hypot(a,b);
       if(rho>rMax)continue;const col=f(rho,Math.atan2(b,a),rho>.05?Math.min(1.2,rho/Math.max(.01,Math.hypot(dx,dy))):.3);if(col){g.fillStyle=col;g.fillRect(x,y,1,1)}}};
-  const edgeOn=pl=>Math.abs(pl.det)<.22*pl.lx*pl.ly;
-  // Räder
-  const wheel=front=>{const pl=plane(front?X.P(X.F(AX.fa)):X.P(AX.ra),front),wr=BK.wr,rTi=wr-1.5,rR=wr-2.3,KN=FINE?32:24,NS=16;
+  const edgeOn=pl=>Math.abs(pl.det)<.22*Math.max(pl.lx,pl.ly)**2;   // Rad fast genau von vorne: als breite Lauffläche zeichnen (vorher scheiterte der Test, wenn eine Achse ganz verschwand)
+  // Räder. Der Reifen hat Breite (TWH = halbe Reifenbreite): von vorne oder schräg sieht man die Lauffläche, von der Seite nur die Flanke.
+  const TWH=1;
+  const wheel=front=>{const C3=front?X.P(X.F(AX.fa)):X.P(AX.ra),pl=plane(C3,front),wr=BK.wr,rTi=wr-1.25,rR=wr-2.05,KN=FINE?32:24,NS=16;
+    const ez3=front?X.dir([0,0,1]):X.dirB([0,0,1]),cS=lo(C3),eS=lo(v3.add(C3,v3.mul(ez3,TWH))),ez2=[(eS[0]-cS[0])*K,(eS[1]-cS[1])*K],nearS=eS[2]>cS[2]?1:-1;
     const TR=P.TR,TS=P.TS,TRk=shade(P.TR,.14),RM=P.RM,RMh=shade(P.RM,.4),RMd=shade(P.RM,-.4),SPK=P.SPK,DSC='#c3c8d1',DSh='#7f8794',HUB='#2a2d35',HUBh='#8e96a6',CAS='#9aa1ad';
+    // ganzer Reifen: Vereinigung der Reifenringe quer über die Breite, Umriss nur außen
+    const fatTyre=()=>{const {c,ex,ey,det}=pl,rM=wr+1.2,wx=(Math.abs(ex[0])+Math.abs(ey[0]))*rM+Math.abs(ez2[0])+2,wy=(Math.abs(ex[1])+Math.abs(ey[1]))*rM+Math.abs(ez2[1])+2,SS=[1,.5,0,-.5,-1].map(s=>s*nearS);
+      for(let y=Math.floor(c[1]-wy);y<=Math.ceil(c[1]+wy);y++)for(let x=Math.floor(c[0]-wx);x<=Math.ceil(c[0]+wx);x++){let col=null,edge=false;
+        for(const s of SS){const dx=x+.5-c[0]-s*ez2[0],dy=y+.5-c[1]-s*ez2[1],a=(dx*ey[1]-dy*ey[0])/det,b=(ex[0]*dy-ex[1]*dx)/det,rho=Math.hypot(a,b);
+          if(rho>rM||rho<rTi)continue;const px=rho>.05?Math.min(1.2,rho/Math.max(.01,Math.hypot(dx,dy))):.3,tw=Math.atan2(b,a)-WA,rO=Math.cos(tw*KN)>.1?wr+.34:wr;
+          if(rho<=rO){col=rho>wr?TRk:rho>rTi+.5?TR:TS;break}if(rho<=rO+px)edge=true}
+        if(col||edge){g.fillStyle=col||O;g.fillRect(x,y,1,1)}}};
     add(pl.c[2]-.6,()=>{
       if(edgeOn(pl)){const A=pl.lx>pl.ly?pl.ex:pl.ey,l=Math.max(pl.lx,pl.ly),r=wr*l,u=[A[0]/l,A[1]/l],P0=[pl.c[0]-u[0]*r,pl.c[1]-u[1]*r],P1=[pl.c[0]+u[0]*r,pl.c[1]+u[1]*r];
-        capsule(g,P0,P1,R(.55)+1,R(.55)+1,O);capsule(g,P0,P1,R(.55),R(.55),(uu)=>Math.floor(uu*r)%3?TR:TRk);dot(pl.c,R(.3),HUB);return}
+        capsule(g,P0,P1,R(TWH)+1,R(TWH)+1,O);capsule(g,P0,P1,R(TWH),R(TWH),(uu)=>Math.floor(uu*r)%3?TR:TRk);dot(pl.c,R(.3),HUB);return}   // von vorne: breite Lauffläche
+      fatTyre();
       for(let i=0;i<NS;i++){const t0=i/NS*Math.PI*2+WA;line(onPl(pl,.6,t0),onPl(pl,rR,t0+(i&1?.55:-.55)),SPK)}   // gekreuzte Speichen
-      rast(pl,wr+1.2,(rho,t,px)=>{const tw=t-WA,rO=Math.cos(tw*KN)>.1?wr+.34:wr;
-        if(rho>rO+px)return null;if(rho>rO)return O;if(rho>wr)return TRk;   // Stollen
-        if(rho>rTi)return rho>rTi+.62?TR:TS;                                  // Lauffläche, Flanke
+      rast(pl,rTi+.1,(rho,t,px)=>{const tw=t-WA;if(rho>rTi)return null;
         if(rho>rTi-px)return RMd;if(rho>rR+px)return RM;if(rho>rR)return RMh;if(rho>rR-px)return O;   // Felge
         if(rho<.6)return rho<.26?HUBh:HUB;                                     // Nabe
         if(!front&&rho<1.12)return Math.cos(tw*(FINE?16:8))>.5||rho<.8?CAS:'#5a606c';   // Ritzelpaket
         if(rho>1.45&&rho<1.95)return rho>1.6&&rho<1.8&&Math.cos(tw*8)>.45?DSh:DSC;   // Bremsscheibe mit Löchern
         if(front&&rho>.6&&rho<1.45&&Math.cos(tw*8)>.6)return DSh;
-        return null})});
+        return null});
+      // vordere Reifenflanke liegt vor der Felge
+      const nr={...pl,c:[pl.c[0]+nearS*ez2[0],pl.c[1]+nearS*ez2[1],pl.c[2]]};
+      rast(nr,wr+.4,(rho,t,px)=>rho>rTi&&rho<=wr?(rho>rTi+.5?TR:TS):null)});
     // Bremssattel am Scheibenrand
     const ang=front?-2.35:-1.0,M=onPl(pl,1.95,ang),T0=onPl(pl,1.95,ang-.32),T1=onPl(pl,1.95,ang+.32);
     if(!edgeOn(pl))add(pl.c[2]-.5,()=>{capsule(g,T0,T1,R(.45)+1,R(.45)+1,O);capsule(g,T0,T1,R(.45),R(.45),sh3('#2f333c'));g.fillStyle='#aeb4bf';g.fillRect(Math.round(M[0]),Math.round(M[1]),1,1)})};
