@@ -203,6 +203,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
 .shop-prev .pv{max-width:220px}
 .prev-note{font-family:var(--ui);font-size:12px;color:var(--muted);text-align:center;min-height:2.4em}
 .tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.tabs.sub{margin-top:-6px;padding:8px;background:#0e1730;box-shadow:0 0 0 2px #000}.tabs.sub .tab{font-size:12px;padding:6px 9px}
 .tab{font-family:var(--ui);font-size:13px;padding:8px 11px;background:var(--panel2);color:var(--muted);border:0;cursor:pointer;box-shadow:0 0 0 2px #000}
 .tab[aria-selected="true"]{background:var(--ice);color:#0c1a33}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
@@ -286,7 +287,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
         <button class="btn ghost" id="bHelp">STEUERUNG</button>
         <button class="btn ghost" id="bRank">RANGLISTE</button>
       </div>
-      <p class="credits">made by Jasper Hollberg<span aria-hidden="true">·</span><button type="button" class="linkbtn" id="bNotes">PATCH NOTES</button></p>
+      <p class="credits">made by Jasper Hollberg<span aria-hidden="true" hidden>·</span><button type="button" class="linkbtn" id="bNotes" hidden>PATCH NOTES</button></p>
     </div>
   </div>
 </section>
@@ -430,6 +431,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
       <div class="shop-prev"><canvas class="pv" id="pvShop" width="64" height="64" aria-label="Vorschau"></canvas><div class="prev-note" id="prevNote">Tippe ein Teil an für die Vorschau.</div></div>
       <div>
         <div class="tabs" id="tabs" role="tablist"></div>
+        <div class="tabs sub" id="subtabs" role="tablist" hidden></div>
         <div class="grid" id="grid"></div>
       </div>
     </div>
@@ -466,7 +468,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
 'use strict';
 const RAD=Math.PI/180, DEG=180/Math.PI;
 const BUTTER180_T=.5,SPIN_TWIST=32,GRAB_BLEND=9,GRIND_SPIN=700,GRIND_REP=.32, G=430, POP=190, JUMP_POP=Math.round(190*Math.SQRT1_2), FOOT=11, VH=342, FLIP_RATE=520, SPIN_RATE=600, CORK_SLOW=.6, STEP=1/120, VMAX=364, PARK_LEN=13000, FREE_LEN=11000;
-let VW=608;
+let VW=608;const RS=3;   // Bildpunkte pro Welt-Pixel: die Welt wird 3x vergrößert, das Bike nutzt die feinen Pixel
 const rand=(a,b)=>a+Math.random()*(b-a);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 const norm=d=>((d+180)%360+360)%360-180;
@@ -558,6 +560,69 @@ const SHOP={
     {id:'bk_raw',name:'Raw Alu',price:80,c:'#b9bfc9',a:'#d63a3a'},
     {id:'bk_purple',name:'Lila',price:90,c:'#7e4fc4',a:'#86e0bf'},
     {id:'bk_gold',name:'Gold',price:200,c:'#f2c445',a:'#2b2e38'}]},
+  bfork:{label:'Gabel',items:[
+    {id:'fk_gold',name:'Gold Kashima',price:0,c:'#e0a526',a:'#23262e'},
+    {id:'fk_black',name:'Schwarz',price:40,c:'#3a3e48',a:'#1d2027'},
+    {id:'fk_silver',name:'Silber',price:40,c:'#c3c8d1',a:'#23262e'},
+    {id:'fk_goldw',name:'Gold & Weiß',price:60,c:'#e0a526',a:'#e8ecf2'},
+    {id:'fk_orange',name:'Orange',price:70,c:'#c3c8d1',a:'#ff7a2f'},
+    {id:'fk_red',name:'Rot',price:70,c:'#c3c8d1',a:'#d63a3a'},
+    {id:'fk_blue',name:'Blau',price:80,c:'#e0a526',a:'#2f6fd0'},
+    {id:'fk_lime',name:'Lime',price:90,c:'#3a3e48',a:'#b6e639'}]},
+  bshock:{label:'Dämpfer',items:[
+    {id:'sh_gold',name:'Gold',price:0,c:'#e0a526'},
+    {id:'sh_orange',name:'Orange',price:40,c:'#ff7a2f'},
+    {id:'sh_red',name:'Rot',price:40,c:'#d63a3a'},
+    {id:'sh_black',name:'Schwarz',price:40,c:'#3a3e48'},
+    {id:'sh_ti',name:'Titan',price:60,c:'#c3c8d1'},
+    {id:'sh_blue',name:'Blau',price:60,c:'#2f6fd0'},
+    {id:'sh_lime',name:'Lime',price:70,c:'#b6e639'},
+    {id:'sh_purple',name:'Lila',price:70,c:'#8b5cd6'}]},
+  brim:{label:'Felgen',items:[
+    {id:'rm_black',name:'Schwarz',price:0,c:'#2e3139',a:'#4b515d'},
+    {id:'rm_silver',name:'Silber',price:30,c:'#b8bec9',a:'#8e96a6'},
+    {id:'rm_gold',name:'Gold',price:60,c:'#e0a526',a:'#4b515d'},
+    {id:'rm_red',name:'Rot',price:50,c:'#d63a3a',a:'#4b515d'},
+    {id:'rm_blue',name:'Blau',price:50,c:'#2f6fd0',a:'#4b515d'},
+    {id:'rm_white',name:'Weiß',price:50,c:'#e8ecf2',a:'#8e96a6'},
+    {id:'rm_orange',name:'Orange',price:50,c:'#ff7a2f',a:'#4b515d'},
+    {id:'rm_purple',name:'Lila',price:60,c:'#8b5cd6',a:'#4b515d'}]},
+  btire:{label:'Reifen',items:[
+    {id:'tr_black',name:'Schwarz',price:0,c:'#24272e',a:'#24272e'},
+    {id:'tr_skin',name:'Skinwall',price:50,c:'#24272e',a:'#c49a63'},
+    {id:'tr_white',name:'Weißwand',price:60,c:'#24272e',a:'#e3e6ea'},
+    {id:'tr_red',name:'Rotwand',price:60,c:'#24272e',a:'#c8442e'},
+    {id:'tr_blue',name:'Blauwand',price:60,c:'#24272e',a:'#2f6fd0'},
+    {id:'tr_yellow',name:'Gelbwand',price:60,c:'#24272e',a:'#f2c445'},
+    {id:'tr_gum',name:'Gumwall',price:60,c:'#24272e',a:'#8a5a2e'},
+    {id:'tr_grey',name:'Grau',price:40,c:'#4a4f5b',a:'#4a4f5b'}]},
+  bbar:{label:'Lenker',items:[
+    {id:'bb_black',name:'Schwarz',price:0,c:'#1d2027',a:'#2e3139'},
+    {id:'bb_red',name:'Rote Griffe',price:30,c:'#d63a3a',a:'#2e3139'},
+    {id:'bb_blue',name:'Blaue Griffe',price:30,c:'#2f6fd0',a:'#2e3139'},
+    {id:'bb_white',name:'Weiße Griffe',price:30,c:'#e8ecf2',a:'#2e3139'},
+    {id:'bb_orange',name:'Orange Griffe',price:30,c:'#ff7a2f',a:'#2e3139'},
+    {id:'bb_lime',name:'Lime Griffe',price:40,c:'#b6e639',a:'#2e3139'},
+    {id:'bb_pink',name:'Pink Griffe',price:40,c:'#f06aa8',a:'#2e3139'},
+    {id:'bb_gold',name:'Goldlenker',price:60,c:'#1d2027',a:'#e0a526'}]},
+  bsad:{label:'Sattel',items:[
+    {id:'sd_black',name:'Schwarz',price:0,c:'#1d2027'},
+    {id:'sd_white',name:'Weiß',price:30,c:'#e8ecf2'},
+    {id:'sd_red',name:'Rot',price:30,c:'#d63a3a'},
+    {id:'sd_blue',name:'Blau',price:30,c:'#2f6fd0'},
+    {id:'sd_orange',name:'Orange',price:30,c:'#ff7a2f'},
+    {id:'sd_camo',name:'Oliv',price:40,c:'#5f6b3a'},
+    {id:'sd_purple',name:'Lila',price:40,c:'#8b5cd6'},
+    {id:'sd_gold',name:'Gold',price:60,c:'#e0a526'}]},
+  bped:{label:'Pedale',items:[
+    {id:'pd_black',name:'Schwarz',price:0,c:'#2e3139',a:'#2e3139'},
+    {id:'pd_silver',name:'Silber',price:30,c:'#c3c8d1',a:'#9aa1ad'},
+    {id:'pd_gold',name:'Gold',price:50,c:'#e0a526',a:'#2e3139'},
+    {id:'pd_red',name:'Rot',price:40,c:'#d63a3a',a:'#2e3139'},
+    {id:'pd_blue',name:'Blau',price:40,c:'#2f6fd0',a:'#2e3139'},
+    {id:'pd_orange',name:'Orange',price:40,c:'#ff7a2f',a:'#2e3139'},
+    {id:'pd_purple',name:'Lila',price:40,c:'#8b5cd6',a:'#2e3139'},
+    {id:'pd_lime',name:'Lime',price:40,c:'#b6e639',a:'#2e3139'}]},
   pack:{label:'Rucksack',items:[
     {id:'pk_none',name:'Ohne Rucksack',price:0,c:'#5d6680'},
     {id:'pk_free',name:'Freeride-Rucksack',price:10000,c:'#c8442e',a:'#2b2e38',info:'Mit Spitzhacke, Lawinenschaufel und Verbandszeug: rettet dich einmal pro Lauf, je nachdem, was dich zuerst erwischt: Abgrund, Lawine oder Fels. Im Menü an- und ausschaltbar.'},
@@ -598,7 +663,7 @@ const SHOP={
 const CATS=Object.keys(SHOP);
 
 /* ================= SAVE ================= */
-const DEF={coins:0,best:0,bestDist:0,owned:{},equip:{helmet:'h_black',goggles:'g_orange',hoodie:'d_grey',pants:'p_khaki',skis:'s_red',board:'b_black',poles:'po_black',pack:'pk_none',beanie:'bn_black',boots:'bt_black',bike:'bk_carbon',jersey:'j_black',prot:'pr_none'},gear:'ski',season:'winter',assist:false,packLast:'pk_free',music:true};
+const DEF={coins:0,best:0,bestDist:0,owned:{},equip:{helmet:'h_black',goggles:'g_orange',hoodie:'d_grey',pants:'p_khaki',skis:'s_red',board:'b_black',poles:'po_black',pack:'pk_none',beanie:'bn_black',boots:'bt_black',bike:'bk_carbon',jersey:'j_black',prot:'pr_none',bfork:'fk_gold',bshock:'sh_gold',brim:'rm_black',btire:'tr_black',bbar:'bb_black',bsad:'sd_black',bped:'pd_black'},gear:'ski',season:'winter',assist:false,packLast:'pk_free',music:true};
 // Stand prüfen und auffüllen (vom Gerät oder aus dem Konto). t = letzte Änderung, uid = Konto, zu dem der Stand gehört, sc = Münzen beim letzten Abgleich mit dem Konto
 const mig41=e=>{if(!e.m41&&e.bike==='bk_red')e.bike='bk_carbon';e.m41=1;return e};   // v4.1: neues Standard-Bike, Rot bleibt gratis im Shop
 function normSave(s){s=s&&typeof s==='object'?s:{};const ob=v=>v&&typeof v==='object'&&!Array.isArray(v);
@@ -633,13 +698,13 @@ function applyLang(){document.documentElement.lang=LANG;
   for(const o of I18N){const v=LANG==='en'?o.en:o.de;if(o.n)o.n.nodeValue=v;else o.el.setAttribute(o.a,v)}
   document.querySelectorAll('.gearbtn[data-lang]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LANG)))}
 // Shop-Namen auf Englisch (fehlt ein Eintrag, ist der Name schon englisch)
-const CAT_EN={helmet:'Helmet',beanie:'Beanie',goggles:'Goggles',hoodie:'Zip Hoodie',jersey:'Jersey',prot:'Back Protector',pants:'Baggy Pants',skis:'Twin Tips',board:'Snowboard',bike:'Bike',pack:'Backpack',poles:'Poles',boots:'Ski Boots'};
+const CAT_EN={helmet:'Helmet',beanie:'Beanie',goggles:'Goggles',hoodie:'Zip Hoodie',jersey:'Jersey',prot:'Back Protector',bfork:'Fork',bshock:'Shock',brim:'Rims',btire:'Tires',bbar:'Bar & Grips',bsad:'Saddle',bped:'Pedals',pants:'Baggy Pants',skis:'Twin Tips',board:'Snowboard',bike:'Bike',pack:'Backpack',poles:'Poles',boots:'Ski Boots'};
 const SHOP_EN={h_none:'No Helmet (Beanie)',h_black:'Matte Black',h_white:'Chalk White',h_orange:'Safety Orange',h_lilac:'Lilac',
   bn_black:'Beanie Black',bn_grey:'Beanie Grey',bn_red:'Beanie Red',bn_pom_white:'Pom Beanie White',bn_pom_red:'Pom Beanie Red',bn_pom_navy:'Pom Beanie Navy',bn_pom_pink:'Pom Beanie Pink',bn_pom_green:'Pom Beanie Forest',bn_pom_black:'Pom Beanie Black',
   bn_fish_mustard:'Fisherman Mustard',bn_fish_lilac:'Fisherman Lilac',d_grey:'Heather Grey',d_black:'Black',d_forest:'Forest Green',d_purple:'Purple',d_red:'Red',d_neon:'Neon Yellow',
   p_black:'Black',p_white:'White',p_camo:'Snow Camo',s_red:'Red / White',s_wood:'Wood Topsheet',b_wood:'Wood Core',
   pk_none:'No Backpack',pk_free:'Freeride Backpack',pk_black:'Backpack Black',pk_navy:'Backpack Navy',pk_olive:'Backpack Olive',pk_orange:'Backpack Orange',pk_mint:'Backpack Mint',pk_purple:'Backpack Purple',pk_stealth:'Backpack Black-Grey',pk_yellow:'Backpack Yellow',
-  pr_none:'No Protector',pr_free:'Back Protector',pr_red:'Protector Red',pr_blue:'Protector Blue',pr_neon:'Protector Neon',pr_orange:'Protector Orange',j_black:'Race Black',j_white:'Race White',j_red:'Red',j_blue:'Blue',j_forest:'Forest Green',j_purple:'Purple',j_gold:'Black-Gold',bk_red:'Red',bk_white:'White',bk_blue:'Racing Blue',bk_raw:'Raw Alloy',bk_purple:'Purple',po_silver:'Alu Silver',po_white:'White',po_red:'Red',po_bamboo:'Bamboo',po_stealth:'Black',bt_black:'Black',bt_turq:'Turquoise',bt_white:'White',bt_red:'Red',bt_lilac:'Lilac'};
+  fk_gold:'Gold Kashima',fk_black:'Black',fk_silver:'Silver',fk_goldw:'Gold & White',fk_orange:'Orange',fk_red:'Red',fk_blue:'Blue',fk_lime:'Lime',sh_gold:'Gold',sh_orange:'Orange',sh_red:'Red',sh_black:'Black',sh_ti:'Titanium',sh_blue:'Blue',sh_lime:'Lime',sh_purple:'Purple',rm_black:'Black',rm_silver:'Silver',rm_gold:'Gold',rm_red:'Red',rm_blue:'Blue',rm_white:'White',rm_orange:'Orange',rm_purple:'Purple',tr_black:'Black',tr_skin:'Skinwall',tr_white:'Whitewall',tr_red:'Red Wall',tr_blue:'Blue Wall',tr_yellow:'Yellow Wall',tr_gum:'Gumwall',tr_grey:'Grey',bb_black:'Black',bb_red:'Red Grips',bb_blue:'Blue Grips',bb_white:'White Grips',bb_orange:'Orange Grips',bb_lime:'Lime Grips',bb_pink:'Pink Grips',bb_gold:'Gold Bar',sd_black:'Black',sd_white:'White',sd_red:'Red',sd_blue:'Blue',sd_orange:'Orange',sd_camo:'Olive',sd_purple:'Purple',sd_gold:'Gold',pd_black:'Black',pd_silver:'Silver',pd_gold:'Gold',pd_red:'Red',pd_blue:'Blue',pd_orange:'Orange',pd_purple:'Purple',pd_lime:'Lime',pr_none:'No Protector',pr_free:'Back Protector',pr_red:'Protector Red',pr_blue:'Protector Blue',pr_neon:'Protector Neon',pr_orange:'Protector Orange',j_black:'Race Black',j_white:'Race White',j_red:'Red',j_blue:'Blue',j_forest:'Forest Green',j_purple:'Purple',j_gold:'Black-Gold',bk_red:'Red',bk_white:'White',bk_blue:'Racing Blue',bk_raw:'Raw Alloy',bk_purple:'Purple',po_silver:'Alu Silver',po_white:'White',po_red:'Red',po_bamboo:'Bamboo',po_stealth:'Black',bt_black:'Black',bt_turq:'Turquoise',bt_white:'White',bt_red:'Red',bt_lilac:'Lilac'};
 const INFO_EN={pr_free:'With a climbing hook, folding spade and first aid kit in its pockets: saves you once per run from whatever gets you first: the abyss, the mudslide or a rock. Can be switched on and off in the menu.',pk_free:'With ice axe, avalanche shovel and first aid kit: saves you once per run from whatever gets you first: the abyss, the avalanche or a rock. Can be switched on and off in the menu.'};
 const RAIL_EN={'Pistenraupe':'Snowcat','Picknicktisch':'Picnic Table','Treppen-Rail':'Stair Rail'};
 const catName=c=>SUMMER&&c==='boots'?TX('Schuhe','Shoes'):SUMMER&&c==='pants'?TX('Bike-Hose','Bike Pants'):LANG==='en'?CAT_EN[c]||SHOP[c].label:SHOP[c].label,itName=it=>LANG==='en'?SHOP_EN[it.id]||it.name:it.name,itInfo=it=>LANG==='en'?INFO_EN[it.id]||it.info:it.info;
@@ -735,7 +800,7 @@ function capsule(g,A,B,rx,ry,col){const dx=B[0]-A[0],dy=B[1]-A[1],sx=1/rx,sy=1/r
   const x0=Math.floor(Math.min(A[0],B[0])-rx-1),x1=Math.ceil(Math.max(A[0],B[0])+rx+1),y0=Math.floor(Math.min(A[1],B[1])-ry-1),y1=Math.ceil(Math.max(A[1],B[1])+ry+1);
   if(!fn)g.fillStyle=col;
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const px=(x+.5-A[0])*sx,py=(y+.5-A[1])*sy,u=l2?clamp((px*ex+py*ey)/l2,0,1):0,qx=px-ex*u,qy=py-ey*u;
-    if(qx*qx+qy*qy>1)continue;if(fn){const c=col(u,(px*ey-py*ex)/ll);if(!c)continue;g.fillStyle=c}g.fillRect(x,y,1,1)}}
+    if(qx*qx+qy*qy>1)continue;if(fn){const v=(px*ey-py*ex)/ll,c=col(u,v,v*ex/ll);if(!c)continue;g.fillStyle=c}g.fillRect(x,y,1,1)}}
 function strokeRects(g,pts,wx,wy,col){g.fillStyle=col;for(let i=0;i<pts.length-1;i++){const [x0,y0]=pts[i],[x1,y1]=pts[i+1];const n=Math.max(1,Math.ceil(Math.hypot(x1-x0,y1-y0)*1.5));for(let k=0;k<=n;k++){const x=x0+(x1-x0)*k/n,y=y0+(y1-y0)*k/n;g.fillRect(Math.round(x-wx/2),Math.round(y-wy/2),wx,wy)}}}
 
 const SKI3=(()=>{
@@ -1043,40 +1108,86 @@ function bikeSolve(L0){let L=BIKE_SOLVED.get(L0);if(L)return L;
   L=Object.assign({},L0,{legs,arms,boots:legs.map(l=>l[2]),bootWH:[4,2],noFlare:true,noPoles:true,handLo:[0,1].map(i=>!(L0.armsX&&L0.armsX[i])),_X:X,_ped:ped});
   BIKE_SOLVED.set(L0,L);return L}
 // Bike zeichnen: Teile mit Tiefe (key) wie die Gliedmaßen, damit Beine, Bike und Arme richtig voreinander liegen.
-// Form wie ein Downhill-Bike: kurzer Hinterbau, langer Vorderbau mit flacher Doppelbrücken-Gabel (goldene Standrohre), abfallendes Oberrohr,
-// goldener Stahlfeder-Dämpfer im Rahmendreieck, tiefer Sattel, Stollenreifen, dunkle Felgen, Bremsscheiben. Rohre pixelgenau, damit nichts verklumpt.
-function bikeParts(g,L,lo,P,O,parts){const X=L._X,bk=L.bike||{},W=q=>lo(X.P(q)),WF=q=>lo(X.P(X.F(q))),AX=bkAx(bk);
-  const RIM='#6f7785',DISC='#c3c8d1',DARK='#2a2d35',FR=P.BK,FRh=shade(P.BK,(c=>(c[0]*.3+c[1]*.59+c[2]*.11)/255)(hexRgb(P.BK))<.3?.45:.25),GOLD=P.bka,GOLDd=shade(P.bka,-.42);
-  const tube=(A,B,r,col,ko,hl)=>parts.push({key:(A[2]+B[2])/2+(ko||0),draw:()=>{capsule(g,A,B,r+1,r+1,O);capsule(g,A,B,r,r,col);
-    if(hl){const dx=B[0]-A[0],dy=B[1]-A[1],l=Math.hypot(dx,dy)||1;let nx=dy/l,ny=-dx/l;if(ny>0){nx=-nx;ny=-ny}const o=r*.62,a0=.12,a1=.88;
-      capsule(g,[A[0]+dx*a0+nx*o,A[1]+dy*a0+ny*o],[A[0]+dx*a1+nx*o,A[1]+dy*a1+ny*o],.55,.55,hl)}}});
-  const wheel=front=>{const ex=front?X.dir([1,0,0]):X.dirB([1,0,0]),ey=front?X.dir([0,1,0]):X.dirB([0,1,0]),ez=front?X.dir([0,0,1]):X.dirB([0,0,1]),C=front?X.P(X.F(AX.fa)):X.P(AX.ra);
-    const at=(r,t,z)=>{const q=lo(v3.add(C,v3.add(v3.add(v3.mul(ex,r*Math.cos(t)),v3.mul(ey,r*Math.sin(t))),v3.mul(ez,z||0))));return [q[0],q[1]]};
-    const ring=(r,n,z)=>{const a=[];for(let i=0;i<=n;i++)a.push(at(r,i/n*Math.PI*2,z));return a};
-    const cc=lo(C),tyre=ring(BK.wr,36),rim=ring(BK.wr-1.5,30),disc=ring(1.7,10,1),knobs=[];for(let i=0;i<BKNOBS;i++)knobs.push(at(BK.wr+1.05,(i+.5)/BKNOBS*Math.PI*2));
-    parts.push({key:cc[2]-.6,draw:()=>{g.fillStyle=O;for(const k of knobs)g.fillRect(Math.floor(k[0]),Math.floor(k[1]),1,1);
-      strokePts(g,tyre,2,O);strokePts(g,rim,1,RIM);strokePts(g,disc,1,DISC);g.fillStyle=O;g.fillRect(Math.round(cc[0]-1),Math.round(cc[1]-1),2,2)}})};
+// Das Bike wird in K-facher Auflösung gezeichnet (K=3 im Spiel: ein Bike-Pixel ist ein Drittel Welt-Pixel), jedes Teil in seiner Shop-Farbe:
+// Stollenreifen mit Flanke, Felgen, gekreuzte Speichen, Bremsscheiben mit Sätteln, Rahmen mit Licht, Schatten und Schriftzug, Doppelbrücken-Gabel,
+// Stahlfeder-Dämpfer mit einzelnen Windungen, Vorbau, Lenker, Griffe, Bremshebel und -leitung, Sattel, Kettenführung, Kette, Schaltwerk, Kurbeln, Pedale mit Pins.
+function bikeParts(g,L,lo,P,O,parts){const X=L._X,bk=L.bike||{},AX=bkAx(bk),K=g._K||1,R=w=>w*K;
+  const W=q=>{const r=lo(X.P(q));return [r[0]*K,r[1]*K,r[2]]},WF=q=>{const r=lo(X.P(X.F(q)));return [r[0]*K,r[1]*K,r[2]]};
+  const add=(key,f)=>parts.push({key,draw:()=>{g.save();g.setTransform(1,0,0,1,0,0);f();g.restore()}});
+  const sh3=c=>{const hi=shade(c,.3),dk=shade(c,-.32);return (u,v,up)=>up>.4?hi:up<-.45?dk:c};
+  const dot=(C,r,col)=>capsule(g,C,C,r,r,col);
+  const tube=(A,B,w,col,ko,extra)=>add((A[2]+B[2])/2+(ko||0),()=>{const r=R(w),f=sh3(col);capsule(g,A,B,r+1,r+1,O);capsule(g,A,B,r,r,extra?(u,v,up)=>extra(u,v,up)||f(u,v,up):f)});
+  const line=(A,B,c0,c1)=>{let x0=Math.round(A[0]),y0=Math.round(A[1]),i=0;const x1=Math.round(B[0]),y1=Math.round(B[1]),dx=Math.abs(x1-x0),dy=-Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1;let e=dx+dy;
+    for(let n=0;n<999;n++){g.fillStyle=c1&&(i++&1)?c1:c0;g.fillRect(x0,y0,1,1);if(x0===x1&&y0===y1)break;const e2=2*e;if(e2>=dy){e+=dy;x0+=sx}if(e2<=dx){e+=dx;y0+=sy}}};
+  // Ebene eines Rads (Rahmen- bzw. Lenkebene): pro Pixel zurück in Radkoordinaten (rho, Winkel); px = eine Pixelbreite in Radeinheiten
+  const plane=(C3,front)=>{const c=lo(C3),ax=v=>{const q=lo(v3.add(C3,v));return [(q[0]-c[0])*K,(q[1]-c[1])*K]};
+    const ex=ax(front?X.dir([1,0,0]):X.dirB([1,0,0])),ey=ax(front?X.dir([0,1,0]):X.dirB([0,1,0]));return {c:[c[0]*K,c[1]*K,c[2]],ex,ey,det:ex[0]*ey[1]-ex[1]*ey[0],lx:Math.hypot(ex[0],ex[1]),ly:Math.hypot(ey[0],ey[1])}};
+  const onPl=(pl,r,a)=>[pl.c[0]+(pl.ex[0]*Math.cos(a)+pl.ey[0]*Math.sin(a))*r,pl.c[1]+(pl.ex[1]*Math.cos(a)+pl.ey[1]*Math.sin(a))*r];
+  const rast=(pl,rMax,f)=>{const {c,ex,ey,det}=pl,wx=(Math.abs(ex[0])+Math.abs(ey[0]))*rMax+2,wy=(Math.abs(ex[1])+Math.abs(ey[1]))*rMax+2;
+    for(let y=Math.floor(c[1]-wy);y<=Math.ceil(c[1]+wy);y++)for(let x=Math.floor(c[0]-wx);x<=Math.ceil(c[0]+wx);x++){const dx=x+.5-c[0],dy=y+.5-c[1],a=(dx*ey[1]-dy*ey[0])/det,b=(ex[0]*dy-ex[1]*dx)/det,rho=Math.hypot(a,b);
+      if(rho>rMax)continue;const col=f(rho,Math.atan2(b,a),rho>.05?Math.min(1.2,rho/Math.max(.01,Math.hypot(dx,dy))):.3);if(col){g.fillStyle=col;g.fillRect(x,y,1,1)}}};
+  const edgeOn=pl=>Math.abs(pl.det)<.22*pl.lx*pl.ly;
+  // Räder
+  const wheel=front=>{const pl=plane(front?X.P(X.F(AX.fa)):X.P(AX.ra),front),wr=BK.wr,rTi=wr-1.05,rR=wr-1.9,KN=34;
+    const TR=P.TR,TS=P.TS,TRk=shade(P.TR,.14),RM=P.RM,RMh=shade(P.RM,.4),RMd=shade(P.RM,-.4),SPK=P.SPK,DSC='#c3c8d1',DSh='#7f8794',HUB='#2a2d35',HUBh='#8e96a6',CAS='#9aa1ad';
+    add(pl.c[2]-.6,()=>{
+      if(edgeOn(pl)){const A=pl.lx>pl.ly?pl.ex:pl.ey,l=Math.max(pl.lx,pl.ly),r=wr*l,u=[A[0]/l,A[1]/l],P0=[pl.c[0]-u[0]*r,pl.c[1]-u[1]*r],P1=[pl.c[0]+u[0]*r,pl.c[1]+u[1]*r];
+        capsule(g,P0,P1,R(.55)+1,R(.55)+1,O);capsule(g,P0,P1,R(.55),R(.55),(uu)=>Math.floor(uu*r)%3?TR:TRk);dot(pl.c,R(.3),HUB);return}
+      for(let i=0;i<20;i++){const t0=i/20*Math.PI*2;line(onPl(pl,.6,t0),onPl(pl,rR,t0+(i&1?.55:-.55)),SPK)}   // gekreuzte Speichen
+      rast(pl,wr+1.2,(rho,t,px)=>{const rO=Math.cos(t*KN)>.1?wr+.34:wr;
+        if(rho>rO+px)return null;if(rho>rO)return O;if(rho>wr)return TRk;   // Stollen
+        if(rho>rTi)return rho>rTi+.42?TR:TS;                                  // Lauffläche, Flanke
+        if(rho>rTi-px)return RMd;if(rho>rR+px)return RM;if(rho>rR)return RMh;if(rho>rR-px)return O;   // Felge
+        if(rho<.6)return rho<.26?HUBh:HUB;                                     // Nabe
+        if(!front&&rho<1.12)return Math.cos(t*14)>.5||rho<.8?CAS:'#5a606c';   // Ritzelpaket
+        if(rho>1.45&&rho<1.95)return rho>1.6&&rho<1.8&&Math.cos(t*9)>.45?DSh:DSC;   // Bremsscheibe mit Löchern
+        if(front&&rho>.6&&rho<1.45&&Math.cos(t*5)>.6)return DSh;
+        return null})});
+    // Bremssattel am Scheibenrand
+    const ang=front?-2.35:-1.0,M=onPl(pl,1.95,ang),T0=onPl(pl,1.95,ang-.32),T1=onPl(pl,1.95,ang+.32);
+    if(!edgeOn(pl))add(pl.c[2]-.5,()=>{capsule(g,T0,T1,R(.45)+1,R(.45)+1,O);capsule(g,T0,T1,R(.45),R(.45),sh3('#2f333c'));g.fillStyle='#aeb4bf';g.fillRect(Math.round(M[0]),Math.round(M[1]),1,1)})};
   wheel(false);wheel(true);
+  // Rahmen: Hinterbau, Hauptlager, Dämpfer, Rohre
   const bb=W([0,0,0]),st=W([-.8,-8.2,0]),ht=W(BK.ht),hb=W(BK.hb),ra=W(AX.ra),rk=W([-.9,-6.4,0]),rk2=W([5.9,-10,0]),piv=W([.8,-1.6,0]),sh0=W([6.9,-5.2,0]);
-  tube(piv,ra,.6,FR,-.12);tube(ra,rk,.6,FR,-.12);   // Hinterbau: Kettenstrebe, Sitzstrebe
-  parts.push({key:-.03,draw:()=>{capsule(g,sh0,rk2,2.4,2.4,O);{const c0=.12+.2*AX.s/BK_SAG;capsule(g,sh0,rk2,1.4,1.4,u=>u<c0||u>.88?DARK:Math.floor((u-c0)/(.88-c0)*6)%2?GOLDd:GOLD)}}});   // Stahlfeder-Dämpfer
-  tube(bb,st,.75,FR);tube(st,ht,.75,FR,.01,FRh);tube(bb,hb,1.15,FR,.02,FRh);tube(ht,hb,1.05,FR,.05);   // Sitzrohr, abfallendes Oberrohr, dickes Unterrohr, Steuerrohr
-  tube(st,W([-1.2,-9.3,0]),.5,DARK,.02);tube(W([-3.5,-9.8,0]),W([.3,-9.6,0]),.6,'#1d2027',.03);   // kurze Sattelstütze, tiefer Sattel
-  // Doppelbrücken-Gabel: Standrohre gold, dicke schwarze Tauchrohre, zwei Brücken
+  tube(piv,ra,.4,P.BK,-.12);tube(ra,rk,.36,P.BK,-.12);
+  add(-.11,()=>{dot(piv,R(.3)+1,O);dot(piv,R(.3),'#9aa1ad')});
+  add(-.03,()=>{const c0=.2+.18*AX.s/BK_SAG,c1=.84,sp=P.SHK,spH=shade(sp,.38),spD=shade(sp,-.45),L=Math.hypot(rk2[0]-sh0[0],rk2[1]-sh0[1]),Lc=L*(c1-c0);
+    capsule(g,sh0,rk2,R(.3)+1,R(.3)+1,O);capsule(g,sh0,rk2,R(.3),R(.3),sh3('#3a3e48'));   // Dämpferkörper
+    const A=[sh0[0]+(rk2[0]-sh0[0])*c0,sh0[1]+(rk2[1]-sh0[1])*c0],B=[sh0[0]+(rk2[0]-sh0[0])*c1,sh0[1]+(rk2[1]-sh0[1])*c1];
+    capsule(g,A,B,R(.82)+1,R(.82)+1,O);   // Feder: schräge Windungen, dazwischen der dunkle Körper
+    capsule(g,A,B,R(.82),R(.82),(u,v,up)=>{const ph=(u*Lc+v*R(.5))/2;return ph-Math.floor(ph)<.55?(up>.35?spH:up<-.4?spD:sp):'#1c1e24'});
+    for(const E of [sh0,rk2]){dot(E,R(.34)+1,O);dot(E,R(.34),'#aeb4bf');g.fillStyle='#2a2d35';g.fillRect(Math.round(E[0]),Math.round(E[1]),1,1)}});
+  const Ldt=Math.hypot(hb[0]-bb[0],hb[1]-bb[1]);
+  tube(bb,st,.46,P.BK);tube(st,ht,.48,P.BK,.01);
+  tube(bb,hb,.68,P.BK,.02,(u,v)=>u>.28&&u<.72&&Math.abs(v+.05)<.42&&Math.floor(u*Ldt)%5!==4?P.bka:null);   // Unterrohr mit Schriftzug in der Akzentfarbe
+  tube(ht,hb,.66,P.BK,.05,u=>u<.1||u>.9?'#1d2027':null);   // Steuerrohr mit Steuersatz
+  tube(st,W([-1.25,-9.3,0]),.3,'#4a4f5b',.02);   // Sattelstütze
+  {const s0=W([-3.6,-9.95,0]),s1=W([.5,-9.72,0]),s2=W([-1.7,-10.05,0]);add(.03,()=>{capsule(g,s0,s1,R(.34)+1,R(.34)+1,O);capsule(g,s0,s2,R(.44)+1,R(.44)+1,O);const f=sh3(P.SD);capsule(g,s0,s1,R(.34),R(.34),f);capsule(g,s0,s2,R(.44),R(.44),f)})}   // Sattel
+  // Doppelbrücken-Gabel: Standrohre, Tauchrohre mit Abstreifring, zwei Brücken
   const FT=BK_FT,FM=AX.fm;
-  for(const z of [-2,2]){tube(WF([FT[0],FT[1],z]),WF([FM[0],FM[1],z]),.6,GOLD,z<0?-.01:.01);tube(WF([FM[0],FM[1],z]),WF([AX.fa[0],AX.fa[1],z]),.95,DARK,z<0?-.02:.02)}
-  tube(WF([9.2,-12.2,-2.6]),WF([9.2,-12.2,2.6]),.8,DARK,.06);tube(WF([11.3,-8.1,-2.6]),WF([11.3,-8.1,2.6]),.8,DARK,.06);
-  // Vorbau, breiter Lenker, Griffe
-  const gx=BK.grip[0],gy=BK.grip[1];tube(WF([9.3,-12.6,0]),WF([gx,gy+.1,0]),.5,DARK,.07);tube(WF([gx,gy,-5.4]),WF([gx,gy,5.4]),.5,DARK,.07);
-  for(const s of [-1,1])tube(WF([gx,gy,s*4]),WF([gx,gy,s*5.4]),.8,'#15171c',.08);
-  // Kette (obere Seite), Kurbeln, Pedale, Kettenblatt
-  {const c0=W([.2,-1.3,1.2]),c1=W([AX.ra[0],AX.ra[1]-1,1.2]);parts.push({key:c0[2]+.015,draw:()=>capsule(g,c0,c1,.55,.55,u=>Math.floor(u*16)%2?'#3d424d':'#6b7280')})}
+  for(const z of [-2,2]){const a=WF([FT[0],FT[1],z]),m=WF([FM[0],FM[1],z]),f=WF([AX.fa[0],AX.fa[1],z]),ko=z<0?-.01:.01;
+    tube(a,m,.36,P.FK,ko);tube(m,f,.55,P.FL,ko*2,u=>u<.07?'#15171c':null)}
+  for(const [x,y] of [[9.2,-12.2],[11.3,-8.1]])tube(WF([x,y,-2.6]),WF([x,y,2.6]),.45,'#26292f',.06);
+  // Vorbau, Lenker, Griffe mit Rillen und Klemmringen, Bremshebel, Bremsleitung vorne
+  const gx=BK.grip[0],gy=BK.grip[1];
+  tube(WF([9.1,-12.9,0]),WF([gx,gy+.1,0]),.4,'#26292f',.07);tube(WF([gx,gy,-5.4]),WF([gx,gy,5.4]),.3,P.BR,.07);
+  for(const s of [-1,1]){tube(WF([gx-.2,gy+.25,s*3.5]),WF([gx+1.4,gy+1.0,s*3.8]),.2,'#3a3e48',.075);
+    tube(WF([gx,gy,s*4]),WF([gx,gy,s*5.45]),.5,P.GR,.08,u=>u<.13||u>.87?P.BR:Math.floor(u*9)%2?shade(P.GR,-.2):null)}
+  {const a=WF([gx,gy+.3,-3.3]),m=WF([FM[0]-.4,FM[1]-1.4,-2.6]),b=WF([FM[0]+.5,FM[1]+2.4,-2.5]);add(a[2]-.03,()=>{line(a,m,'#16181d');line(m,b,'#16181d')})}
+  // Kettenführung (Bashguard unten), Kettenblatt mit Zähnen, Kette mit Gliedern, kurzes Schaltwerk
+  {const pl=plane(X.P([0,0,1.3]),false);if(!edgeOn(pl))add(pl.c[2]-.02,()=>rast(pl,2.3,(rho,t,px)=>{
+      if(Math.sin(t)>-.15&&rho<=2.05&&rho>1.62)return rho>2.05-px?O:rho>1.9-px?'#3a3e48':'#2b2e36';
+      const rO=Math.cos(t*16)>0?1.58:1.45;if(rho>rO+px)return null;if(rho>rO)return O;if(rho>1.25)return '#5a606c';if(rho>1.1)return '#2f333c';
+      if(rho<.45)return '#8e96a6';return Math.cos(t*4)>.55?'#5a606c':null}))}
+  {const a=W([.1,-1.5,1.2]),b=W([AX.ra[0],AX.ra[1]-1.05,1.2]),c=W([.1,1.5,1.2]),e=W([AX.ra[0]-.1,AX.ra[1]+1.1,1.2]),d=W([AX.ra[0]+.7,AX.ra[1]+2.3,1.2]);
+    add(a[2]+.015,()=>{line(a,b,'#3d424d','#80889a');line(c,d,'#3d424d','#80889a');capsule(g,e,d,R(.32)+1,R(.32)+1,O);capsule(g,e,d,R(.32),R(.32),'#2b2e36');dot(e,1,'#9aa1ad');dot(d,1,'#9aa1ad')})}
+  // Kurbeln und Plattformpedale mit Pins
   const th=(bk.crank||0)*RAD,c=BK.crank;
-  for(const s of [-1,1]){const e=W([s*c*Math.cos(th),s*c*Math.sin(th),s*1.5]),pd=W([s*c*Math.cos(th),s*c*Math.sin(th),s*BK.ped]);
-    tube(W([0,0,s*1.2]),e,.55,'#3b3f4b',.02);parts.push({key:pd[2]-.02,draw:()=>rectO(g,Math.round(pd[0])-1,Math.round(pd[1]),3,1,'#4a4f5c',O)})}
-  {const cr=W([0,0,1]);parts.push({key:cr[2]+.01,draw:()=>{g.fillStyle=O;g.fillRect(Math.round(cr[0])-1,Math.round(cr[1])-1,3,3);g.fillStyle='#8e96a6';g.fillRect(Math.round(cr[0]),Math.round(cr[1]),1,1)}})}
+  for(const s of [-1,1]){const cx=s*c*Math.cos(th),cy=s*c*Math.sin(th),e=W([cx,cy,s*1.55]),p0=W([cx-.85,cy,s*BK.ped]),p1=W([cx+.85,cy,s*BK.ped]),pd=W([cx,cy,s*BK.ped]);
+    tube(W([0,0,s*1.4]),e,.34,P.CR,.02);
+    add(pd[2]-.02,()=>{capsule(g,p0,p1,R(.33)+1,R(.33)+1,O);capsule(g,p0,p1,R(.33),R(.33),sh3(P.PD));g.fillStyle='#c3c8d1';
+      for(const u of [.18,.82]){const x=p0[0]+(p1[0]-p0[0])*u,y=p0[1]+(p1[1]-p0[1])*u;g.fillRect(Math.round(x),Math.round(y-R(.33))-1,1,1)}})}
 }
-const BKNOBS=24;
 /* Bike-Posen. Tricks liegen auf denselben Stick-Richtungen wie die Grabs:
    blunt = Superman, truck = X-Up, nose = Whip, venom = Can-Can, mute = Table Top, octo = Nac-Nac, tail = No-Hander, japan = One-Footer */
 const BIKE3=(()=>{
@@ -1133,6 +1244,7 @@ const BIKE3=(()=>{
   for(const g of ['blunt','japan','nose','tail','mute','truck','venom','octo'])L[g+'_h']=mixD(tuck,L[g],.5);
   for(const k of ['ab_back','ab_lean','crouch'])L[k+'_h']=mixD(ride,L[k],.5);
   L.ab_sag_h=mixD(ride,L.ab_sag,.5);L.ab_sag_h.bike.sag=BK_SAG/2;
+  L._bike=Object.assign({},ride,{noRider:true});
   return L})();
 /* Körperschwerpunkt (KSP) einer Pose: In der Luft dreht sich der Körper immer um den KSP, der auf einer Parabel fliegt.
    Gewichte grob nach Körperanteilen: Rumpf 43, Kopf 7, Oberschenkel je 10, Unterschenkel+Fuß je 6, Arme je 5, Ski+Schuhe zusammen ca. 11. */
@@ -1185,6 +1297,7 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
       else{const base=skiBaseShown(s),c0=base?P.ka:P.K,col=L.skiDark&&L.skiDark[i]?shade(c0,-.2):c0;strokePts(g,sp,4,O);strokePts(g,sp,2,col)}}});
   });
   if(bike){bikeParts(g,L,lo,P,O,parts);skiKeys[0]=lo(L._ped[0])[2];skiKeys[1]=lo(L._ped[1])[2]}   // Bike statt Ski, Schuhe auf den Pedalen
+  if(L.noRider){parts.sort((a,b)=>a.key-b.key).forEach(q=>q.draw());return}   // nur das Bike (Shop-Vorschau)
   const bootKey=i=>(board?skiKeys[0]:skiKeys[i])+.01+i*.001;
   // Skischuh: nur 1 Pixel hoch, unten am Hosenbein direkt über der Skifarbe (statt der dunklen Ski-Oberkante); vorne schaut die Spitze raus
   const skiBootRow=!board&&!bike&&L.skis&&L.axe==null;
@@ -1280,24 +1393,27 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
   if(L.handsBack){const q0=up(L.arms[0][2]),q1=up(L.arms[1][2]);parts.push({key:Math.max(q0[2],q1[2])+.01,draw:()=>rectO(g,Math.round((q0[0]+q1[0])/2-1.5),Math.round((q0[1]+q1[1])/2-1),3,2,P.glove,O)})}
   parts.sort((a,b)=>a.key-b.key).forEach(q=>q.draw());
 }
-function applyPattern(g,P){
-  const id=g.getImageData(0,0,SPR,SPR),d=id.data,a=hexRgb(P.P),b=hexRgb(P.p),c1=hexRgb(P.pat[0]),c2=hexRgb(P.pat[1]);
-  for(let y=0;y<SPR;y++)for(let x=0;x<SPR;x++){
-    const i=(y*SPR+x)*4;const isA=d[i]===a[0]&&d[i+1]===a[1]&&d[i+2]===a[2],isB=d[i]===b[0]&&d[i+1]===b[1]&&d[i+2]===b[2];
-    if(!isA&&!isB)continue;const h=((x>>1)*73^(y>>1)*151)%7;
+function applyPattern(g,P,K){K=K||1;const N=SPR*K;
+  const id=g.getImageData(0,0,N,N),d=id.data,a=hexRgb(P.P),b=hexRgb(P.p),c1=hexRgb(P.pat[0]),c2=hexRgb(P.pat[1]);
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    const i=(y*N+x)*4;const isA=d[i]===a[0]&&d[i+1]===a[1]&&d[i+2]===a[2],isB=d[i]===b[0]&&d[i+1]===b[1]&&d[i+2]===b[2];
+    if(!isA&&!isB)continue;const h=(((x/K|0)>>1)*73^((y/K|0)>>1)*151)%7;
     const col=h<2?c1:h===3?c2:null;if(col){d[i]=col[0];d[i+1]=col[1];d[i+2]=col[2]}
   }
   g.putImageData(id,0,0);
 }
-const sprCache=new Map();
-function getSprite(pose,phi,look,eq,gear,pow,cork,twist){
-  eq=eq||SAVE.equip;gear=gear||GEAR;
-  const ph=((Math.round(phi/15)*15)%360+360)%360,ck=cork?{m:cork.m,t:((Math.round(cork.t/15)*15)%360+360)%360}:null,tq=Math.round((twist||0)/15)*15,key=pose+'|'+ph+'|'+(look?1:0)+'|'+(pow?1:0)+'|'+(ck?ck.m+ck.t:'')+'|'+gear+'|'+tq+'|'+eqKey(eq);
-  let s=sprCache.get(key);if(s)return s;
-  const P=palette(eq);if(gear==='bike'){const Ji=itemOf('jersey',eq.jersey||'j_black');P.D=Ji.c;P.d=shade(Ji.c,-.3);P.J2=Ji.a;P.pk=null;{const Pr=eq.prot&&eq.prot!=='pr_none'?itemOf('prot',eq.prot):null;P.pr=Pr?Pr.c:null;P.pra=Pr?Pr.a:null}{const a=hexRgb(Ji.a),b=hexRgb(P.H),lum=(b[0]*.3+b[1]*.59+b[2]*.11)/255;const la=(a[0]*.3+a[1]*.59+a[2]*.11)/255;P.J=la>lum+.25?Ji.a:shade(P.H,lum>.5?-.3:.5)}if(!P.hat)P.ff=true}const [c,g]=mk(SPR,SPR);
+const sprCache=new Map();let sprW=0;   // Speicher der Bild-Caches in 1x-Sprite-Einheiten
+function getSprite(pose,phi,look,eq,gear,pow,cork,twist,K){
+  eq=eq||SAVE.equip;gear=gear||GEAR;K=K||(gear==='bike'?RS:1);
+  const ph=((Math.round(phi/15)*15)%360+360)%360,ck=cork?{m:cork.m,t:((Math.round(cork.t/15)*15)%360+360)%360}:null,tq=Math.round((twist||0)/15)*15,key=pose+'|'+ph+'|'+(look?1:0)+'|'+(pow?1:0)+'|'+(ck?ck.m+ck.t:'')+'|'+gear+'|'+tq+'|'+eqKey(eq)+'|'+K;
+  let s=sprCache.get(key);if(s){sprCache.delete(key);sprCache.set(key,s);return s}
+  const P=palette(eq);if(gear==='bike'){const Ji=itemOf('jersey',eq.jersey||'j_black');P.D=Ji.c;P.d=shade(Ji.c,-.3);P.J2=Ji.a;P.pk=null;{const Pr=eq.prot&&eq.prot!=='pr_none'?itemOf('prot',eq.prot):null;P.pr=Pr?Pr.c:null;P.pra=Pr?Pr.a:null}{const a=hexRgb(Ji.a),b=hexRgb(P.H),lum=(b[0]*.3+b[1]*.59+b[2]*.11)/255;const la=(a[0]*.3+a[1]*.59+a[2]*.11)/255;P.J=la>lum+.25?Ji.a:shade(P.H,lum>.5?-.3:.5)}if(!P.hat)P.ff=true;
+    {const it=c=>itemOf(c,eq[c]),Fo=it('bfork'),Sh=it('bshock'),Ri=it('brim'),Ti=it('btire'),Ba=it('bbar'),Sa=it('bsad'),Pe=it('bped');   // Bike-Teile aus dem Shop
+     P.FK=Fo.c;P.FL=Fo.a;P.SHK=Sh.c;P.RM=Ri.c;P.SPK=Ri.a;P.TR=Ti.c;P.TS=Ti.a;P.GR=Ba.c;P.BR=Ba.a;P.SD=Sa.c;P.PD=Pe.c;P.CR=Pe.a}}
+  const [c,g]=mk(SPR*K,SPR*K);g.setTransform(K,0,0,K,0,0);g._K=K;c.hi=K>1;c.K=K;
   renderFigure(g,pose,ph,look,P,gear,pow,ck,tq);
-  if(P.pat)applyPattern(g,P);
-  if(sprCache.size>1400)sprCache.clear();
+  if(P.pat)applyPattern(g,P,K);
+  sprW+=K*K;while(sprW>2600&&sprCache.size){const [k0,c0]=sprCache.entries().next().value;sprCache.delete(k0);sprW-=(c0.K||1)**2}
   sprCache.set(key,c);return c;
 }
 /* Patrol snowmobile */
@@ -1968,6 +2084,7 @@ function drawClouds(cX,DS,alpha){
 // damit die Stirnlampe keine weit entfernten Bäume oder Berge anleuchtet
 let worldCv=null,worldCtx=null,bgCv=null,bgCtx=null,lightCv=null,lightCtx=null,emissive=[],emissiveBg=[];
 function nightPass(DS,list,holes){
+  lightOn=DS.night>=.02;
   if(DS.dusk>.02){ctx.globalCompositeOperation='source-atop';ctx.fillStyle='rgba(255,128,80,'+(.15*DS.dusk)+')';ctx.fillRect(0,0,VW,VH);ctx.globalCompositeOperation='source-over'}
   const nf=DS.night;if(nf<.02)return false;
   if(!lightCv||lightCv.width!==VW){[lightCv,lightCtx]=mk(VW,VH)}
@@ -2082,9 +2199,20 @@ function playerView(){
   }
   return {pose,phi,look,ang,comx,comy,ox,oy,twist,inPow:p.mode==='ground'&&p.sink>2.5,cork:airish&&p.corkMode?{m:p.corkMode,t:p.flipAcc}:null};
 }
+/* Hochauflösender Fahrer (Bike): eigene Ebene in voller Bildschirm-Auflösung. Alles, was danach kommt (Erdhaufen, Partikel, Mure), landet auf
+   einer zweiten Welt-Ebene darüber; Dämmerung und Nacht werden auf alle drei Ebenen gelegt. */
+let HIP=null,plCv=null,plCtx=null,afterCv=null,afterCtx=null,lightOn=false;const PLH=52;
+function shadeLayer(g,sx,sy,sw,sh,dw,dh){const DS=curDS;g.save();g.setTransform(1,0,0,1,0,0);g.globalCompositeOperation='source-atop';
+  if(DS.dusk>.02){g.fillStyle='rgba(255,128,80,'+(.15*DS.dusk)+')';g.fillRect(0,0,dw,dh)}
+  if(lightOn&&lightCv)g.drawImage(lightCv,sx,sy,sw,sh,0,0,dw,dh);g.restore()}
 function drawPlayer(cX,cY){
   const v=playerView(),spr=getSprite(v.pose,v.phi,v.look,null,null,v.inPow,v.cork,v.twist);
-  ctx.save();ctx.translate(Math.round(v.comx-cX),Math.round(v.comy-cY));ctx.rotate(v.ang*RAD);ctx.drawImage(spr,-SCX-v.ox,-SCY-v.oy);ctx.restore();
+  if(spr.hi){const tx=Math.round(v.comx-cX),ty=Math.round(v.comy-cY),S=PLH*2*RS;
+    if(!plCv){[plCv,plCtx]=mk(S,S);[afterCv,afterCtx]=mk(VW,VH)}
+    plCtx.setTransform(1,0,0,1,0,0);plCtx.globalCompositeOperation='source-over';plCtx.clearRect(0,0,S,S);
+    plCtx.translate(S/2,S/2);plCtx.rotate(v.ang*RAD);plCtx.drawImage(spr,(-SCX-v.ox)*spr.K,(-SCY-v.oy)*spr.K);plCtx.setTransform(1,0,0,1,0,0);
+    HIP={tx,ty};afterCtx.clearRect(0,0,VW,VH);ctx=afterCtx}
+  else{ctx.save();ctx.translate(Math.round(v.comx-cX),Math.round(v.comy-cY));ctx.rotate(v.ang*RAD);ctx.drawImage(spr,-SCX-v.ox,-SCY-v.oy);ctx.restore()}
   if(p.mode==='dig'&&p.dig.mound>.5){const hM=p.dig.mound;for(let dx=-17;dx<=17;dx++){const g=groundAt(p.x+dx);if(!g)continue;
       const u=dx/17,hh=Math.round(hM*Math.sqrt(Math.max(0,1-u*u))*(1+.12*Math.sin(dx*1.7+p.dig.t*2)));if(hh<1)continue;const x=Math.round(p.x+dx-cX),y=Math.round(g.y-cY);
       const MC=SUMMER?['#6d5133','#8a6a45','#a98559','#5a4229']:['#c6d3e5','#eef3fa','#ffffff','#b3c2d8'];   // Sommer: Erde und Geröll der Mure
@@ -2333,7 +2461,7 @@ function drawAlm(cX,cY){if(!ALM_SPR||!almDeco.length||cX>ALM_END+260)return;cons
       if(lit)for(const [wx,wy] of [[32,51],[100,51],[28,77],[104,77]])emissive.push({x:sx+wx,y:sy+wy,r:9})}}}
 
 /* ================= STATE ================= */
-const cv=$('cv');let ctx=cv.getContext('2d');
+const cv=$('cv');let ctx=cv.getContext('2d'),visCtx=null,frameCv=null,frameCtx=null;   // visCtx: sichtbares 3x-Bild, frameCtx: Welt in 1x
 let state='menu',now=0,shake=0;
 const p={};const wall={x:0,v:0};const pat={on:false};const cam={x:0,y:0};
 let parts=[],flakes=[];let run={};
@@ -3488,6 +3616,7 @@ function render(dt){
   let cX=Math.round(cam.x),cY=Math.round(cam.y);
   if(shake>0){cX+=Math.round(rand(-shake,shake));cY+=Math.round(rand(-shake,shake))}
   curDS=dayState();emissive=[];emissiveBg=[];
+  if(!frameCv)[frameCv,frameCtx]=mk(VW,VH);ctx=frameCtx;
   const mainCtx=ctx,fm=freeMix(cX+VW/2),by=Math.round(VH*.62);
   // Himmel und Bergketten (eigene Farben für Tag, Dämmerung, Nacht)
   drawSky(curDS);drawClouds(cX,curDS,1-fm*.5);drawMountains(cX,curDS);
@@ -3506,17 +3635,21 @@ function render(dt){
   ctx=mainCtx;ctx.drawImage(bgCv,0,0);
   // Welt: Piste, Klippen, alles Bewegliche; nachts Flutlicht und Stirnlampe
   if(!worldCv||worldCv.width!==VW){[worldCv,worldCtx]=mk(VW,VH)}
-  ctx=worldCtx;ctx.clearRect(0,0,VW,VH);
+  ctx=worldCtx;ctx.clearRect(0,0,VW,VH);HIP=null;
   drawTerrain(cX,cY);drawAlm(cX,cY);drawCrevasses(cX,cY);drawGapMist(cX,cY);drawCliffs(cX,cY);drawTrees(cX,cY);drawFauna(cX,cY);drawFloods(cX,cY);drawRocks(cX,cY);drawJTrees(cX,cY);drawLoops(cX,cY);drawSigns(cX,cY);drawRails(cX,cY);drawBonks(cX,cY);drawCoins(cX,cY);drawPatrol(cX,cY);drawPlayer(cX,cY);
   for(const q of parts){ctx.fillStyle=SUMMER&&DIRT_MAP[q.col]||q.col;ctx.fillRect(Math.round(q.x-cX),Math.round(q.y-cY),q.sz,q.sz)}
   drawGapFog(cX,cY);drawWall(cX,cY);
   const lamp=applyNight(cX,cY,curDS,fm);
+  if(HIP){shadeLayer(worldCtx,0,0,VW,VH,VW,VH);shadeLayer(plCtx,HIP.tx-PLH,HIP.ty-PLH,PLH*2,PLH*2,PLH*2*RS,PLH*2*RS)}   // Dämmerung und Nacht auch auf Welt und Fahrer-Ebene
   ctx=mainCtx;ctx.drawImage(worldCv,0,0);
   if(lamp)drawBeam(cX,cY,lamp,fm*curDS.night);
   if(curDS.night>.05&&fm<.95)drawFloodFog(cX,cY,curDS.night*(1-fm));
+  if(HIP)ctx=afterCtx;   // ab hier über dem feinen Fahrer
   drawFlakes(cX,cY,dt);
   if(state==='play'||state==='pause')drawPatrolPointer(cX,cY);
   if(whiteout>0){ctx.fillStyle=(SUMMER?'rgba(92,66,40,':'rgba(255,255,255,')+whiteout.toFixed(3)+')';ctx.fillRect(0,0,VW,VH)}
+  ctx=mainCtx;
+  if(visCtx){visCtx.drawImage(frameCv,0,0);if(HIP){visCtx.drawImage(plCv,HIP.tx-PLH,HIP.ty-PLH,PLH*2,PLH*2);visCtx.drawImage(afterCv,0,0)}}   // 1x-Welt hochskaliert, feiner Fahrer, Ebene darüber
   if(state==='play'||state==='pause')drawHud();
 }
 
@@ -3539,7 +3672,7 @@ function show(id){screens.forEach(s=>$(s).hidden=s!==id);if(id){const b=$(id).qu
 /* Saisonwechsel: alles, was nach Schnee oder Sommer aussieht, neu bauen (Hintergrund, Bäume, Alm, Ranger), Bild-Caches leeren, neue Welt */
 function seasonVisuals(){MPAL=SUMMER?MPAL_S:MPAL_W;avaColors()}
 function applySeason(){SUMMER=SAVE.season==='summer';setGear();
-  sprCache.clear();comCache.clear();mCache.clear();for(const k in mLuts)delete mLuts[k];avaSpr.clear();JT_SPR=null;for(const k in FAUNA_SPR)delete FAUNA_SPR[k];
+  sprCache.clear();sprW=0;comCache.clear();mCache.clear();for(const k in mLuts)delete mLuts[k];avaSpr.clear();JT_SPR=null;for(const k in FAUNA_SPR)delete FAUNA_SPR[k];
   if(typeof seasonVisuals==='function')seasonVisuals();
   rebuildBg();makeTreeSprites();makeAlmSprites();PATROL_SPR=[makePatrol(true),makePatrol(false)];initFlakes();
   resetRun();updCamera(0,true);refreshMenu()}
@@ -3583,17 +3716,21 @@ function toMenu(){state='menu';$('hud').hidden=true;refreshMenu();resetRun();upd
 /* ================= SHOP UI ================= */
 let shopCat='helmet',tryOn={};
 function openShop(){tryOn={};$('shopMsg').textContent='';show('shop');renderShop()}
+const BIKE_PARTS=['bike','bfork','bshock','brim','btire','bbar','bsad','bped'];let bikeSub='bike';
 function renderShop(){
   setT($('sCoins'),String(SAVE.coins));
   const tabs=$('tabs');tabs.innerHTML='';
-  const cats=CATS.filter(c=>SUMMER?!['skis','board','poles','hoodie','pack'].includes(c):!['bike','jersey','prot'].includes(c));if(!cats.includes(shopCat))shopCat='helmet';
-  for(const c of cats){const b=document.createElement('button');b.className='tab';b.role='tab';b.textContent=catName(c);b.setAttribute('aria-selected',c===shopCat);b.onclick=()=>{shopCat=c;renderShop()};tabs.appendChild(b)}
+  const cats=CATS.filter(c=>c==='bike'||!BIKE_PARTS.includes(c)).filter(c=>SUMMER?!['skis','board','poles','hoodie','pack'].includes(c):!['bike','jersey','prot'].includes(c));
+  const inBike=SUMMER&&BIKE_PARTS.includes(shopCat);if(!cats.includes(shopCat)&&!inBike)shopCat='helmet';
+  for(const c of cats){const b=document.createElement('button');b.className='tab';b.role='tab';b.textContent=catName(c);b.setAttribute('aria-selected',c===shopCat||(c==='bike'&&inBike));b.onclick=()=>{shopCat=c==='bike'?bikeSub:c;renderShop()};tabs.appendChild(b)}
+  {const sub=$('subtabs');sub.innerHTML='';sub.hidden=!inBike;if(inBike){bikeSub=shopCat;   // Bike: Abteilungen für jedes Teil
+    for(const c of BIKE_PARTS){const b=document.createElement('button');b.className='tab';b.role='tab';b.textContent=c==='bike'?TX('Rahmen','Frame'):catName(c);b.setAttribute('aria-selected',c===shopCat);b.onclick=()=>{shopCat=c;renderShop()};sub.appendChild(b)}}}
   const grid=$('grid');grid.innerHTML='';
   for(const it of SHOP[shopCat].items){
     const owned=it.price===0||SAVE.owned[it.id],eq=SAVE.equip[shopCat]===it.id,sel=tryOn[shopCat]===it.id;
     const b=document.createElement('button');b.className='item'+(eq?' eq':'')+(sel?' sel':'')+(owned&&!eq?' owned':'');
     b.style.setProperty('--c',it.c);if(it.a)b.style.setProperty('--a',it.a);if(it.pat)b.style.setProperty('--a',it.pat[0]);
-    let pr;if(eq)pr=TX('ANGEZOGEN','EQUIPPED');else if(owned)pr=TX('ANZIEHEN','EQUIP');else if(sel)pr=TX('KAUFEN · ','BUY · ')+it.price;else pr=String(it.price);
+    const bp=BIKE_PARTS.includes(shopCat);let pr;if(eq)pr=bp?TX('EINGEBAUT','INSTALLED'):TX('ANGEZOGEN','EQUIPPED');else if(owned)pr=bp?TX('EINBAUEN','INSTALL'):TX('ANZIEHEN','EQUIP');else if(sel)pr=TX('KAUFEN · ','BUY · ')+it.price;else pr=String(it.price);
     b.innerHTML='<span class="sw"></span><span class="nm"></span><span class="pr">'+(!owned?'<i class="coin"></i>':'')+'<span></span></span>';
     b.querySelector('.nm').textContent=itName(it);b.querySelector('.pr span').textContent=pr;
     b.onclick=()=>shopClick(it,b);grid.appendChild(b);
@@ -3607,19 +3744,20 @@ function shopEquip(it){SAVE.equip[shopCat]=it.id;
 function shopClick(it,el){
   const owned=it.price===0||SAVE.owned[it.id];
   if(!owned&&it.req&&!SAVE.owned[it.req]){$('shopMsg').textContent=TX('Erst den '+itName(itemOf(shopCat,it.req))+' kaufen, dann gibt es ihn in anderen Farben.','Buy the '+itName(itemOf(shopCat,it.req))+' first, then you can get it in other colors.');el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');return}
-  if(owned){const ex=shopEquip(it);delete tryOn[shopCat];persist();$('shopMsg').textContent=itName(it)+TX(' angezogen.',' equipped.')+ex;renderShop();return}
+  if(owned){const ex=shopEquip(it);delete tryOn[shopCat];persist();$('shopMsg').textContent=itName(it)+(BIKE_PARTS.includes(shopCat)?TX(' eingebaut.',' installed.'):TX(' angezogen.',' equipped.'))+ex;renderShop();return}
   if(tryOn[shopCat]!==it.id){tryOn[shopCat]=it.id;$('shopMsg').textContent='';renderShop();return}
   if(SAVE.coins<it.price){$('shopMsg').textContent=TX('Dir fehlen '+(it.price-SAVE.coins)+' Münzen. Ab auf die Piste!','You need '+(it.price-SAVE.coins)+' more coins. Hit the slopes!');el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');return}
   SAVE.coins-=it.price;SAVE.owned[it.id]=true;const ex=shopEquip(it);delete tryOn[shopCat];persist();
-  $('shopMsg').textContent=itName(it)+TX(' gekauft und angezogen.',' bought and equipped.')+ex;unlockAudio();SFX.trick();renderShop();
+  $('shopMsg').textContent=itName(it)+(BIKE_PARTS.includes(shopCat)?TX(' gekauft und eingebaut.',' bought and installed.'):TX(' gekauft und angezogen.',' bought and equipped.'))+ex;unlockAudio();SFX.trick();renderShop();
 }
-function drawPreview(id,eq,gear,pushAnim){
-  const c=$(id);if(!c||c.closest('.screen').hidden)return;const g=c.getContext('2d');g.imageSmoothingEnabled=false;
+function drawPreview(id,eq,gear,pushAnim,bikeOnly){
+  const c=$(id);if(!c||c.closest('.screen').hidden)return;if(c.width!==64*RS){c.width=64*RS;c.height=64*RS}const g=c.getContext('2d');g.imageSmoothingEnabled=false;g.setTransform(RS,0,0,RS,0,0);
   g.clearRect(0,0,64,64);g.fillStyle=SUMMER?'#6ea24a':'#ffffff';g.fillRect(0,50,64,14);g.fillStyle=SUMMER?'#8a6a45':'#d0def3';g.fillRect(0,56,64,8);g.fillStyle=SUMMER?'#6d5133':'#b6c9e8';g.fillRect(0,61,64,3);
+  if(bikeOnly){const K=4,s=getSprite('_bike',0,false,eq,'bike',false,null,0,K);g.setTransform(1,0,0,1,0,0);g.drawImage(s,Math.round(32*RS-(SCX+5)*K),Math.round(51*RS-(SCY+FOOTG)*K));return}   // nur das Bike, 4 Punkte pro Welt-Pixel
   const seq=[['ride',0,true],['ride',90,true],['ride',180,true],['ride',270,true],['blunt',0,false],['mute',0,false],['nose',60,false],['tail',0,false]];
   let [pose,phi,look]=seq[Math.floor(T/.9)%seq.length];
   if(pushAnim){pose='push'+(Math.floor(((T/.55)%1)*8)%8);phi=0;look=false}
-  g.drawImage(getSprite(pose,phi,look,eq,gear),32-SCX,((gear||GEAR)==='bike'?(pose==='ride'?36:32):pose==='ride'||pushAnim?39:36)-SCY);
+  g.drawImage(getSprite(pose,phi,look,eq,gear),32-SCX,((gear||GEAR)==='bike'?(pose==='ride'?36:32):pose==='ride'||pushAnim?39:36)-SCY,SPR,SPR);
 }
 
 /* ================= LAYOUT ================= */
@@ -3636,7 +3774,7 @@ function layout(){
   const nVW=608; // feste 16:9 (608x342), weit rausgezoomt
   let sw=W,sh=sw*VH/nVW;if(sh>aH){sh=aH;sw=sh*nVW/VH}
   stage.style.width=Math.floor(sw)+'px';stage.style.height=Math.floor(sh)+'px';stage.style.setProperty('--u',(sh/270)+'px');
-  if(nVW!==VW||!BG.sky){VW=nVW;cv.width=VW;cv.height=VH;ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;rebuildBg();initFlakes()}
+  if(nVW!==VW||!BG.sky){VW=nVW;cv.width=VW*RS;cv.height=VH*RS;visCtx=cv.getContext('2d');visCtx.setTransform(RS,0,0,RS,0,0);visCtx.imageSmoothingEnabled=false;[frameCv,frameCtx]=mk(VW,VH);ctx=frameCtx;rebuildBg();initFlakes()}
 }
 addEventListener('resize',layout);
 document.addEventListener('visibilitychange',()=>{if(document.hidden){persist();if(state==='play')setPause(true)}});
@@ -3848,7 +3986,7 @@ function frame(t){
   else{acc=0;if(grindSnd)grindStop(true);if(state==='menu'){cam.x+=dt*18;while(gx<cam.x+VW+900)genNext()}}
   render(dt);musicMix();
   if(state==='menu')drawPreview('pvMenu');
-  if(!$('shop').hidden)drawPreview('pvShop',Object.assign({},SAVE.equip,tryOn,shopCat==='beanie'?{helmet:'h_none'}:{}),SUMMER?'bike':shopCat==='board'?'board':(shopCat==='skis'||shopCat==='poles'||shopCat==='boots')?'ski':SAVE.gear,!SUMMER&&shopCat==='poles');
+  if(!$('shop').hidden)drawPreview('pvShop',Object.assign({},SAVE.equip,tryOn,shopCat==='beanie'?{helmet:'h_none'}:{}),SUMMER?'bike':shopCat==='board'?'board':(shopCat==='skis'||shopCat==='poles'||shopCat==='boots')?'ski':SAVE.gear,!SUMMER&&shopCat==='poles',SUMMER&&BIKE_PARTS.includes(shopCat));
   requestAnimationFrame(frame);
 }
 function start(){
