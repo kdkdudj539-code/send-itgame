@@ -1246,8 +1246,10 @@ const BIKE3=(()=>{
     japan:{bike:B([1.4,10.2,0]),torso:T(4.4,-5.6),head:[6.6,-9,0],legsX:[null,[[.4,0,2.4],[5,2.6,5],[10.4,5.6,8]]]},                   // One-Footer: Fuß raus
     japan_max:{bike:B([1.4,10.2,0],{roll:6}),torso:T(4.2,-5.8),head:[6.4,-9.2,0],legsX:[null,[[.4,0,2.4],[5.4,1.6,5.8],[11,3.6,9.4]]]},
     grind:ride};
-  // Treten im Stehen: acht Bilder pro Kurbelumdrehung, die Hüfte sinkt etwas ab, Oberkörper wippt mit
-  for(let k=0;k<8;k++){const a=k*45,b=Math.sin(a*RAD*2)*.4;L['push'+k]={bike:B([.6,12.6,0],{crank:a}),hips:[[-.4,3.6+b,-2.4],[.4,3.6+b,2.4]],torso:T(4.9,-2.6+b,3.6+b),head:[7.1,-6.2+b,0]}}
+  // Vollgas im Stehen (Wiegetritt): acht Bilder pro Kurbelumdrehung. Haltung wie beim normalen Stehen, die Hüfte sinkt nur so weit, dass das untere Bein
+  // das Pedal erreicht; das Bike schwingt bei jedem Tritt zur Seite weg vom drückenden Bein, der Oberkörper schiebt dabei leicht nach vorne
+  for(let k=0;k<8;k++){const a=k*45,s=Math.sin(a*RAD),s2=s*s,hy=1.4+1*s2,fw=.8*s2;
+    L['push'+k]={bike:B([.6,12.6,0],{crank:a,roll:20*s,yaw:-4*s}),hips:[[-.4,hy,-2.4],[.4,hy,2.4]],torso:T(4.2+fw,-6.4+hy,hy),head:[6.3+fw,-10+hy,0]}}
   // Verbandszeug: im Dreck sitzen, das Bike liegt hinter dir; danach um den Stein schieben (aufrecht, Hüfte 12,5 über dem Boden)
   {const legs=[[[-.5,0,-3],[4.5,-3.5,-3.5],[9,.5,-4]],[[.5,0,3],[5,-3.5,3.5],[9,.5,4]]],lying=B([3,.8,-10],{roll:-80});
    L.sit0={bike:lying,legsX:legs,torso:[[-.5,0,0],[-1,-7,0]],head:[1,-10.6,0],armsX:[[[-1,-6,-5],[2.5,-4.5,-6],[4.5,-3.5,-3.5]],[[0,-6,5],[3,-3,6],[5,-2.5,2.5]]]};
@@ -2247,7 +2249,7 @@ function playerView(){
     const bsp=p.mode==='ground'&&p.bs?smooth01(p.bs.t/BUTTER180_T):0;if(bsp)phi+=p.bs.dir*180*bsp;
     if(p.mode==='loop')look=false;
     if(p.mode==='rail'){const sv=Math.abs(Math.sin(phi*RAD));pose=sv>.75?'grind':sv>.4?'grind_h':'ride'}
-    if(p.mode==='ground'&&!board&&!p.sw&&p.tuck&&p.pushT>0)pose='push'+(Math.floor(((p.pushT/.55)%1)*8)%8);
+    if(p.mode==='ground'&&!board&&!p.sw&&p.tuck&&p.pushT>0)pose='push'+(Math.floor(((p.pushT/(bike?.45:.55))%1)*8)%8);   // Bike: schnellere Trittfrequenz
     if(p.mode==='ground'&&GP.charge)pose=performance.now()-(GP.chargeAt||0)<70?'crouch_h':'crouch';   // Sprung geladen
     if(p.mode==='ground'&&(Math.abs(p.butterVis||0)>5||p.bs))pose=(p.bs?p.bs.end:p.butterVis)<0?'butter':'nbutter';
     if(p.mode==='ground'&&p.ab){const k=p.ab.kind,t=p.ab.t,d=p.ab.dur;
