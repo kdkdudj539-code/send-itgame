@@ -3272,6 +3272,11 @@ const GROOM=(()=>{const out=[];for(const kk of [0,1])for(const lane of [0,1])for
 /* Sommer: Bikepark = festgefahrene Dirt-Strecke (hell, darunter Erdschichten), Freeride und Alm = Gras auf Waldboden mit Blumen.
    Steinchen und Wurzeln in der Erde, an den Spalten ein dunkler Erdrand. */
 const CS={dirtTop:'#c9a271',dirtTop2:'#a9814f',dirt:['#a07a50','#86643f','#6d5133','#553f29'],kick:'#b38653',grass:'#5f9b3c',grassL:'#7fba52',grassD:'#4a7f30',soil:['#6c5536','#58452c','#463723','#352a1b'],lip:'#7a4f2a'};
+let LEAF_TEX=null;
+function leafTex(){if(LEAF_TEX)return LEAF_TEX;const W=97,H=32,[c,g]=mk(W,H);let s=7;const r=()=>(s=(s*1103515245+12345)&0x7fffffff)/0x7fffffff;
+  const C=['#c2702a','#d9a63a','#8a3b22','#6b8f3a','#b84a2a','#e0c060'];
+  for(let i=0;i<9;i++){const cx=r()*W,cy=2+r()*(H-6),n=2+Math.floor(r()*3);for(let j=0;j<n;j++){g.fillStyle=C[Math.floor(r()*C.length)];const x=Math.floor(cx+r()*6-3),y=Math.floor(cy+r()*4-2);if(r()<.5)g.fillRect(x,y,2,1);else g.fillRect(x,y,1,2)}}   // ein paar Blätter hier und da
+  return LEAF_TEX=c}
 function drawTerrainS(cX,cY){
   let i=segIndexAt(cX);if(i<0){i=0;while(i<segs.length-1&&segs[i].x1<=cX)i++}
   for(let sx=0;sx<VW;sx++){
@@ -3284,6 +3289,7 @@ function drawTerrainS(cX,cY){
     let wd=99;if(!green){const nx=segs[i+1],pv=segs[i-1];if(nx&&nx.gap&&s.x1-wx<8)wd=s.x1-wx;else if(pv&&pv.gap&&wx-s.x0<8)wd=wx-s.x0}
     ctx.fillStyle=green?L[0]:(s.kind==='kicker'?CS.kick:L[0]);ctx.fillRect(sx,y,1,VH-y+1);
     ctx.fillStyle=L[1];ctx.fillRect(sx,y+16+d,1,VH);ctx.fillStyle=L[2];ctx.fillRect(sx,y+44+d*2,1,VH);ctx.fillStyle=L[3];ctx.fillRect(sx,y+88+d*2,1,VH);
+    if(s.zone==='park'&&y+16<VH)ctx.drawImage(leafTex(),((wi%97)+97)%97,0,1,28+d,sx,y+16+d,1,28+d);   // Bikepark-Trail: ab und zu ein paar Blätter in der zweiten Schicht
     if(h%53===0){ctx.fillStyle='#8f877a';ctx.fillRect(sx,y+6+(h>>>8)%22,2,1)}else if(h%71===0){ctx.fillStyle='#3e2c1c';ctx.fillRect(sx,y+5+(h>>>9)%14,1,2)}   // Steinchen, Wurzeln
     if(wd<8&&y+4<VH){ctx.globalAlpha=.42*(1-wd/8);ctx.fillStyle='#2e2116';ctx.fillRect(sx,y+4,1,VH-y-4);ctx.globalAlpha=1}
     if(green){const b=h%5===0?2:h%3===0?1:0,pb=s.kind==='deep'?Math.max(0,Math.round(1.6+1.3*Math.sin(wi*.17)+.9*Math.sin(wi*.41+1.3))):0;
@@ -3495,7 +3501,15 @@ function drawLog(r,cX,cY){
 // Nur zeichnen, was über der Schneeoberfläche liegt (Treppen-Pfad, pixelgenau ohne Kantenglättung)
 function clipAboveGround(sx,top,w,cX,cY,extra){ctx.beginPath();ctx.moveTo(sx,top);ctx.lineTo(sx+w,top);
   for(let i=w-1;i>=0;i--){const g=groundAt(cX+sx+i+.5),y=g?Math.round(g.y-cY)+(extra||0):top+4000;ctx.lineTo(sx+i+1,y);ctx.lineTo(sx+i,y)}ctx.closePath();ctx.clip()}
-function drawTrees(cX,cY){for(const t of trees){const V=TREE_SPR[t.k]||TREE_SPR[0],sp=V.c,W=sp.width;
+// dunklere Fassung für die hinteren Waldbäume (wirkt weiter weg)
+function treeDark(V){if(!V.cd){const [c,g]=mk(V.c.width,V.c.height);g.drawImage(V.c,0,0);g.globalCompositeOperation='source-atop';g.fillStyle='rgba(18,40,32,.38)';g.fillRect(0,0,c.width,c.height);V.cd=c}return V.cd}
+function drawParkForest(cX,cY){if(!SUMMER||!TREE_SPR.length)return;
+  for(let x=Math.floor((cX-40)/4)*4;x<cX+VW+40;x+=4){const h=((x*2654435761)>>>0);if(h%6!==0)continue;
+    const ok=q=>q&&(q.seg.kind==='snow'||q.seg.kind==='landing'),g=groundAt(x);if(!ok(g)||g.seg.zone!=='park')continue;if(!ok(groundAt(x-16))||!ok(groundAt(x+16)))continue;
+    const V=TREE_SPR[(h>>>4)%TREE_SPR.length],sp=treeDark(V),W=sp.width,l2=groundAt(x-V.w),r2=groundAt(x+V.w),low=Math.max(l2?l2.y:g.y,r2?r2.y:g.y);
+    const foot=Math.max(g.y+2,low+2-(V.tr-3)),sx=Math.round(x-cX-W/2),sy=Math.round(foot-cY-V.base);if(sx>VW||sx+W<0||sy>VH||sy+sp.height<0)continue;
+    ctx.save();clipAboveGround(sx,sy-2,W,cX,cY,1);if((h>>>9)&1){ctx.translate(sx*2+W,0);ctx.scale(-1,1)}ctx.drawImage(sp,sx,sy);ctx.restore()}}
+function drawTrees(cX,cY){drawParkForest(cX,cY);for(let pass=0;pass<2;pass++)for(const t of trees){if(!!t.dk!==(pass===0))continue;const V=TREE_SPR[t.k]||TREE_SPR[0],sp=t.dk?treeDark(V):V.c,W=sp.width;
   // Fuß so tief, dass die untersten Äste talseitig auf dem Schnee liegen; bergseitig stecken sie im Schnee. Kiefern stehen auf dem Stamm.
   const g0=groundAt(t.x),gl=groundAt(t.x-V.w),gr=groundAt(t.x+V.w),y0=g0?g0.y:t.y,low=Math.max(gl?gl.y:y0,gr?gr.y:y0);
   const foot=Math.max(y0+2,low+2-(V.tr-3)),sx=Math.round(t.x-cX-W/2),sy=Math.round(foot-cY-V.base);if(sx>VW||sx+W<0||sy>VH||sy+sp.height<0)continue;
