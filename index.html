@@ -540,6 +540,16 @@ const SHOP={
     {id:'s_pink',name:'Bubblegum',price:55,c:'#ff86c8',a:'#ffffff'},
     {id:'s_wood',name:'Holz Topsheet',price:60,c:'#c08a50',a:'#6e4523'},
     {id:'s_neon',name:'Neon',price:100,c:'#c8ff3a',a:'#ff3aa8'}]},
+  binding:{label:'Bindung',items:[
+    {id:'bd_grey',name:'Grau',price:0,c:'#9aa1ad'},
+    {id:'bd_black',name:'Schwarz',price:30,c:'#3a3e48'},
+    {id:'bd_white',name:'Weiß',price:30,c:'#e8ecf2'},
+    {id:'bd_red',name:'Rot',price:40,c:'#d63a3a'},
+    {id:'bd_orange',name:'Orange',price:40,c:'#ff7a2f'},
+    {id:'bd_blue',name:'Blau',price:40,c:'#2f6fd0'},
+    {id:'bd_pink',name:'Pink',price:50,c:'#ff86c8'},
+    {id:'bd_lime',name:'Lime',price:50,c:'#b8f03c'},
+    {id:'bd_gold',name:'Gold',price:100,c:'#f2c445'}]},
   board:{label:'Snowboard',items:[
     {id:'b_black',name:'Black Mamba',price:0,c:'#3b4152',a:'#9aa1ad'},
     {id:'b_white',name:'Powder White',price:30,c:'#eef1f6',a:'#3a6fd8'},
@@ -657,12 +667,23 @@ const SHOP={
     {id:'bt_orange',name:'Orange',price:50,c:'#ff7a2f'},
     {id:'bt_lilac',name:'Flieder',price:70,c:'#b79cf0'},
     {id:'bt_lime',name:'Lime',price:80,c:'#b8f03c'},
-    {id:'bt_gold',name:'Gold',price:150,c:'#f2c445'}]}
+    {id:'bt_gold',name:'Gold',price:150,c:'#f2c445'}]},
+  shoes:{label:'Bike-Schuhe',items:[   // c Oberteil, a Sohle
+    {id:'bs_black',name:'Schwarz',price:0,c:'#2e313b',a:'#c3c8d1'},
+    {id:'bs_grey',name:'Grau',price:30,c:'#8d939f',a:'#2e313b'},
+    {id:'bs_white',name:'Weiß',price:40,c:'#e8ecf2',a:'#2e313b'},
+    {id:'bs_gum',name:'Schwarz mit Gummisohle',price:50,c:'#2e313b',a:'#b07a3e'},
+    {id:'bs_red',name:'Rot',price:50,c:'#d63a3a',a:'#2e313b'},
+    {id:'bs_blue',name:'Blau',price:50,c:'#2f6fd0',a:'#e8ecf2'},
+    {id:'bs_orange',name:'Orange',price:60,c:'#ff7a2f',a:'#2e313b'},
+    {id:'bs_olive',name:'Oliv',price:60,c:'#6b7442',a:'#b07a3e'},
+    {id:'bs_lime',name:'Lime',price:70,c:'#b8f03c',a:'#2e313b'},
+    {id:'bs_gold',name:'Gold',price:150,c:'#f2c445',a:'#2e313b'}]}
 };
 const CATS=Object.keys(SHOP);
 
 /* ================= SAVE ================= */
-const DEF={coins:0,best:0,bestDist:0,owned:{},equip:{helmet:'h_black',goggles:'g_orange',hoodie:'d_grey',pants:'p_khaki',skis:'s_red',board:'b_black',poles:'po_black',pack:'pk_none',beanie:'bn_black',boots:'bt_black',bike:'bk_carbon',jersey:'j_black',prot:'pr_none',bfork:'fk_gold',bshock:'sh_gold',brim:'rm_black',btire:'tr_black',bbar:'bb_black',bsad:'sd_black',bped:'pd_black'},gear:'ski',season:'winter',assist:false,packLast:'pk_free',music:true};
+const DEF={coins:0,best:0,bestDist:0,owned:{},equip:{helmet:'h_black',goggles:'g_orange',hoodie:'d_grey',pants:'p_khaki',skis:'s_red',board:'b_black',poles:'po_black',pack:'pk_none',beanie:'bn_black',boots:'bt_black',bike:'bk_carbon',jersey:'j_black',prot:'pr_none',bfork:'fk_gold',bshock:'sh_gold',brim:'rm_black',btire:'tr_black',bbar:'bb_black',bsad:'sd_black',bped:'pd_black',binding:'bd_grey',shoes:'bs_black'},gear:'ski',season:'winter',assist:false,packLast:'pk_free',music:true};
 // Stand prüfen und auffüllen (vom Gerät oder aus dem Konto). t = letzte Änderung, uid = Konto, zu dem der Stand gehört, sc = Münzen beim letzten Abgleich mit dem Konto
 const mig41=e=>{if(!e.m41&&e.bike==='bk_red')e.bike='bk_carbon';e.m41=1;return e};   // v4.1: neues Standard-Bike, Rot bleibt gratis im Shop
 function normSave(s){s=s&&typeof s==='object'?s:{};const ob=v=>v&&typeof v==='object'&&!Array.isArray(v);
@@ -697,8 +718,8 @@ function applyLang(){document.documentElement.lang=LANG;
   for(const o of I18N){const v=LANG==='en'?o.en:o.de;if(o.n)o.n.nodeValue=v;else o.el.setAttribute(o.a,v)}
   document.querySelectorAll('.gearbtn[data-lang]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LANG)))}
 // Shop-Namen auf Englisch (fehlt ein Eintrag, ist der Name schon englisch)
-const CAT_EN={helmet:'Helmet',beanie:'Beanie',goggles:'Goggles',hoodie:'Zip Hoodie',jersey:'Jersey',prot:'Back Protector',bfork:'Fork',bshock:'Shock',brim:'Rims',btire:'Tires',bbar:'Bar & Grips',bsad:'Saddle',bped:'Pedals',pants:'Baggy Pants',skis:'Twin Tips',board:'Snowboard',bike:'Bike',pack:'Backpack',poles:'Poles',boots:'Ski Boots'};
-const SHOP_EN={h_none:'No Helmet (Beanie)',h_black:'Matte Black',h_white:'Chalk White',h_orange:'Safety Orange',h_lilac:'Lilac',
+const CAT_EN={helmet:'Helmet',beanie:'Beanie',goggles:'Goggles',hoodie:'Zip Hoodie',jersey:'Jersey',prot:'Back Protector',bfork:'Fork',bshock:'Shock',brim:'Rims',btire:'Tires',bbar:'Bar & Grips',bsad:'Saddle',bped:'Pedals',pants:'Baggy Pants',skis:'Twin Tips',board:'Snowboard',bike:'Bike',pack:'Backpack',poles:'Poles',boots:'Ski Boots',binding:'Bindings',shoes:'Bike Shoes'};
+const SHOP_EN={bd_grey:'Grey',bd_black:'Black',bd_white:'White',bd_red:'Red',bd_orange:'Orange',bd_blue:'Blue',bd_pink:'Pink',bd_lime:'Lime',bd_gold:'Gold',bs_black:'Black',bs_grey:'Grey',bs_white:'White',bs_gum:'Black with Gum Sole',bs_red:'Red',bs_blue:'Blue',bs_orange:'Orange',bs_olive:'Olive',bs_lime:'Lime',bs_gold:'Gold',h_none:'No Helmet (Beanie)',h_black:'Matte Black',h_white:'Chalk White',h_orange:'Safety Orange',h_lilac:'Lilac',
   bn_black:'Beanie Black',bn_grey:'Beanie Grey',bn_red:'Beanie Red',bn_pom_white:'Pom Beanie White',bn_pom_red:'Pom Beanie Red',bn_pom_navy:'Pom Beanie Navy',bn_pom_pink:'Pom Beanie Pink',bn_pom_green:'Pom Beanie Forest',bn_pom_black:'Pom Beanie Black',
   bn_fish_mustard:'Fisherman Mustard',bn_fish_lilac:'Fisherman Lilac',d_grey:'Heather Grey',d_black:'Black',d_forest:'Forest Green',d_purple:'Purple',d_red:'Red',d_neon:'Neon Yellow',
   p_black:'Black',p_white:'White',p_camo:'Snow Camo',s_red:'Red / White',s_wood:'Wood Topsheet',b_wood:'Wood Core',
@@ -706,7 +727,7 @@ const SHOP_EN={h_none:'No Helmet (Beanie)',h_black:'Matte Black',h_white:'Chalk 
   fk_gold:'Gold Kashima',fk_black:'Black',fk_silver:'Silver',fk_goldw:'Gold & White',fk_orange:'Orange',fk_red:'Red',fk_blue:'Blue',fk_lime:'Lime',sh_gold:'Gold',sh_orange:'Orange',sh_red:'Red',sh_black:'Black',sh_ti:'Titanium',sh_blue:'Blue',sh_lime:'Lime',sh_purple:'Purple',rm_black:'Black',rm_silver:'Silver',rm_gold:'Gold',rm_red:'Red',rm_blue:'Blue',rm_white:'White',rm_orange:'Orange',rm_purple:'Purple',tr_black:'Black',tr_skin:'Skinwall',tr_white:'Whitewall',tr_red:'Red Wall',tr_blue:'Blue Wall',tr_yellow:'Yellow Wall',tr_gum:'Gumwall',tr_grey:'Grey',bb_black:'Black',bb_red:'Red Grips',bb_blue:'Blue Grips',bb_white:'White Grips',bb_orange:'Orange Grips',bb_lime:'Lime Grips',bb_pink:'Pink Grips',bb_gold:'Gold Bar',sd_black:'Black',sd_white:'White',sd_red:'Red',sd_blue:'Blue',sd_orange:'Orange',sd_camo:'Olive',sd_purple:'Purple',sd_gold:'Gold',pd_black:'Black',pd_silver:'Silver',pd_gold:'Gold',pd_red:'Red',pd_blue:'Blue',pd_orange:'Orange',pd_purple:'Purple',pd_lime:'Lime',pr_none:'No Protector',pr_free:'Back Protector',pr_red:'Protector Red',pr_blue:'Protector Blue',pr_neon:'Protector Neon',pr_orange:'Protector Orange',j_black:'Race Black',j_white:'Race White',j_red:'Red',j_blue:'Blue',j_forest:'Forest Green',j_purple:'Purple',j_gold:'Black-Gold',bk_red:'Red',bk_white:'White',bk_blue:'Racing Blue',bk_raw:'Raw Alloy',bk_purple:'Purple',po_silver:'Alu Silver',po_white:'White',po_red:'Red',po_bamboo:'Bamboo',po_stealth:'Black',bt_black:'Black',bt_turq:'Turquoise',bt_white:'White',bt_red:'Red',bt_lilac:'Lilac'};
 const INFO_EN={pr_free:'With a climbing hook, folding spade and first aid kit in its pockets: saves you once per run from whatever gets you first: the abyss, the mudslide or a rock. Can be switched on and off in the menu.',pk_free:'With ice axe, avalanche shovel and first aid kit: saves you once per run from whatever gets you first: the abyss, the avalanche or a rock. Can be switched on and off in the menu.'};
 const RAIL_EN={'Pistenraupe':'Snowcat','Picknicktisch':'Picnic Table','Treppen-Rail':'Stair Rail'};
-const catName=c=>SUMMER&&c==='boots'?TX('Schuhe','Shoes'):SUMMER&&c==='pants'?TX('Bike-Hose','Bike Pants'):LANG==='en'?CAT_EN[c]||SHOP[c].label:SHOP[c].label,itName=it=>LANG==='en'?SHOP_EN[it.id]||it.name:it.name,itInfo=it=>LANG==='en'?INFO_EN[it.id]||it.info:it.info;
+const catName=c=>SUMMER&&c==='pants'?TX('Bike-Hose','Bike Pants'):LANG==='en'?CAT_EN[c]||SHOP[c].label:SHOP[c].label,itName=it=>LANG==='en'?SHOP_EN[it.id]||it.name:it.name,itInfo=it=>LANG==='en'?INFO_EN[it.id]||it.info:it.info;
 
 /* ================= COLORS ================= */
 function hexRgb(h){h=h.replace('#','');return [0,2,4].map(i=>parseInt(h.slice(i,i+2),16))}
@@ -714,7 +735,8 @@ function shade(h,f){const c=hexRgb(h).map(v=>Math.round(f<0?v*(1+f):v+(255-v)*f)
 function itemOf(cat,id){const L=SHOP[cat].items;return L.find(i=>i.id===id)||L[0]}
 function palette(eq){
   const H=itemOf('helmet',eq.helmet).c, L=itemOf('goggles',eq.goggles).c, D=itemOf('hoodie',eq.hoodie).c, Pi=itemOf('pants',eq.pants), Si=itemOf('skis',eq.skis),Bi=itemOf('board',eq.board),Pl=itemOf('poles',eq.poles),Pk=eq.pack&&eq.pack!=='pk_none'?itemOf('pack',eq.pack):null,Bn=itemOf('beanie',eq.beanie),Bk=itemOf('bike',eq.bike||'bk_red'),noHelm=eq.helmet==='h_none';
-  return {O:'#121626',H,h:shade(H,-.38),l:shade(H,.5),L,M:shade(L,.65),G:'#252a39',S:'#eab58f',k:'#c38663',
+  const Bd=itemOf('binding',eq.binding),Sh=itemOf('shoes',eq.shoes);
+  return {O:'#121626',bnd:[shade(Bd.c,-.38),Bd.c,shade(Bd.c,.6)],SH:Sh.c,SHa:Sh.a,H,h:shade(H,-.38),l:shade(H,.5),L,M:shade(L,.65),G:'#252a39',S:'#eab58f',k:'#c38663',
     D,d:shade(D,-.3),P:Pi.c,p:shade(Pi.c,-.28),pat:Pi.pat||null,K:Si.c,ka:Si.a,B:Bi.c,ba:Bi.a,PO:Pl.c,pa:Pl.a,pk:Pk?Pk.c:null,pka:Pk?Pk.a:null,hat:noHelm?Bn.model:null,N:Bn.c,n:shade(Bn.c,-.22),C:Bn.a||shade(Bn.c,-.15),Q:Bn.pom||'#ffffff',q:shade(Bn.pom||'#ffffff',-.2),R:'#3b2a20',boot:'#3c4356',bootC:itemOf('boots',eq.boots||'bt_black').c,glove:'#272b38',zip:'#eef1f7',BK:Bk.c,bka:Bk.a};
 }
 const eqKey=eq=>CATS.map(c=>eq[c]).join(',');
@@ -764,6 +786,7 @@ function drawHead(g,kind,x,y,P,flip,rot){const m=P.hat?BEANIES[P.hat][kind]:P.ff
 /* ===== 3D-Figur: Gelenke als [vorne, unten, rechts] relativ zum Schwerpunkt ===== */
 const SPR=56,SCX=28,SCY=30;
 const RZ=1.2,RW=Math.ceil(SPR*RZ);   // Fahrer-Raster: 1,2 Fahrer-Pixel pro Welt-Pixel (ein Fünftel feiner); RW = Seitenlänge des Fahrer-Bilds
+let LGX=null;function legCtx(){if(!LGX){const [c,g]=mk(RW,RW);LGX=g}LGX.clearRect(0,0,RW,RW);return LGX}   // Zwischenbild: Bein ohne den Teil im Trikot
 let RCX=null;function riderCtx(){if(!RCX){const [c,g]=mk(RW,RW);g._S=RZ;RCX=g}RCX.clearRect(0,0,RW,RW);return RCX}   // Zwischenbild für den Fahrer auf dem Bike
 const v3={add:(p,q)=>[p[0]+q[0],p[1]+q[1],p[2]+q[2]],mul:(p,k)=>[p[0]*k,p[1]*k,p[2]*k],dot:(p,q)=>p[0]*q[0]+p[1]*q[1]+p[2]*q[2],unit:p=>{const l=Math.hypot(p[0],p[1],p[2])||1;return [p[0]/l,p[1]/l,p[2]/l]}};
 function rotY(p,yaw){const c=Math.cos(yaw*RAD),s=Math.sin(yaw*RAD);return [SCX+p[0]*c-p[2]*s,SCY+p[1],p[0]*s+p[2]*c]}
@@ -1279,7 +1302,6 @@ function airPose(){const gv=p.gVis||0;
 /* Zeichnet die Figur bei Drehwinkel phi (0 = Fahrtrichtung rechts, 90 = zum Spieler, 180 = Switch, 270 = vom Spieler weg).
    look: Kopf schaut die Piste runter; bei Switch dreht sich der Oberkörper mit (Blick über die Schulter). */
 const SKI_HW=.85;   // halbe Skibreite (Welt)
-const BND_D='#5d6372',BND_M='#9aa1ad',BND_L='#e3e7ee';   // Skibindung: unten grau, oben hellgrau, Glanzpunkt hinten an der Ferse
 function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
   const board=gear==='board',bike=gear==='bike',LIB=LIBOF(gear),L=bike?bikeSolve(LIB[poseName]||LIB.ride):LIB[poseName]||LIB.ride,O=P.O;
   // Der Fahrer wird im eigenen, feineren Raster gezeichnet (S Fahrer-Pixel pro Welt-Pixel). gW = Sprite-Bild (Bike), g = Fahrer-Raster.
@@ -1326,7 +1348,7 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
       let bind=null;if(Math.abs(dxs)>3*S){const dr=dxs>0?1:-1,uy=ny<0?-1:1,hx=dr>0?x0:x1,tx=dr>0?x1:x0;
         const piece=(x0p,x1p,hh,out,hi)=>{const a=Math.min(x0p,x1p),b=Math.max(x0p,x1p);
           {const y=Math.round(lineY(out)+so*ny);g.fillStyle=O;for(let j=0;j<hh;j++)g.fillRect(out,y+j*uy,1,1)}
-          for(let x=a;x<=b;x++){const y=Math.round(lineY(x)+so*ny);for(let j=0;j<hh;j++){g.fillStyle=hi&&j===hh-1&&x===hx?BND_L:j<hh-1?BND_D:BND_M;g.fillRect(x,y+j*uy,1,1)}g.fillStyle=O;g.fillRect(x,y+hh*uy,1,1)}};
+          for(let x=a;x<=b;x++){const y=Math.round(lineY(x)+so*ny);for(let j=0;j<hh;j++){g.fillStyle=hi&&j===hh-1&&x===hx?P.bnd[2]:j<hh-1?P.bnd[0]:P.bnd[1];g.fillRect(x,y+j*uy,1,1)}g.fillStyle=O;g.fillRect(x,y+hh*uy,1,1)}};
         bind=()=>{piece(hx,hx+dr,2,hx-dr,true);piece(tx-dr,tx,1,tx+dr,false)}}
       for(let x=x0;x<=x1;x++){const y=Math.round(lineY(x)+so*ny);g.fillStyle=Math.abs(dxs)>3*S&&x===toeX?lt:col;g.fillRect(x,y,1,1);
         if(Math.abs(dxs)>3*S&&ny<-.7){g.fillStyle=sk;g.fillRect(x,y+1,1,1)}
@@ -1342,23 +1364,34 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
     const f=lo(L.boots[i]),dxs=tt[0]-h[0],dys=tt[1]-h[1],BL=Math.round(6*S),bo=(zw(3)+2)/2;g.fillStyle=P.bootC;   // BL Schuhlänge, bo Abstand Boardmitte bis Oberkante
     if(Math.abs(dys)<=Math.abs(dxs)+.5){const x0=Math.round(f[0]-BL/2);for(let x=x0;x<x0+BL;x++)g.fillRect(x,Math.round((Math.abs(dxs)>.5?h[1]+dys*(x-h[0])/dxs:cc[1])+bo*ny),1,1)}
     else{const y0=Math.round(f[1]-BL/2);for(let y=y0;y<y0+BL;y++)g.fillRect(Math.round(h[0]+dxs*(y-h[1])/(dys||1)+bo*nx),y,1,1)}};
-  L.boots.forEach((b,i)=>{if(skiBootRow||onBoard(i))return;const q=lo(b),w=zw(L.bootWH?L.bootWH[0]:Math.round(6-sL)),h=zw(L.bootWH?L.bootWH[1]:(board?3:Math.round(4-sL)));
+  // Bike-Schuhe (Flat-Pedal): Oberteil in Schuhfarbe, Sohle in der Zweitfarbe, Spitze in Fahrtrichtung des Bikes
+  const bikeShoe=i=>{const X=L._X,f=L.boots[i],fw=X.dirB([1,0,0]),dn=X.dirB([0,1,0]);
+    const hp=lo(v3.add(f,v3.mul(fw,-1.6))),tp=lo(v3.add(f,v3.mul(fw,1.4))),c0=lo(f),c1=lo(v3.add(f,dn));let sx=c1[0]-c0[0],sy=c1[1]-c0[1];const sl=Math.hypot(sx,sy)||1;sx/=sl;sy/=sl;
+    const hh=zw(2),o=(hh-1)/2,ln=[[hp[0],hp[1]],[tp[0],tp[1]]];
+    let dx=tp[0]-hp[0],dy=tp[1]-hp[1];const dl=Math.hypot(dx,dy);dx=dl>.5?dx/dl:0;dy=dl>.5?dy/dl:0;   // Richtung Ferse -> Spitze auf dem Bild
+    strokePts(g,ln,hh+2,O);strokePts(g,ln,hh,P.SH);
+    strokePts(g,[[hp[0]-dx*o+sx*o,hp[1]-dy*o+sy*o],[tp[0]+dx*o+sx*o,tp[1]+dy*o+sy*o]],1,P.SHa);   // Sohle über die ganze Länge
+    if(dl>2){g.fillStyle=O;g.fillRect(Math.round(tp[0]+dx*o-sx*o-.5),Math.round(tp[1]+dy*o-sy*o-.5),1,1)}};   // Spitze oben abgerundet
+  L.boots.forEach((b,i)=>{if(skiBootRow||onBoard(i))return;if(bike)return;const q=lo(b),w=zw(L.bootWH?L.bootWH[0]:Math.round(6-sL)),h=zw(L.bootWH?L.bootWH[1]:(board?3:Math.round(4-sL)));
     parts.push({key:bootKey(i),draw:()=>{const x=Math.round(q[0]-w/2),y=Math.round(q[1]-h/2);rectO(g,x,y,w,h,bike?P.bootC:P.boot,O);if(board){g.fillStyle='#1a1d27';g.fillRect(x,y+h-1,w,1)}}})});
+  // Bike: Trikot-Umriss (Kapsel vom verlängerten Saum bis zur Schulter), gebraucht fürs Trikot und zum Aussparen der Hose
+  const JX=1.4,jGeo=bike?(()=>{const h=lo(L.torso[0]),s=up(L.torso[1]),as=Math.abs(Math.sin(tYaw*RAD)),rx=2.4+1.4*as,ry=2.4,B=[s[0],s[1]],ax=B[0]-h[0],ay=B[1]-h[1],L0=Math.hypot(ax,ay)||1,E=JX*S;
+    return {h,A:[h[0]-ax/L0*E,h[1]-ay/L0*E],B,L0,E,L2:L0+E,ro:(rx+1)*S,rq:(ry+1)*S}})():null;
   let legMax=-99;
   // Hose: Hüftpunkte zur Mitte gerückt, damit die Hose am Bund so breit ist wie der Oberkörper; Beine etwas schmaler
   const hipC=v3.mul(v3.add(L.legs[0][0],L.legs[1][0]),.5),hipIn=j=>v3.add(hipC,v3.mul(v3.add(j,v3.mul(hipC,-1)),.5));
   L.legs.forEach((lg,i)=>{const q=lg.map((j,n)=>lo(n?j:hipIn(j)));const key=Math.max(Math.max(q[1][2],q[2][2])-.5,bootKey(i)+.02);legMax=Math.max(legMax,key);
     const dark=L.legDark?L.legDark[i]:key<-2;
-    const lw=bike?zw(2)+1:zw(5);parts.push({key,draw:()=>{const col=dark?P.p:P.P;limb(g,q.map(v=>[v[0],v[1]]),lw,col,O);if(!L.noFlare&&cL>.5){g.fillStyle=col;g.fillRect(Math.round(q[2][0]-(lw+1)/2),Math.round(q[2][1])-2,lw+1,2)}}});   // Bike: Hose einen Fahrer-Pixel breiter
+    const lw=bike?zw(2)+1:zw(5);parts.push({key,draw:()=>{const col=dark?P.p:P.P;if(jGeo){const tg=legCtx();limb(tg,q.map(v=>[v[0],v[1]]),lw,col,O);tg.globalCompositeOperation='destination-out';capsule(tg,jGeo.A,jGeo.B,jGeo.ro,jGeo.rq,'#000');tg.globalCompositeOperation='source-over';g.drawImage(tg.canvas,0,0)}else limb(g,q.map(v=>[v[0],v[1]]),lw,col,O);if(!L.noFlare&&cL>.5){g.fillStyle=col;g.fillRect(Math.round(q[2][0]-(lw+1)/2),Math.round(q[2][1])-2,lw+1,2)}}});   // Bike: Hose einen Fahrer-Pixel breiter
+    if(bike)parts.push({key:key+.001,draw:()=>bikeShoe(i)});   // Bike-Schuh nach dem Bein, damit er nicht vom Hosenbein verdeckt wird
     if(skiBootRow)parts.push({key:key+.001,draw:()=>skiBoot(i)});else if(onBoard(i))parts.push({key:key+.001,draw:()=>boardBoot(i)})});
   {const h0=lo(hipIn(L.legs[0][0])),h1=lo(hipIn(L.legs[1][0]));
     if(board&&cL>.5)parts.push({key:legMax+.001,draw:()=>{const x0=Math.round(Math.min(h0[0],h1[0])),x1=Math.round(Math.max(h0[0],h1[0]));const hb=zw(4);g.fillStyle=P.P;g.fillRect(x0,Math.round(h0[1]-hb/2),x1-x0+1,hb)}});
     if(!board&&sL>.6)parts.push({key:legMax+.001,draw:()=>{g.fillStyle=P.p;g.fillRect(Math.round((h0[0]+h1[0])/2)-1,Math.round(h0[1])+1,2,Math.round(3*S))}})}
   const TK=bike?2:4.5;
   /* Downhill-Jersey: eng, ohne Kapuze und Zipper. Muster auf dem Rumpf-Zylinder: weiße Schulterpasse, geschwungene Seitenteile, V-Ausschnitt.
-     Das Trikot ist um JX (Welt) länger als der Rumpf und hängt über den Beinansatz: over=true zeichnet nur diesen unteren Teil noch einmal über die Beine. */
-  const JX=1.4,bikeJersey=over=>{const h=lo(L.torso[0]),s=up(L.torso[1]),as=Math.abs(Math.sin(tYaw*RAD));
-      const rx=2.4+1.4*as,ry=2.4,psc=90-tYaw,J=P.J2||shade(P.D,.5),B=[s[0],s[1]],ax=B[0]-h[0],ay=B[1]-h[1],L0=Math.hypot(ax,ay)||1,E=JX*S,A=[h[0]-ax/L0*E,h[1]-ay/L0*E],L2=L0+E;
+     Das Trikot ist um JX (Welt) länger als der Rumpf; die Hose ist im Trikot-Umriss ausgespart und beginnt erst unter dem Trikot. */
+  const bikeJersey=()=>{const {h,A,B,L0,E,L2,ro,rq}=jGeo,psc=90-tYaw,J=P.J2||shade(P.D,.5);
       const pat0=(u,v)=>{const ps=psc+Math.asin(clamp(v,-1,1))*DEG,a=ps*RAD,fr=Math.cos(a);
         if(P.pr){const da=x=>Math.abs(((x%360)+540)%360-180);   // Protektor: Hüftgurt mit Schnalle vorne, Schultergurte mit Brustschnalle
           if(u>.13&&u<.21)return fr>.93||Math.min(da(ps-90),da(ps-270))<12?P.pra:P.pr;
@@ -1367,15 +1400,12 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
         const k=clamp((u-.12)/.66,0,1),bend=46*(1-k),d=x=>{const m=((x%360)+540)%360-180;return Math.abs(m)};
         return Math.min(d(ps-90-bend),d(ps-270+bend))<20?J:P.D};
       const pat=(u,v)=>u*L2<.1*L0?P.d:pat0(Math.max(.1,(u*L2-E)/L0),v);   // u auf dem langen Trikot -> u am Rumpf (0 = Hüfte); unten der dunkle Saum
-      const ro=(rx+1)*S,rq=(ry+1)*S;
-      if(over){const th=(E+.14*L0)/L2;capsule(g,A,B,ro,rq,u=>u<th?O:null);capsule(g,A,B,ro-1,rq-1,(u,v)=>u<th?pat(u,v):null);return}
       capsule(g,A,B,ro,rq,O);capsule(g,A,B,ro-1,rq-1,pat);
       if(P.pr){const sv=Math.sin((180-psc)*RAD);if(Math.cos((180-psc)*RAD)>-.2){const dx=B[0]-h[0],dy=B[1]-h[1],l=Math.hypot(dx,dy)||1,o=sv*(ro-1.7),nx=dy/l*o,ny=-dx/l*o;   // Rückenplatte: eine Pixellinie am Rücken
         capsule(g,[h[0]+dx*.2+nx,h[1]+dy*.2+ny],[h[0]+dx*.92+nx,h[1]+dy*.92+ny],.55,.55,P.pr)}}};
-  if(bike)parts.push({key:legMax+.002,draw:()=>bikeJersey(true)});   // Trikot-Saum über dem Beinansatz
   parts.push({key:TK,draw:()=>{
     const h=lo(L.torso[0]),s=up(L.torso[1]),sf=Math.sin(tYaw*RAD),cf=Math.cos(tYaw*RAD),as=Math.abs(sf);
-    if(bike){bikeJersey(false);return}
+    if(bike){bikeJersey();return}
     const wW=Math.round(7+1.4*as*(board?1:1-k)),w=zw(7+1.4*as*(board?1:1-k)),hh=zw(7-2*as),hx=-3*cf*S,side=Math.abs(cf)>.5,frontF=sf>.5,backF=sf<-.5,kw=zw(4);
     const line=L.torsoMid?[[h[0],h[1]],(q=>[q[0],q[1]])(lo(L.torsoMid)),[s[0],s[1]]]:[[h[0],h[1]],[s[0],s[1]]];
     if(side)strokePts(g,[[s[0]+hx,s[1]-S],[s[0]+hx,s[1]+2*S]],kw+2,O);
@@ -3008,7 +3038,8 @@ function updAir(dt){
   const fOk=!(p.flipCD>0),up=fOk&&inU(),dn=fOk&&inD();
   // Flips komplett von Hand: nur drehen, solange die Taste gehalten wird. Kein automatisches Weiterdrehen.
   // Die Grundneigung gleicht sich langsam dem Landehang an. Die Flip-Drehung kommt nur von dir und dreht nie automatisch weiter.
-  const cs=(p.corkMode?CORK_SLOW:p.spinLock&&p.diagT>0?.3:1)*(GEAR==='bike'?.72:1);   // Sommer: mit dem Bike dreht man langsamer   // Corks und Mistys drehen gemütlicher; schräg aus dem Gas heraus erst langsam, bis klar ist, ob es ein Cork wird
+  // Bike: Corks und Mistys drehen mit vollem Tempo, also schneller als die anderen Drehungen auf dem Bike (die sind auf 0,72 gebremst)
+  const cs=GEAR==='bike'&&p.corkMode?1:(p.corkMode?CORK_SLOW:p.spinLock&&p.diagT>0?.3:1)*(GEAR==='bike'?.72:1);   // Sommer: mit dem Bike dreht man langsamer   // Corks und Mistys drehen gemütlicher; schräg aus dem Gas heraus erst langsam, bis klar ist, ob es ein Cork wird
   if(up||dn){const dir=dn?-1:1;p.flipAcc+=dir*FLIP_RATE*cs*dt;p.flipDir=dir;p.flipPoseT=.18}else p.flipPoseT=Math.max(0,(p.flipPoseT||0)-dt);
   {const df=norm(landingGuess()-p.base),mx=150*dt;p.base+=clamp(df,-mx,mx)}
   p.ang=p.base+p.flipAcc;
@@ -3775,7 +3806,7 @@ const BIKE_PARTS=['bike','bfork','bshock','brim','btire','bbar','bsad','bped'];l
 function renderShop(){
   setT($('sCoins'),String(SAVE.coins));
   const tabs=$('tabs');tabs.innerHTML='';
-  const cats=CATS.filter(c=>c==='bike'||!BIKE_PARTS.includes(c)).filter(c=>SUMMER?!['skis','board','poles','hoodie','pack'].includes(c):!['bike','jersey','prot'].includes(c));
+  const cats=CATS.filter(c=>c==='bike'||!BIKE_PARTS.includes(c)).filter(c=>SUMMER?!['skis','board','poles','hoodie','pack','boots','binding'].includes(c):!['bike','jersey','prot','shoes'].includes(c));
   const inBike=SUMMER&&BIKE_PARTS.includes(shopCat);if(!cats.includes(shopCat)&&!inBike)shopCat='helmet';
   for(const c of cats){const b=document.createElement('button');b.className='tab';b.role='tab';b.textContent=catName(c);b.setAttribute('aria-selected',c===shopCat||(c==='bike'&&inBike));b.onclick=()=>{shopCat=c==='bike'?bikeSub:c;renderShop()};tabs.appendChild(b)}
   {const sub=$('subtabs');sub.innerHTML='';sub.hidden=!inBike;if(inBike){bikeSub=shopCat;   // Bike: Abteilungen für jedes Teil
@@ -4044,7 +4075,7 @@ function frame(t){
   else{acc=0;if(grindSnd)grindStop(true);if(state==='menu'){cam.x+=dt*18;while(gx<cam.x+VW+900)genNext()}}
   render(dt);musicMix();
   if(state==='menu')drawPreview('pvMenu');
-  if(!$('shop').hidden)drawPreview('pvShop',Object.assign({},SAVE.equip,tryOn,shopCat==='beanie'?{helmet:'h_none'}:{}),SUMMER?'bike':shopCat==='board'?'board':(shopCat==='skis'||shopCat==='poles'||shopCat==='boots')?'ski':SAVE.gear,!SUMMER&&shopCat==='poles',SUMMER&&BIKE_PARTS.includes(shopCat));
+  if(!$('shop').hidden)drawPreview('pvShop',Object.assign({},SAVE.equip,tryOn,shopCat==='beanie'?{helmet:'h_none'}:{}),SUMMER?'bike':shopCat==='board'?'board':(shopCat==='skis'||shopCat==='poles'||shopCat==='boots'||shopCat==='binding')?'ski':SAVE.gear,!SUMMER&&shopCat==='poles',SUMMER&&BIKE_PARTS.includes(shopCat));
   requestAnimationFrame(frame);
 }
 function start(){
