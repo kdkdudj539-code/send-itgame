@@ -1441,7 +1441,9 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist,hy){
   {const q=up(L.head),hn=norm(hYaw);let kind='side',flip=false;
     if(hn>45&&hn<=135)kind='front';else if(hn>135||hn<=-135)flip=true;else if(hn<-45)kind='back';
     let hr=0;if(cork&&cork.t){const t=up(v3.add(L.head,[0,-4,0])),dx=t[0]-q[0],dy=t[1]-q[1];if(dx*dx+dy*dy>2.2*S*S)hr=((Math.round(Math.atan2(dx,-dy)/(Math.PI/2))%4)+4)%4}
-    parts.push({key:4.6,draw:()=>drawHead(g,kind,Math.round(q[0]-6.5),Math.round(q[1]-5.5),P,flip,hr)})}
+    // Whip: der Kopf liegt in der Ansicht hinter dem hochgeschleuderten Hinterrad
+    let hk=4.6;if(bike&&/^nose/.test(poseName)&&(L.bike.roll||0)>25){const rk=loW(L._X.P(bkAx(L.bike).ra))[2]-.61;if(rk>2.01&&rk<hk)hk=rk}   // nur vor dem Trikot (Key 2), sonst würde der Rumpf den Kopf verdecken
+    parts.push({key:hk,draw:()=>drawHead(g,kind,Math.round(q[0]-6.5),Math.round(q[1]-5.5),P,flip,hr)})}
   const armK=[];
   // Bike: die Hand bleibt am Lenker (dreht mit dem Bike), die Schulter mit dem Oberkörper
   const hl=(j,n,i)=>{if(!(L.handLo&&L.handLo[i]))return up(j);if(n===2)return lo(j);if(n===1){const a=up(j),b=lo(j);return [(a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2]}return up(j)};
