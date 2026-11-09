@@ -1224,8 +1224,9 @@ const BIKE3=(()=>{
     // Afterbang Sommer: Gabel und Dämpfer federn tief ein, Rahmen und Fahrer sinken, die Räder bleiben am Boden
     ab_sag:{bike:B([.6,12.6+BK_SAG,0],{sag:BK_SAG}),hips:[[-.4,BK_SAG+2.2,-2.4],[.4,BK_SAG+2.2,2.4]],torso:T(5.1,-1.2,BK_SAG+2.2),head:[7.6,-4.4,0]},
     // Tricks (Richtungen wie die Grabs). Jede Pose hat eine Tweak-Pose (_max), in die der Trick beim Halten weiter hineingeht.
-    nose:{bike:B([1.2,10,0],{yaw:-118,roll:56,steer:-18,piv:[8,-10,0]}),torso:T(5,-5.6),head:[7.4,-9,0]},          // Whip: Heck fliegt über 90° quer raus, Bike kippt, Gegenlenken
-    nose_max:{bike:B([1.2,9.8,0],{yaw:-140,roll:66,steer:-28,piv:[8,-10,0]}),torso:T(4.8,-5.8),head:[7.2,-9.2,0]},
+    // Whip: das Bike wird seitlich flach gelegt, die Front zeigt nach vorne unten, das Heck fliegt hoch nach hinten raus; man sieht die Unterseite des Bikes
+    nose:{bike:B([2.6,10,0],{yaw:-30,roll:50,pitch:-50,steer:-10,piv:[4,-6,0]}),torso:T(4.6,-6),head:[6.8,-9.6,0]},
+    nose_max:{bike:B([2.8,9.8,0],{yaw:-36,roll:58,pitch:-58,steer:-14,piv:[4,-6,0]}),torso:T(4.6,-6.1),head:[6.8,-9.7,0]},
     mute:{bike:B([1.6,9,0],{yaw:-26,roll:82,piv:[8,-10,0]}),torso:T(4.6,-5),head:[7,-8.4,0]},                      // Table Top: Bike liegt flach, hochgezogen
     mute_max:{bike:B([1.6,8.4,0],{yaw:-32,roll:94,piv:[8,-10,0]}),torso:T(4.4,-4.8),head:[6.8,-8.2,0]},
     blunt:{bike:B([4.2,11.6,0],{pitch:-8}),torso:T(7.2,-2.6),head:[10.4,-4.8,0],                                   // Superman: Beine lang nach hinten, Körper flach über dem Bike
