@@ -3009,7 +3009,7 @@ function updAir(dt){
   const fOk=!(p.flipCD>0),up=fOk&&inU(),dn=fOk&&inD();
   // Flips komplett von Hand: nur drehen, solange die Taste gehalten wird. Kein automatisches Weiterdrehen.
   // Die Grundneigung gleicht sich langsam dem Landehang an. Die Flip-Drehung kommt nur von dir und dreht nie automatisch weiter.
-  const cs=p.corkMode?CORK_SLOW:p.spinLock&&p.diagT>0?.3:1;   // Corks und Mistys drehen gemütlicher; schräg aus dem Gas heraus erst langsam, bis klar ist, ob es ein Cork wird
+  const cs=(p.corkMode?CORK_SLOW:p.spinLock&&p.diagT>0?.3:1)*(GEAR==='bike'?.72:1);   // Sommer: mit dem Bike dreht man langsamer   // Corks und Mistys drehen gemütlicher; schräg aus dem Gas heraus erst langsam, bis klar ist, ob es ein Cork wird
   if(up||dn){const dir=dn?-1:1;p.flipAcc+=dir*FLIP_RATE*cs*dt;p.flipDir=dir;p.flipPoseT=.18}else p.flipPoseT=Math.max(0,(p.flipPoseT||0)-dt);
   {const df=norm(landingGuess()-p.base),mx=150*dt;p.base+=clamp(df,-mx,mx)}
   p.ang=p.base+p.flipAcc;
@@ -3702,7 +3702,7 @@ function drawHud(){
   const meters=Math.max(0,Math.floor(footX()/10));
   setT(hud.hScore,String(run.score+meters));setT(hud.hCoins,String(run.coins));
   const sp=p.mode==='air'?Math.hypot(p.vx,p.vy):p.s||0;
-  setT(hud.hDist,meters+' m · '+Math.round(sp*.22)+' km/h'+(sp>=VMAX-3?' · MAX':''));
+  setT(hud.hDist,meters+' m · '+Math.round(sp*.22/(SUMMER?1.5:1))+' km/h'+(sp>=VMAX-3?' · MAX':''));
   // Ski Patrol: nur der Hinweis am linken Bildrand (drawPatrolPointer)
   const ad=(footX()-wall.x)/10;hud.hAval.hidden=!(ad<26&&p.mode!=='dead');if(ad<26)setT(hud.hAvalD,Math.max(0,Math.round(ad))+' m');
   $('avalGlow').style.opacity=String(clamp((28-ad)/8,0,1)*clamp((ad-12)/6,0,1)*(.6+.4*Math.sin(T*10)));
