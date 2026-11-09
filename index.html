@@ -1099,7 +1099,7 @@ function bikeSolve(L0){let L=BIKE_SOLVED.get(L0);if(L)return L;
   const ped=[X.P([-c*Math.cos(th),-c*Math.sin(th),-BK.ped]),X.P([c*Math.cos(th),c*Math.sin(th),BK.ped])];   // links, rechts
   const grip=[X.P(X.F([BK.grip[0],BK.grip[1],-4.2])),X.P(X.F([BK.grip[0],BK.grip[1],4.2]))];
   const fw=X.dirB([1,0,0]),kD=v3.add(fw,[0,-.5,0]);
-  const t1=L0.torso[1],hips=L0.hips||[[-.4,0,-2.4],[.4,0,2.4]],sh=L0.shoulders||[[t1[0]-.6,t1[1]+.6,-4.4],[t1[0]+.2,t1[1]+.6,4.4]];
+  const t1=L0.torso[1],hips=L0.hips||[[-.4,0,-2.4],[.4,0,2.4]],sh=L0.shoulders||[[t1[0]-.6,t1[1]+.6,(t1[2]||0)-4.4],[t1[0]+.2,t1[1]+.6,(t1[2]||0)+4.4]];
   const legs=[0,1].map(i=>L0.legsX&&L0.legsX[i]||[hips[i],ik2(hips[i],ped[i],BK.thigh,BK.shin,kD),ped[i]]);
   const arms=[0,1].map(i=>L0.armsX&&L0.armsX[i]||[sh[i],ik2(sh[i],grip[i],BK.uarm,BK.farm,[-.35,.55,i?.9:-.9]),grip[i]]);
   L=Object.assign({},L0,{legs,arms,boots:legs.map(l=>l[2]),bootWH:[4,2],noFlare:true,noPoles:true,handLo:[0,1].map(i=>!(L0.armsX&&L0.armsX[i])),_X:X,_ped:ped});
@@ -1225,8 +1225,8 @@ const BIKE3=(()=>{
     ab_sag:{bike:B([.6,12.6+BK_SAG,0],{sag:BK_SAG}),hips:[[-.4,BK_SAG+2.2,-2.4],[.4,BK_SAG+2.2,2.4]],torso:T(5.1,-1.2,BK_SAG+2.2),head:[7.6,-4.4,0]},
     // Tricks (Richtungen wie die Grabs). Jede Pose hat eine Tweak-Pose (_max), in die der Trick beim Halten weiter hineingeht.
     // Whip: das Bike wird seitlich flach gelegt, die Front zeigt nach vorne unten, das Heck fliegt hoch nach hinten raus; man sieht die Unterseite des Bikes
-    nose:{bike:B([2.6,10,0],{yaw:-30,roll:50,pitch:-50,steer:-10,piv:[4,-6,0]}),torso:T(4.6,-6),head:[6.8,-9.6,0]},
-    nose_max:{bike:B([2.8,9.8,0],{yaw:-36,roll:58,pitch:-58,steer:-14,piv:[4,-6,0]}),torso:T(4.6,-6.1),head:[6.8,-9.7,0]},
+    nose:{bike:B([2.6,10,0],{yaw:-30,roll:50,pitch:-50,steer:-10,piv:[4,-6,0]}),torso:[[-.5,0,0],[4,-5,-3.6]],head:[5.8,-8.2,-5.2]},          // Fahrer legt sich mit dem Bike zur Seite und nach vorne
+    nose_max:{bike:B([2.8,9.8,0],{yaw:-36,roll:58,pitch:-58,steer:-14,piv:[4,-6,0]}),torso:[[-.5,0,0],[3.8,-4.6,-4.2]],head:[5.6,-7.6,-6]},
     mute:{bike:B([1.6,9,0],{yaw:-26,roll:82,piv:[8,-10,0]}),torso:T(4.6,-5),head:[7,-8.4,0]},                      // Table Top: Bike liegt flach, hochgezogen
     mute_max:{bike:B([1.6,8.4,0],{yaw:-32,roll:94,piv:[8,-10,0]}),torso:T(4.4,-4.8),head:[6.8,-8.2,0]},
     blunt:{bike:B([4.2,11.6,0],{pitch:-8}),torso:T(7.2,-2.6),head:[10.4,-4.8,0],                                   // Superman: Beine lang nach hinten, Körper flach über dem Bike
@@ -1303,14 +1303,14 @@ function airPose(){const gv=p.gVis||0;
 /* Zeichnet die Figur bei Drehwinkel phi (0 = Fahrtrichtung rechts, 90 = zum Spieler, 180 = Switch, 270 = vom Spieler weg).
    look: Kopf schaut die Piste runter; bei Switch dreht sich der Oberkörper mit (Blick über die Schulter). */
 const SKI_HW=.85;   // halbe Skibreite (Welt)
-function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
+function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist,hy){
   const board=gear==='board',bike=gear==='bike',LIB=LIBOF(gear),L=bike?bikeSolve(LIB[poseName]||LIB.ride):LIB[poseName]||LIB.ride,O=P.O;
   // Der Fahrer wird im eigenen, feineren Raster gezeichnet (S Fahrer-Pixel pro Welt-Pixel). gW = Sprite-Bild (Bike), g = Fahrer-Raster.
   // zw: Füllbreite im Fahrer-Raster, so dass Teil plus 1-Pixel-Umriss so breit bleibt wie vorher in Welt-Pixeln
   const gW=g;g=g._R||g;const S=g._S||1,zw=w=>Math.max(1,Math.round((w+2)*S)-2),SKL=25,SKW=Math.max(1,zw(2)-1);   // SKL Skilänge (Welt), SKW Skidicke (Fahrer-Pixel)
   const k=look?smooth01((-Math.cos(phi*RAD)-.2)/.8):0;
   // twist: beim Drehen führen Schultern und Kopf, Ski bzw. Board ziehen nach
-  const tw=(board?150:-70)*k,yL=phi,yU=phi+tw+(twist||0),tYaw=yU+(L.torsoFace||0),hYaw=look?0:yU+(twist||0)*.4;
+  const tw=(board?150:-70)*k,yL=phi,yU=phi+tw+(twist||0),tYaw=yU+(L.torsoFace||0),hYaw=hy!=null?phi+hy:look?0:yU+(twist||0)*.4;
   let xf=q=>q;
   if(cork&&cork.t){const cm=poseCOM(poseName,phi,gear),k=corkAxis(cork.m);
     xf=q=>{const v=rodrigues([q[0]-SCX-cm.cx,q[1]-SCY-cm.cy,q[2]-cm.cz],k,cork.t);return [SCX+cm.cx+v[0],SCY+cm.cy+v[1],cm.cz+v[2]]}}
@@ -1468,9 +1468,9 @@ function applyPattern(g,P){const N=g.canvas.width;
   g.putImageData(id,0,0);
 }
 const sprCache=new Map();let sprW=0;   // Speicher der Bild-Caches in 1x-Sprite-Einheiten
-function getSprite(pose,phi,look,eq,gear,pow,cork,twist,K,wf){
+function getSprite(pose,phi,look,eq,gear,pow,cork,twist,K,wf,hy){
   eq=eq||SAVE.equip;gear=gear||GEAR;K=K||(gear==='bike'?RS:RZ);wf=gear==='bike'?(wf||0):0;
-  const ph=((Math.round(phi/15)*15)%360+360)%360,ck=cork?{m:cork.m,t:((Math.round(cork.t/15)*15)%360+360)%360}:null,tq=Math.round((twist||0)/15)*15,key=pose+'|'+ph+'|'+(look?1:0)+'|'+(pow?1:0)+'|'+(ck?ck.m+ck.t:'')+'|'+gear+'|'+tq+'|'+eqKey(eq)+'|'+K+'|'+wf;
+  const ph=((Math.round(phi/15)*15)%360+360)%360,ck=cork?{m:cork.m,t:((Math.round(cork.t/15)*15)%360+360)%360}:null,tq=Math.round((twist||0)/15)*15,key=pose+'|'+ph+'|'+(look?1:0)+'|'+(pow?1:0)+'|'+(ck?ck.m+ck.t:'')+'|'+gear+'|'+tq+'|'+eqKey(eq)+'|'+K+'|'+wf+'|'+(hy==null?'':Math.round(hy/15)*15);
   let s=sprCache.get(key);if(s){sprCache.delete(key);sprCache.set(key,s);return s}
   const P=palette(eq);P.wf=wf;if(gear==='bike'){const Ji=itemOf('jersey',eq.jersey||'j_black');P.D=Ji.c;P.d=shade(Ji.c,-.3);P.J2=Ji.a;P.pk=null;{const Pr=eq.prot&&eq.prot!=='pr_none'?itemOf('prot',eq.prot):null;P.pr=Pr?Pr.c:null;P.pra=Pr?Pr.a:null}{const a=hexRgb(Ji.a),b=hexRgb(P.H),lum=(b[0]*.3+b[1]*.59+b[2]*.11)/255;const la=(a[0]*.3+a[1]*.59+a[2]*.11)/255;P.J=shade(P.H,lum>.5?-.22:.32)}if(!P.hat)P.ff=true;   // Helm-Details (Schirm, Kinnbügel) nur in der Helmfarbe, nicht in der Trikotfarbe
     {const it=c=>itemOf(c,eq[c]),Fo=it('bfork'),Sh=it('bshock'),Ri=it('brim'),Ti=it('btire'),Ba=it('bbar'),Sa=it('bsad'),Pe=it('bped');   // Bike-Teile aus dem Shop
@@ -1478,7 +1478,7 @@ function getSprite(pose,phi,look,eq,gear,pow,cork,twist,K,wf){
   // Ski/Board: das Sprite ist direkt das Fahrer-Raster. Bike: Sprite im Bild-Raster, der Fahrer kommt aus dem Fahrer-Raster dazwischen.
   let c,g;if(K===RZ){[c,g]=mk(RW,RW);g._S=RZ}else{[c,g]=mk(SPR*K,SPR*K);g.setTransform(K,0,0,K,0,0);g._K=K;g._R=riderCtx()}
   c.hi=true;c.K=K;
-  renderFigure(g,pose,ph,look,P,gear,pow,ck,tq);
+  renderFigure(g,pose,ph,look,P,gear,pow,ck,tq,hy==null?null:Math.round(hy/15)*15);
   sprW+=K*K;while(sprW>3400&&sprCache.size){const [k0,c0]=sprCache.entries().next().value;sprCache.delete(k0);sprW-=(c0.K||1)**2}
   sprCache.set(key,c);return c;
 }
@@ -2234,13 +2234,13 @@ function playerView(){
     if(bike)return {pose:'walk'+(Math.floor(h.walk/.2)%4),phi:0,look:true,ang:p.ang,comx:cx,comy:cy,ox:0,oy:0,inPow:false,cork:null};   // Bike: um den Stein schieben
     return {pose:'push'+(Math.floor(((h.walk/.55)%1)*8)%8),phi:0,look:true,ang:p.ang,comx:cx,comy:cy,ox:0,oy:0,inPow:false,cork:null}}   // Ski: um den Stein laufen
   if(p.mode==='climb'){const fr=p.climb&&p.climb.moving?Math.floor(p.climb.anim/.22)%2:0;return {pose:'climb'+fr,phi:0,look:false,ang:0,comx:p.x,comy:p.y-9,ox:0,oy:0,inPow:false,cork:null}}
-  let phi=0,pose='ride',ang=p.ang,comx,comy,look=true,ox=0,oy=0,twist=0;
+  let phi=0,pose='ride',ang=p.ang,comx,comy,look=true,ox=0,oy=0,twist=0,hy=null;
   if(airish){
     comx=p.x;comy=p.y;phi=p.spin;ox=p.cx||0;oy=p.cy||0;
     if(bike&&p.gName==='nose')phi-=90*smooth01(p.gVis||0);   // Whip: Fahrer und Bike drehen sich dabei automatisch um 90° nach links (wie ein Links-Spin) und beim Loslassen zurück
     const settled=Math.abs(p.spin-Math.round(p.spin/90)*90)<1.5;
     pose=airPose();look=settled&&!p.grab&&!p.corkMode;twist=p.corkMode?0:(p.spinTw||0);
-    if(bike&&p.gName==='nose')twist+=64*smooth01(p.gVis||0);   // Whip: Oberkörper dreht nur teilweise mit, der Kopf schaut immer nach vorne auf die Strecke (Kopf dreht 1,4-mal so weit wie der Oberkörper)
+    if(bike&&p.gName==='nose'){const s=smooth01(p.gVis||0);twist+=20*s;hy=90*s}   // Whip: Oberkörper geht fast ganz mit dem Bike mit, der Kopf schaut immer nach vorne auf die Strecke
     if(p.corkMode)ang=p.base;
   }else{
     phi=p.mode==='rail'?(p.gspinVis??90):(p.sw?180:0);if(p.mode==='rail')twist=p.gTw||0;else if(p.mode==='ground'){const w=GP.wind||(p.auto||(jibb&&(TC.up||TC.down))?0:TC.left?-1:TC.right?1:0);if(w)twist=-w*30}
@@ -2265,7 +2265,7 @@ function playerView(){
       comx=px+vx*Math.cos(b)-vy*Math.sin(b);comy=py+vx*Math.sin(b)+vy*Math.cos(b);ang+=bv*(p.sw?-1:1)}
     if(p.mode==='ground'&&p.sink)comy+=p.sink;
   }
-  return {pose,phi,look,ang,comx,comy,ox,oy,twist,inPow:p.mode==='ground'&&p.sink>2.5,cork:airish&&p.corkMode?{m:p.corkMode,t:p.flipAcc}:null};
+  return {pose,phi,look,ang,comx,comy,ox,oy,twist,hy,inPow:p.mode==='ground'&&p.sink>2.5,cork:airish&&p.corkMode?{m:p.corkMode,t:p.flipAcc}:null};
 }
 /* Hochauflösender Fahrer (Bike): eigene Ebene in voller Bildschirm-Auflösung. Alles, was danach kommt (Erdhaufen, Partikel, Mure), landet auf
    einer zweiten Welt-Ebene darüber; Dämmerung und Nacht werden auf alle drei Ebenen gelegt. */
@@ -2274,7 +2274,7 @@ function shadeLayer(g,sx,sy,sw,sh,dw,dh){const DS=curDS;g.save();g.setTransform(
   if(DS.dusk>.02){g.fillStyle='rgba(255,128,80,'+(.15*DS.dusk)+')';g.fillRect(0,0,dw,dh)}
   if(lightOn&&lightCv)g.drawImage(lightCv,sx,sy,sw,sh,0,0,dw,dh);g.restore()}
 function drawPlayer(cX,cY){
-  const v=playerView(),spr=getSprite(v.pose,v.phi,v.look,null,null,v.inPow,v.cork,v.twist,0,GEAR==='bike'?((Math.floor((p.wheelA||0)/7.5)%6)+6)%6:0);
+  const v=playerView(),spr=getSprite(v.pose,v.phi,v.look,null,null,v.inPow,v.cork,v.twist,0,GEAR==='bike'?((Math.floor((p.wheelA||0)/7.5)%6)+6)%6:0,v.hy);
   if(spr.hi){const tx=Math.round(v.comx-cX),ty=Math.round(v.comy-cY),S=PLH*2*RS;
     if(!plCv){[plCv,plCtx]=mk(S,S);[afterCv,afterCtx]=mk(VW,VH)}
     plCtx.setTransform(1,0,0,1,0,0);plCtx.globalCompositeOperation='source-over';plCtx.clearRect(0,0,S,S);
