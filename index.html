@@ -1127,7 +1127,8 @@ function bikeParts(g,L,lo,P,O,parts){const X=L._X,bk=L.bike||{},AX=bkAx(bk),SK=g
   const edgeOn=pl=>Math.abs(pl.det)<.22*Math.max(pl.lx,pl.ly)**2;   // Rad fast genau von vorne: als breite Lauffläche zeichnen (vorher scheiterte der Test, wenn eine Achse ganz verschwand)
   // Räder. Der Reifen hat Breite (TWH = halbe Reifenbreite): von vorne oder schräg sieht man die Lauffläche, von der Seite nur die Flanke.
   const TWH=1;
-  const wheel=front=>{const C3=front?X.P(X.F(AX.fa)):X.P(AX.ra),pl=plane(C3,front),wr=BK.wr,rTi=wr-1.25,rR=wr-2.05,KN=FINE?32:24,NS=16;
+  const wheel=front=>{const wk=k=>!front&&L._rearUp?Math.max(k,5.22+(k-pl.c[2])):k;   // Whip: Hinterrad vor dem Kopf (Kopf-Key 4,6)
+const C3=front?X.P(X.F(AX.fa)):X.P(AX.ra),pl=plane(C3,front),wr=BK.wr,rTi=wr-1.25,rR=wr-2.05,KN=FINE?32:24,NS=16;
     const ez3=front?X.dir([0,0,1]):X.dirB([0,0,1]),cS=lo(C3),eS=lo(v3.add(C3,v3.mul(ez3,TWH))),ez2=[(eS[0]-cS[0])*K,(eS[1]-cS[1])*K],nearS=eS[2]>cS[2]?1:-1;
     const TR=P.TR,TS=P.TS,TRk=shade(P.TR,.14),RM=P.RM,RMh=shade(P.RM,.4),RMd=shade(P.RM,-.4),SPK=P.SPK,DSC='#c3c8d1',DSh='#7f8794',HUB='#2a2d35',HUBh='#8e96a6',CAS='#9aa1ad';
     // ganzer Reifen: Vereinigung der Reifenringe quer über die Breite, Umriss nur außen
@@ -1137,7 +1138,7 @@ function bikeParts(g,L,lo,P,O,parts){const X=L._X,bk=L.bike||{},AX=bkAx(bk),SK=g
           if(rho>rM||rho<rTi)continue;const px=rho>.05?Math.min(1.2,rho/Math.max(.01,Math.hypot(dx,dy))):.3,tw=Math.atan2(b,a)-WA,rO=Math.cos(tw*KN)>.1?wr+.34:wr;
           if(rho<=rO){col=rho>wr?TRk:rho>rTi+.5?TR:TS;break}if(rho<=rO+px)edge=true}
         if(col||edge){g.fillStyle=col||O;g.fillRect(x,y,1,1)}}};
-    add(pl.c[2]-.6,()=>{
+    add(wk(pl.c[2]-.6),()=>{
       if(edgeOn(pl)){const A=pl.lx>pl.ly?pl.ex:pl.ey,l=Math.max(pl.lx,pl.ly),r=wr*l,u=[A[0]/l,A[1]/l],P0=[pl.c[0]-u[0]*r,pl.c[1]-u[1]*r],P1=[pl.c[0]+u[0]*r,pl.c[1]+u[1]*r];
         capsule(g,P0,P1,R(TWH)+1,R(TWH)+1,O);capsule(g,P0,P1,R(TWH),R(TWH),(uu)=>Math.floor(uu*r)%3?TR:TRk);dot(pl.c,R(.3),HUB);return}   // von vorne: breite Lauffläche
       fatTyre();
@@ -1154,7 +1155,7 @@ function bikeParts(g,L,lo,P,O,parts){const X=L._X,bk=L.bike||{},AX=bkAx(bk),SK=g
       rast(nr,wr+.4,(rho,t,px)=>rho>rTi&&rho<=wr?(rho>rTi+.5?TR:TS):null)});
     // Bremssattel am Scheibenrand
     const ang=front?-2.35:-1.0,M=onPl(pl,1.95,ang),T0=onPl(pl,1.95,ang-.32),T1=onPl(pl,1.95,ang+.32);
-    if(!edgeOn(pl))add(pl.c[2]-.5,()=>{capsule(g,T0,T1,R(.45)+1,R(.45)+1,O);capsule(g,T0,T1,R(.45),R(.45),sh3('#2f333c'));g.fillStyle='#aeb4bf';g.fillRect(Math.round(M[0]),Math.round(M[1]),1,1)})};
+    if(!edgeOn(pl))add(wk(pl.c[2]-.5),()=>{capsule(g,T0,T1,R(.45)+1,R(.45)+1,O);capsule(g,T0,T1,R(.45),R(.45),sh3('#2f333c'));g.fillStyle='#aeb4bf';g.fillRect(Math.round(M[0]),Math.round(M[1]),1,1)})};
   wheel(false);wheel(true);
   // Rahmen: Hinterbau, Hauptlager, Umlenkhebel, Dämpfer vorne am Steuerrohr, Rohre. Das Oberrohr fällt stark zum Sitzrohr ab (wie im Vorbild).
   const bb=W([0,0,0]),stT=W([-.75,-8.4,0]),ttR=W([-.55,-6.2,0]),ttF=W([9.45,-11.3,0]),ht=W(BK.ht),hb=W(BK.hb),ra=W(AX.ra),rk=W([-.45,-5.3,0]),piv=W([.8,-1.6,0]);
@@ -1334,7 +1335,8 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist,hy){
       if(board){drawBoardWide(g,P3,d,n,lo,P,O,skiBaseShown(s)?P.ba:P.B)}   // Belagfarbe nur, wenn der Belag zum Spieler zeigt
       else{const base=skiBaseShown(s),c0=base?P.ka:P.K,col=L.skiDark&&L.skiDark[i]?shade(c0,-.2):c0;drawBoardWide(g,P3,d,n,lo,P,O,col,SKI_HW,SKW)}}});   // Ski: von der Seite dünn, von vorne/oben/unten breiter
   });
-  if(bike){bikeParts(gW,L,loW,P,O,parts);skiKeys[0]=lo(L._ped[0])[2];skiKeys[1]=lo(L._ped[1])[2]}   // Bike statt Ski, Schuhe auf den Pedalen
+  if(bike){L._rearUp=/^nose/.test(poseName)&&(L.bike.roll||0)>25;bikeParts(gW,L,loW,P,O,parts);   // Whip: Hinterrad liegt in der Ansicht vor dem Kopf
+   skiKeys[0]=lo(L._ped[0])[2];skiKeys[1]=lo(L._ped[1])[2]}   // Bike statt Ski, Schuhe auf den Pedalen
   if(L.noRider){parts.sort((a,b)=>a.key-b.key).forEach(q=>q.draw());return}   // nur das Bike (Shop-Vorschau)
   const bootKey=i=>(board?skiKeys[0]:skiKeys[i])+.01+i*.001;
   // Skischuh: nur 1 Pixel hoch, unten am Hosenbein direkt über der Skifarbe (statt der dunklen Ski-Oberkante); vorne schaut die Spitze raus
@@ -1441,9 +1443,7 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist,hy){
   {const q=up(L.head),hn=norm(hYaw);let kind='side',flip=false;
     if(hn>45&&hn<=135)kind='front';else if(hn>135||hn<=-135)flip=true;else if(hn<-45)kind='back';
     let hr=0;if(cork&&cork.t){const t=up(v3.add(L.head,[0,-4,0])),dx=t[0]-q[0],dy=t[1]-q[1];if(dx*dx+dy*dy>2.2*S*S)hr=((Math.round(Math.atan2(dx,-dy)/(Math.PI/2))%4)+4)%4}
-    // Whip: der Kopf liegt in der Ansicht hinter dem hochgeschleuderten Hinterrad
-    let hk=4.6;if(bike&&/^nose/.test(poseName)&&(L.bike.roll||0)>25){const rk=loW(L._X.P(bkAx(L.bike).ra))[2]-.61;if(rk>2.01&&rk<hk)hk=rk}   // nur vor dem Trikot (Key 2), sonst würde der Rumpf den Kopf verdecken
-    parts.push({key:hk,draw:()=>drawHead(g,kind,Math.round(q[0]-6.5),Math.round(q[1]-5.5),P,flip,hr)})}
+    parts.push({key:4.6,draw:()=>drawHead(g,kind,Math.round(q[0]-6.5),Math.round(q[1]-5.5),P,flip,hr)})}
   const armK=[];
   // Bike: die Hand bleibt am Lenker (dreht mit dem Bike), die Schulter mit dem Oberkörper
   const hl=(j,n,i)=>{if(!(L.handLo&&L.handLo[i]))return up(j);if(n===2)return lo(j);if(n===1){const a=up(j),b=lo(j);return [(a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2]}return up(j)};
