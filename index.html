@@ -1205,16 +1205,16 @@ const BIKE3=(()=>{
   const B=(o,x)=>Object.assign({o:o||[1.6,11,0]},x||{}),T=(a,b,y0)=>[[-.5,y0||0,0],[a,b,0]];
   // Punkte einer Pose nach unten schieben (z. B. aufrecht stehen statt auf den Pedalen), Richtungen bleiben
   const SH=(o,dy)=>Array.isArray(o)&&o.length===3&&typeof o[0]==='number'?[o[0],o[1]+dy,o[2]]:Array.isArray(o)?o.map(v=>SH(v,dy)):o;
-  // Angriffshaltung: Beine fast gestreckt, Hüfte hinten über dem Tretlager, Oberkörper weit nach vorne zum Lenker
-  const ride={bike:B(),torso:T(5.4,-5.2),head:[7.8,-8.6,0]};
-  const tuck={bike:B([1.4,10.2,0]),torso:T(5.6,-5),head:[8,-8.4,0]};   // in der Luft: Bike etwas angezogen
+  // Fahrhaltung: im Stehen, Beine gestreckt, Hüfte hoch über dem Sattel, Oberkörper nur leicht nach vorne, Arme leicht gebeugt
+  const ride={bike:B([.6,12.6,0]),torso:T(4.2,-6.4),head:[6.3,-10,0]};
+  const tuck={bike:B([.4,11.8,0]),torso:T(4.4,-6.2),head:[6.6,-9.8,0]};   // in der Luft: Bike etwas angezogen
   const L={ride,tuck,
     // R2 halten: Hüfte tiefer, Räder bleiben am Boden
-    crouch:{bike:B(),hips:[[-.4,2.6,-2.4],[.4,2.6,2.4]],torso:T(5.8,-2.6,2.6),head:[8.4,-5.8,0]},
+    crouch:{bike:B([.6,12.6,0]),hips:[[-.4,2.6,-2.4],[.4,2.6,2.4]],torso:T(5.2,-3.4,2.6),head:[7.6,-6.8,0]},
     layout:{bike:B([2,11,0],{pitch:8}),torso:T(3,-6.4),head:[5,-10.2,0]},
     ftuck:{bike:B([1.2,9.6,0],{pitch:-8}),torso:T(5.4,-4.4),head:[7.8,-7.4,0]},
-    cork:{bike:B([1.4,10.2,0],{roll:14,yaw:-10}),torso:T(5.6,-5),head:[8,-8.4,0]},
-    misty:{bike:B([1.4,10.2,0],{roll:-14,yaw:10}),torso:T(5.6,-5),head:[8,-8.4,0]},
+    cork:{bike:B([.4,11.8,0],{roll:14,yaw:-10}),torso:T(4.4,-6.2),head:[6.6,-9.8,0]},
+    misty:{bike:B([.4,11.8,0],{roll:-14,yaw:10}),torso:T(4.4,-6.2),head:[6.6,-9.8,0]},
     // Jib-Modus: Manual (Hinterrad, Gewicht hinten, Arme lang) und Nose Manual (Vorderrad, über dem Lenker)
     butter:{bike:B([4,11,0]),torso:T(1.8,-6.8),head:[4,-10.6,0]},
     nbutter:{bike:B([-.8,11,0]),torso:T(6.6,-4),head:[9.2,-7.2,0]},
@@ -1222,7 +1222,7 @@ const BIKE3=(()=>{
     ab_lean:{bike:B([2.8,11,0]),torso:T(2.4,-6.6),head:[4.6,-10.4,0]},
     ab_back:{bike:B(),torso:T(3.4,-6.4),head:[5.6,-10,0],armsX:[null,[[3.4,-5.8,4.4],[4,-9.2,6.4],[4.8,-12.6,7.2]]]},
     // Afterbang Sommer: Gabel und Dämpfer federn tief ein, Rahmen und Fahrer sinken, die Räder bleiben am Boden
-    ab_sag:{bike:B([1.6,11+BK_SAG,0],{sag:BK_SAG}),hips:[[-.4,BK_SAG+.6,-2.4],[.4,BK_SAG+.6,2.4]],torso:T(5.9,-2.6,BK_SAG+.6),head:[8.5,-5.6,0]},
+    ab_sag:{bike:B([.6,12.6+BK_SAG,0],{sag:BK_SAG}),hips:[[-.4,BK_SAG+2.2,-2.4],[.4,BK_SAG+2.2,2.4]],torso:T(5.1,-1.2,BK_SAG+2.2),head:[7.6,-4.4,0]},
     // Tricks (Richtungen wie die Grabs). Jede Pose hat eine Tweak-Pose (_max), in die der Trick beim Halten weiter hineingeht.
     nose:{bike:B([1.2,10,0],{yaw:-118,roll:56,steer:-18,piv:[8,-10,0]}),torso:T(5,-5.6),head:[7.4,-9,0]},          // Whip: Heck fliegt über 90° quer raus, Bike kippt, Gegenlenken
     nose_max:{bike:B([1.2,9.8,0],{yaw:-140,roll:66,steer:-28,piv:[8,-10,0]}),torso:T(4.8,-5.8),head:[7.2,-9.2,0]},
@@ -1246,7 +1246,7 @@ const BIKE3=(()=>{
     japan_max:{bike:B([1.4,10.2,0],{roll:6}),torso:T(4.2,-5.8),head:[6.4,-9.2,0],legsX:[null,[[.4,0,2.4],[5.4,1.6,5.8],[11,3.6,9.4]]]},
     grind:ride};
   // Treten im Stehen: acht Bilder pro Kurbelumdrehung, die Hüfte sinkt etwas ab, Oberkörper wippt mit
-  for(let k=0;k<8;k++){const a=k*45,b=Math.sin(a*RAD*2)*.4;L['push'+k]={bike:B([1.6,11,0],{crank:a}),hips:[[-.4,2+b,-2.4],[.4,2+b,2.4]],torso:T(5.8,-3.6+b,2+b),head:[8.2,-7+b,0]}}
+  for(let k=0;k<8;k++){const a=k*45,b=Math.sin(a*RAD*2)*.4;L['push'+k]={bike:B([.6,12.6,0],{crank:a}),hips:[[-.4,3.6+b,-2.4],[.4,3.6+b,2.4]],torso:T(4.9,-2.6+b,3.6+b),head:[7.1,-6.2+b,0]}}
   // Verbandszeug: im Dreck sitzen, das Bike liegt hinter dir; danach um den Stein schieben (aufrecht, Hüfte 12,5 über dem Boden)
   {const legs=[[[-.5,0,-3],[4.5,-3.5,-3.5],[9,.5,-4]],[[.5,0,3],[5,-3.5,3.5],[9,.5,4]]],lying=B([3,.8,-10],{roll:-80});
    L.sit0={bike:lying,legsX:legs,torso:[[-.5,0,0],[-1,-7,0]],head:[1,-10.6,0],armsX:[[[-1,-6,-5],[2.5,-4.5,-6],[4.5,-3.5,-3.5]],[[0,-6,5],[3,-3,6],[5,-2.5,2.5]]]};
@@ -1272,7 +1272,7 @@ const BIKE3=(()=>{
      const M=L[g+'_max']||L[g];L[g+'#9']=frame(L[g],M,.5);L[g+'#10']=M}}
   for(const k of ['ab_back','ab_lean','crouch'])L[k+'_h']=mixD(ride,L[k],.5);
   L.ab_sag_h=mixD(ride,L.ab_sag,.5);L.ab_sag_h.bike.sag=BK_SAG/2;
-  L._bike=Object.assign({},ride,{noRider:true});
+  L._bike=Object.assign({},ride,{bike:B(),noRider:true});   // Shop-Vorschau: Bike an der gewohnten Stelle
   return L})();
 /* Körperschwerpunkt (KSP) einer Pose: In der Luft dreht sich der Körper immer um den KSP, der auf einer Parabel fliegt.
    Gewichte grob nach Körperanteilen: Rumpf 43, Kopf 7, Oberschenkel je 10, Unterschenkel+Fuß je 6, Arme je 5, Ski+Schuhe zusammen ca. 11. */
@@ -3038,8 +3038,8 @@ function updAir(dt){
   const fOk=!(p.flipCD>0),up=fOk&&inU(),dn=fOk&&inD();
   // Flips komplett von Hand: nur drehen, solange die Taste gehalten wird. Kein automatisches Weiterdrehen.
   // Die Grundneigung gleicht sich langsam dem Landehang an. Die Flip-Drehung kommt nur von dir und dreht nie automatisch weiter.
-  // Bike: Corks und Mistys drehen mit vollem Tempo, also schneller als die anderen Drehungen auf dem Bike (die sind auf 0,72 gebremst)
-  const cs=GEAR==='bike'&&p.corkMode?1:(p.corkMode?CORK_SLOW:p.spinLock&&p.diagT>0?.3:1)*(GEAR==='bike'?.72:1);   // Sommer: mit dem Bike dreht man langsamer   // Corks und Mistys drehen gemütlicher; schräg aus dem Gas heraus erst langsam, bis klar ist, ob es ein Cork wird
+  // Bike: Corks und Mistys drehen etwas schneller als die anderen Drehungen auf dem Bike (0,85 statt 0,72)
+  const cs=GEAR==='bike'&&p.corkMode?.85:(p.corkMode?CORK_SLOW:p.spinLock&&p.diagT>0?.3:1)*(GEAR==='bike'?.72:1);   // Sommer: mit dem Bike dreht man langsamer   // Corks und Mistys drehen gemütlicher; schräg aus dem Gas heraus erst langsam, bis klar ist, ob es ein Cork wird
   if(up||dn){const dir=dn?-1:1;p.flipAcc+=dir*FLIP_RATE*cs*dt;p.flipDir=dir;p.flipPoseT=.18}else p.flipPoseT=Math.max(0,(p.flipPoseT||0)-dt);
   {const df=norm(landingGuess()-p.base),mx=150*dt;p.base+=clamp(df,-mx,mx)}
   p.ang=p.base+p.flipAcc;
