@@ -1277,11 +1277,12 @@ function airPose(){const gv=p.gVis||0;
   if(p.gName&&gv>.02&&!(p.grab&&gv>=.98))return p.gName+'_h';return p.grab||(p.corkMode?p.corkMode:null)||(p.flipPoseT>0?(p.flipDir<0?'layout':'ftuck'):(GEAR==='board'?'bair':'tuck'))}
 /* Zeichnet die Figur bei Drehwinkel phi (0 = Fahrtrichtung rechts, 90 = zum Spieler, 180 = Switch, 270 = vom Spieler weg).
    look: Kopf schaut die Piste runter; bei Switch dreht sich der Oberkörper mit (Blick über die Schulter). */
+const BND_D='#5d6372',BND_M='#9aa1ad',BND_L='#e3e7ee';   // Skibindung: unten grau, oben hellgrau, Glanzpunkt hinten an der Ferse
 function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
   const board=gear==='board',bike=gear==='bike',LIB=LIBOF(gear),L=bike?bikeSolve(LIB[poseName]||LIB.ride):LIB[poseName]||LIB.ride,O=P.O;
   // Der Fahrer wird im eigenen, feineren Raster gezeichnet (S Fahrer-Pixel pro Welt-Pixel). gW = Sprite-Bild (Bike), g = Fahrer-Raster.
   // zw: Füllbreite im Fahrer-Raster, so dass Teil plus 1-Pixel-Umriss so breit bleibt wie vorher in Welt-Pixeln
-  const gW=g;g=g._R||g;const S=g._S||1,zw=w=>Math.max(1,Math.round((w+2)*S)-2);
+  const gW=g;g=g._R||g;const S=g._S||1,zw=w=>Math.max(1,Math.round((w+2)*S)-2),SKL=25,SKW=Math.max(1,zw(2)-1);   // SKL Skilänge (Welt), SKW Skidicke (Fahrer-Pixel)
   const k=look?smooth01((-Math.cos(phi*RAD)-.2)/.8):0;
   // twist: beim Drehen führen Schultern und Kopf, Ski bzw. Board ziehen nach
   const tw=(board?150:-70)*k,yL=phi,yU=phi+tw+(twist||0),tYaw=yU+(L.torsoFace||0),hYaw=look?0:yU+(twist||0)*.4;
@@ -1293,7 +1294,7 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
   const parts=[],skiKeys=[];
   const skiBaseShown=s=>{const d=v3.unit(s.d);let n=s.n||[0,-1,0];n=v3.unit(v3.add(n,v3.mul(d,-v3.dot(n,d))));const a=lo(s.c),b=lo(v3.add(s.c,n));return b[2]-a[2]<-.35};
   (board?(L.board?[L.board]:[]):bike?[]:L.skis).forEach((s,i)=>{
-    const len=board?20:22,tip=pow?4:2,d=v3.unit(s.d);let n=s.n||[0,-1,0];n=v3.unit(v3.add(n,v3.mul(d,-v3.dot(n,d))));
+    const len=board?20:SKL,tip=pow?4:2,d=v3.unit(s.d);let n=s.n||[0,-1,0];n=v3.unit(v3.add(n,v3.mul(d,-v3.dot(n,d))));
     const A=v3.add(s.c,v3.mul(d,-len/2)),B=v3.add(s.c,v3.mul(d,len/2));
     // Biegung beim Butter: das gedrückte Ende bleibt am Schnee, das freie Ende biegt sich nach oben
     const fl=s.flex||0,fw=u=>s.flexEnd==='tail'?(1-u)*(1-u):u*u,FP=u=>v3.add(v3.add(A,v3.mul(v3.add(B,v3.mul(A,-1)),u)),v3.mul(n,fl*fw(u)));
@@ -1303,7 +1304,7 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
     const key=(pts[1][2]+pts[pts.length-2][2])/2-1+(L.skiKey||0);skiKeys[i]=key;
     parts.push({key,draw:()=>{const sp=pts.map(q=>[q[0],q[1]]);
       if(board){drawBoardWide(g,P3,d,n,lo,P,O,skiBaseShown(s)?P.ba:P.B)}   // Belagfarbe nur, wenn der Belag zum Spieler zeigt
-      else{const base=skiBaseShown(s),c0=base?P.ka:P.K,col=L.skiDark&&L.skiDark[i]?shade(c0,-.2):c0;const kw=zw(2);strokePts(g,sp,kw+2,O);strokePts(g,sp,kw,col)}}});
+      else{const base=skiBaseShown(s),c0=base?P.ka:P.K,col=L.skiDark&&L.skiDark[i]?shade(c0,-.2):c0;strokePts(g,sp,SKW+2,O);strokePts(g,sp,SKW,col)}}});
   });
   if(bike){bikeParts(gW,L,loW,P,O,parts);skiKeys[0]=lo(L._ped[0])[2];skiKeys[1]=lo(L._ped[1])[2]}   // Bike statt Ski, Schuhe auf den Pedalen
   if(L.noRider){parts.sort((a,b)=>a.key-b.key).forEach(q=>q.draw());return}   // nur das Bike (Shop-Vorschau)
@@ -1312,13 +1313,19 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
   const skiBootRow=!board&&!bike&&L.skis&&L.axe==null;
   const skiBoot=i=>{const s=L.skis[i]||L.skis[0],d=v3.unit(s.d);if(skiBaseShown(s))return;let n=s.n||[0,-1,0];n=v3.unit(v3.add(n,v3.mul(d,-v3.dot(n,d))));
     const sd=[d[1]*n[2]-d[2]*n[1],d[2]*n[0]-d[0]*n[2],d[0]*n[1]-d[1]*n[0]],fl=s.flex||0,fw=v=>s.flexEnd==='tail'?(1-v)*(1-v):v*v;
-    const SP=(u,w)=>lo(v3.add(v3.add(s.c,v3.add(v3.mul(d,u),v3.mul(sd,w||0))),v3.mul(n,fl*fw((u+11)/22))));
+    const SP=(u,w)=>lo(v3.add(v3.add(s.c,v3.add(v3.mul(d,u),v3.mul(sd,w||0))),v3.mul(n,fl*fw((u+SKL/2)/SKL))));
     const h=SP(-3.5),t=SP(4.5),cc=SP(.5),no=lo(v3.add(s.c,n)),c0=lo(s.c);let nx=no[0]-c0[0],ny=no[1]-c0[1];const nl=Math.hypot(nx,ny)||1;nx/=nl;ny/=nl;
-    const col=P.bootC,lt=shade(col,.35),dxs=t[0]-h[0],so=(zw(2)+2)/2;   // so: Abstand Skimitte bis obere Umrisskante
+    const col=P.bootC,lt=shade(col,.35),dxs=t[0]-h[0],so=(SKW+2)/2;   // so: Abstand Skimitte bis obere Umrisskante
     if(Math.abs(t[1]-h[1])<=Math.abs(dxs)+.5){const cs=[SP(-3.5,-1.8),SP(-3.5,1.8),SP(4.5,-1.8),SP(4.5,1.8)],x0=Math.round(Math.min(...cs.map(q=>q[0]))),x1=Math.round(Math.max(...cs.map(q=>q[0])));
       const lineY=x=>Math.abs(dxs)>.5?h[1]+(t[1]-h[1])*(x-h[0])/dxs:cc[1],toeX=Math.round(t[0]);
       // darunter wieder Skifarbe (bzw. Bindung), falls die Hosenkontur auf den Ski reicht: keine dunkle Linie unter dem Schuh
       const sk=L.skiDark&&L.skiDark[i]?shade(P.K,-.2):P.K;
+      if(Math.abs(dxs)>3*S){const dr=dxs>0?1:-1,uy=ny<0?-1:1,hx=dr>0?x0:x1,tx=dr>0?x1:x0;   // Bindung: Fersenteil hinter, Zehenteil vor dem Schuh
+        const piece=(xa,xb,hh,hi)=>{const a=Math.min(xa,xb),b=Math.max(xa,xb),back=dr>0?a:b;   // hh Höhe über der Ski-Oberkante, hi: Glanzpunkt hinten oben
+          for(const x of [a-1,b+1]){const y=Math.round(lineY(x)+so*ny);g.fillStyle=O;for(let j=0;j<hh;j++)g.fillRect(x,y+j*uy,1,1)}
+          for(let x=a;x<=b;x++){const y=Math.round(lineY(x)+so*ny);g.fillStyle=BND_D;g.fillRect(x,y,1,1);
+            for(let j=1;j<hh;j++){g.fillStyle=hi&&j===hh-1&&x===back?BND_L:BND_M;g.fillRect(x,y+j*uy,1,1)}g.fillStyle=O;g.fillRect(x,y+hh*uy,1,1)}};
+        piece(hx-dr*4,hx-dr,3,true);piece(tx+dr,tx+dr*3,2,false)}
       for(let x=x0;x<=x1;x++){const y=Math.round(lineY(x)+so*ny);g.fillStyle=Math.abs(dxs)>3*S&&x===toeX?lt:col;g.fillRect(x,y,1,1);
         if(Math.abs(dxs)>3*S&&ny<-.7){g.fillStyle=sk;g.fillRect(x,y+1,1,1)}
         else{const q=g.getImageData(x,y+1,1,2).data,oc=hexRgb(O),kc=hexRgb(sk);   // von vorne: dunkle Ski-Kante direkt unter dem Schuh durch Skifarbe ersetzen
