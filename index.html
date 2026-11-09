@@ -2237,6 +2237,7 @@ function playerView(){
   let phi=0,pose='ride',ang=p.ang,comx,comy,look=true,ox=0,oy=0,twist=0;
   if(airish){
     comx=p.x;comy=p.y;phi=p.spin;ox=p.cx||0;oy=p.cy||0;
+    if(bike&&p.gName==='nose')phi-=90*smooth01(p.gVis||0);   // Whip: Fahrer und Bike drehen sich dabei automatisch um 90° nach links (wie ein Links-Spin) und beim Loslassen zurück
     const settled=Math.abs(p.spin-Math.round(p.spin/90)*90)<1.5;
     pose=airPose();look=settled&&!p.grab&&!p.corkMode;twist=p.corkMode?0:(p.spinTw||0);
     if(p.corkMode)ang=p.base;
