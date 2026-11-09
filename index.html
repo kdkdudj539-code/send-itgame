@@ -1320,16 +1320,17 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
       const lineY=x=>Math.abs(dxs)>.5?h[1]+(t[1]-h[1])*(x-h[0])/dxs:cc[1],toeX=Math.round(t[0]);
       // darunter wieder Skifarbe (bzw. Bindung), falls die Hosenkontur auf den Ski reicht: keine dunkle Linie unter dem Schuh
       const sk=L.skiDark&&L.skiDark[i]?shade(P.K,-.2):P.K;
-      if(Math.abs(dxs)>3*S){const dr=dxs>0?1:-1,uy=ny<0?-1:1,hx=dr>0?x0:x1,tx=dr>0?x1:x0;   // Bindung: Fersenteil hinter, Zehenteil vor dem Schuh
-        const piece=(xa,xb,hh,hi)=>{const a=Math.min(xa,xb),b=Math.max(xa,xb),back=dr>0?a:b;   // hh Höhe über der Ski-Oberkante, hi: Glanzpunkt hinten oben
-          for(const x of [a-1,b+1]){const y=Math.round(lineY(x)+so*ny);g.fillStyle=O;for(let j=0;j<hh;j++)g.fillRect(x,y+j*uy,1,1)}
-          for(let x=a;x<=b;x++){const y=Math.round(lineY(x)+so*ny);g.fillStyle=BND_D;g.fillRect(x,y,1,1);
-            for(let j=1;j<hh;j++){g.fillStyle=hi&&j===hh-1&&x===back?BND_L:BND_M;g.fillRect(x,y+j*uy,1,1)}g.fillStyle=O;g.fillRect(x,y+hh*uy,1,1)}};
-        piece(hx-dr*4,hx-dr,3,true);piece(tx+dr,tx+dr*3,2,false)}
+      // Bindung: klein, direkt auf den Schuhenden (der Schuh wirkt dadurch kürzer). Ferse 2x2 mit Glanzpunkt, Zehe 2x1; Umriss oben und außen
+      let bind=null;if(Math.abs(dxs)>3*S){const dr=dxs>0?1:-1,uy=ny<0?-1:1,hx=dr>0?x0:x1,tx=dr>0?x1:x0;
+        const piece=(x0p,x1p,hh,out,hi)=>{const a=Math.min(x0p,x1p),b=Math.max(x0p,x1p);
+          {const y=Math.round(lineY(out)+so*ny);g.fillStyle=O;for(let j=0;j<hh;j++)g.fillRect(out,y+j*uy,1,1)}
+          for(let x=a;x<=b;x++){const y=Math.round(lineY(x)+so*ny);for(let j=0;j<hh;j++){g.fillStyle=hi&&j===hh-1&&x===hx?BND_L:j<hh-1?BND_D:BND_M;g.fillRect(x,y+j*uy,1,1)}g.fillStyle=O;g.fillRect(x,y+hh*uy,1,1)}};
+        bind=()=>{piece(hx,hx+dr,2,hx-dr,true);piece(tx-dr,tx,1,tx+dr,false)}}
       for(let x=x0;x<=x1;x++){const y=Math.round(lineY(x)+so*ny);g.fillStyle=Math.abs(dxs)>3*S&&x===toeX?lt:col;g.fillRect(x,y,1,1);
         if(Math.abs(dxs)>3*S&&ny<-.7){g.fillStyle=sk;g.fillRect(x,y+1,1,1)}
         else{const q=g.getImageData(x,y+1,1,2).data,oc=hexRgb(O),kc=hexRgb(sk);   // von vorne: dunkle Ski-Kante direkt unter dem Schuh durch Skifarbe ersetzen
-          if(q[3]&&q[0]===oc[0]&&q[1]===oc[1]&&q[2]===oc[2]&&q[7]&&Math.abs(q[4]-kc[0])<4&&Math.abs(q[5]-kc[1])<4&&Math.abs(q[6]-kc[2])<4){g.fillStyle=sk;g.fillRect(x,y+1,1,1)}}}}
+          if(q[3]&&q[0]===oc[0]&&q[1]===oc[1]&&q[2]===oc[2]&&q[7]&&Math.abs(q[4]-kc[0])<4&&Math.abs(q[5]-kc[1])<4&&Math.abs(q[6]-kc[2])<4){g.fillStyle=sk;g.fillRect(x,y+1,1,1)}}}
+      if(bind)bind()}
     else{const y0=Math.round(Math.min(h[1],t[1])),y1=Math.round(Math.max(h[1],t[1]));g.fillStyle=col;
       for(let y=y0;y<=y1;y++)g.fillRect(Math.round(h[0]+(t[0]-h[0])*(y-h[1])/((t[1]-h[1])||1)+so*nx),y,1,1)}};
   // Snowboard-Schuh wie beim Ski: eine Pixelreihe in der Schuhfarbe direkt auf dem Board, unten am Hosenbein (statt der dunklen Board-Oberkante)
