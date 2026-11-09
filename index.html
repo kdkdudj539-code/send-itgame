@@ -1349,28 +1349,33 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist){
   const hipC=v3.mul(v3.add(L.legs[0][0],L.legs[1][0]),.5),hipIn=j=>v3.add(hipC,v3.mul(v3.add(j,v3.mul(hipC,-1)),.5));
   L.legs.forEach((lg,i)=>{const q=lg.map((j,n)=>lo(n?j:hipIn(j)));const key=Math.max(Math.max(q[1][2],q[2][2])-.5,bootKey(i)+.02);legMax=Math.max(legMax,key);
     const dark=L.legDark?L.legDark[i]:key<-2;
-    const lw=zw(bike?2:5);parts.push({key,draw:()=>{const col=dark?P.p:P.P;limb(g,q.map(v=>[v[0],v[1]]),lw,col,O);if(!L.noFlare&&cL>.5){g.fillStyle=col;g.fillRect(Math.round(q[2][0]-(lw+1)/2),Math.round(q[2][1])-2,lw+1,2)}}});
+    const lw=bike?zw(2)+1:zw(5);parts.push({key,draw:()=>{const col=dark?P.p:P.P;limb(g,q.map(v=>[v[0],v[1]]),lw,col,O);if(!L.noFlare&&cL>.5){g.fillStyle=col;g.fillRect(Math.round(q[2][0]-(lw+1)/2),Math.round(q[2][1])-2,lw+1,2)}}});   // Bike: Hose einen Fahrer-Pixel breiter
     if(skiBootRow)parts.push({key:key+.001,draw:()=>skiBoot(i)});else if(onBoard(i))parts.push({key:key+.001,draw:()=>boardBoot(i)})});
   {const h0=lo(hipIn(L.legs[0][0])),h1=lo(hipIn(L.legs[1][0]));
     if(board&&cL>.5)parts.push({key:legMax+.001,draw:()=>{const x0=Math.round(Math.min(h0[0],h1[0])),x1=Math.round(Math.max(h0[0],h1[0]));const hb=zw(4);g.fillStyle=P.P;g.fillRect(x0,Math.round(h0[1]-hb/2),x1-x0+1,hb)}});
     if(!board&&sL>.6)parts.push({key:legMax+.001,draw:()=>{g.fillStyle=P.p;g.fillRect(Math.round((h0[0]+h1[0])/2)-1,Math.round(h0[1])+1,2,Math.round(3*S))}})}
   const TK=bike?2:4.5;
-  parts.push({key:TK,draw:()=>{
-    const h=lo(L.torso[0]),s=up(L.torso[1]),sf=Math.sin(tYaw*RAD),cf=Math.cos(tYaw*RAD),as=Math.abs(sf);
-    if(bike){   // Downhill-Jersey: eng, ohne Kapuze und Zipper. Muster auf dem Rumpf-Zylinder: weiße Schulterpasse, geschwungene Seitenteile, V-Ausschnitt
-      const rx=2.4+1.4*as,ry=2.4,psc=90-tYaw,J=P.J2||shade(P.D,.5),A=[h[0],h[1]],B=[s[0],s[1]];
-      const pat=(u,v)=>{const ps=psc+Math.asin(clamp(v,-1,1))*DEG,a=ps*RAD,fr=Math.cos(a);
-        if(u<.1)return P.d;
+  /* Downhill-Jersey: eng, ohne Kapuze und Zipper. Muster auf dem Rumpf-Zylinder: weiße Schulterpasse, geschwungene Seitenteile, V-Ausschnitt.
+     Das Trikot ist um JX (Welt) länger als der Rumpf und hängt über den Beinansatz: over=true zeichnet nur diesen unteren Teil noch einmal über die Beine. */
+  const JX=1.4,bikeJersey=over=>{const h=lo(L.torso[0]),s=up(L.torso[1]),as=Math.abs(Math.sin(tYaw*RAD));
+      const rx=2.4+1.4*as,ry=2.4,psc=90-tYaw,J=P.J2||shade(P.D,.5),B=[s[0],s[1]],ax=B[0]-h[0],ay=B[1]-h[1],L0=Math.hypot(ax,ay)||1,E=JX*S,A=[h[0]-ax/L0*E,h[1]-ay/L0*E],L2=L0+E;
+      const pat0=(u,v)=>{const ps=psc+Math.asin(clamp(v,-1,1))*DEG,a=ps*RAD,fr=Math.cos(a);
         if(P.pr){const da=x=>Math.abs(((x%360)+540)%360-180);   // Protektor: Hüftgurt mit Schnalle vorne, Schultergurte mit Brustschnalle
           if(u>.13&&u<.21)return fr>.93||Math.min(da(ps-90),da(ps-270))<12?P.pra:P.pr;
           if(u>.6&&u<.8&&Math.min(da(ps-38),da(ps+38))<8)return u>.66&&u<.72?P.pra:P.pr}
         if(u>.8+.06*fr)return fr>.72&&u>.86?P.D:J;
         const k=clamp((u-.12)/.66,0,1),bend=46*(1-k),d=x=>{const m=((x%360)+540)%360-180;return Math.abs(m)};
         return Math.min(d(ps-90-bend),d(ps-270+bend))<20?J:P.D};
-      const ro=(rx+1)*S,rq=(ry+1)*S;capsule(g,A,B,ro,rq,O);capsule(g,A,B,ro-1,rq-1,pat);
-      if(P.pr){const sv=Math.sin((180-psc)*RAD);if(Math.cos((180-psc)*RAD)>-.2){const dx=B[0]-A[0],dy=B[1]-A[1],l=Math.hypot(dx,dy)||1,o=sv*(ro-1.7),nx=dy/l*o,ny=-dx/l*o;   // Rückenplatte: eine Pixellinie am Rücken
-        capsule(g,[A[0]+dx*.2+nx,A[1]+dy*.2+ny],[A[0]+dx*.92+nx,A[1]+dy*.92+ny],.55,.55,P.pr)}}
-      return}
+      const pat=(u,v)=>u*L2<.1*L0?P.d:pat0(Math.max(.1,(u*L2-E)/L0),v);   // u auf dem langen Trikot -> u am Rumpf (0 = Hüfte); unten der dunkle Saum
+      const ro=(rx+1)*S,rq=(ry+1)*S;
+      if(over){const th=(E+.14*L0)/L2;capsule(g,A,B,ro,rq,u=>u<th?O:null);capsule(g,A,B,ro-1,rq-1,(u,v)=>u<th?pat(u,v):null);return}
+      capsule(g,A,B,ro,rq,O);capsule(g,A,B,ro-1,rq-1,pat);
+      if(P.pr){const sv=Math.sin((180-psc)*RAD);if(Math.cos((180-psc)*RAD)>-.2){const dx=B[0]-h[0],dy=B[1]-h[1],l=Math.hypot(dx,dy)||1,o=sv*(ro-1.7),nx=dy/l*o,ny=-dx/l*o;   // Rückenplatte: eine Pixellinie am Rücken
+        capsule(g,[h[0]+dx*.2+nx,h[1]+dy*.2+ny],[h[0]+dx*.92+nx,h[1]+dy*.92+ny],.55,.55,P.pr)}}};
+  if(bike)parts.push({key:legMax+.002,draw:()=>bikeJersey(true)});   // Trikot-Saum über dem Beinansatz
+  parts.push({key:TK,draw:()=>{
+    const h=lo(L.torso[0]),s=up(L.torso[1]),sf=Math.sin(tYaw*RAD),cf=Math.cos(tYaw*RAD),as=Math.abs(sf);
+    if(bike){bikeJersey(false);return}
     const wW=Math.round(7+1.4*as*(board?1:1-k)),w=zw(7+1.4*as*(board?1:1-k)),hh=zw(7-2*as),hx=-3*cf*S,side=Math.abs(cf)>.5,frontF=sf>.5,backF=sf<-.5,kw=zw(4);
     const line=L.torsoMid?[[h[0],h[1]],(q=>[q[0],q[1]])(lo(L.torsoMid)),[s[0],s[1]]]:[[h[0],h[1]],[s[0],s[1]]];
     if(side)strokePts(g,[[s[0]+hx,s[1]-S],[s[0]+hx,s[1]+2*S]],kw+2,O);
@@ -1436,7 +1441,7 @@ function getSprite(pose,phi,look,eq,gear,pow,cork,twist,K,wf){
   eq=eq||SAVE.equip;gear=gear||GEAR;K=K||(gear==='bike'?RS:RZ);wf=gear==='bike'?(wf||0):0;
   const ph=((Math.round(phi/15)*15)%360+360)%360,ck=cork?{m:cork.m,t:((Math.round(cork.t/15)*15)%360+360)%360}:null,tq=Math.round((twist||0)/15)*15,key=pose+'|'+ph+'|'+(look?1:0)+'|'+(pow?1:0)+'|'+(ck?ck.m+ck.t:'')+'|'+gear+'|'+tq+'|'+eqKey(eq)+'|'+K+'|'+wf;
   let s=sprCache.get(key);if(s){sprCache.delete(key);sprCache.set(key,s);return s}
-  const P=palette(eq);P.wf=wf;if(gear==='bike'){const Ji=itemOf('jersey',eq.jersey||'j_black');P.D=Ji.c;P.d=shade(Ji.c,-.3);P.J2=Ji.a;P.pk=null;{const Pr=eq.prot&&eq.prot!=='pr_none'?itemOf('prot',eq.prot):null;P.pr=Pr?Pr.c:null;P.pra=Pr?Pr.a:null}{const a=hexRgb(Ji.a),b=hexRgb(P.H),lum=(b[0]*.3+b[1]*.59+b[2]*.11)/255;const la=(a[0]*.3+a[1]*.59+a[2]*.11)/255;P.J=la>lum+.25?Ji.a:shade(P.H,lum>.5?-.3:.5)}if(!P.hat)P.ff=true;
+  const P=palette(eq);P.wf=wf;if(gear==='bike'){const Ji=itemOf('jersey',eq.jersey||'j_black');P.D=Ji.c;P.d=shade(Ji.c,-.3);P.J2=Ji.a;P.pk=null;{const Pr=eq.prot&&eq.prot!=='pr_none'?itemOf('prot',eq.prot):null;P.pr=Pr?Pr.c:null;P.pra=Pr?Pr.a:null}{const a=hexRgb(Ji.a),b=hexRgb(P.H),lum=(b[0]*.3+b[1]*.59+b[2]*.11)/255;const la=(a[0]*.3+a[1]*.59+a[2]*.11)/255;P.J=shade(P.H,lum>.5?-.22:.32)}if(!P.hat)P.ff=true;   // Helm-Details (Schirm, Kinnbügel) nur in der Helmfarbe, nicht in der Trikotfarbe
     {const it=c=>itemOf(c,eq[c]),Fo=it('bfork'),Sh=it('bshock'),Ri=it('brim'),Ti=it('btire'),Ba=it('bbar'),Sa=it('bsad'),Pe=it('bped');   // Bike-Teile aus dem Shop
      P.FK=Fo.c;P.FL=Fo.a;P.SHK=Sh.c;P.RM=Ri.c;P.SPK=Ri.a;P.TR=Ti.c;P.TS=Ti.a;P.GR=Ba.c;P.BR=Ba.a;P.SD=Sa.c;P.PD=Pe.c;P.CR=Pe.a}}
   // Ski/Board: das Sprite ist direkt das Fahrer-Raster. Bike: Sprite im Bild-Raster, der Fahrer kommt aus dem Fahrer-Raster dazwischen.
