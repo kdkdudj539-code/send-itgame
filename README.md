@@ -14,3 +14,4 @@ Einmalig im Supabase SQL Editor ausführen:
 2. `supabase-save.sql`: Spielstand im Konto (Münzen, gekaufte Sachen, Outfit, Bestwerte)
 3. `supabase-rename.sql`: Spielernamen ändern (Rangliste → NAME ÄNDERN; Login und Profilname ändern sich zusammen)
 4. `supabase-japan.sql`: eigene Rangliste für die Japan-Map (die bisherige Rangliste bleibt die der Alpen)
+5. `supabase-maxscore.sql`: höchster erlaubter Score 100 Millionen (nur nötig, wenn 1. und 4. noch mit der alten Grenze von 2 Millionen angelegt wurden)

@@ -10,7 +10,7 @@ create unique index if not exists profiles_name_lower on public.profiles (lower(
 
 create table if not exists public.scores (
   user_id uuid primary key references public.profiles(id) on delete cascade,
-  best integer not null default 0 check (best between 0 and 2000000),
+  best integer not null default 0 check (best between 0 and 100000000),
   best_dist integer not null default 0 check (best_dist between 0 and 1000000),
   best_trick text,
   updated_at timestamptz not null default now()
@@ -40,7 +40,7 @@ create or replace function public.submit_score(p_score integer, p_dist integer, 
 language plpgsql security definer set search_path = public as $$
 begin
   if auth.uid() is null then raise exception 'nicht angemeldet'; end if;
-  if p_score < 0 or p_score > 2000000 or p_dist < 0 or p_dist > 1000000 then raise exception 'ungültiger Wert'; end if;
+  if p_score < 0 or p_score > 100000000 or p_dist < 0 or p_dist > 1000000 then raise exception 'ungültiger Wert'; end if;
   insert into public.scores (user_id, best, best_dist, best_trick, updated_at)
   values (auth.uid(), p_score, p_dist, left(p_trick, 40), now())
   on conflict (user_id) do update set
