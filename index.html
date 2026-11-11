@@ -2914,8 +2914,7 @@ const GRAB_KEYS=[['blunt','KeyJ','Digit1'],['nose','KeyK','Digit2'],['tail','Key
 const SKI_ONLY_GRABS={japan:1,truck:1,octo:1,venom:1};
 let jibb=false;   // Handy: Jib-Modus, Standard aus; bleibt an, bis man wieder drückt
 const bU=()=>!p.auto&&(K.ArrowUp||K.KeyW||(TC.up&&jibb)||GP.up),bD=()=>!p.auto&&(K.ArrowDown||K.KeyS||(TC.down&&jibb)||GP.down);   // Butter-Eingaben
-const GRAB_TOUCH_DELAY=.1;   // Handy: der Grab-Stick greift erst 0,1 s nach dem Absprung, damit ein Daumen auf dem Stick nicht sofort grabt
-function inGrab(){let g=null;for(const [k,a,b] of GRAB_KEYS)if(K[a]||K[b]){g=k;break}if(!g)g=(TC.g&&(p.airT||0)>=GRAB_TOUCH_DELAY?TC.g:null)||GP.g||null;return g&&GEAR==='board'&&SKI_ONLY_GRABS[g]?null:g}
+function inGrab(){let g=null;for(const [k,a,b] of GRAB_KEYS)if(K[a]||K[b]){g=k;break}if(!g)g=TC.g||GP.g||null;return g&&GEAR==='board'&&SKI_ONLY_GRABS[g]?null:g}
 addEventListener('keydown',e=>{
   if(e.target&&e.target.tagName==='INPUT')return;
   const c=e.code;unlockAudio();
@@ -3467,7 +3466,7 @@ function updAir(dt){
       if(tl<.34&&!(up||dn)){const d=Math.round(p.flipAcc/360)*360-p.flipAcc,mx=720*dt;p.flipAcc+=clamp(d,-mx,mx);p.ang=p.base+p.flipAcc}
       if(tl<.32&&!(l||r)){const tg=p.fromRail&&p.spinTarget!=null&&((p.spinTarget%180)+180)%180===0?p.spinTarget:Math.round(p.spin/180)*180,d=tg-p.spin,mx=820*dt;p.spin+=clamp(d,-mx,mx);p.spinDir=0;p.spinTarget=p.fromRail?tg:null}
       if(tl<.14)p.grab=null}}
-  {const sw=!!p.gNext,tg=sw?0:p.grab?1:0,mx=(GEAR==='bike'?5:GRAB_BLEND)*dt;p.gVis=(p.gVis||0)+clamp(tg-(p.gVis||0),-mx,mx);
+  {const sw=!!p.gNext,tg=sw?0:p.grab?1:0,up=tg>(p.gVis||0)&&!sw&&!p.gIn,mx=(GEAR==='bike'?5:GRAB_BLEND)*(up?.5:1)*dt;p.gVis=(p.gVis||0)+clamp(tg-(p.gVis||0),-mx,mx);   // erster Grab nach dem Absprung: halb so schnell rein; Wechsel zwischen Grabs bleibt schnell
    if(sw&&p.gVis<=.02){p.gName=p.gNext;p.gNext=null;p.gIn=true}if(p.gIn&&(p.gVis>=.98||!p.grab))p.gIn=false;
    const tk=p.grab&&p.grab===p.gName&&p.gVis>=.98?1:0;p.gTk=(p.gTk||0)+clamp(tk-(p.gTk||0),-6*dt,2.8*dt)}   // Tweak: gehaltener Trick geht noch weiter rein
   {const sv=(p.spin-(p.lastSpin??p.spin))/Math.max(dt,1e-4);p.lastSpin=p.spin;const tg=p.corkMode?0:clamp(sv/SPIN_RATE,-1,1)*SPIN_TWIST;p.spinTw=(p.spinTw||0)+(tg-(p.spinTw||0))*Math.min(1,dt*14)}   // Hand braucht ca. 0,11 s zum Ski
