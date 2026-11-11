@@ -469,7 +469,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
 (()=>{
 'use strict';
 const RAD=Math.PI/180, DEG=180/Math.PI;
-const BUTTER180_T=.5,SPIN_TWIST=32,GRAB_BLEND=9,GRIND_SPIN=700,GRIND_REP=.32, G=430, POP=190, JUMP_POP=Math.round(190*Math.SQRT1_2), FOOT=11, VH=342, FLIP_RATE=520, SPIN_RATE=600, CORK_SLOW=.6, STEP=1/120, VMAX=364, PARK_LEN=13000, FREE_LEN=11000;
+const BUTTER180_T=.5,SPIN_TWIST=32,GRAB_BLEND=9,GRIND_SPIN=700,GRIND_REP=.32, G=430, POP=190, JUMP_POP=Math.round(190*Math.SQRT1_2), FOOT=11, VH=342, FLIP_RATE=520, SPIN_RATE=600, CORK_SLOW=.6,CORK_LATE=150, STEP=1/120, VMAX=364, PARK_LEN=13000, FREE_LEN=11000;
 let VW=608;const RS=3;   // Bildpunkte pro Welt-Pixel: die Welt wird 3x vergrößert; ein Bike-Pixel ist 2 Bildpunkte (2/3 Welt-Pixel)
 const rand=(a,b)=>a+Math.random()*(b-a);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
@@ -788,7 +788,7 @@ function drawHead(g,kind,x,y,P,flip,rot){const m=P.hat?BEANIES[P.hat][kind]:P.ff
     g.fillStyle=P[ch];g.fillRect(X+sx,Y+sy,1,1)}}
 
 /* ===== 3D-Figur: Gelenke als [vorne, unten, rechts] relativ zum Schwerpunkt ===== */
-const SPR=56,SCX=28,SCY=30,POW_TILT=18,SKI_VIS=2.5;   // POW_TILT: Ski vorne im Powder aufgestellt (Grad), SKI_VIS: so tief steckt der Skifahrer sichtbar im Powder (der Rest ist der Pulverwulst)
+const SPR=56,SCX=28,SCY=30;
 const RZ=1.2,RW=Math.ceil(SPR*RZ);   // Fahrer-Raster: 1,2 Fahrer-Pixel pro Welt-Pixel (ein Fünftel feiner); RW = Seitenlänge des Fahrer-Bilds
 let LGX=null;function legCtx(){if(!LGX){const [c,g]=mk(RW,RW);LGX=g}LGX.clearRect(0,0,RW,RW);return LGX}   // Zwischenbild: Bein ohne den Teil im Trikot
 let RCX=null;function riderCtx(){if(!RCX){const [c,g]=mk(RW,RW);g._S=RZ;RCX=g}RCX.clearRect(0,0,RW,RW);return RCX}   // Zwischenbild für den Fahrer auf dem Bike
@@ -1312,10 +1312,7 @@ function airPose(){const gv=p.gVis||0;
    look: Kopf schaut die Piste runter; bei Switch dreht sich der Oberkörper mit (Blick über die Schulter). */
 const SKI_HW=.85;   // halbe Skibreite (Welt)
 function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist,hy){
-  const board=gear==='board',bike=gear==='bike',LIB=LIBOF(gear),L0=bike?bikeSolve(LIB[poseName]||LIB.ride):LIB[poseName]||LIB.ride,O=P.O;
-  // Powder: Ski vorne um POW_TILT aufgestellt (die Seite in Fahrtrichtung, also rechts im Bild), das Heck taucht ein, die Spitzen ragen raus
-  const L=pow&&!board&&!bike&&L0.skis?{...L0,skis:L0.skis.map(s=>{const d=v3.unit(s.d);let n=s.n||[0,-1,0];n=v3.unit(v3.add(n,v3.mul(d,-v3.dot(n,d))));
-    const sg=Math.cos(phi*RAD)>=0?1:-1,c=Math.cos(POW_TILT*RAD),sn=Math.sin(POW_TILT*RAD)*sg;return {...s,d:v3.add(v3.mul(d,c),v3.mul(n,sn)),n:v3.add(v3.mul(n,c),v3.mul(d,-sn))}})}:L0;
+  const board=gear==='board',bike=gear==='bike',LIB=LIBOF(gear),L=bike?bikeSolve(LIB[poseName]||LIB.ride):LIB[poseName]||LIB.ride,O=P.O;
   // Der Fahrer wird im eigenen, feineren Raster gezeichnet (S Fahrer-Pixel pro Welt-Pixel). gW = Sprite-Bild (Bike), g = Fahrer-Raster.
   // zw: Füllbreite im Fahrer-Raster, so dass Teil plus 1-Pixel-Umriss so breit bleibt wie vorher in Welt-Pixeln
   const gW=g;g=g._R||g;const S=g._S||1,zw=w=>Math.max(1,Math.round((w+2)*S)-2),SKL=25,SKW=Math.max(1,zw(2)-1);   // SKL Skilänge (Welt), SKW Skidicke (Fahrer-Pixel)
@@ -2406,7 +2403,7 @@ function playerView(){
     const bv=p.mode==='ground'?(p.butterVis||0)*(1-bsp):0;
     if(Math.abs(bv)>.3){const rr=ang*RAD,d=(bike?(bv<0?-8.4:12.8):(bv<0?-9:9))*(p.sw?-1:1),px=p.x+Math.cos(rr)*d,py=p.y+Math.sin(rr)*d,b=bv*(p.sw?-1:1)*RAD,vx=comx-px,vy=comy-py;
       comx=px+vx*Math.cos(b)-vy*Math.sin(b);comy=py+vx*Math.sin(b)+vy*Math.cos(b);ang+=bv*(p.sw?-1:1)}
-    if(p.mode==='ground'&&p.sink)comy+=GEAR==='ski'?Math.min(p.sink,SKI_VIS):p.sink;
+    if(p.mode==='ground'&&p.sink)comy+=p.sink;
   }
   return {pose,phi,look,ang,comx,comy,ox,oy,twist,hy,inPow:p.mode==='ground'&&p.sink>2.5,cork:airish&&p.corkMode?{m:p.corkMode,t:p.flipAcc}:null};
 }
@@ -2442,14 +2439,11 @@ function drawPlayer(cX,cY){
       ctx.globalAlpha=1-u;ctx.fillStyle=k===1?'#ffffff':'#7be08f';ctx.fillRect(x,y-1,1,3);ctx.fillRect(x-1,y,3,1);ctx.globalAlpha=1}
     // beim Vorbeilaufen steht der Stein vor dir: du gehst hinter ihm herum
     if(t>=tW&&h.rock)drawRock1(h.rock,cX,cY)}
-  /* Powder an den Füßen, im feinen Fahrer-Bild: unter der Oberfläche deckt Schnee nur den Fahrer selbst ab (nichts anderes wird weiß übermalt),
-     beim Skifahrer liegt um die Beine ein Pulverwulst, der vor dem vorderen Ski-Drittel endet, damit die Spitzen frei herausragen. */
-  if(p.mode==='ground'&&p.sink>1.2&&!SUMMER&&HIP){const sk=p.sink,ski=GEAR==='ski',vis=ski?Math.min(sk,SKI_VIS):sk,hm=ski?sk-vis+1:0,f=RS,ox=HIP.tx-PLH,oy=HIP.ty-PLH,G=plCtx;
+  /* Powder an den Füßen, im feinen Fahrer-Bild: unter der Oberfläche deckt Schnee nur den Fahrer selbst ab (nichts anderes wird weiß übermalt). */
+  if(p.mode==='ground'&&p.sink>1.2&&!SUMMER&&HIP){const vis=p.sink,f=RS,ox=HIP.tx-PLH,oy=HIP.ty-PLH,G=plCtx;
     G.save();G.setTransform(1,0,0,1,0,0);
     for(let dx=-18;dx<=18;dx++){const g=groundAt(p.x+dx);if(!g||!isPow(g.seg))continue;const x=Math.round(p.x+dx-cX),y=Math.round(g.y)-cY,X=(x-ox)*f,Y=(y-oy)*f;
-      G.globalCompositeOperation='source-atop';G.fillStyle='#ffffff';G.fillRect(X,Y,f,2*f);G.fillStyle='#eef4fd';G.fillRect(X,Y+2*f,f,(Math.ceil(vis)+5)*f);
-      const u=(dx+3.5)/6.5;if(hm>.5&&Math.abs(u)<1){const m=Math.round(hm*Math.sqrt(1-u*u));if(m>0){G.globalCompositeOperation='source-over';
-        G.fillStyle='#ffffff';G.fillRect(X,Y-m*f,f,(m+2)*f);G.fillStyle=u>.55?'#dfe9f7':'#eef4fd';G.fillRect(X,Y-m*f+2*f,f,Math.max(0,m-1)*f)}}}
+      G.globalCompositeOperation='source-atop';G.fillStyle='#ffffff';G.fillRect(X,Y,f,2*f);G.fillStyle='#eef4fd';G.fillRect(X,Y+2*f,f,(Math.ceil(vis)+5)*f)}
     G.restore()}
 }
 
@@ -3262,9 +3256,9 @@ function updAir(dt){
   const fOk=!(p.flipCD>0),up=fOk&&inU(),dn=fOk&&inD();
   // Flips komplett von Hand: nur drehen, solange die Taste gehalten wird. Kein automatisches Weiterdrehen.
   // Die Grundneigung gleicht sich langsam dem Landehang an. Die Flip-Drehung kommt nur von dir und dreht nie automatisch weiter.
-  // Bike: Corks und Mistys drehen genauso schnell wie auf Ski: CORK_SLOW, und auch in den ersten Momenten, bevor der Cork erkannt ist, ohne die Bike-Bremse 0,72
-  const corkBike=GEAR==='bike'&&(p.corkMode||(p.corkHold>0&&Math.abs(norm(p.flipAcc))<45));
-  const cs=corkBike?(p.corkMode?CORK_SLOW:1):(p.corkMode?CORK_SLOW:p.spinLock&&p.diagT>0?.3:1)*(GEAR==='bike'?.72:1);   // Sommer: mit dem Bike dreht man langsamer   // Corks und Mistys drehen gemütlicher; schräg aus dem Gas heraus erst langsam, bis klar ist, ob es ein Cork wird
+  // Corks und Mistys (Ski, Board und Bike) drehen im Cork-Tempo CORK_SLOW, sobald Flip und Spin zusammen gedrückt werden, auch in den ersten Momenten, bevor der Cork erkannt ist
+  const corkDiag=(up||dn)&&!p.spinLock&&(inL()||inR());
+  const cs=p.corkMode||corkDiag?CORK_SLOW:(p.spinLock&&p.diagT>0?.3:1)*(GEAR==='bike'?.72:1);   // Sommer: mit dem Bike dreht man langsamer   // Corks und Mistys drehen gemütlicher; schräg aus dem Gas heraus erst langsam, bis klar ist, ob es ein Cork wird
   if(up||dn){const dir=dn?-1:1;p.flipAcc+=dir*FLIP_RATE*cs*dt;p.flipDir=dir;p.flipPoseT=.18;p.fHeld=(p.fHeld||0)+dt}else{p.flipPoseT=Math.max(0,(p.flipPoseT||0)-dt);p.fHeld=Math.max(0,(p.fHeld||0)-dt*2)}
   // Flip-Pose erst bei echtem Flip (oben/unten ca. 0,1 s gehalten), kurzes Antippen oder Wackeln am Stick während eines Spins bleibt in der Hock-Pose
   {const want=p.flipPoseT>0&&p.fHeld>=.1?1:0,mx=8*dt;p.fVis=(p.fVis||0)+clamp(want-(p.fVis||0),-mx,mx)}
@@ -3285,7 +3279,7 @@ function updAir(dt){
     if((p.spinDir>0&&ns>=p.spinTarget)||(p.spinDir<0&&ns<=p.spinTarget)){p.spin=p.spinTarget;p.spinDir=0;p.spinTarget=null}else p.spin=ns;
   }
   p.corkHold=(up||dn)&&(l||r)?(p.corkHold||0)+dt:0;   // Cork/Misty erst, wenn kurz schräg gehalten wird, nicht beim Durchrutschen über die Schräge (sonst dreht ein Spin plötzlich langsamer)
-  if(!p.corkMode&&p.corkHold>=.07&&Math.abs(norm(p.flipAcc))<45)p.corkMode=dn?'cork':'misty';
+  if(!p.corkMode&&p.corkHold>=.07&&(Math.abs(norm(p.flipAcc))<45||Math.abs(p.flipAcc)<CORK_LATE))p.corkMode=dn?'cork':'misty';
   const gr=inGrab();p.grab=gr;if(gr)p.grabT[gr]=(p.grabT[gr]||0)+dt;
   if(gr&&gr!==p.gName){if((p.gVis||0)>.5)p.gVis=.5;p.gName=gr}
   // Landehilfe: kurz vor dem Aufsetzen Flip und Spin auf die nächste landbare Stellung drehen und den Grab loslassen
@@ -3827,7 +3821,7 @@ function afSprites(){if(AF_SPR)return AF_SPR;
   const back=[],mid=[],front=[];
   for(let i=0;i<8;i++){const h=Math.round(26+hash01(i*3.3+1)*22);back.push(mkS(h,Math.ceil(h*.2),['#4c6a70','#5d7d82'],.8,3,i*7.3+2))}
   for(let i=0;i<10;i++){const h=Math.round(44+hash01(i*5.1+3)*40);mid.push(mkS(h,Math.ceil(h*(.17+hash01(i*2.3)*.08)),TREE_COLS[i%TREE_COLS.length],.4+hash01(i*9.1)*.5,3,i*9.1+5))}
-  for(let i=0;i<5;i++){const h=Math.round(140+hash01(i*2.7+9)*50),t=mkS(h,Math.ceil(h*.075),TREE_COLS[i%TREE_COLS.length],.6,Math.round(h*.68),i*4.7+11,true),[cd,gd]=mk(t.c.width,t.c.height);
+  for(let i=0;i<5;i++){const h=Math.round(84+hash01(i*2.7+9)*24),t=mkS(h,Math.ceil(h*.1),TREE_COLS[i%TREE_COLS.length],.6,Math.round(h*.42),i*4.7+11,true),[cd,gd]=mk(t.c.width,t.c.height);
     gd.drawImage(t.c,0,0);gd.globalCompositeOperation='source-atop';gd.fillStyle='rgba(8,12,30,.82)';gd.fillRect(0,0,cd.width,cd.height);t.cd=cd;front.push(t)}
   return AF_SPR={back,mid,front}}
 const forestOn=g=>JAPAN||!SUMMER&&g.seg.zone==='free';   // Wald: Japan überall, Alpen nur im Freeride
@@ -3980,7 +3974,7 @@ function drawWall(cX,cY){
   // Erfasst: Ballen über dem Fahrer
   if(buried)for(let i=0;i<4;i++){const r=9+i*2+Math.sin(T*3+i)*1.5;L.push({x:p.x-cX+(i-1.5)*9,y:p.y-cY-8-(i&1)*7,r,v:i&3})}
   L.sort((a,b)=>(a.y-a.r)-(b.y-b.r));
-  for(const q of L){const s=puffSprite(avaR(q.r),q.v);ctx.drawImage(s,Math.round(q.x-s.width/2),Math.round(q.y-s.height/2))}
+  for(const q of L){if(!Number.isFinite(q.r)||!Number.isFinite(q.x)||!Number.isFinite(q.y))continue;const s=puffSprite(avaR(q.r),q.v);ctx.drawImage(s,Math.round(q.x-s.width/2),Math.round(q.y-s.height/2))}
   // Kontaktschatten am Boden und Brocken, die vorne aus der Walze kullern
   {const xa=Math.max(0,Math.round(wall.x-AVA_DMAX-cX)),xb=Math.min(VW,wsx+6);
     for(let sx=xa;sx<xb;sx++){const wx=cX+sx+.5,gw=avaGround(wx);if(gw==null)continue;const gy=Math.round(gw-cY);ctx.fillStyle=wx>wall.x-4?AVA_C.mid:AVA_C.sh;ctx.fillRect(sx,gy-1,1,2)}
