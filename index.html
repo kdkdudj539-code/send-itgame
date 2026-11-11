@@ -3245,27 +3245,27 @@ function landingGuess(){
   return 20;
 }
 function showTrick(name,sub,cls){const el=$('trick');el.className='';el.querySelector('b').textContent=name;el.querySelector('span').textContent=sub||'';void el.offsetWidth;el.className='show '+(cls||'good')}
+/* Feste Punkte: jeder Trick-Baustein ist immer gleich viel wert, egal wie lange gehalten, wie hoch geflogen oder wie schnell hintereinander.
+   Die Werte sind gut doppelt so hoch wie die alten Grundwerte, weil der Kombo-Multiplikator (bis x3) weggefallen ist: über einen Lauf kommt ähnlich viel heraus. */
+const PTS={spin180:300,flip:1200,cork:1600,grab:550,barspin:550,tailwhip:750,switch:200,bigAirKicker:600,bigAir:300,butter:500,butter180:700,tap:300,bonk:400,loop:1200,grind:650,swap:300,grindParts:300,railBonus:2};
 function addPoints(pts,name,extra){
-  if(now-p.lastTrickT<4)p.combo++;else p.combo=1;p.lastTrickT=now;
-  const mult=Math.min(3,1+.25*(p.combo-1));const total=Math.round(pts*mult);
+  p.lastTrickT=now;const total=Math.round(pts);
   run.score+=total;if(total>run.bestPts){run.bestPts=total;run.bestTrick=name}
-  showTrick(name,'+'+total+(mult>1?'  x'+mult.toFixed(2).replace(/0$/,'').replace(/\.0$/,''):'')+(extra?'  '+extra:''));
+  showTrick(name,'+'+total+(extra?'  '+extra:''));
   SFX.trick();
 }
 function scoreAir(sketchy){
   const sd=Math.abs(p.spin-p.spinStart),spinDeg=p.fromRail?Math.round(sd/90)*90:Math.floor((sd+40)/180)*180,flips=Math.round(Math.abs(p.flipAcc)/360);
   const grabs=Object.keys(p.grabT).filter(k=>p.grabT[k]>=.18);
   let pts=0;const nm=[];
-  if(p.takeoffSwitch&&(spinDeg||flips||grabs.length))nm.push(GEAR==='bike'?'Fakie':'Switch');
+  if(p.takeoffSwitch&&(spinDeg||flips||grabs.length)){nm.push(GEAR==='bike'?'Fakie':'Switch');pts+=PTS.switch}
   const corked=!!p.corkMode&&flips>0;
-  if(flips){nm.push((flips>=3?'Triple ':flips===2?'Double ':'')+(corked?(p.corkMode==='cork'?'Cork':'Misty'):(p.flipAcc<0?'Backflip':'Frontflip')));pts+=flips*450}
-  if(spinDeg){nm.push(p.fromRail?spinDeg+' Out':String(spinDeg));pts+=spinDeg/180*130}
-  for(const k of grabs){nm.push(GEAR==='board'&&BOARD_GRAB_NAMES[k]||GEAR==='bike'&&BIKE_GRAB_NAMES[k]||GRAB_NAMES[k]);pts+=150+Math.round(p.grabT[k]*120)}
-  if(GEAR==='bike'){const mul=n=>n>=3?'Triple ':n===2?'Double ':'';if(p.nBar){nm.push(mul(p.nBar)+'Barspin');pts+=p.nBar*220}if(p.nWhip){nm.push(mul(p.nWhip)+'Tailwhip');pts+=p.nWhip*320}}
-  if(flips&&spinDeg)pts*=corked?1.6:1.3;
-  if(p.airT>.9)pts+=(p.airT-.9)*160;
-  if(!nm.length){if(p.airT>1.05)nm.push('Big Air');else return false}
-  if(p.bigAir)pts*=1.5;
+  if(flips){nm.push((flips>=3?'Triple ':flips===2?'Double ':'')+(corked?(p.corkMode==='cork'?'Cork':'Misty'):(p.flipAcc<0?'Backflip':'Frontflip')));pts+=flips*(corked?PTS.cork:PTS.flip)}
+  if(spinDeg){nm.push(p.fromRail?spinDeg+' Out':String(spinDeg));pts+=spinDeg/180*PTS.spin180}
+  for(const k of grabs){nm.push(GEAR==='board'&&BOARD_GRAB_NAMES[k]||GEAR==='bike'&&BIKE_GRAB_NAMES[k]||GRAB_NAMES[k]);pts+=PTS.grab}
+  if(GEAR==='bike'){const mul=n=>n>=3?'Triple ':n===2?'Double ':'';if(p.nBar){nm.push(mul(p.nBar)+'Barspin');pts+=p.nBar*PTS.barspin}if(p.nWhip){nm.push(mul(p.nWhip)+'Tailwhip');pts+=p.nWhip*PTS.tailwhip}}
+  if(!nm.length){if(p.airT>1.05){nm.push('Big Air');pts+=PTS.bigAir}else return false}
+  if(p.bigAir)pts+=PTS.bigAirKicker;
   if(sketchy)pts*=.5;
   addPoints(Math.round(pts),nm.join(' '),sketchy?'SKETCHY':'');return true;
 }
@@ -3310,7 +3310,7 @@ function updGround(dt){
     // Butter 180: auf dem vorderen Ende (regulär die Nose, switch das Tail) schräg lenken = flach um 180° drehen
     const lead=p.sw?-1:1;
     if(!p.bs&&ctrl&&want===lead&&p.butterT>.1&&(inL()||inR())){p.bs={dir:(inR()?1:-1)*(p.sw?-1:1),t:0,end:want};SFX.jump()}
-    if(p.bs){p.bs.t+=dt;if(p.bs.t>=BUTTER180_T){const nm=GEAR==='bike'?(p.sw?'Fakie Manual 180':'Nose Manual 180'):p.sw?'Switch Tail Butter 180':'Nose Butter 180';p.sw=!p.sw;p.bs=null;p.butter=0;p.butterT=0;p.butterVis=0;p.bLock=true;addPoints(320,nm)}}
+    if(p.bs){p.bs.t+=dt;if(p.bs.t>=BUTTER180_T){const nm=GEAR==='bike'?(p.sw?'Fakie Manual 180':'Nose Manual 180'):p.sw?'Switch Tail Butter 180':'Nose Butter 180';p.sw=!p.sw;p.bs=null;p.butter=0;p.butterT=0;p.butterVis=0;p.bLock=true;addPoints(PTS.butter180,nm)}}
     if(want){p.butterT+=dt;if(Math.random()<.5){const d=(want<0?-9:9)*(p.sw?-1:1);parts.push({x:p.x+Math.cos(a)*d,y:p.y+Math.sin(a)*d-1,vx:-p.s*.2+rand(-25,25),vy:-rand(20,60),life:rand(.2,.45),col:Math.random()<.6?'#ffffff':'#dce8f8',sz:Math.random()<.4?2:1,gr:300})}}
     const tgt=p.bs?0:want<0?(GEAR==='bike'?-24:-14):want>0?(GEAR==='bike'?16:12):0;p.butterVis=(p.butterVis||0)+(tgt-(p.butterVis||0))*Math.min(1,dt*12)}
   p.pushT=p.tuck&&GEAR!=='board'&&!p.sw&&!p.ab?(p.pushT||0)+dt:0;   // Switch und Afterbang: kein Stockeinsatz
@@ -3331,7 +3331,7 @@ function updGround(dt){
   // Pole Jam: reinfahren reicht, man rutscht die Stange hoch und poppt am Ende ab
   for(const r of rails)if((r.type==='pole'&&p.mode==='ground'||r.look==='cat')&&p.x<r.x0&&nx>=r.x0){p.x=r.x0+.2;p.tumble=0;mountRail(r);return}   // Pistenraupe: über die Fräse rauf
   // Reifen und Fässer am Boden: antippen = kleiner Hüpfer drüber
-  for(const b of bonks)if(!b.hit&&p.x<b.x-b.w/2&&nx>=b.x-b.w/2){b.hit=true;b.t=0;p.x=nx;p.y=ny;launch(a-.25,90,null);addPoints(150,b.kind==='stump'?'Stump Tap':b.kind==='tire'?'Tire Tap':'Barrel Tap');burst(b.x,b.y-b.h,8,['#ffffff','#e4eefb'],80);SFX.jump();return}
+  for(const b of bonks)if(!b.hit&&p.x<b.x-b.w/2&&nx>=b.x-b.w/2){b.hit=true;b.t=0;p.x=nx;p.y=ny;launch(a-.25,90,null);addPoints(PTS.tap,b.kind==='stump'?'Stump Tap':b.kind==='tire'?'Tire Tap':'Barrel Tap');burst(b.x,b.y-b.h,8,['#ffffff','#e4eefb'],80);SFX.jump();return}
   p.x=nx;p.y=g2.y;
   if(p.mode==='crash'){p.crashT-=dt;if(p.crashT>.45)p.tumble+=760*dt;else p.tumble=90;if(p.crashT<=0){p.mode='ground';p.tumble=0}}
   p.ang+=(g2.a*DEG-p.ang)*Math.min(1,dt*18);
@@ -3349,14 +3349,14 @@ function startAfterbang(){
   p.ab={kind:k,t:0,dur:1.05,dir:Math.random()<.5?1:-1,held:(inU()?1:0)|(inD()?2:0)|(inL()?4:0)|(inR()&&!inGas()?8:0)};
 }
 function butterEnd(){const t=p.butterT||0,b=p.butter||0;p.butter=0;p.butterT=0;
-  if(b&&t>=.35&&p.mode==='ground')addPoints(Math.round(Math.min(400,40+t*90)),(p.sw?(GEAR==='bike'?'Fakie ':'Switch '):'')+(GEAR==='bike'?(b<0?'Manual':'Nose Manual'):(b<0?'Butter':'Nose Butter')),t.toFixed(1)+'s')}
+  if(b&&t>=.35&&p.mode==='ground')addPoints(PTS.butter,(p.sw?(GEAR==='bike'?'Fakie ':'Switch '):'')+(GEAR==='bike'?(b<0?'Manual':'Nose Manual'):(b<0?'Butter':'Nose Butter')),t.toFixed(1)+'s')}
 function enterLoop(L){p.mode='loop';p.loop=L;p.phi=0;L.done=true;if(!p.braking)p.s=Math.max(p.s,Math.sqrt(6.2*G*L.R))}
 function updLoop(dt){
   const L=p.loop;
   p.s+=(-G*Math.sin(p.phi)-.02*G-.0003*p.s*p.s)*dt;
   p.phi+=p.s/L.R*dt;
   p.x=L.cx+L.R*Math.sin(p.phi);p.y=L.cy+L.R*Math.cos(p.phi);p.ang=-p.phi*DEG;
-  if(p.phi>=Math.PI*2){p.mode='ground';p.x=L.cx+.5;p.y=groundAt(p.x).y;p.ang=0;addPoints(500,'LOOP');return}
+  if(p.phi>=Math.PI*2){p.mode='ground';p.x=L.cx+.5;p.y=groundAt(p.x).y;p.ang=0;addPoints(PTS.loop,'LOOP');return}
   const N=p.s*p.s/L.R+G*Math.cos(p.phi);
   if(N<0||p.s<20){launch(-p.phi,0,null);p.bailed=true;showTrick(TX('ZU LANGSAM','TOO SLOW'),TX('Loop verpasst','Missed the loop'),'bad')}
 }
@@ -3390,7 +3390,7 @@ function gLabel(){
 function endGrind(){
   p.grindPts=false;if(p.gBust){p.gBust=false;return}const t=p.grindT;if(t<=.15)return;
   const nm=p.gParts.join(' to ')+(p.gSwaps?' · '+p.gSwaps+'x '+(p.rail.type==='rail'?'Swap':'90'):'')+(p.rail.name?' · '+(LANG==='en'&&RAIL_EN[p.rail.name]||p.rail.name):'');
-  addPoints(Math.round(t*280+p.gSwaps*120+(p.gParts.length>1?100:0)+(p.rail.bonus||0)),nm,t.toFixed(1)+'s');p.grindPts=true;
+  addPoints(PTS.grind+p.gSwaps*PTS.swap+(p.gParts.length>1?PTS.grindParts:0)+(p.rail.bonus||0)*PTS.railBonus,nm);p.grindPts=true;
 }
 function leaveRail(a,pop){
   if(p.rCrash>0){p.rCrash=0;p.tumble=0}endGrind();p.spin=p.gspin;launch(a,pop,null);p.fromRail=true;p.aPrevL=false;p.aPrevR=false;p.spinLock=false;   // Stick gehalten: Drehung geht beim Absprung sofort los
@@ -3470,7 +3470,7 @@ function updAir(dt){
   const fx=footX(),fy=footY();
   // Reifen und Fässer in der Luft antippen: Bonk, federt nach oben
   if(p.vy>0)for(const b of bonks){const top=b.y-b.h;if(fx>=b.x-b.w/2-2&&fx<=b.x+b.w/2+2&&pfy<=top+1&&fy>=top){b.hit=true;b.t=0;p.y-=fy-top;p.vy=-Math.max(170,p.vy*.6);
-    addPoints(200,b.kind==='stump'?'Stump Bonk':b.kind==='tire'?'Tire Bonk':'Barrel Bonk');burst(fx,top,10,['#ffffff','#e4eefb'],90);SFX.jump();break}}
+    addPoints(PTS.bonk,b.kind==='stump'?'Stump Bonk':b.kind==='tire'?'Tire Bonk':'Barrel Bonk');burst(fx,top,10,['#ffffff','#e4eefb'],90);SFX.jump();break}}
   for(const rl of rails){if(fx<rl.x0||fx>rl.x1)continue;const ry=railY(rl,fx),pry=railY(rl,clamp(pfx,rl.x0,rl.x1));
     // Pistenraupe ist massiv: wer von oben kommt oder seitlich in den Aufbau fliegt, landet oben drauf (auch steigend, nur nicht direkt nach dem Absprung)
     if(rl.look==='cat'){if(fy>=ry&&(pfy<=pry+1.5||fy-ry<14)&&!(p.airT<.08&&p.vy<0)){if(landRail(rl,fx))return}continue}
