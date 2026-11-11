@@ -3246,12 +3246,13 @@ function landingGuess(){
 }
 function showTrick(name,sub,cls){const el=$('trick');el.className='';el.querySelector('b').textContent=name;el.querySelector('span').textContent=sub||'';void el.offsetWidth;el.className='show '+(cls||'good')}
 /* Feste Punkte: jeder Trick-Baustein ist immer gleich viel wert, egal wie lange gehalten, wie hoch geflogen oder wie schnell hintereinander.
-   Die Werte sind gut doppelt so hoch wie die alten Grundwerte, weil der Kombo-Multiplikator (bis x3) weggefallen ist: über einen Lauf kommt ähnlich viel heraus. */
+   Dazu der Kombo-Multiplikator: jeder weitere Trick innerhalb von 4 Sekunden +0,25, höchstens x3; ein Sturz setzt ihn zurück. */
 const PTS={spin180:300,flip:1200,cork:1600,grab:550,barspin:550,tailwhip:750,switch:200,bigAirKicker:600,bigAir:300,butter:500,butter180:700,tap:300,bonk:400,loop:1200,grind:650,swap:300,grindParts:300,railBonus:2};
 function addPoints(pts,name,extra){
-  p.lastTrickT=now;const total=Math.round(pts);
+  if(now-p.lastTrickT<4)p.combo++;else p.combo=1;p.lastTrickT=now;
+  const mult=Math.min(3,1+.25*(p.combo-1)),total=Math.round(pts*mult);
   run.score+=total;if(total>run.bestPts){run.bestPts=total;run.bestTrick=name}
-  showTrick(name,'+'+total+(extra?'  '+extra:''));
+  showTrick(name,'+'+total+(mult>1?'  x'+String(+mult.toFixed(2)):'')+(extra?'  '+extra:''));
   SFX.trick();
 }
 function scoreAir(sketchy){
