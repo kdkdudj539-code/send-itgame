@@ -3247,7 +3247,7 @@ function landingGuess(){
 function showTrick(name,sub,cls){const el=$('trick');el.className='';el.querySelector('b').textContent=name;el.querySelector('span').textContent=sub||'';void el.offsetWidth;el.className='show '+(cls||'good')}
 /* Feste Punkte: jeder Trick-Baustein ist immer gleich viel wert, egal wie lange gehalten, wie hoch geflogen oder wie schnell hintereinander.
    Dazu der Kombo-Multiplikator: jeder weitere Trick innerhalb von 4 Sekunden +0,25, höchstens x3; ein Sturz setzt ihn zurück. */
-const PTS={spin180:300,flip:1200,cork:1600,grab:550,barspin:550,tailwhip:750,switch:200,bigAirKicker:600,bigAir:300,butter:500,butter180:700,tap:300,bonk:400,loop:1200,grind:650,swap:300,grindParts:300,railBonus:2};
+const PTS={spin180:200,flip:850,cork:1100,grab:400,barspin:400,tailwhip:550,switch:150,bigAirKicker:400,bigAir:200,butter:350,butter180:500,tap:200,bonk:300,loop:850,grind:450,swap:200,grindParts:200,railBonus:1.5};   // gut zwei Drittel der vorigen Werte
 function addPoints(pts,name,extra){
   if(now-p.lastTrickT<4)p.combo++;else p.combo=1;p.lastTrickT=now;
   const mult=Math.min(3,1+.25*(p.combo-1)),total=Math.round(pts*mult);
