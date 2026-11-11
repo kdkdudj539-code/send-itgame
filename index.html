@@ -1067,7 +1067,7 @@ function drawBoardWide(g,poly,d,n,lo,P,O,col,hw,bw){
    const bd=mixD(BOARD3.ride,BOARD3.tuck,1);bd.arms=mixD(BOARD3.ride.arms,BOARD3.tuck.arms,.35);
    BOARD3.crouch=shY(bd,BOARD3.ride.board.c[1]-bd.board.c[1]);
    for(const LIB of [SKI3,BOARD3])LIB.crouch_h=mixD(LIB.ride,LIB.crouch,.5)}
-  for(const [LIB,base] of [[SKI3,'tuck'],[BOARD3,'bair']])for(const g of ['blunt','japan','nose','tail','mute','truck','venom','octo'])if(LIB[g]&&LIB[base])LIB[g+'_h']=mixD(LIB[base],LIB[g],.5);
+  for(const [LIB,base] of [[SKI3,'tuck'],[BOARD3,'bair']])for(const g of ['blunt','japan','nose','tail','mute','truck','venom','octo','layout','ftuck'])if(LIB[g]&&LIB[base])LIB[g+'_h']=mixD(LIB[base],LIB[g],.5);
   BOARD3.blunt=BOARD3.japan;BOARD3.blunt_h=BOARD3.japan_h;
   // Verbandszeug: im Schnee sitzen, Knie hoch, Hände wickeln den Verband ums Knie (Ski bzw. Brett liegen vorne flach im Schnee)
   {const armsA=[[[-1,-6,-5],[2.5,-4.5,-6],[4.5,-3.5,-3.5]],[[0,-6,5],[3,-3,6],[5,-2.5,2.5]]],armsB=[[[-1,-6,-5],[3,-3,-6],[5,-2,-3]],[[0,-6,5],[2.5,-4.5,6],[4,-4,2.5]]];
@@ -1270,7 +1270,7 @@ const BIKE3=(()=>{
     if(Array.isArray(A)&&Array.isArray(Z)&&A.length===Z.length)return Z.map((z,i)=>mixD(A[i],z,u));
     if(A&&Z&&typeof A==='object'&&typeof Z==='object'&&!Array.isArray(A)&&!Array.isArray(Z)){const o={};for(const k in Z)o[k]=k in A?mixD(A[k],Z[k],u):Z[k];return o}
     return Z};
-  for(const g of ['blunt','japan','nose','tail','mute','truck','venom','octo'])L[g+'_h']=mixD(tuck,L[g],.5);
+  for(const g of ['blunt','japan','nose','tail','mute','truck','venom','octo','layout','ftuck'])L[g+'_h']=mixD(tuck,L[g],.5);
   {const DH=[[-.4,0,-2.4],[.4,0,2.4]],mv=(a,b,u)=>a.map((x,i)=>x+(b[i]-x)*u);
    const mixBk=(a,b,u)=>{const o={o:mv(a.o||[1.6,11,0],b.o||[1.6,11,0],u),piv:b.piv||a.piv};for(const k of ['yaw','roll','pitch','steer','crank'])o[k]=(a[k]||0)+((b[k]||0)-(a[k]||0))*u;return o};
    const frame=(A,Z,u)=>{const SA=bikeSolve(A),lim=(k,s)=>[0,1].map(i=>Z[k]&&Z[k][i]?mixD(SA[s][i],Z[k][i],u):null);
@@ -1306,7 +1306,7 @@ function rodrigues(v,k,deg){const t=deg*RAD,c=Math.cos(t),s=Math.sin(t),kv=v3.do
 const corkAxis=m=>{const b=(m==='cork'?45:-45)*RAD;return [Math.sin(b),0,Math.cos(b)]};
 function airPose(){const gv=p.gVis||0;
   if(GEAR==='bike'&&p.gName&&gv>.02){const q=smooth01(gv)*8+(p.gTk||0)*2;return p.gName+'#'+Math.max(1,Math.min(10,Math.round(q)))}   // Bike: 10 Bilder je Trick
-  if(p.gName&&gv>.02&&!(p.grab&&gv>=.98))return p.gName+'_h';return p.grab||(p.corkMode?p.corkMode:null)||(p.flipPoseT>0?(p.flipDir<0?'layout':'ftuck'):(GEAR==='board'?'bair':'tuck'))}
+  if(p.gName&&gv>.02&&!(p.grab&&gv>=.98))return p.gName+'_h';return p.grab||(p.corkMode?p.corkMode:null)||(()=>{const fv=p.fVis||0,f=p.flipDir<0?'layout':'ftuck',base=GEAR==='board'?'bair':'tuck';return fv>=.75?f:fv>=.3?f+'_h':base})()}   // Flip-Pose weich über ein Zwischenbild
 /* Zeichnet die Figur bei Drehwinkel phi (0 = Fahrtrichtung rechts, 90 = zum Spieler, 180 = Switch, 270 = vom Spieler weg).
    look: Kopf schaut die Piste runter; bei Switch dreht sich der Oberkörper mit (Blick über die Schulter). */
 const SKI_HW=.85;   // halbe Skibreite (Welt)
@@ -3055,7 +3055,7 @@ function launch(a,pop,sg){
   if(sg&&sg.vmax)s=Math.min(s,sg.vmax);
   if(sg&&sg.kind==='kicker'&&pop)pop*=1.1;
   p.vx=Math.cos(a)*s;p.vy=Math.sin(a)*s-pop;
-  p.flipPoseT=0;p.grab=null;p.gVis=0;p.gTk=0;p.gName=null;p.corkMode=null;p.spinTw=0;p.lastSpin=null;p.ab=null;const r=p.ang*RAD;p.x+=FOOTG*Math.sin(r);p.y-=FOOTG*Math.cos(r);
+  p.flipPoseT=0;p.fHeld=0;p.fVis=0;p.grab=null;p.gVis=0;p.gTk=0;p.gName=null;p.corkMode=null;p.spinTw=0;p.lastSpin=null;p.ab=null;const r=p.ang*RAD;p.x+=FOOTG*Math.sin(r);p.y-=FOOTG*Math.cos(r);
   {const pc=poseCOM(airPose(),p.spin,GEAR);p.x+=pc.cx*Math.cos(r)-pc.cy*Math.sin(r);p.y+=pc.cx*Math.sin(r)+pc.cy*Math.cos(r);p.cx=pc.cx;p.cy=pc.cy;p.cz=pc.cz;p.fx=pc.fx;p.fy=pc.fy;p.fz=pc.fz}
   p.mode='air';
   p.airT=0;p.base=p.ang;p.spinStart=p.spin;p.flipAcc=0;p.flipDir=0;p.flipTarget=null;p.spinDir=0;p.spinTarget=null;p.grabT={};p.grab=null;
@@ -3249,7 +3249,9 @@ function updAir(dt){
   // Bike: Corks und Mistys drehen genauso schnell wie auf Ski: CORK_SLOW, und auch in den ersten Momenten, bevor der Cork erkannt ist, ohne die Bike-Bremse 0,72
   const corkBike=GEAR==='bike'&&(p.corkMode||(p.corkHold>0&&Math.abs(norm(p.flipAcc))<45));
   const cs=corkBike?(p.corkMode?CORK_SLOW:1):(p.corkMode?CORK_SLOW:p.spinLock&&p.diagT>0?.3:1)*(GEAR==='bike'?.72:1);   // Sommer: mit dem Bike dreht man langsamer   // Corks und Mistys drehen gemütlicher; schräg aus dem Gas heraus erst langsam, bis klar ist, ob es ein Cork wird
-  if(up||dn){const dir=dn?-1:1;p.flipAcc+=dir*FLIP_RATE*cs*dt;p.flipDir=dir;p.flipPoseT=.18}else p.flipPoseT=Math.max(0,(p.flipPoseT||0)-dt);
+  if(up||dn){const dir=dn?-1:1;p.flipAcc+=dir*FLIP_RATE*cs*dt;p.flipDir=dir;p.flipPoseT=.18;p.fHeld=(p.fHeld||0)+dt}else{p.flipPoseT=Math.max(0,(p.flipPoseT||0)-dt);p.fHeld=Math.max(0,(p.fHeld||0)-dt*2)}
+  // Flip-Pose erst bei echtem Flip (oben/unten ca. 0,1 s gehalten), kurzes Antippen oder Wackeln am Stick während eines Spins bleibt in der Hock-Pose
+  {const want=p.flipPoseT>0&&p.fHeld>=.1?1:0,mx=8*dt;p.fVis=(p.fVis||0)+clamp(want-(p.fVis||0),-mx,mx)}
   {const df=norm(landingGuess()-p.base),mx=150*dt;p.base+=clamp(df,-mx,mx)}
   p.ang=p.base+p.flipAcc;
   // spins
