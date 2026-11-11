@@ -2011,6 +2011,32 @@ function fTable(){
   const fl=flightLen(lipX,lipY,la,VMAX,JUMP_POP*1.1,gx,gy,28);parkEnd=gx+fl;
   seg(clamp(fl+80,200,560),28,'landing');seg(60,13);
 }
+/* Sommer-Bikepark wie ein Dirt- und Pumptrack-Park: Absprung aus Erde mit Holz-Lip, dazwischen kein Loch.
+   table = oben flach, double = flache Mulde zwischen Absprung und Landung, big = großer Table. Wer zu kurz springt, landet im Dreck, nicht im Abgrund. */
+function fDirt(type){
+  const d=difficulty(),big=type==='big';
+  seg(Math.max(big?200:60,(big?400:130)-leadCut),big?24:rand(16,21));seg(big?30:20,big?7:5);
+  const steps=big?[-8,-16,-24,-31]:[-8,-15,-22,-28],sl=big?16:12,ks=[];for(const a of steps)ks.push(seg(sl,a,'kicker'));
+  ks[ks.length-1].lip=true;
+  for(const s of ks.slice(2)){s.wood=true;s.kx=ks[2].x0;s.ky=ks[2].y0;s.kb=Math.tan(5*RAD)}   // oberer Teil des Absprungs: Holzbretter auf dem Erdhügel
+  const lipX=gx,lipY=gy,la=steps[steps.length-1];let dist,dropY;
+  if(type==='double'){const dep=rand(20,28)+d*8,bot=rand(26,46)+d*30;
+    seg(dep/Math.tan(42*RAD),42,'ditch');seg(bot,5,'ditch');const up=gy-(lipY+6);seg(up/Math.tan(30*RAD),-30,'ditch');seg(10,4,'dtop');
+    dist=gx-lipX+14;dropY=gy-lipY}
+  else{const tl=big?rand(130,180)+d*50:rand(60,100)+d*35;seg(tl,4,'dtop');dist=tl+(big?40:26);dropY=tl*Math.tan(4*RAD)+4}
+  const dbl=type==='double',req=reqSpeed(la,dist,dropY)*(dbl?1.08:1);ks.forEach(s=>{s.req=req;s.assist=dbl?1:.86;s.vmax=VMAX});   // Double: zieht sicher über die Mulde
+  coinArc(lipX,lipY,la,req*1.02,dist+80,big?12:7);
+  const fl=flightLen(lipX,lipY,la,VMAX,JUMP_POP*1.1,gx,gy,28);parkEnd=gx+fl;
+  seg(clamp(fl+80,200,big?900:600),28,'landing');seg(60,13);
+}
+// Sommer-Drop: Holzpodest, darunter eine steile Erdkante bis zur Landung (kein Loch)
+function fDropS(){
+  const d=difficulty();seg(Math.max(80,150-leadCut),25);const dk=seg(26,4,'deck');dk.vmax=360;dk.wood=true;dk.lip=true;
+  const lipX=gx,lipY=gy,h=rand(34,48)+d*16;seg(h/Math.tan(64*RAD),64,'dface');
+  coinArc(lipX,lipY,4,270,100,6);
+  const fl=flightLen(lipX,lipY,4,360,JUMP_POP,gx,gy,28);parkEnd=gx+fl;
+  seg(clamp(fl+80,220,620),28,'landing');seg(60,14);
+}
 // Rollers wie im Pumptrack: weiche Wellen, mit Schwung hebst du kurz ab
 function fRollers(){const n=Math.random()<.5?3:4;seg(Math.max(50,90-leadCut),rand(14,18));const x0=gx;
   for(let i=0;i<n;i++){seg(14,4);seg(16,-14);seg(12,-4);seg(10,14);seg(18,32);seg(14,22)}
@@ -2102,17 +2128,18 @@ function genJapan(z){
 }
 function genFree(){
   const fx0=gx;
-  const o=sinceGap>=2?{cliff:2,bigcliff:1,hugecliff:.5,cliffgap:2}:SUMMER?{run:1.3,cliff:1.8,bigcliff:.8,hugecliff:.45,cliffgap:1.3,rocks:.45,treejump:1.3,logobs:1.8}   // Sommer: keine Grinds
+  const o=SUMMER?{run:1.3,rocks:.6,treejump:1.3,logobs:1.8,dtable:1.1,ddouble:.9,rollers:.9}   // Sommer: Wald-Trail ohne Klippen und Abgründe, dafür Dirt Jumps und Wellen zwischen den Bäumen
+    :sinceGap>=2?{cliff:2,bigcliff:1,hugecliff:.5,cliffgap:2}
     :{run:1.3,cliff:1.8,bigcliff:.8,hugecliff:.45,cliffgap:1.3,logs:2.2,rocks:.35,logjam:1.1,treejump:1.3};
   if(o[lastType])o[lastType]*=.35;const t=pickW(o);
-  ({run:fFreeRun,cliff:()=>fCliff(false),bigcliff:()=>fCliff(true),hugecliff:()=>fCliff('huge'),cliffgap:fCliffGap,logs:fLogs,rocks:fRocks,logjam:fLogJam,treejump:fTreeJump,logobs:fLogObs})[t]();
+  ({run:fFreeRun,cliff:()=>fCliff(false),bigcliff:()=>fCliff(true),hugecliff:()=>fCliff('huge'),cliffgap:fCliffGap,logs:fLogs,rocks:fRocks,logjam:fLogJam,treejump:fTreeJump,logobs:fLogObs,dtable:()=>fDirt('table'),ddouble:()=>fDirt('double'),rollers:fRollers})[t]();
   sinceGap=['cliff','bigcliff','hugecliff','cliffgap'].includes(t)?0:sinceGap+1;lastType=t;
   if(Math.random()<.5)fFreeRun();
   addFauna(fx0,gx);
 }
 function pickW(o){let t=0;for(const k in o)t+=o[k];let r=Math.random()*t;for(const k in o){r-=o[k];if(r<=0)return k}return Object.keys(o)[0]}
 /* Park-Abstand in px (~1,1 s Fahrt mit Gas). PARK_LEAD: Strecke vom Anfang eines Hindernisses bis zur Rampe/Rail/Kante */
-const PARK_SPACE=380,PARK_LEAD={rollers:90,kicker:188,bigair:516,rail:124,tube:124,drop:150,gaprail:180,loop:254,kink:124,rainbow:124,box:124,cat:124,table:124,pole:124,stairs:124,bonk:130,wave:124,waterfall:124};
+const PARK_SPACE=380,PARK_LEAD={dtable:183,ddouble:183,rollers:90,kicker:188,bigair:516,rail:124,tube:124,drop:150,gaprail:180,loop:254,kink:124,rainbow:124,box:124,cat:124,table:124,pole:124,stairs:124,bonk:130,wave:124,waterfall:124};
 let parkEnd=null,leadCut=0;
 function genNext(){
   const z=zoneAt(gx);
@@ -2120,8 +2147,8 @@ function genNext(){
   if(JAPAN){genJapan(z);return}
   if(z==='free'){genFree();return}
   const d=difficulty();let o;
-  if(sinceGap>=2)o=SUMMER?{kicker:3,drop:2,bigair:1+d*1.5}:{kicker:3,drop:2,gaprail:1.1,bigair:1+d*1.5};
-  else if(SUMMER)o={kicker:3,drop:1.5,bigair:.8+d,table:2.2,rollers:1.3};   // Bikepark: Dirt Jumps, Tables, Drops, Rollers, keine Rails
+  if(SUMMER)o={ddouble:2.6,dtable:2.6,drop:1.5,bigair:.8+d,rollers:2.2};   // Bikepark wie Dirt- und Pumptrack: Doubles, Tables, Holz-Drops, Rollers; keine Rails, keine Abgründe
+  else if(sinceGap>=2)o={kicker:3,drop:2,gaprail:1.1,bigair:1+d*1.5};
   else o={kicker:3,rail:1.1,tube:1.6,drop:1.5,gaprail:.8,bigair:.8+d,kink:1.5,rainbow:.8,box:1.3,cat:.5,table:.5,pole:.6,stairs:.6,bonk:.6,wave:.4,waterfall:.4};
   if(o[lastType])o[lastType]*=.35;
   const t=pickW(o);
@@ -2131,10 +2158,10 @@ function genNext(){
   if(parkEnd!==null){const L=PARK_SPACE+rand(-15,15)-(gx-parkEnd)-PARK_LEAD[t];
     if(L>8){const x=gx;seg(L,rand(14,20));if(L>140&&Math.random()<.4)coinRow(x+30,Math.floor((L-50)/24),16,12)}else leadCut=-L}
   const pickOf=a=>a[Math.floor(Math.random()*a.length)];
-  ({kicker:()=>fKicker(false),bigair:()=>fKicker(true),rail:()=>fRail(false),tube:()=>fRail(true),drop:fDrop,gaprail:fGapRail,loop:fLoop,
+  ({dtable:()=>fDirt('table'),ddouble:()=>fDirt('double'),kicker:()=>fKicker(false),bigair:()=>SUMMER?fDirt('big'):fKicker(true),rail:()=>fRail(false),tube:()=>fRail(true),drop:()=>SUMMER?fDropS():fDrop(),gaprail:fGapRail,loop:fLoop,
     kink:()=>fJib(pickOf(['fd','dfd','fdf'])),rainbow:()=>fJib('rainbow'),box:()=>fJib(pickOf(['aframe','battleship','flatbox','downbox'])),cat:()=>fJib('cat'),
     table:()=>SUMMER?fTable():fJib('table'),rollers:fRollers,pole:()=>fJib('pole'),stairs:()=>fJib('stairs'),bonk:fBonks,wave:()=>fJib('wave'),waterfall:()=>fJib('waterfall')})[t]();
-  sinceGap=['kicker','bigair','drop','gaprail'].includes(t)?0:sinceGap+1;
+  sinceGap=['kicker','bigair','drop','gaprail','dtable','ddouble'].includes(t)?0:sinceGap+1;
   if(t==='loop')lastLoopX=gx;
   lastType=t;
   addFloods();flushGapFx();
@@ -2725,14 +2752,14 @@ function drawLeafVar(g,X,base,h,w,cols,seed){const tr=Math.round(h*.42);g.fillSt
   for(const [dx,dy,r] of blobs){const cx=X+1+dx,cy=base+dy;for(let yy=-Math.ceil(r);yy<=Math.ceil(r);yy++){const ww=Math.round(Math.sqrt(Math.max(0,r*r-yy*yy)));
     for(let xx=-ww;xx<=ww;xx++){const u=xx/r,v=yy/r,lit=u+v<-.55,dark=u+v>.6,n=hash01(seed*3.7+Math.floor(cx+xx)*.31+Math.floor(cy+yy)*.57);
       g.fillStyle=dark?cols[0]:lit&&n<.8?cols[2]:n<.12?cols[0]:cols[1];g.fillRect(Math.round(cx+xx),Math.round(cy+yy),1,1)}}}}
-function makeTreeSprites(){TREE_SPR=[];JF_SPR=null;AF_SPR=null;
+function makeTreeSprites(){TREE_SPR=[];JF_SPR=null;AF_SPR=null;SF_SPR=null;
   if(JAPAN){for(let i=0;i<14;i++){const h=Math.round(46+hash01(i*4.7+1)*52);
       if(i%3===0){const w=Math.ceil(h*.15),tr=Math.round(h*.16),[c,g]=mk(w*2+6,h+6);drawTreeVar(g,w+2,h+5,h,w,TREE_COLS[i%TREE_COLS.length],.95,tr,i+1);TREE_SPR.push({c,w,tr,base:h+5})}
       else{const R=Math.ceil(h*.4)+5,[c,g]=mk(R*2+4,h+6);drawBirch(g,R+1,h+5,h,3,i*6.1+3,false,i%4===1);TREE_SPR.push({c,w:2,tr:h,base:h+5})}}
     return}
   if(SUMMER){const LC=[['#2e5a2c','#3f7a38','#5b9a46'],['#355f2a','#4a7d33','#6aa346'],['#2c5530','#3c703c','#56904d']];
     for(let i=0;i<14;i++){const h=Math.round(34+hash01(i*4.7+1)*58);
-      if(i%3===1){const w=Math.round(h*(.3+hash01(i*2.3+5)*.08)),[c,g]=mk(w*2+8,h+6);drawLeafVar(g,w+3,h+5,h,w,LC[i%3],i+1);TREE_SPR.push({c,w,tr:Math.round(h*.42),base:h+5})}
+      if(i%3===1){const w=Math.round(h*.48),[c,g]=mk(w*2+8,h+6);drawBeech(g,w+3,h+5,h,3,i+1,LC[i%3],['#4d4a43','#6f6a5e','#918b7c']);TREE_SPR.push({c,w,tr:Math.round(h*.5),base:h+5})}
       else{const pine=i%5===4,w=Math.ceil(h*(pine?.17:.17+hash01(i*2.3+5)*.12)),tr=pine?Math.round(h*.22):3,cols=TREE_COLS[i%TREE_COLS.length],[c,g]=mk(w*2+6,h+6);
         drawTreeVar(g,w+2,h+5,h,w,cols,0,tr,i+1);TREE_SPR.push({c,w,tr,base:h+5})}}
     return}
@@ -3659,12 +3686,12 @@ function drawTerrainS(cX,cY){
   for(let sx=0;sx<VW;sx++){
     const wx=cX+sx+.5;while(i<segs.length-1&&wx>=segs[i].x1)i++;
     const s=segs[i];if(!s||wx<s.x0||wx>=s.x1||s.gap)continue;
-    const wi=cX+sx,d=wi&1,h=((wi*2654435761)>>>0),green=s.zone==='free'||s.kind==='alm'||s.kind==='start'||s.kind==='deep',L=green?CS.soil:CS.dirt;
+    const wi=cX+sx,d=wi&1,h=((wi*2654435761)>>>0),wood=s.zone==='free'||s.kind==='alm'||s.kind==='start'||s.kind==='deep',green=wood&&!DIRT_K[s.kind],L=wood?CS.soil:CS.dirt;   // im Wald: Erdschichten wie daneben, nur die Oberfläche der Sprünge ist sandig
     if(s.kind==='rock'){const yr=Math.round(s.y0)-cY,yf=Math.round(s.y1)+20-cY;if(yf>=VH)continue;
       ctx.fillStyle=L[0];ctx.fillRect(sx,yf,1,VH-yf+1);ctx.fillStyle=L[1];ctx.fillRect(sx,Math.max(yf,yr+16+d),1,VH);ctx.fillStyle=L[2];ctx.fillRect(sx,Math.max(yf,yr+44+d*2),1,VH);ctx.fillStyle=L[3];ctx.fillRect(sx,Math.max(yf,yr+88+d*2),1,VH);continue}
     const y=Math.round(s.y0+(s.y1-s.y0)*(wx-s.x0)/(s.x1-s.x0))-cY;if(y>=VH)continue;
     let wd=99;if(!green){const nx=segs[i+1],pv=segs[i-1];if(nx&&nx.gap&&s.x1-wx<8)wd=s.x1-wx;else if(pv&&pv.gap&&wx-s.x0<8)wd=wx-s.x0}
-    ctx.fillStyle=green?L[0]:(s.kind==='kicker'?CS.kick:L[0]);ctx.fillRect(sx,y,1,VH-y+1);
+    ctx.fillStyle=green?L[0]:(DIRT_K[s.kind]?CS.kick:L[0]);ctx.fillRect(sx,y,1,VH-y+1);
     ctx.fillStyle=L[1];ctx.fillRect(sx,y+16+d,1,VH);ctx.fillStyle=L[2];ctx.fillRect(sx,y+44+d*2,1,VH);ctx.fillStyle=L[3];ctx.fillRect(sx,y+88+d*2,1,VH);
     if(s.zone==='park'&&y+16<VH)ctx.drawImage(leafTex(),((wi%97)+97)%97,0,1,28+d,sx,y+16+d,1,28+d);   // Bikepark-Trail: ab und zu ein paar Blätter in der zweiten Schicht
     if(h%53===0){ctx.fillStyle='#8f877a';ctx.fillRect(sx,y+6+(h>>>8)%22,2,1)}else if(h%71===0){ctx.fillStyle='#3e2c1c';ctx.fillRect(sx,y+5+(h>>>9)%14,1,2)}   // Steinchen, Wurzeln
@@ -3678,8 +3705,17 @@ function drawTerrainS(cX,cY){
     if(h%9<2){ctx.fillStyle='#b48d5e';ctx.fillRect(sx,y+1,1,1)}
     if(h%23===0&&s.kind!=='kicker'){ctx.fillStyle=CS.grass;ctx.fillRect(sx,y-1,1,1)}   // Grasbüschel am Streckenrand
     if(s.kind==='kicker'&&s.lip&&s.x1-wx<3){ctx.fillStyle=CS.lip;ctx.fillRect(sx,y,1,3)}   // Holzkante am Absprung
+    if(s.wood)woodCol(s,sx,y,wx,cY);
   }
 }
+const DIRT_K={kicker:1,dtop:1,ditch:1,deck:1,dface:1};   // Dirt-Jump-Teile sind auch im Wald aus Erde
+/* Holz im Bikepark, eine Pixelspalte: Lip aus senkrechten Brettern auf dem Erdhügel (Seitenwand mit Rahmen), Drop-Podest aus Bohlen mit Pfosten */
+function woodCol(s,sx,y,wx,cY){
+  if(s.kind==='kicker'){const yb=Math.round(s.ky+(wx-s.kx)*s.kb)-cY+2,k=Math.floor(wx-s.kx),b=Math.floor(k/3);
+    for(let yy=y;yy<Math.max(y+3,yb);yy++){ctx.fillStyle=yy<y+2?'#7a4f2a':yy>=yb-1?'#5c3b21':(k%3===2?'#8a5d34':b%2?'#c08f55':'#b07f48');ctx.fillRect(sx,yy,1,1)}
+    if(k%9===4){ctx.fillStyle='#4a2f1a';ctx.fillRect(sx,y+3,1,1)}return}
+  if(s.kind==='deck'){const e=s.x1-wx,k=Math.floor(wx-s.x0);ctx.fillStyle='#7a4f2a';ctx.fillRect(sx,y,1,1);ctx.fillStyle=k%4===3?'#8a5d34':'#b9894f';ctx.fillRect(sx,y+1,1,2);ctx.fillStyle='#5c3b21';ctx.fillRect(sx,y+3,1,1);
+    ctx.fillStyle='#3a2b1d';ctx.fillRect(sx,y+4,1,9);if(k%8<2||e<2){ctx.fillStyle=k%8===0||e<1?'#6a4528':'#8a5d34';ctx.fillRect(sx,y+4,1,12)}}}
 const JP_SOFT={snow:1,landing:1,deep:1};   // Japan: auf diesen Flächen liegt welliger Powder
 // Japan, eine Pixelspalte: Pillow (runde Schneehaube, vorne überhängend mit Schatten), Kicker (Stapel aus Stämmen unter dem Schnee), Drop-Kante (liegender Stamm)
 function jpTerrainCol(s,sx,y,wx,cY){
@@ -3919,12 +3955,6 @@ function clipAboveGround(sx,top,w,cX,cY,extra){ctx.beginPath();ctx.moveTo(sx,top
   for(let i=w-1;i>=0;i--){const g=groundAt(cX+sx+i+.5),y=g?Math.round(g.y-cY)+(extra||0):top+4000;ctx.lineTo(sx+i+1,y);ctx.lineTo(sx+i,y)}ctx.closePath();ctx.clip()}
 // dunklere Fassung für die hinteren Waldbäume (wirkt weiter weg)
 function treeDark(V){if(!V.cd){const [c,g]=mk(V.c.width,V.c.height);g.drawImage(V.c,0,0);g.globalCompositeOperation='source-atop';g.fillStyle='rgba(18,40,32,.38)';g.fillRect(0,0,c.width,c.height);V.cd=c}return V.cd}
-function drawParkForest(cX,cY){if(!SUMMER||!TREE_SPR.length)return;
-  for(let x=Math.floor((cX-40)/4)*4;x<cX+VW+40;x+=4){const h=((x*2654435761)>>>0);if(h%6!==0)continue;
-    const ok=q=>q&&(q.seg.kind==='snow'||q.seg.kind==='landing'),g=groundAt(x);if(!ok(g)||g.seg.zone!=='park')continue;if(!ok(groundAt(x-16))||!ok(groundAt(x+16)))continue;
-    const V=TREE_SPR[(h>>>4)%TREE_SPR.length],sp=treeDark(V),W=sp.width,l2=groundAt(x-V.w),r2=groundAt(x+V.w),low=Math.max(l2?l2.y:g.y,r2?r2.y:g.y);
-    const foot=Math.max(g.y+2,low+2-(V.tr-3)),sx=Math.round(x-cX-W/2),sy=Math.round(foot-cY-V.base);if(sx>VW||sx+W<0||sy>VH||sy+sp.height<0)continue;
-    ctx.save();clipAboveGround(sx,sy-2,W,cX,cY,1);if((h>>>9)&1){ctx.translate(sx*2+W,0);ctx.scale(-1,1)}ctx.drawImage(sp,sx,sy);ctx.restore()}}
 /* Japan: Man fährt durch einen lichten Wald aus dünnen Bäumen. Hinten zwei Tiefen (klein und blass, größer und kräftig), dazu ab und zu
    ein dicker Stamm vor der Spur, der am Fahrer vorbeizieht. Die Plätze kommen aus der x-Position, bleiben also fest stehen. */
 let JF_SPR=null;
@@ -3937,7 +3967,42 @@ function jfSprites(){if(JF_SPR)return JF_SPR;
   for(let i=0;i<5;i++){const t=mkT(Math.round(130+hash01(i*2.7+9)*50),3,i*4.7+11,false,i%2===1,true),[cd,gd]=mk(t.c.width,t.c.height);
     gd.drawImage(t.c,0,0);gd.globalCompositeOperation='source-atop';gd.fillStyle='rgba(8,12,30,.82)';gd.fillRect(0,0,cd.width,cd.height);t.cd=cd;front.push(t)}
   return JF_SPR={back,mid,front}}
-const JF_NO={kicker:1,pkick:1,deck:1,rock:1,rocklip:1,alm:1,start:1,loopfloor:1};
+const JF_NO={kicker:1,pkick:1,deck:1,rock:1,rocklip:1,alm:1,start:1,loopfloor:1,dtop:1,ditch:1,dface:1};
+/* Sommer-Wald wie ein Buchenwald: hinten dunstiger Mischwald, in der Mitte große Buchen mit dicken grauen Stämmen und runden Kronen,
+   vorne ab und zu ein riesiger Stamm (Krone oben aus dem Bild) mit Farn und Büschen am Fuß. */
+let SF_SPR=null;
+/* Krone aus vielen Blätterbüscheln: erst die ganze Form dunkel, dann jedes Büschel hell oben links und mittel, unten der Schatten bleibt */
+function leafCrown(g,cx,cy,rx,ry,n,cl,cols,seed){const B=[];
+  for(let i=0;i<n;i++){const a=hash01(seed*2.3+i*1.7)*6.283,d=Math.sqrt(hash01(seed*5.1+i*3.3)),x=cx+Math.cos(a)*rx*d*.82,y=cy+Math.sin(a)*ry*d*.78,r=cl*(.75+.5*hash01(seed*7.7+i));B.push([x,y,r])}
+  B.push([cx,cy,Math.min(rx,ry)*.75]);B.sort((p,q)=>p[1]-q[1]);
+  const ball=(x,y,r,f)=>{for(let yy=-Math.ceil(r);yy<=Math.ceil(r);yy++){const ww=Math.sqrt(Math.max(0,r*r-yy*yy));for(let xx=-Math.ceil(ww);xx<=Math.ceil(ww);xx++)f(Math.round(x+xx),Math.round(y+yy),xx/r,yy/r)}};
+  for(const [x,y,r] of B)ball(x,y,r+1,(px,py)=>{g.fillStyle=cols[0];g.fillRect(px,py,1,1)});
+  for(const [x,y,r] of B){const lowT=(y-(cy-ry))/(2*ry);
+    ball(x,y,r,(px,py,u,v)=>{const s=u*.55+v,n=hash01(seed*3.7+px*.31+py*.57),edge=u*u+v*v>.8;
+      if(s>.45+(n-.5)*.3)return;g.fillStyle=(s<-.35+(n-.5)*.25&&lowT<.75)?cols[2]:(edge&&n<.35)?cols[0]:cols[1];g.fillRect(px,py,1,1)})}}
+function drawBeech(g,X,base,h,tw,seed,cols,bark){const tt=base-Math.round(h*.55);
+  for(let y=tt;y<=base;y++){const t=(y-tt)/Math.max(1,base-tt),w=tw+(t>.86?Math.round((t-.86)/.14*Math.max(2,tw*.7)):0),x0=X-Math.floor(w/2);
+    for(let x=0;x<w;x++){const u=(x+.5)/w,n=hash01(seed*1.7+y*.37+x*1.31);g.fillStyle=u<.28?bark[2]:u>.72?bark[0]:n<.07?bark[0]:n>.95?bark[2]:bark[1];g.fillRect(x0+x,y,1,1)}}
+  const br=Math.max(1,Math.round(tw*.3));for(const s of [-1,1]){const by=tt+Math.round(h*.04),L=Math.round(h*.18);for(let k=0;k<L;k++){g.fillStyle=bark[0];g.fillRect(X+s*(Math.floor(tw/2)+k),by-Math.round(k*.9),br,br)}}
+  leafCrown(g,X,base-h*.68,h*.42,h*.32,Math.round(12+h*.1),Math.max(4,h*.09),cols,seed)}
+function sfSprites(){if(SF_SPR)return SF_SPR;
+  const LEAF=[['#2b5228','#3a6d33','#5a9446'],['#2f5a2a','#43793a','#6aa24e'],['#284a2a','#376536','#518a49']],BARK=[['#4d4a43','#6f6a5e','#918b7c'],['#463f37','#655d52','#857c6c']];
+  const HAZE=[['#5f7d63','#6d8b6d','#7f9b7a'],['#688667','#779475','#89a585']];
+  const back=[],mid=[],front=[];
+  for(let i=0;i<8;i++){const h=Math.round(46+hash01(i*3.3+1)*34),con=i%3===1,W=Math.ceil(h*.42)+4,[c,g]=mk(W*2+6,h+6);
+    if(con)drawTreeVar(g,W+2,h+5,h,Math.ceil(h*.2),[HAZE[i%2][0],HAZE[i%2][1]],0,4,i*7.3+2);else drawBeech(g,W+2,h+5,h,2,i*7.3+2,HAZE[i%2],['#5c6f5a','#6a7d66','#7a8c74']);
+    back.push({c,ox:W+2,H:h+6})}
+  for(let i=0;i<10;i++){const h=Math.round(96+hash01(i*5.1+3)*70),tw=6+Math.floor(hash01(i*1.9)*4),W=Math.ceil(h*.52)+6,[c,g]=mk(W*2+6,h+8);
+    drawBeech(g,W+2,h+6,h,tw,i*9.1+5,LEAF[i%3],BARK[i%2]);mid.push({c,ox:W+2,H:h+8})}
+  for(let i=0;i<5;i++){const tw=26+Math.floor(hash01(i*2.7+9)*12),h=320,W=tw+22,[c,g]=mk(W*2,h+16),X=W,base=h+8,bk=BARK[i%2];
+    for(let y=0;y<=base;y++){const t=y/base,w=tw+(t>.9?Math.round((t-.9)/.1*14):0),x0=X-Math.floor(w/2);
+      for(let x=0;x<w;x++){const u=(x+.5)/w,fx=Math.floor((x+hash01(i+Math.floor(y/9))*3)/6),n=hash01(i*3.1+Math.floor(y/2)*.37+x*1.31),furche=(x+Math.round(Math.sin(y*.05+fx)*1.2))%6===0&&n<.8;
+        g.fillStyle=u<.16?bk[2]:u>.74?bk[0]:furche?bk[0]:n<.05?bk[2]:bk[1];if(t>.8&&u>.15&&u<.6&&hash01(i*7+x*.7+y*.3)<(t-.8)*2)g.fillStyle='#4f6b34';g.fillRect(x0+x,y,1,1)}}   // Furchen in der Rinde, unten Moos
+    leafCrown(g,X,base-6,tw*.9,7,9,6,LEAF[i%3],i*13+1);   // Farn und Büsche am Fuß
+    for(let k=0;k<6;k++){g.fillStyle=k%2?'#e8925a':'#f2b46a';g.fillRect(Math.round(X-tw*.8+hash01(i*9+k)*tw*1.6),Math.round(base-10+hash01(i*4+k)*6),1,1)}   // kleine Blüten
+    const [cd,gd]=mk(c.width,c.height);gd.drawImage(c,0,0);gd.globalCompositeOperation='source-atop';gd.fillStyle='rgba(8,14,10,.82)';gd.fillRect(0,0,cd.width,cd.height);
+    front.push({c,cd,ox:X,H:base+2})}
+  return SF_SPR={back,mid,front}}
 /* Alpen-Freeride: derselbe Wald, aber aus Fichten mit Schnee (hinten klein und dunstig, Mitte kräftig) und schlanken Kiefern vorne. */
 let AF_SPR=null;
 function afSprites(){if(AF_SPR)return AF_SPR;
@@ -3949,17 +4014,17 @@ function afSprites(){if(AF_SPR)return AF_SPR;
   for(let i=0;i<5;i++){const h=Math.round(84+hash01(i*2.7+9)*24),t=mkS(h,Math.ceil(h*.1),TREE_COLS[i%TREE_COLS.length],.6,Math.round(h*.42),i*4.7+11,true),[cd,gd]=mk(t.c.width,t.c.height);
     gd.drawImage(t.c,0,0);gd.globalCompositeOperation='source-atop';gd.fillStyle='rgba(8,12,30,.82)';gd.fillRect(0,0,cd.width,cd.height);t.cd=cd;front.push(t)}
   return AF_SPR={back,mid,front}}
-const forestOn=g=>JAPAN||!SUMMER&&g.seg.zone==='free';   // Wald: Japan überall, Alpen nur im Freeride
-function drawJForest(cX,cY){if(SUMMER)return;const S=JAPAN?jfSprites():afSprites();
+const forestOn=g=>JAPAN||SUMMER||g.seg.zone==='free';   // Wald: Japan und Sommer überall, Alpen-Winter nur im Freeride
+function drawJForest(cX,cY){const S=JAPAN?jfSprites():SUMMER?sfSprites():afSprites();
   for(let x=Math.floor((cX-60)/5)*5;x<cX+VW+60;x+=5){const h=((x*2654435761)>>>0);if(h%(JAPAN?3:4)!==0)continue;
     const g=groundAt(x);if(!g||JF_NO[g.seg.kind]||!forestOn(g))continue;const far=((h>>>3)%100)<55,L=far?S.back:S.mid,V=L[(h>>>11)%L.length];
     const sx=Math.round(x-cX)-V.ox,sy=Math.round(g.y-cY)-V.H+3;if(sx>VW||sx+V.c.width<0||sy>VH)continue;ctx.drawImage(V.c,sx,sy)}}
-function drawJForestFront(cX,cY){if(SUMMER)return;const S=JAPAN?jfSprites():afSprites(),dk=clamp(curDS.night*.85+curDS.dusk*.2,0,.9);
-  for(let x=Math.floor((cX-80)/7)*7;x<cX+VW+80;x+=7){const h=((x*40503+977)>>>0);if(h%29!==0)continue;
+function drawJForestFront(cX,cY){const S=JAPAN?jfSprites():SUMMER?sfSprites():afSprites(),dk=clamp(curDS.night*.85+curDS.dusk*.2,0,.9);
+  for(let x=Math.floor((cX-80)/7)*7;x<cX+VW+80;x+=7){const h=((x*40503+977)>>>0);if(h%(SUMMER?47:29)!==0)continue;
     const g=groundAt(x);if(!g||JF_NO[g.seg.kind]||!forestOn(g))continue;const V=S.front[(h>>>9)%S.front.length];
     const sx=Math.round(x-cX)-V.ox,sy=Math.round(g.y-cY)-V.H+9+((h>>>5)%6);if(sx>VW||sx+V.c.width<0)continue;
     ctx.drawImage(V.c,sx,sy);if(dk>.02){ctx.globalAlpha=dk;ctx.drawImage(V.cd,sx,sy);ctx.globalAlpha=1}}}
-function drawTrees(cX,cY){drawParkForest(cX,cY);drawJForest(cX,cY);for(let pass=0;pass<2;pass++)for(const t of trees){if(!!t.dk!==(pass===0))continue;const V=TREE_SPR[t.k]||TREE_SPR[0],sp=t.dk?treeDark(V):V.c,W=sp.width;
+function drawTrees(cX,cY){drawJForest(cX,cY);for(let pass=0;pass<2;pass++)for(const t of trees){if(!!t.dk!==(pass===0))continue;const V=TREE_SPR[t.k]||TREE_SPR[0],sp=t.dk?treeDark(V):V.c,W=sp.width;
   // Fuß so tief, dass die untersten Äste talseitig auf dem Schnee liegen; bergseitig stecken sie im Schnee. Kiefern stehen auf dem Stamm.
   const g0=groundAt(t.x),gl=groundAt(t.x-V.w),gr=groundAt(t.x+V.w),y0=g0?g0.y:t.y,low=Math.max(gl?gl.y:y0,gr?gr.y:y0);
   const foot=Math.max(y0+2,low+2-(V.tr-3)),sx=Math.round(t.x-cX-W/2),sy=Math.round(foot-cY-V.base);if(sx>VW||sx+W<0||sy>VH||sy+sp.height<0)continue;
