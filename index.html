@@ -4012,10 +4012,13 @@ function sfSprites(){if(SF_SPR)return SF_SPR;
     back.push({c,ox:W+2,H:h+6})}
   for(let i=0;i<10;i++){const h=Math.round(96+hash01(i*5.1+3)*70),tw=6+Math.floor(hash01(i*1.9)*4),W=Math.ceil(h*.52)+6,[c,g]=mk(W*2+6,h+8);
     drawBeech(g,W+2,h+6,h,tw,i*9.1+5,LEAF[i%3],BARK[i%2]);mid.push({c,ox:W+2,H:h+8})}
-  for(let i=0;i<5;i++){const tw=26+Math.floor(hash01(i*2.7+9)*12),h=320,W=tw+22,[c,g]=mk(W*2,h+16),X=W,base=h+8,bk=BARK[i%2];
-    for(let y=0;y<=base;y++){const t=y/base,w=tw+(t>.9?Math.round((t-.9)/.1*14):0),x0=X-Math.floor(w/2);
+  /* Riesenstämme: oben eine breite Krone mit Ästen, damit bei hohen Sprüngen kein abgeschnittener Stamm zu sehen ist */
+  for(let i=0;i<5;i++){const tw=26+Math.floor(hash01(i*2.7+9)*12),h=320,CR=Math.round(tw*2.1)+10,RX=Math.round(tw*2.6),W=Math.max(tw+22,RX+12),[c,g]=mk(W*2,h+16+CR),X=W,top=CR,base=top+h+8,bk=BARK[i%2];
+    for(let y=top-6;y<=base;y++){const t=(y-top)/(base-top),w=tw+(t>.9?Math.round((t-.9)/.1*14):0),x0=X-Math.floor(w/2);
       for(let x=0;x<w;x++){const u=(x+.5)/w,fx=Math.floor((x+hash01(i+Math.floor(y/9))*3)/6),n=hash01(i*3.1+Math.floor(y/2)*.37+x*1.31),furche=(x+Math.round(Math.sin(y*.05+fx)*1.2))%6===0&&n<.8;
         g.fillStyle=u<.16?bk[2]:u>.74?bk[0]:furche?bk[0]:n<.05?bk[2]:bk[1];if(t>.8&&u>.15&&u<.6&&hash01(i*7+x*.7+y*.3)<(t-.8)*2)g.fillStyle='#4f6b34';g.fillRect(x0+x,y,1,1)}}   // Furchen in der Rinde, unten Moos
+    for(const s of [-1,1])for(let k=0;k<Math.round(RX*.45);k++){const bw=Math.max(2,Math.round(tw*.22*(1-k/RX)));g.fillStyle=bk[0];g.fillRect(X+s*(Math.floor(tw/2)-2+k)-(s<0?bw:0),top+16-Math.round(k*.6),bw,bw)}   // dicke Äste in die Krone
+    leafCrown(g,X,top+4,RX,CR*.62,Math.round(RX*.55),Math.max(7,tw*.32),LEAF[i%3],i*17+3);   // Krone
     leafCrown(g,X,base-6,tw*.9,7,9,6,LEAF[i%3],i*13+1);   // Farn und Büsche am Fuß
     for(let k=0;k<6;k++){g.fillStyle=k%2?'#e8925a':'#f2b46a';g.fillRect(Math.round(X-tw*.8+hash01(i*9+k)*tw*1.6),Math.round(base-10+hash01(i*4+k)*6),1,1)}   // kleine Blüten
     const [cd,gd]=mk(c.width,c.height);gd.drawImage(c,0,0);gd.globalCompositeOperation='source-atop';gd.fillStyle='rgba(8,14,10,.82)';gd.fillRect(0,0,cd.width,cd.height);
