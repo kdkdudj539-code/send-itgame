@@ -2914,7 +2914,7 @@ const GRAB_KEYS=[['blunt','KeyJ','Digit1'],['nose','KeyK','Digit2'],['tail','Key
 const SKI_ONLY_GRABS={japan:1,truck:1,octo:1,venom:1};
 let jibb=false;   // Handy: Jib-Modus, Standard aus; bleibt an, bis man wieder drückt
 const bU=()=>!p.auto&&(K.ArrowUp||K.KeyW||(TC.up&&jibb)||GP.up),bD=()=>!p.auto&&(K.ArrowDown||K.KeyS||(TC.down&&jibb)||GP.down);   // Butter-Eingaben
-const GRAB_TOUCH_DELAY=.5;   // Handy: der Grab-Stick greift erst 0,5 s nach dem Absprung, damit ein Daumen auf dem Stick nicht sofort grabt
+const GRAB_TOUCH_DELAY=.1;   // Handy: der Grab-Stick greift erst 0,1 s nach dem Absprung, damit ein Daumen auf dem Stick nicht sofort grabt
 function inGrab(){let g=null;for(const [k,a,b] of GRAB_KEYS)if(K[a]||K[b]){g=k;break}if(!g)g=(TC.g&&(p.airT||0)>=GRAB_TOUCH_DELAY?TC.g:null)||GP.g||null;return g&&GEAR==='board'&&SKI_ONLY_GRABS[g]?null:g}
 addEventListener('keydown',e=>{
   if(e.target&&e.target.tagName==='INPUT')return;
