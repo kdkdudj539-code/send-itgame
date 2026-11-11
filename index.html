@@ -788,7 +788,7 @@ function drawHead(g,kind,x,y,P,flip,rot){const m=P.hat?BEANIES[P.hat][kind]:P.ff
     g.fillStyle=P[ch];g.fillRect(X+sx,Y+sy,1,1)}}
 
 /* ===== 3D-Figur: Gelenke als [vorne, unten, rechts] relativ zum Schwerpunkt ===== */
-const SPR=56,SCX=28,SCY=30;
+const SPR=56,SCX=28,SCY=30,POW_TILT=18,SKI_VIS=2.5;   // POW_TILT: Ski vorne im Powder aufgestellt (Grad), SKI_VIS: so tief steckt der Skifahrer sichtbar im Powder (der Rest ist der Pulverwulst)
 const RZ=1.2,RW=Math.ceil(SPR*RZ);   // Fahrer-Raster: 1,2 Fahrer-Pixel pro Welt-Pixel (ein Fünftel feiner); RW = Seitenlänge des Fahrer-Bilds
 let LGX=null;function legCtx(){if(!LGX){const [c,g]=mk(RW,RW);LGX=g}LGX.clearRect(0,0,RW,RW);return LGX}   // Zwischenbild: Bein ohne den Teil im Trikot
 let RCX=null;function riderCtx(){if(!RCX){const [c,g]=mk(RW,RW);g._S=RZ;RCX=g}RCX.clearRect(0,0,RW,RW);return RCX}   // Zwischenbild für den Fahrer auf dem Bike
@@ -1312,7 +1312,10 @@ function airPose(){const gv=p.gVis||0;
    look: Kopf schaut die Piste runter; bei Switch dreht sich der Oberkörper mit (Blick über die Schulter). */
 const SKI_HW=.85;   // halbe Skibreite (Welt)
 function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist,hy){
-  const board=gear==='board',bike=gear==='bike',LIB=LIBOF(gear),L=bike?bikeSolve(LIB[poseName]||LIB.ride):LIB[poseName]||LIB.ride,O=P.O;
+  const board=gear==='board',bike=gear==='bike',LIB=LIBOF(gear),L0=bike?bikeSolve(LIB[poseName]||LIB.ride):LIB[poseName]||LIB.ride,O=P.O;
+  // Powder: Ski vorne um POW_TILT aufgestellt (die Seite in Fahrtrichtung, also rechts im Bild), das Heck taucht ein, die Spitzen ragen raus
+  const L=pow&&!board&&!bike&&L0.skis?{...L0,skis:L0.skis.map(s=>{const d=v3.unit(s.d);let n=s.n||[0,-1,0];n=v3.unit(v3.add(n,v3.mul(d,-v3.dot(n,d))));
+    const sg=Math.cos(phi*RAD)>=0?1:-1,c=Math.cos(POW_TILT*RAD),sn=Math.sin(POW_TILT*RAD)*sg;return {...s,d:v3.add(v3.mul(d,c),v3.mul(n,sn)),n:v3.add(v3.mul(n,c),v3.mul(d,-sn))}})}:L0;
   // Der Fahrer wird im eigenen, feineren Raster gezeichnet (S Fahrer-Pixel pro Welt-Pixel). gW = Sprite-Bild (Bike), g = Fahrer-Raster.
   // zw: Füllbreite im Fahrer-Raster, so dass Teil plus 1-Pixel-Umriss so breit bleibt wie vorher in Welt-Pixeln
   const gW=g;g=g._R||g;const S=g._S||1,zw=w=>Math.max(1,Math.round((w+2)*S)-2),SKL=25,SKW=Math.max(1,zw(2)-1);   // SKL Skilänge (Welt), SKW Skidicke (Fahrer-Pixel)
@@ -2143,7 +2146,7 @@ const MPAL_S=[
 ];
 const MPAL_J=[
   {haze:'#d6e2f2',near:'#5a6c8e',light:'#f6f9ff',snow:'#ffffff',snowSh:'#bccbe4',tree:'#4a4458'},
-  {haze:'#f4c2a4',near:'#5c4268',light:'#ffd8b4',snow:'#ffeadb',snowSh:'#dba8b0',tree:'#40304a'},
+  {haze:'#f2a2b8',near:'#5e3462',light:'#ffc2cf',snow:'#ffe2ea',snowSh:'#d88aa8',tree:'#3e2444'},
   {haze:'#213159',near:'#070c1a',light:'#2e3e68',snow:'#56688f',snowSh:'#3a4a70',tree:'#060912'}
 ];
 MPAL=SUMMER?MPAL_S:JAPAN?MPAL_J:MPAL_W;
@@ -2234,7 +2237,7 @@ function rebuildBg(){
     BG.clouds=[makeCloud(70,20),makeCloud(48,15),makeCloud(92,24),makeCloud(60,18)];BG.valley=makeValley();BG.sky=1;return}
   if(JAPAN){   // Japan: blasser Schneehimmel, Birkenwald
     BG.skyDay=gradSky(['#4a78bd','#5886c6','#6894cf','#7aa3d7','#8eb2de','#a4c2e5','#bbd1ec','#d1dff2','#e6edf7']);
-    BG.skyDusk=gradSky(['#2b2a5e','#4b3a7a','#7c4c8c','#b55a8c','#de6f80','#f08f78','#f6b080','#f9cfa0','#fbe4c4']);
+    BG.skyDusk=gradSky(['#2a1846','#4a1f5e','#7a2670','#a82e78','#d2397c','#ea5482','#f4708e','#f894a6','#fbbcc4']);   // rot/pink
     BG.skyNight=gradSky(['#04060f','#060a19','#091024','#0c152f','#101b3a','#142144','#19294f','#1f3159','#263a63'],true);
     BG.treesB=birchRow(520,56,95,10,26,true);BG.treesF=birchRow(560,74,64,24,60,false);
     BG.ftreesB=birchRow(520,70,105,14,40,true);BG.ftreesF=birchRow(560,100,72,34,90,false);
@@ -2252,9 +2255,13 @@ function rebuildBg(){
 function tile(img,off,y){let x=-(((off%img.width)+img.width)%img.width);for(;x<VW;x+=img.width)ctx.drawImage(img,Math.round(x),Math.round(y))}
 
 /* ================= TAG UND NACHT ================= */
-const DAY_LEN=150;let curDS={ph:.1,night:0,dusk:0,sunDown:0};
+/* Tageslauf in Sekunden: Tag 80 s, Sonnenuntergang 210 s (die Sonne sinkt zehnmal so langsam wie früher), Nacht und Morgen 92 s.
+   ph ist die alte Phase 0..1 (0,40 bis 0,54 = Sonnenuntergang mit Dämmerung), auf die alle Farben und Lichter abgestimmt sind. */
+const DAY_SEGS=[[0,.40,80],[.40,.54,210],[.54,1,92]],DAY_LEN=DAY_SEGS.reduce((a,s)=>a+s[2],0),DAY_T0=10;let curDS={ph:.1,night:0,dusk:0,sunDown:0};
+const DUSK_TINT=()=>JAPAN?'255,84,136':'255,128,80';   // Abendlicht auf der Welt: Japan rot/pink
+function dayPhase(t){let r=((t%DAY_LEN)+DAY_LEN)%DAY_LEN;for(const [a,b,d] of DAY_SEGS){if(r<d)return a+(b-a)*r/d;r-=d}return 0}
 function dayState(){
-  const t=(state==='menu'||!run)?0:(run.time||0),ph=((t/DAY_LEN)+.05)%1;
+  const t=(state==='menu'||!run)?0:(run.time||0),ph=dayPhase(t+DAY_T0);
   const night=ph<.44?0:ph<.54?smooth01((ph-.44)/.1):ph<.88?1:ph<.98?1-smooth01((ph-.88)/.1):0;
   const dusk=Math.min(1,Math.max(0,1-Math.abs(ph-.47)/.06)+Math.max(0,1-Math.abs(ph-.93)/.06)*.75);
   const sunDown=ph<.4?0:ph<.52?smooth01((ph-.4)/.12):ph>.9?1-smooth01((ph-.9)/.1):1;
@@ -2267,9 +2274,9 @@ function drawSky(DS){
   if(DS.night>.01){ctx.globalAlpha=DS.night;ctx.drawImage(BG.skyNight,0,0)}
   ctx.globalAlpha=1;
   if(DS.night<.97){const sx=VW*.8,sy=30+DS.sunDown*VH*.48,warm=DS.dusk>.25;
-    if(DS.dusk>.05){ctx.globalAlpha=DS.dusk*.09*(1-DS.night);disc(sx,sy,58,'#ffc08a');ctx.globalAlpha=DS.dusk*.12*(1-DS.night);disc(sx,sy,38,'#ffd3a0')}
-    ctx.globalAlpha=(1-DS.night)*.22;disc(sx,sy,17,warm?'#ffb070':'#fff3c8');ctx.globalAlpha=(1-DS.night)*.35;disc(sx,sy,12,warm?'#ffc488':'#fff6d6');
-    ctx.globalAlpha=1-DS.night;disc(sx,sy,8,warm?'#ffd29a':'#fff8de');disc(sx,sy,5,'#fffdf4');ctx.globalAlpha=1}
+    if(DS.dusk>.05){ctx.globalAlpha=DS.dusk*.09*(1-DS.night);disc(sx,sy,58,JAPAN?'#ff7a98':'#ffc08a');ctx.globalAlpha=DS.dusk*.12*(1-DS.night);disc(sx,sy,38,JAPAN?'#ff9cb0':'#ffd3a0')}
+    ctx.globalAlpha=(1-DS.night)*.22;disc(sx,sy,17,warm?(JAPAN?'#ff6a7a':'#ffb070'):'#fff3c8');ctx.globalAlpha=(1-DS.night)*.35;disc(sx,sy,12,warm?(JAPAN?'#ff8a8a':'#ffc488'):'#fff6d6');
+    ctx.globalAlpha=1-DS.night;disc(sx,sy,8,warm?(JAPAN?'#ffb0a0':'#ffd29a'):'#fff8de');disc(sx,sy,5,'#fffdf4');ctx.globalAlpha=1}
   if(DS.night>.02){ctx.globalAlpha=DS.night;const mx=VW*.2,my=42;disc(mx,my,12,'rgba(200,215,255,.12)');disc(mx,my,7,'#eef2ff');disc(mx+3,my-2,6,'#0d1632');
     ctx.fillStyle='#ffffff';for(let i=0;i<18;i++){if(Math.sin(T*2.6+i*1.7)>.55)ctx.fillRect(Math.round(hash01(i+90)*VW),Math.round(hash01(i+140)*VH*.5),1,1)}
     ctx.globalAlpha=1}
@@ -2286,7 +2293,7 @@ function drawClouds(cX,DS,alpha){
 let worldCv=null,worldCtx=null,bgCv=null,bgCtx=null,lightCv=null,lightCtx=null,emissive=[],emissiveBg=[];
 function nightPass(DS,list,holes){
   lightOn=DS.night>=.02;
-  if(DS.dusk>.02){ctx.globalCompositeOperation='source-atop';ctx.fillStyle='rgba(255,128,80,'+(.15*DS.dusk)+')';ctx.fillRect(0,0,VW,VH);ctx.globalCompositeOperation='source-over'}
+  if(DS.dusk>.02){ctx.globalCompositeOperation='source-atop';ctx.fillStyle='rgba('+DUSK_TINT()+','+(.15*DS.dusk)+')';ctx.fillRect(0,0,VW,VH);ctx.globalCompositeOperation='source-over'}
   const nf=DS.night;if(nf<.02)return false;
   if(!lightCv||lightCv.width!==VW){[lightCv,lightCtx]=mk(VW,VH)}
   const L=lightCtx;L.globalCompositeOperation='source-over';L.globalAlpha=1;L.clearRect(0,0,VW,VH);
@@ -2399,7 +2406,7 @@ function playerView(){
     const bv=p.mode==='ground'?(p.butterVis||0)*(1-bsp):0;
     if(Math.abs(bv)>.3){const rr=ang*RAD,d=(bike?(bv<0?-8.4:12.8):(bv<0?-9:9))*(p.sw?-1:1),px=p.x+Math.cos(rr)*d,py=p.y+Math.sin(rr)*d,b=bv*(p.sw?-1:1)*RAD,vx=comx-px,vy=comy-py;
       comx=px+vx*Math.cos(b)-vy*Math.sin(b);comy=py+vx*Math.sin(b)+vy*Math.cos(b);ang+=bv*(p.sw?-1:1)}
-    if(p.mode==='ground'&&p.sink)comy+=p.sink;
+    if(p.mode==='ground'&&p.sink)comy+=GEAR==='ski'?Math.min(p.sink,SKI_VIS):p.sink;
   }
   return {pose,phi,look,ang,comx,comy,ox,oy,twist,hy,inPow:p.mode==='ground'&&p.sink>2.5,cork:airish&&p.corkMode?{m:p.corkMode,t:p.flipAcc}:null};
 }
@@ -2407,7 +2414,7 @@ function playerView(){
    einer zweiten Welt-Ebene darüber; Dämmerung und Nacht werden auf alle drei Ebenen gelegt. */
 let HIP=null,plCv=null,plCtx=null,afterCv=null,afterCtx=null,lightOn=false,rotCv=null,rotCtx=null;const PLH=52,RC=Math.round(PLH*RZ)*2;   // rotCv: Fahrer im eigenen Raster gedreht
 function shadeLayer(g,sx,sy,sw,sh,dw,dh){const DS=curDS;g.save();g.setTransform(1,0,0,1,0,0);g.globalCompositeOperation='source-atop';
-  if(DS.dusk>.02){g.fillStyle='rgba(255,128,80,'+(.15*DS.dusk)+')';g.fillRect(0,0,dw,dh)}
+  if(DS.dusk>.02){g.fillStyle='rgba('+DUSK_TINT()+','+(.15*DS.dusk)+')';g.fillRect(0,0,dw,dh)}
   if(lightOn&&lightCv)g.drawImage(lightCv,sx,sy,sw,sh,0,0,dw,dh);g.restore()}
 function drawPlayer(cX,cY){
   const v=playerView(),spr=getSprite(v.pose,v.phi,v.look,null,null,v.inPow,v.cork,v.twist,0,GEAR==='bike'?((Math.floor((p.wheelA||0)/7.5)%6)+6)%6:0,v.hy);
@@ -2435,7 +2442,15 @@ function drawPlayer(cX,cY){
       ctx.globalAlpha=1-u;ctx.fillStyle=k===1?'#ffffff':'#7be08f';ctx.fillRect(x,y-1,1,3);ctx.fillRect(x-1,y,3,1);ctx.globalAlpha=1}
     // beim Vorbeilaufen steht der Stein vor dir: du gehst hinter ihm herum
     if(t>=tW&&h.rock)drawRock1(h.rock,cX,cY)}
-  if(p.mode==='ground'&&p.sink>1.2&&!SUMMER){const sk=Math.round(p.sink);for(let dx=-18;dx<=18;dx++){const g=groundAt(p.x+dx);if(!g||!isPow(g.seg))continue;const x=Math.round(p.x+dx-cX),y=Math.round(g.y)-cY;ctx.fillStyle='#ffffff';ctx.fillRect(x,y,1,3);ctx.fillStyle='#eef4fd';ctx.fillRect(x,y+3,1,sk+3)}}
+  /* Powder an den Füßen, im feinen Fahrer-Bild: unter der Oberfläche deckt Schnee nur den Fahrer selbst ab (nichts anderes wird weiß übermalt),
+     beim Skifahrer liegt um die Beine ein Pulverwulst, der vor dem vorderen Ski-Drittel endet, damit die Spitzen frei herausragen. */
+  if(p.mode==='ground'&&p.sink>1.2&&!SUMMER&&HIP){const sk=p.sink,ski=GEAR==='ski',vis=ski?Math.min(sk,SKI_VIS):sk,hm=ski?sk-vis+1:0,f=RS,ox=HIP.tx-PLH,oy=HIP.ty-PLH,G=plCtx;
+    G.save();G.setTransform(1,0,0,1,0,0);
+    for(let dx=-18;dx<=18;dx++){const g=groundAt(p.x+dx);if(!g||!isPow(g.seg))continue;const x=Math.round(p.x+dx-cX),y=Math.round(g.y)-cY,X=(x-ox)*f,Y=(y-oy)*f;
+      G.globalCompositeOperation='source-atop';G.fillStyle='#ffffff';G.fillRect(X,Y,f,2*f);G.fillStyle='#eef4fd';G.fillRect(X,Y+2*f,f,(Math.ceil(vis)+5)*f);
+      const u=(dx+3.5)/6.5;if(hm>.5&&Math.abs(u)<1){const m=Math.round(hm*Math.sqrt(1-u*u));if(m>0){G.globalCompositeOperation='source-over';
+        G.fillStyle='#ffffff';G.fillRect(X,Y-m*f,f,(m+2)*f);G.fillStyle=u>.55?'#dfe9f7':'#eef4fd';G.fillRect(X,Y-m*f+2*f,f,Math.max(0,m-1)*f)}}}
+    G.restore()}
 }
 
 /* ================= FLUTLICHT (PARK) ================= */
@@ -2592,7 +2607,7 @@ function drawLeafVar(g,X,base,h,w,cols,seed){const tr=Math.round(h*.42);g.fillSt
   for(const [dx,dy,r] of blobs){const cx=X+1+dx,cy=base+dy;for(let yy=-Math.ceil(r);yy<=Math.ceil(r);yy++){const ww=Math.round(Math.sqrt(Math.max(0,r*r-yy*yy)));
     for(let xx=-ww;xx<=ww;xx++){const u=xx/r,v=yy/r,lit=u+v<-.55,dark=u+v>.6,n=hash01(seed*3.7+Math.floor(cx+xx)*.31+Math.floor(cy+yy)*.57);
       g.fillStyle=dark?cols[0]:lit&&n<.8?cols[2]:n<.12?cols[0]:cols[1];g.fillRect(Math.round(cx+xx),Math.round(cy+yy),1,1)}}}}
-function makeTreeSprites(){TREE_SPR=[];JF_SPR=null;
+function makeTreeSprites(){TREE_SPR=[];JF_SPR=null;AF_SPR=null;
   if(JAPAN){for(let i=0;i<14;i++){const h=Math.round(46+hash01(i*4.7+1)*52);
       if(i%3===0){const w=Math.ceil(h*.15),tr=Math.round(h*.16),[c,g]=mk(w*2+6,h+6);drawTreeVar(g,w+2,h+5,h,w,TREE_COLS[i%TREE_COLS.length],.95,tr,i+1);TREE_SPR.push({c,w,tr,base:h+5})}
       else{const R=Math.ceil(h*.4)+5,[c,g]=mk(R*2+4,h+6);drawBirch(g,R+1,h+5,h,3,i*6.1+3,false,i%4===1);TREE_SPR.push({c,w:2,tr:h,base:h+5})}}
@@ -3804,13 +3819,25 @@ function jfSprites(){if(JF_SPR)return JF_SPR;
     gd.drawImage(t.c,0,0);gd.globalCompositeOperation='source-atop';gd.fillStyle='rgba(8,12,30,.82)';gd.fillRect(0,0,cd.width,cd.height);t.cd=cd;front.push(t)}
   return JF_SPR={back,mid,front}}
 const JF_NO={kicker:1,pkick:1,deck:1,rock:1,rocklip:1,alm:1,start:1,loopfloor:1};
-function drawJForest(cX,cY){if(!JAPAN)return;const S=jfSprites();
-  for(let x=Math.floor((cX-60)/5)*5;x<cX+VW+60;x+=5){const h=((x*2654435761)>>>0);if(h%3!==0)continue;
-    const g=groundAt(x);if(!g||JF_NO[g.seg.kind])continue;const far=((h>>>3)%100)<55,L=far?S.back:S.mid,V=L[(h>>>11)%L.length];
+/* Alpen-Freeride: derselbe Wald, aber aus Fichten mit Schnee (hinten klein und dunstig, Mitte kräftig) und schlanken Kiefern vorne. */
+let AF_SPR=null;
+function afSprites(){if(AF_SPR)return AF_SPR;
+  const mkS=(h,w,cols,snow,tr,seed,mound)=>{const [c,g]=mk(w*2+8,h+6);drawTreeVar(g,w+3,h+3,h,w,cols,snow,tr,seed);
+    if(mound){g.fillStyle='#ffffff';g.fillRect(w-1,h+1,9,3);g.fillRect(w+1,h,5,1);g.fillStyle='#dfe9f7';g.fillRect(w-1,h+3,9,1)}return {c,ox:w+3,H:h+4}};
+  const back=[],mid=[],front=[];
+  for(let i=0;i<8;i++){const h=Math.round(26+hash01(i*3.3+1)*22);back.push(mkS(h,Math.ceil(h*.2),['#4c6a70','#5d7d82'],.8,3,i*7.3+2))}
+  for(let i=0;i<10;i++){const h=Math.round(44+hash01(i*5.1+3)*40);mid.push(mkS(h,Math.ceil(h*(.17+hash01(i*2.3)*.08)),TREE_COLS[i%TREE_COLS.length],.4+hash01(i*9.1)*.5,3,i*9.1+5))}
+  for(let i=0;i<5;i++){const h=Math.round(140+hash01(i*2.7+9)*50),t=mkS(h,Math.ceil(h*.075),TREE_COLS[i%TREE_COLS.length],.6,Math.round(h*.68),i*4.7+11,true),[cd,gd]=mk(t.c.width,t.c.height);
+    gd.drawImage(t.c,0,0);gd.globalCompositeOperation='source-atop';gd.fillStyle='rgba(8,12,30,.82)';gd.fillRect(0,0,cd.width,cd.height);t.cd=cd;front.push(t)}
+  return AF_SPR={back,mid,front}}
+const forestOn=g=>JAPAN||!SUMMER&&g.seg.zone==='free';   // Wald: Japan überall, Alpen nur im Freeride
+function drawJForest(cX,cY){if(SUMMER)return;const S=JAPAN?jfSprites():afSprites();
+  for(let x=Math.floor((cX-60)/5)*5;x<cX+VW+60;x+=5){const h=((x*2654435761)>>>0);if(h%(JAPAN?3:4)!==0)continue;
+    const g=groundAt(x);if(!g||JF_NO[g.seg.kind]||!forestOn(g))continue;const far=((h>>>3)%100)<55,L=far?S.back:S.mid,V=L[(h>>>11)%L.length];
     const sx=Math.round(x-cX)-V.ox,sy=Math.round(g.y-cY)-V.H+3;if(sx>VW||sx+V.c.width<0||sy>VH)continue;ctx.drawImage(V.c,sx,sy)}}
-function drawJForestFront(cX,cY){if(!JAPAN)return;const S=jfSprites(),dk=clamp(curDS.night*.85+curDS.dusk*.2,0,.9);
+function drawJForestFront(cX,cY){if(SUMMER)return;const S=JAPAN?jfSprites():afSprites(),dk=clamp(curDS.night*.85+curDS.dusk*.2,0,.9);
   for(let x=Math.floor((cX-80)/7)*7;x<cX+VW+80;x+=7){const h=((x*40503+977)>>>0);if(h%29!==0)continue;
-    const g=groundAt(x);if(!g||JF_NO[g.seg.kind])continue;const V=S.front[(h>>>9)%S.front.length];
+    const g=groundAt(x);if(!g||JF_NO[g.seg.kind]||!forestOn(g))continue;const V=S.front[(h>>>9)%S.front.length];
     const sx=Math.round(x-cX)-V.ox,sy=Math.round(g.y-cY)-V.H+9+((h>>>5)%6);if(sx>VW||sx+V.c.width<0)continue;
     ctx.drawImage(V.c,sx,sy);if(dk>.02){ctx.globalAlpha=dk;ctx.drawImage(V.cd,sx,sy);ctx.globalAlpha=1}}}
 function drawTrees(cX,cY){drawParkForest(cX,cY);drawJForest(cX,cY);for(let pass=0;pass<2;pass++)for(const t of trees){if(!!t.dk!==(pass===0))continue;const V=TREE_SPR[t.k]||TREE_SPR[0],sp=t.dk?treeDark(V):V.c,W=sp.width;
@@ -4076,16 +4103,27 @@ function toMenu(){state='menu';$('hud').hidden=true;refreshMenu();resetRun();upd
 
 /* ================= SHOP UI ================= */
 let shopCat='helmet',tryOn={};
-function openShop(){tryOn={};$('shopMsg').textContent='';show('shop');renderShop()}
+/* Der Shop merkt sich pro Saison den zuletzt offenen Reiter (bei Bike-Teilen die Abteilung) und das zuletzt angetippte Teil, auch nach dem Neuladen. */
+const SHOP_MEM_KEY='sendit_shop_v1';let shopMem={};try{shopMem=JSON.parse(localStorage.getItem(SHOP_MEM_KEY)||'{}')||{}}catch(e){shopMem={}}
+function shopRemember(id){try{const s=SUMMER?'summer':'winter',o=shopMem[s]||{};shopMem[s]={cat:shopCat,sub:bikeSub,id:id!==undefined?id:o.cat===shopCat?o.id:null};localStorage.setItem(SHOP_MEM_KEY,JSON.stringify(shopMem))}catch(e){}}
+function openShop(){tryOn={};$('shopMsg').textContent='';const m=shopMem[SUMMER?'summer':'winter'];if(m&&SHOP[m.cat]){shopCat=m.cat;if(m.sub&&SHOP[m.sub])bikeSub=m.sub}
+  show('shop');renderShop();const SC=$('shop');SC.scrollTop=0;
+  if(m&&m.id&&m.cat===shopCat){const el=$('grid').querySelector('[data-id="'+m.id+'"]');if(el){const r=el.getBoundingClientRect(),sr=SC.getBoundingClientRect();SC.scrollTop=Math.max(0,r.top-sr.top-(SC.clientHeight-r.height)/2)}}}
 const BIKE_PARTS=['bike','bfork','bshock','brim','btire','bbar','bsad','bped'];let bikeSub='bike';
-function renderShop(){
+/* Beim Neuaufbau bleibt die Ansicht stehen: Scrollstand merken und das angetippte Teil (bzw. der gewählte Reiter) bleibt genau an seiner Stelle.
+   Safari kennt kein automatisches Scroll-Anchoring, ohne das springt die Liste nach jedem Antippen nach oben. */
+let shopAnchor=null;
+function renderShop(){const SC=$('shop'),st0=SC.scrollTop,an=shopAnchor,anTop=an?an.top:null;shopAnchor=null;
+  renderShopInner();SC.scrollTop=st0;
+  if(an&&anTop!==null){const el=an.id?$('grid').querySelector('[data-id="'+an.id+'"]'):an.sel?document.querySelector(an.sel):null;if(el){SC.scrollTop+=el.getBoundingClientRect().top-anTop}}}
+function renderShopInner(){queueMicrotask(()=>shopRemember());
   setT($('sCoins'),String(SAVE.coins));
   const tabs=$('tabs');tabs.innerHTML='';
   const cats=CATS.filter(c=>c==='bike'||!BIKE_PARTS.includes(c)).filter(c=>SUMMER?!['skis','board','poles','hoodie','pack','boots','binding'].includes(c):!['bike','jersey','prot','shoes'].includes(c));
   const inBike=SUMMER&&BIKE_PARTS.includes(shopCat);if(!cats.includes(shopCat)&&!inBike)shopCat='helmet';
-  for(const c of cats){const b=document.createElement('button');b.className='tab';b.role='tab';b.textContent=catName(c);b.setAttribute('aria-selected',c===shopCat||(c==='bike'&&inBike));b.onclick=()=>{shopCat=c==='bike'?bikeSub:c;renderShop()};tabs.appendChild(b)}
+  for(const c of cats){const b=document.createElement('button');b.className='tab';b.role='tab';b.textContent=catName(c);b.setAttribute('aria-selected',c===shopCat||(c==='bike'&&inBike));b.onclick=()=>{shopAnchor={sel:'#tabs .tab[aria-selected="true"]',top:b.getBoundingClientRect().top};shopCat=c==='bike'?bikeSub:c;renderShop()};tabs.appendChild(b)}
   {const sub=$('subtabs');sub.innerHTML='';sub.hidden=!inBike;if(inBike){bikeSub=shopCat;   // Bike: Abteilungen für jedes Teil
-    for(const c of BIKE_PARTS){const b=document.createElement('button');b.className='tab';b.role='tab';b.textContent=c==='bike'?TX('Rahmen','Frame'):catName(c);b.setAttribute('aria-selected',c===shopCat);b.onclick=()=>{shopCat=c;renderShop()};sub.appendChild(b)}}}
+    for(const c of BIKE_PARTS){const b=document.createElement('button');b.className='tab';b.role='tab';b.textContent=c==='bike'?TX('Rahmen','Frame'):catName(c);b.setAttribute('aria-selected',c===shopCat);b.onclick=()=>{shopAnchor={sel:'#subtabs .tab[aria-selected="true"]',top:b.getBoundingClientRect().top};shopCat=c;renderShop()};sub.appendChild(b)}}}
   const grid=$('grid');grid.innerHTML='';
   for(const it of SHOP[shopCat].items){
     const owned=it.price===0||SAVE.owned[it.id],eq=SAVE.equip[shopCat]===it.id,sel=tryOn[shopCat]===it.id;
@@ -4094,7 +4132,7 @@ function renderShop(){
     const bp=BIKE_PARTS.includes(shopCat);let pr;if(eq)pr=bp?TX('EINGEBAUT','INSTALLED'):TX('ANGEZOGEN','EQUIPPED');else if(owned)pr=bp?TX('EINBAUEN','INSTALL'):TX('ANZIEHEN','EQUIP');else if(sel)pr=TX('KAUFEN · ','BUY · ')+it.price;else pr=String(it.price);
     b.innerHTML='<span class="sw"></span><span class="nm"></span><span class="pr">'+(!owned?'<i class="coin"></i>':'')+'<span></span></span>';
     b.querySelector('.nm').textContent=itName(it);b.querySelector('.pr span').textContent=pr;
-    b.onclick=()=>shopClick(it,b);grid.appendChild(b);
+    b.dataset.id=it.id;b.onclick=()=>{shopAnchor={id:it.id,top:b.getBoundingClientRect().top};shopRemember(it.id);shopClick(it,b)};grid.appendChild(b);
   }
   const t=tryOn[shopCat],ti=t?itemOf(shopCat,t):null;$('prevNote').textContent=ti?TX('Vorschau: ','Preview: ')+itName(ti)+'. '+(ti.info?itInfo(ti)+' ':'')+TX('Nochmal tippen zum Kaufen.','Tap again to buy.'):TX('Tippe ein Teil an für die Vorschau.','Tap an item to preview it.');
 }
