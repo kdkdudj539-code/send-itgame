@@ -2593,7 +2593,7 @@ function drawPlayer(cX,cY){
     // beim Vorbeilaufen steht der Stein vor dir: du gehst hinter ihm herum
     if(t>=tW&&h.rock)drawRock1(h.rock,cX,cY)}
   /* Powder an den Füßen, im feinen Fahrer-Bild: unter der Oberfläche deckt Schnee nur den Fahrer selbst ab (nichts anderes wird weiß übermalt). */
-  if(p.mode==='ground'&&p.sinkV>1.2&&!SUMMER&&HIP&&isPow((groundAt(p.x)||{}).seg)){const vis=p.sinkV,f=RS,ox=HIP.tx-PLH,oy=HIP.ty-PLH,G=plCtx;
+  if(p.mode==='ground'&&p.sinkV>1.2&&!SUMMER&&HIP){const vis=p.sinkV,f=RS,ox=HIP.tx-PLH,oy=HIP.ty-PLH,G=plCtx;
     G.save();G.setTransform(1,0,0,1,0,0);
     for(let dx=-18;dx<=18;dx++){const g=groundAt(p.x+dx);if(!g||!isPow(g.seg))continue;const x=Math.round(p.x+dx-cX),y=Math.round(g.y)-cY,X=(x-ox)*f,Y=(y-oy)*f;
       G.globalCompositeOperation='source-atop';G.fillStyle='#ffffff';G.fillRect(X,Y,f,2*f);G.fillStyle='#eef4fd';G.fillRect(X,Y+2*f,f,(Math.ceil(vis)+5)*f)}
@@ -3289,6 +3289,9 @@ function land(g,fx){
     SFX.land();if(pow){const dp=g.seg.kind==='deep';powderBurst(fx,g.y,(dp?44:26)+Math.min(30,p.vy/14),dp?170:130);p.sink=(dp?9:5)+(JAPAN?3:0);shake=Math.min(2,p.vy/250)}else{burst(fx,g.y,10,['#ffffff','#e4eefb'],90);shake=Math.min(4,p.vy/160)}
   }else crash(s,btFail?TX('NICHT GEFANGEN','NOT CAUGHT'):null,pow);
 }
+/* Abstand zum nächsten festen Untergrund (Holz, Kicker, Fels) oder zur nächsten Kante voraus, höchstens L; null = nur Powder */
+const SNOW_RAMP=46;
+function hardAhead(x,L){let i=segIndexAt(x);if(i<0)return null;for(;i<segs.length;i++){const s=segs[i];if(s.x0>x+L)return null;if(s.gap||!isPow(s))return Math.max(0,s.x0-x)}return null}
 function updGround(dt){
   if(GEAR==='bike')p.wheelA=((p.wheelA||0)+(p.sw?-1:1)*Math.min(Math.abs(p.s||0)*8.8,700)*dt)%360;   // Räder drehen mit (schnell gedeckelt, sonst flimmert es)
   const g=groundAt(p.x);if(!g){launch(p.ang*RAD,0,null);return}
@@ -3318,7 +3321,8 @@ function updGround(dt){
   acc-=drag*p.s*p.s;
   p.s=clamp(p.s+acc*dt,ctrl?(p.auto?0:40):0,p.auto?170:VMAX);
   const deep=pow&&g.seg.kind==='deep';
-  p.sink=(p.sink||0)+((pow?(deep?(JAPAN?10:8):(JAPAN?7:4)):0)-(p.sink||0))*Math.min(1,dt*(pow?8:16));   // Japan: man steckt tiefer im Powder; auf festem Untergrund (Holz, Kicker) kommt man schnell hoch
+  let sinkT=pow?(deep?(JAPAN?10:8):(JAPAN?7:4)):0;if(sinkT){const d=hardAhead(p.x,SNOW_RAMP);if(d!==null)sinkT*=clamp(d/SNOW_RAMP,0,1)}   // vor Holz, Stämmen und Kanten wird der Powder flacher: man kommt nach und nach heraus
+  p.sink=(p.sink||0)+(sinkT-(p.sink||0))*Math.min(1,dt*(pow?8:16));   // Japan: man steckt tiefer im Powder; auf festem Untergrund (Holz, Kicker) kommt man schnell hoch
   const prevX=p.x,nx=p.x+Math.cos(a)*p.s*dt,ny=p.y+Math.sin(a)*p.s*dt,g2=groundAt(nx);
   if(!g2){p.x=nx;p.y=ny;launch(a,0,g.seg);return}
   // Kante zu einer Felswand oder sehr starker Knick: immer abheben, auch wenn der letzte Schritt die Kante nur knapp trifft
