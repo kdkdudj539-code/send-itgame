@@ -1432,7 +1432,7 @@ function rodrigues(v,k,deg){const t=deg*RAD,c=Math.cos(t),s=Math.sin(t),kv=v3.do
 const corkAxis=m=>{const b=(m==='cork'?45:-45)*RAD;return [Math.sin(b),0,Math.cos(b)]};
 function airPose(){const gv=p.gVis||0;
   if(p.gName&&gv>.02){const q=smooth01(gv)*8+(p.gTk||0)*2,nm=p.gName+'#'+Math.max(1,Math.min(10,Math.round(q)));if(LIBOF(GEAR)[nm])return nm}   // 10 Bilder je Grab (Ski, Board, Bike)
-  if(p.gName&&gv>.02&&!(p.grab&&gv>=.98))return p.gName+'_h';return p.grab||(p.corkMode?p.corkMode:null)||(()=>{const fv=p.fVis||0,f=p.flipDir<0?'layout':'ftuck',base=GEAR==='board'?'bair':'tuck';return fv>=.75?f:fv>=.3?f+'_h':base})()}   // Flip-Pose weich über ein Zwischenbild
+  if(p.gName&&gv>.02&&!(p.grab&&gv>=.98))return p.gName+'_h';return (p.grab&&gv>=.5?p.grab:null)||(p.corkMode?p.corkMode:null)||(()=>{const fv=p.fVis||0,f=p.flipDir<0?'layout':'ftuck',base=GEAR==='board'?'bair':'tuck';return fv>=.75?f:fv>=.3?f+'_h':base})()}   // Flip-Pose weich über ein Zwischenbild
 /* Zeichnet die Figur bei Drehwinkel phi (0 = Fahrtrichtung rechts, 90 = zum Spieler, 180 = Switch, 270 = vom Spieler weg).
    look: Kopf schaut die Piste runter; bei Switch dreht sich der Oberkörper mit (Blick über die Schulter). */
 const SKI_HW=.85;   // halbe Skibreite (Welt)
@@ -3222,7 +3222,7 @@ function launch(a,pop,sg){
   if(sg&&sg.vmax)s=Math.min(s,sg.vmax);
   if(sg&&sg.kind==='kicker'&&pop)pop*=1.1;
   p.vx=Math.cos(a)*s;p.vy=Math.sin(a)*s-pop;
-  p.flipPoseT=0;p.fHeld=0;p.fVis=0;p.grab=null;p.gVis=0;p.gTk=0;p.gName=null;p.corkMode=null;p.spinTw=0;p.lastSpin=null;p.ab=null;const r=p.ang*RAD;p.x+=FOOTG*Math.sin(r);p.y-=FOOTG*Math.cos(r);
+  p.flipPoseT=0;p.fHeld=0;p.fVis=0;p.grab=null;p.gVis=0;p.gTk=0;p.gName=null;p.gNext=null;p.gIn=false;p.corkMode=null;p.spinTw=0;p.lastSpin=null;p.ab=null;const r=p.ang*RAD;p.x+=FOOTG*Math.sin(r);p.y-=FOOTG*Math.cos(r);
   {const pc=poseCOM(airPose(),p.spin,GEAR);p.x+=pc.cx*Math.cos(r)-pc.cy*Math.sin(r);p.y+=pc.cx*Math.sin(r)+pc.cy*Math.cos(r);p.cx=pc.cx;p.cy=pc.cy;p.cz=pc.cz;p.fx=pc.fx;p.fy=pc.fy;p.fz=pc.fz}
   p.mode='air';p.bar=null;p.whip=null;p.nBar=0;p.nWhip=0;
   p.airT=0;p.base=p.ang;p.spinStart=p.spin;p.flipAcc=0;p.flipDir=0;p.flipTarget=null;p.spinDir=0;p.spinTarget=null;p.grabT={};p.grab=null;
@@ -3458,14 +3458,16 @@ function updAir(dt){
   p.corkHold=(up||dn)&&(l||r)?(p.corkHold||0)+dt:0;   // Cork/Misty erst, wenn kurz schräg gehalten wird, nicht beim Durchrutschen über die Schräge (sonst dreht ein Spin plötzlich langsamer)
   if(!p.corkMode&&p.corkHold>=.07&&(Math.abs(norm(p.flipAcc))<45||Math.abs(p.flipAcc)<CORK_LATE))p.corkMode=dn?'cork':'misty';
   const gr=inGrab();p.grab=gr;if(gr)p.grabT[gr]=(p.grabT[gr]||0)+dt;
-  if(gr&&gr!==p.gName){if((p.gVis||0)>.5)p.gVis=.5;p.gName=gr}
+  // Grab wechseln: erst den alten schneller zurück, dann den neuen etwas schneller rein (nicht direkt im neuen Grab)
+  if(gr&&gr!==p.gName){if(p.gName&&(p.gVis||0)>.02)p.gNext=gr;else{p.gName=gr;p.gNext=null}}else if(!gr||gr===p.gName)p.gNext=null;
   // Landehilfe: kurz vor dem Aufsetzen Flip und Spin auf die nächste landbare Stellung drehen und den Grab loslassen
   if(SAVE.assist){const ax=footX(),ay=footY(),gA=groundAt(ax+p.vx*.1);
     if(gA&&p.vy>0){const tl=(gA.y-ay)/Math.max(60,p.vy);
       if(tl<.34&&!(up||dn)){const d=Math.round(p.flipAcc/360)*360-p.flipAcc,mx=720*dt;p.flipAcc+=clamp(d,-mx,mx);p.ang=p.base+p.flipAcc}
       if(tl<.32&&!(l||r)){const tg=p.fromRail&&p.spinTarget!=null&&((p.spinTarget%180)+180)%180===0?p.spinTarget:Math.round(p.spin/180)*180,d=tg-p.spin,mx=820*dt;p.spin+=clamp(d,-mx,mx);p.spinDir=0;p.spinTarget=p.fromRail?tg:null}
       if(tl<.14)p.grab=null}}
-  {const tg=p.grab?1:0,mx=(GEAR==='bike'?5:GRAB_BLEND)*dt;p.gVis=(p.gVis||0)+clamp(tg-(p.gVis||0),-mx,mx);
+  {const sw=!!p.gNext,tg=sw?0:p.grab?1:0,mx=(GEAR==='bike'?5:GRAB_BLEND)*(sw?2.2:p.gIn?1.4:1)*dt;p.gVis=(p.gVis||0)+clamp(tg-(p.gVis||0),-mx,mx);
+   if(sw&&p.gVis<=.02){p.gName=p.gNext;p.gNext=null;p.gIn=true}if(p.gIn&&(p.gVis>=.98||!p.grab))p.gIn=false;
    const tk=p.grab&&p.grab===p.gName&&p.gVis>=.98?1:0;p.gTk=(p.gTk||0)+clamp(tk-(p.gTk||0),-6*dt,2.8*dt)}   // Tweak: gehaltener Trick geht noch weiter rein
   {const sv=(p.spin-(p.lastSpin??p.spin))/Math.max(dt,1e-4);p.lastSpin=p.spin;const tg=p.corkMode?0:clamp(sv/SPIN_RATE,-1,1)*SPIN_TWIST;p.spinTw=(p.spinTw||0)+(tg-(p.spinTw||0))*Math.min(1,dt*14)}   // Hand braucht ca. 0,11 s zum Ski
   // Pose bestimmt, wo der Schwerpunkt im Körper liegt; der Schwerpunkt selbst fliegt unbeirrt weiter
