@@ -2456,7 +2456,7 @@ function playerView(){
     const bv=p.mode==='ground'?(p.butterVis||0)*(1-bsp):0;
     if(Math.abs(bv)>.3){const rr=ang*RAD,d=(bike?(bv<0?-8.4:12.8):(bv<0?-9:9))*(p.sw?-1:1),px=p.x+Math.cos(rr)*d,py=p.y+Math.sin(rr)*d,b=bv*(p.sw?-1:1)*RAD,vx=comx-px,vy=comy-py;
       comx=px+vx*Math.cos(b)-vy*Math.sin(b);comy=py+vx*Math.sin(b)+vy*Math.cos(b);ang+=bv*(p.sw?-1:1)}
-    if(p.mode==='ground'&&p.sink)comy+=p.sink;
+    if(p.sinkV>.05&&p.mode!=='dead')comy+=p.sinkV;
   }
   return {pose,phi,look,ang,comx,comy,ox,oy,twist,hy,inPow:p.mode==='ground'&&p.sink>2.5,cork:airish&&p.corkMode?{m:p.corkMode,t:p.flipAcc}:null};
 }
@@ -2493,7 +2493,7 @@ function drawPlayer(cX,cY){
     // beim Vorbeilaufen steht der Stein vor dir: du gehst hinter ihm herum
     if(t>=tW&&h.rock)drawRock1(h.rock,cX,cY)}
   /* Powder an den Füßen, im feinen Fahrer-Bild: unter der Oberfläche deckt Schnee nur den Fahrer selbst ab (nichts anderes wird weiß übermalt). */
-  if(p.mode==='ground'&&p.sink>1.2&&!SUMMER&&HIP&&isPow((groundAt(p.x)||{}).seg)){const vis=p.sink,f=RS,ox=HIP.tx-PLH,oy=HIP.ty-PLH,G=plCtx;
+  if(p.mode==='ground'&&p.sinkV>1.2&&!SUMMER&&HIP&&isPow((groundAt(p.x)||{}).seg)){const vis=p.sinkV,f=RS,ox=HIP.tx-PLH,oy=HIP.ty-PLH,G=plCtx;
     G.save();G.setTransform(1,0,0,1,0,0);
     for(let dx=-18;dx<=18;dx++){const g=groundAt(p.x+dx);if(!g||!isPow(g.seg))continue;const x=Math.round(p.x+dx-cX),y=Math.round(g.y)-cY,X=(x-ox)*f,Y=(y-oy)*f;
       G.globalCompositeOperation='source-atop';G.fillStyle='#ffffff';G.fillRect(X,Y,f,2*f);G.fillStyle='#eef4fd';G.fillRect(X,Y+2*f,f,(Math.ceil(vis)+5)*f)}
@@ -3202,7 +3202,7 @@ function updGround(dt){
   acc-=drag*p.s*p.s;
   p.s=clamp(p.s+acc*dt,ctrl?(p.auto?0:40):0,p.auto?170:VMAX);
   const deep=pow&&g.seg.kind==='deep';
-  p.sink=(p.sink||0)+((pow?(deep?(JAPAN?10:8):(JAPAN?7:4)):0)-(p.sink||0))*Math.min(1,dt*(pow?8:30));   // Japan: man steckt tiefer im Powder; auf festem Untergrund (Holz, Kicker) ist man sofort oben
+  p.sink=(p.sink||0)+((pow?(deep?(JAPAN?10:8):(JAPAN?7:4)):0)-(p.sink||0))*Math.min(1,dt*(pow?8:16));   // Japan: man steckt tiefer im Powder; auf festem Untergrund (Holz, Kicker) kommt man schnell hoch
   const prevX=p.x,nx=p.x+Math.cos(a)*p.s*dt,ny=p.y+Math.sin(a)*p.s*dt,g2=groundAt(nx);
   if(!g2){p.x=nx;p.y=ny;launch(a,0,g.seg);return}
   // Kante zu einer Felswand oder sehr starker Knick: immer abheben, auch wenn der letzte Schritt die Kante nur knapp trifft
@@ -3415,7 +3415,7 @@ function startHeal(r){run.packUsed=true;
   const xi=Math.min(footX(),r.cx-r.w/2),x=r.cx-r.w/2-22,g=groundAt(x);
   p.mode='heal';p.heal={t:0,rock:r,xi,x0:x,x1:r.cx+r.w/2+9,walk:0};
   p.x=xi;{const gi=groundAt(xi)||g;if(gi){p.y=gi.y;p.ang=gi.a*DEG}}
-  p.vx=0;p.vy=0;p.s=0;p.spin=0;p.flipAcc=0;p.corkMode=null;p.grab=null;p.gVis=0;p.sw=false;p.bs=null;p.butter=0;p.butterVis=0;p.sink=0;p.tuck=false;p.braking=false;p.combo=0;p.ab=null;
+  p.vx=0;p.vy=0;p.s=0;p.spin=0;p.flipAcc=0;p.corkMode=null;p.grab=null;p.gVis=0;p.sw=false;p.bs=null;p.butter=0;p.butterVis=0;p.sink=0;p.sinkV=0;p.tuck=false;p.braking=false;p.combo=0;p.ab=null;
   if(pat.on){pat.on=false;pat.next=rand(24,38)}
   shake=8;SFX.crash();burst(r.cx,r.y-6,30,['#ffffff','#8d91a3','#e3ecf8'],170);
   showTrick(TX('FELS!','ROCK!'),TX('Verbandszeug raus','First aid kit out'),'bad');
@@ -3432,7 +3432,7 @@ function die(reason){
   if(p.mode==='dead'||p.mode==='dig'||p.mode==='heal')return;
   const fx0=footX();
   p.inAir=p.mode==='air';
-  if(reason==='wall'){p.inAir=false;p.x=fx0;const g=groundAt(fx0);if(g){p.y=g.y;p.ang=g.a*DEG}p.wallSink=0;p.wTumble=0;p.sink=0}
+  if(reason==='wall'){p.inAir=false;p.x=fx0;const g=groundAt(fx0);if(g){p.y=g.y;p.ang=g.a*DEG}p.wallSink=0;p.wTumble=0;p.sink=0;p.sinkV=0}
   p.mode='dead';p.deadReason=reason;p.deadT=0;SFX.die();shake=reason==='void'?0:8;
   if(reason==='patrol')showTrick('BUSTED!',SUMMER?'Ranger':'Ski Patrol','bad');
   if(reason==='wall')showTrick(SUMMER?TX('MURE!','MUDSLIDE!'):TX('LAWINE!','AVALANCHE!'),'','bad');
@@ -3541,6 +3541,7 @@ function updCamera(dt,snap){
 }
 let pruneT=0;
 function update(dt){
+  {const tg=p.mode==='ground'?(p.sink||0):0;p.sinkV=(p.sinkV||0)+(tg-(p.sinkV||0))*Math.min(1,dt*12)}   // sichtbares Einsinken folgt weich: kein Ruck beim Wechsel vom Powder auf Holz, Stämme oder in die Luft
   now+=dt;if(!p.auto)run.time+=dt;if(jumpBuf>0)jumpBuf-=dt;
   if(p.auto){if(jumpBuf>0){jumpBuf=0;endIntro(true)}else if(p.x>=ALM_END)endIntro(false)}
   p.prevX=p.x;
