@@ -1191,6 +1191,9 @@ function drawBoardWide(g,poly,d,n,lo,P,O,col,hw,bw){
    BOARD3.crouch=shY(bd,BOARD3.ride.board.c[1]-bd.board.c[1]);
    for(const LIB of [SKI3,BOARD3])LIB.crouch_h=mixD(LIB.ride,LIB.crouch,.5)}
   for(const [LIB,base] of [[SKI3,'tuck'],[BOARD3,'bair']])for(const g of ['blunt','japan','nose','tail','mute','truck','venom','octo','layout','ftuck'])if(LIB[g]&&LIB[base])LIB[g+'_h']=mixD(LIB[base],LIB[g],.5);
+  /* Ski und Board: 10 Bilder je Grab wie beim Bike. 1-8 greifen weich zu, 9 und 10 sind der Tweak (gehaltener Grab geht noch etwas weiter rein) */
+  {const ease=u=>u*u*(3-2*u);for(const [LIB,base] of [[SKI3,'tuck'],[BOARD3,'bair']])for(const g of ['blunt','japan','nose','tail','mute','truck','venom','octo'])if(LIB[g]&&LIB[base]){
+    for(let k=1;k<8;k++)LIB[g+'#'+k]=mixD(LIB[base],LIB[g],ease(k/8));LIB[g+'#8']=LIB[g];LIB[g+'#9']=mixD(LIB[base],LIB[g],1.05);LIB[g+'#10']=mixD(LIB[base],LIB[g],1.1)}}
   BOARD3.blunt=BOARD3.japan;BOARD3.blunt_h=BOARD3.japan_h;
   // Verbandszeug: im Schnee sitzen, Knie hoch, Hände wickeln den Verband ums Knie (Ski bzw. Brett liegen vorne flach im Schnee)
   {const armsA=[[[-1,-6,-5],[2.5,-4.5,-6],[4.5,-3.5,-3.5]],[[0,-6,5],[3,-3,6],[5,-2.5,2.5]]],armsB=[[[-1,-6,-5],[3,-3,-6],[5,-2,-3]],[[0,-6,5],[2.5,-4.5,6],[4,-4,2.5]]];
@@ -1428,7 +1431,7 @@ function rodrigues(v,k,deg){const t=deg*RAD,c=Math.cos(t),s=Math.sin(t),kv=v3.do
   return [v[0]*c+(k[1]*v[2]-k[2]*v[1])*s+k[0]*kv*(1-c),v[1]*c+(k[2]*v[0]-k[0]*v[2])*s+k[1]*kv*(1-c),v[2]*c+(k[0]*v[1]-k[1]*v[0])*s+k[2]*kv*(1-c)]}
 const corkAxis=m=>{const b=(m==='cork'?45:-45)*RAD;return [Math.sin(b),0,Math.cos(b)]};
 function airPose(){const gv=p.gVis||0;
-  if(GEAR==='bike'&&p.gName&&gv>.02){const q=smooth01(gv)*8+(p.gTk||0)*2;return p.gName+'#'+Math.max(1,Math.min(10,Math.round(q)))}   // Bike: 10 Bilder je Trick
+  if(p.gName&&gv>.02){const q=smooth01(gv)*8+(p.gTk||0)*2,nm=p.gName+'#'+Math.max(1,Math.min(10,Math.round(q)));if(LIBOF(GEAR)[nm])return nm}   // 10 Bilder je Grab (Ski, Board, Bike)
   if(p.gName&&gv>.02&&!(p.grab&&gv>=.98))return p.gName+'_h';return p.grab||(p.corkMode?p.corkMode:null)||(()=>{const fv=p.fVis||0,f=p.flipDir<0?'layout':'ftuck',base=GEAR==='board'?'bair':'tuck';return fv>=.75?f:fv>=.3?f+'_h':base})()}   // Flip-Pose weich über ein Zwischenbild
 /* Zeichnet die Figur bei Drehwinkel phi (0 = Fahrtrichtung rechts, 90 = zum Spieler, 180 = Switch, 270 = vom Spieler weg).
    look: Kopf schaut die Piste runter; bei Switch dreht sich der Oberkörper mit (Blick über die Schulter). */
