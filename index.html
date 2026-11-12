@@ -1249,10 +1249,10 @@ function bikeSolve(L0){let L=BIKE_SOLVED.get(L0);if(L)return L;
   const bk=L0.bike||{o:[1.6,11,0]},X=bikeXf(bk),th=((bk.crank||0)+CRANK0)*RAD,c=BK.crank;
   const ped=[X.P([-c*Math.cos(th),-c*Math.sin(th),-BK.ped]),X.P([c*Math.cos(th),c*Math.sin(th),BK.ped])];   // links, rechts
   const grip=[X.P(X.F([BK.grip[0],BK.grip[1],-4.2])),X.P(X.F([BK.grip[0],BK.grip[1],4.2]))];if(L0.saddleHand!=null)grip[L0.saddleHand]=X.P([-1.4,-9.3,L0.saddleHand?1.1:-1.1]);   /* saddleHand: diese Hand hält den Sattel */
-  const fw=X.dirB([1,0,0]),kD=v3.add(fw,[0,-.5,0]);
+  const fw=X.dirB([1,0,0]),kD=v3.add(fw,[0,-.5,0]),EP=L0.elbow||[-.35,.55,.9];
   const t1=L0.torso[1],hips=L0.hips||[[-.4,0,-2.4],[.4,0,2.4]],sh=L0.shoulders||[[t1[0]-.6,t1[1]+.6,(t1[2]||0)-4.4],[t1[0]+.2,t1[1]+.6,(t1[2]||0)+4.4]];
   const legs=[0,1].map(i=>L0.legsX&&L0.legsX[i]||[hips[i],ik2(hips[i],ped[i],BK.thigh,BK.shin,kD),ped[i]]);
-  const arms=[0,1].map(i=>L0.armsX&&L0.armsX[i]||[sh[i],ik2(sh[i],grip[i],BK.uarm,BK.farm,[-.35,.55,i?.9:-.9]),grip[i]]);
+  const arms=[0,1].map(i=>L0.armsX&&L0.armsX[i]||[sh[i],ik2(sh[i],grip[i],BK.uarm,BK.farm,[EP[0],EP[1],i?EP[2]:-EP[2]]),grip[i]]);
   L=Object.assign({},L0,{legs,arms,boots:legs.map(l=>l[2]),bootWH:[4,2],noFlare:true,noPoles:true,handLo:[0,1].map(i=>!(L0.armsX&&L0.armsX[i])),_X:X,_ped:ped});
   BIKE_SOLVED.set(L0,L);return L}
 // Bike zeichnen: Teile mit Tiefe (key) wie die Gliedmaßen, damit Beine, Bike und Arme richtig voreinander liegen.
@@ -1357,12 +1357,14 @@ const BIKE3=(()=>{
   const B=(o,x)=>Object.assign({o:o||[1.6,11,0]},x||{}),T=(a,b,y0)=>[[-.5,y0||0,0],[a,b,0]];
   // Punkte einer Pose nach unten schieben (z. B. aufrecht stehen statt auf den Pedalen), Richtungen bleiben
   const SH=(o,dy)=>Array.isArray(o)&&o.length===3&&typeof o[0]==='number'?[o[0],o[1]+dy,o[2]]:Array.isArray(o)?o.map(v=>SH(v,dy)):o;
-  // Fahrhaltung: im Stehen, Beine gestreckt, Hüfte hoch über dem Sattel, Oberkörper nur leicht nach vorne, Arme leicht gebeugt
-  const ride={bike:B([.6,12.6,0]),torso:T(4.2,-6.4),head:[6.3,-10,0]};
-  const tuck={bike:B([.4,11.8,0]),torso:T(4.4,-6.2),head:[6.6,-9.8,0]};   // in der Luft: Bike etwas angezogen
+  // Fahrhaltung wie im Downhill-Rennen (Attack-Position): im Stehen, Knie gebeugt, Hüfte tief und hinter dem Tretlager, Oberkörper flach Richtung Lenker,
+  // Kopf vorne über dem Vorbau, Ellbogen gebeugt und nach außen. AP(dx,dy): Hüfte und Oberkörper zusammen verschieben
+  const AP=(dx,dy,tx,ty,hx,hy)=>({hips:[[-3+dx,2.8+dy,-2.4],[-2.2+dx,2.8+dy,2.4]],torso:[[-3.1+dx,2.8+dy,0],[3.3+dx+(tx||0),-1.6+dy+(ty||0),0]],head:[6.1+dx+(hx||0),-4.2+dy+(hy||0),0],elbow:[-.3,.1,1]});
+  const ride=Object.assign({bike:B([.6,12.6,0])},AP(0,0));
+  const tuck=Object.assign({bike:B([.4,11.8,0])},AP(.8,-.6,0,-.4,0,-.6));   // in der Luft: Bike etwas angezogen, Oberkörper etwas aufrechter
   const L={ride,tuck,
     // R2 halten: Hüfte tiefer, Räder bleiben am Boden
-    crouch:{bike:B([.6,12.6,0]),hips:[[-.4,2.6,-2.4],[.4,2.6,2.4]],torso:T(5.2,-3.4,2.6),head:[7.6,-6.8,0]},
+    crouch:Object.assign({bike:B([.6,12.6,0])},AP(-.4,1.4,.6,1,.6,1.4)),
     layout:{bike:B([2,11,0],{pitch:8}),torso:T(3,-6.4),head:[5,-10.2,0]},
     ftuck:{bike:B([1.2,9.6,0],{pitch:-8}),torso:T(5.4,-4.4),head:[7.8,-7.4,0]},
     cork:{bike:B([.4,11.8,0],{roll:14,yaw:-10}),torso:T(4.4,-6.2),head:[6.6,-9.8,0]},
@@ -1400,8 +1402,8 @@ const BIKE3=(()=>{
     grind:ride};
   // Vollgas im Stehen (Wiegetritt): acht Bilder pro Kurbelumdrehung. Haltung wie beim normalen Stehen, die Hüfte sinkt nur so weit, dass das untere Bein
   // das Pedal erreicht; das Bike schwingt bei jedem Tritt zur Seite weg vom drückenden Bein, der Oberkörper schiebt dabei leicht nach vorne
-  for(let k=0;k<8;k++){const a=k*45,s=Math.sin(a*RAD),s2=s*s,hy=1.4+1*s2,fw=.8*s2;
-    L['push'+k]={bike:B([.6,12.6,0],{crank:a,roll:-20*s,yaw:4*s}),hips:[[-.4,hy,-2.4],[.4,hy,2.4]],torso:T(4.2+fw,-6.4+hy,hy),head:[6.3+fw,-10+hy,0]}}
+  for(let k=0;k<8;k++){const a=k*45,s=Math.sin(a*RAD),s2=s*s,hy=-1+1*s2,fw=1.6+.8*s2;
+    L['push'+k]=Object.assign({bike:B([.6,12.6,0],{crank:a,roll:-20*s,yaw:4*s})},AP(fw,hy))}   // Treten: Hüfte etwas höher und weiter vorne als in der Attack-Position
   // Verbandszeug: im Dreck sitzen, das Bike liegt hinter dir; danach um den Stein schieben (aufrecht, Hüfte 12,5 über dem Boden)
   {const legs=[[[-.5,0,-3],[4.5,-3.5,-3.5],[9,.5,-4]],[[.5,0,3],[5,-3.5,3.5],[9,.5,4]]],lying=B([3,.8,-10],{roll:-80});
    L.sit0={bike:lying,legsX:legs,torso:[[-.5,0,0],[-1,-7,0]],head:[1,-10.6,0],armsX:[[[-1,-6,-5],[2.5,-4.5,-6],[4.5,-3.5,-3.5]],[[0,-6,5],[3,-3,6],[5,-2.5,2.5]]]};
@@ -1417,7 +1419,7 @@ const BIKE3=(()=>{
     if(Array.isArray(A)&&Array.isArray(Z)&&A.length===Z.length)return Z.map((z,i)=>mixD(A[i],z,u));
     if(A&&Z&&typeof A==='object'&&typeof Z==='object'&&!Array.isArray(A)&&!Array.isArray(Z)){const o={};for(const k in Z)o[k]=k in A?mixD(A[k],Z[k],u):Z[k];return o}
     return Z};
-  for(const g of ['blunt','japan','nose','tail','mute','truck','venom','octo','layout','ftuck'])L[g+'_h']=mixD(tuck,L[g],.5);
+  const DH0=[[-.4,0,-2.4],[.4,0,2.4]];for(const g of ['blunt','japan','nose','tail','mute','truck','venom','octo','layout','ftuck'])L[g+'_h']=Object.assign(mixD(tuck,L[g],.5),{hips:mixD(tuck.hips||DH0,L[g].hips||DH0,.5)});
   for(const k of ['blunt','blunt_max']){const S=bikeSolve(L[k]),i=L[k].saddleHand,ax=[null,null];ax[i]=S.arms[i];L[k]=Object.assign({},L[k],{armsX:ax})}   // Superman: Hand am Sattel als feste Armstellung, damit die Zwischenbilder dorthin greifen
   {const DH=[[-.4,0,-2.4],[.4,0,2.4]],mv=(a,b,u)=>a.map((x,i)=>x+(b[i]-x)*u);
    const mixBk=(a,b,u)=>{const o={o:mv(a.o||[1.6,11,0],b.o||[1.6,11,0],u),piv:b.piv||a.piv};for(const k of ['yaw','roll','pitch','steer','crank'])o[k]=(a[k]||0)+((b[k]||0)-(a[k]||0))*u;return o};
@@ -1426,7 +1428,7 @@ const BIKE3=(()=>{
    const ease=u=>u*u*(3-2*u);
    for(const g of ['blunt','japan','nose','tail','mute','truck','venom','octo']){for(let k=1;k<8;k++)L[g+'#'+k]=frame(tuck,L[g],ease(k/8));L[g+'#8']=L[g];
      const M=L[g+'_max']||L[g];L[g+'#9']=frame(L[g],M,.5);L[g+'#10']=M}}
-  for(const k of ['ab_back','ab_lean','crouch'])L[k+'_h']=mixD(ride,L[k],.5);
+  for(const k of ['ab_back','ab_lean','crouch'])L[k+'_h']=Object.assign(mixD(ride,L[k],.5),{hips:mixD(ride.hips||DH0,L[k].hips||DH0,.5)});
   L.ab_sag_h=mixD(ride,L.ab_sag,.5);L.ab_sag_h.bike.sag=BK_SAG/2;
   L._bike=Object.assign({},ride,{bike:B(),noRider:true});   // Shop-Vorschau: Bike an der gewohnten Stelle
   return L})();
@@ -2042,27 +2044,27 @@ function fTable(){
    table = oben flach, double = flache Mulde zwischen Absprung und Landung, big = großer Table. Wer zu kurz springt, landet im Dreck, nicht im Abgrund. */
 function fDirt(type){
   const d=difficulty(),big=type==='big';
-  seg(Math.max(big?200:60,(big?400:130)-leadCut),big?24:rand(16,21));seg(big?30:20,big?7:5);
-  const steps=big?[-8,-16,-24,-31]:[-8,-15,-22,-28],sl=big?16:12,ks=[];for(const a of steps)ks.push(seg(sl,a,'kicker'));
+  seg(Math.max(big?220:80,(big?440:170)-leadCut),big?25:rand(18,22));seg(big?36:26,big?7:5);
+  const steps=big?[-8,-16,-24,-31,-37]:[-8,-15,-22,-29,-34],sl=big?22:15,ks=[];   /* große Erdhügel: gut doppelt so hoch wie vorher */for(const a of steps)ks.push(seg(sl,a,'kicker'));
   ks[ks.length-1].lip=true;
   for(const s of ks.slice(2)){s.wood=true;s.kx=ks[2].x0;s.ky=ks[2].y0;s.kb=Math.tan(5*RAD)}   // oberer Teil des Absprungs: Holzbretter auf dem Erdhügel
   const lipX=gx,lipY=gy,la=steps[steps.length-1];let dist,dropY;
-  if(type==='double'){const dep=rand(20,28)+d*8,bot=rand(26,46)+d*30;
+  if(type==='double'){const dep=rand(34,46)+d*10,bot=rand(50,80)+d*35;
     seg(dep/Math.tan(42*RAD),42,'ditch');seg(bot,5,'ditch');const up=gy-(lipY+6);seg(up/Math.tan(30*RAD),-30,'ditch');seg(10,4,'dtop');
     dist=gx-lipX+14;dropY=gy-lipY}
-  else{const tl=big?rand(130,180)+d*50:rand(60,100)+d*35;seg(tl,4,'dtop');dist=tl+(big?40:26);dropY=tl*Math.tan(4*RAD)+4}
-  const dbl=type==='double',req=reqSpeed(la,dist,dropY)*(dbl?1.08:1);ks.forEach(s=>{s.req=req;s.assist=dbl?1:.86;s.vmax=VMAX});   // Double: zieht sicher über die Mulde
+  else{const tl=big?rand(180,230)+d*40:rand(110,160)+d*40;seg(tl,4,'dtop');dist=tl+(big?70:50);dropY=tl*Math.tan(4*RAD)+4}
+  const dbl=type==='double',req=reqSpeed(la,dist,dropY)*(dbl?1.08:1);ks.forEach(s=>{s.req=req;s.assist=dbl?1:.86;s.dirt=true;s.vmax=VMAX});   // Double: zieht sicher über die Mulde; Tisch: mit Schwung sicher auf die Landung
   coinArc(lipX,lipY,la,req*1.02,dist+80,big?12:7);
   const fl=flightLen(lipX,lipY,la,VMAX,JUMP_POP*1.1,gx,gy,28);parkEnd=gx+fl;
-  seg(clamp(fl+80,200,big?900:600),28,'landing');seg(60,13);
+  seg(clamp(fl+80,240,big?1100:800),28,'landing');seg(60,13);
 }
 // Sommer-Drop: Holzpodest, darunter eine steile Erdkante bis zur Landung (kein Loch)
 function fDropS(){
   const d=difficulty();seg(Math.max(80,150-leadCut),25);const dk=seg(26,4,'deck');dk.vmax=360;dk.wood=true;dk.lip=true;
-  const lipX=gx,lipY=gy,h=rand(34,48)+d*16;seg(h/Math.tan(64*RAD),64,'dface');
+  const lipX=gx,lipY=gy,h=rand(64,84)+d*20;seg(h/Math.tan(64*RAD),64,'dface');
   coinArc(lipX,lipY,4,270,100,6);
   const fl=flightLen(lipX,lipY,4,360,JUMP_POP,gx,gy,28);parkEnd=gx+fl;
-  seg(clamp(fl+80,220,620),28,'landing');seg(60,14);
+  seg(clamp(fl+80,260,900),28,'landing');seg(60,14);
 }
 // Rollers wie im Pumptrack: weiche Wellen, mit Schwung hebst du kurz ab
 function fRollers(){const n=Math.random()<.5?3:4;seg(Math.max(50,90-leadCut),rand(14,18));const x0=gx;
@@ -3263,7 +3265,7 @@ function launch(a,pop,sg){
   if(p.mode==='ground'&&(Math.abs(Math.round(p.spin/180))%2===1)!==!!p.sw)p.spin+=180;
   if(p.butter)butterEnd();p.butterVis=0;
   let s=p.s;
-  if(sg&&sg.req&&sg.assist&&!p.braking)s=Math.max(s,sg.req*sg.assist);
+  if(sg&&sg.req&&sg.assist&&!p.braking)s=Math.max(s,sg.req*(sg.dirt&&s>=sg.req*.45?1:sg.assist));
   if(sg&&sg.vmax)s=Math.min(s,sg.vmax);
   if(sg&&sg.kind==='kicker'&&pop)pop*=1.1;
   p.vx=Math.cos(a)*s;p.vy=Math.sin(a)*s-pop;
