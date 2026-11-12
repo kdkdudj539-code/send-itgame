@@ -1006,6 +1006,9 @@ const SKI3=(()=>{
     // Afterbangs: lässig nach der Landung (ca. 1 s)
     ab_back:{...ride,torso:[[-1,0,0],[-.3,-7,0]],head:[.8,-11.5,0],handsBack:true,
       arms:[[[-1,-6,-5],[-3.5,-3,-4.5],[-4,.5,-1]],[[.5,-6,5],[-3,-3,4.5],[-3.5,.5,1]]],poleTips:null,poleDirs:[[-.9,.42,.25],[-.9,.42,-.25]]},
+    /* Double-Cork-Afterbang: tief in den Hintern gesetzt und weit zurückgelehnt, Rücken rund, Kopf hängt vor, Hände hinter dem Rücken */
+    ab_hard:{...ride,skis:[{c:[.5,11,-4],d:[1,0,0],flex:1.8,flexEnd:'tip'},{c:[.5,11,4],d:[1,0,0],flex:1.8,flexEnd:'tip'}],legs:[[[-4,3,-3],[1.4,5.2,-3.5],[-1,7,-4]],[[-2.4,3,3],[3.2,5.2,3.5],[1,7,4]]],torso:[[-3.2,3,0],[-8,-2,0]],head:[-6.8,-6.2,0],handsBack:true,
+      arms:[[[-8.4,-1.4,-5],[-11,1.6,-4.5],[-11.6,4.8,-1.4]],[[-7.2,-1.4,5],[-10.4,1.6,4.5],[-11,4.8,1.4]]],poleTips:null,poleDirs:[[-.94,.3,.2],[-.94,.3,-.2]]},
     ab_lean:{...ride,torso:[[-1,0,0],[-3,-6.4,0]],head:[-1.6,-11,0],
       arms:[[[-3,-5.6,-5],[-3,-1.6,-6.5],[-2,2,-6.5]],[[-2.2,-5.6,5],[-2,-1.6,6.5],[-1,2,6.5]]],poleTips:null,poleDirs:[[-.8,.6,0],[-.8,.6,0]]},
     // Nose Butter: Gewicht auf die Spitzen, Hüfte und Knie nach vorne, Enden biegen sich hoch
@@ -1105,6 +1108,8 @@ const BOARD3=(()=>{
     misty:{...tuck,torso:[[0,-1,0],[2,-7,0]],arms:[[[0,-6.5,-4.5],[3,-4,-1],[5,-2,2]],[[1.5,-6.5,4.5],[4.5,-3,4.5],[5.5,-1,2.5]]],head:[3.5,-11,0]},
     // Afterbangs
     ab_back:{...ride,torso:[[0,0,0],[-.6,-7,0]],head:[1.4,-11.5,0]},
+    ab_hard:{...ride,legs:[[[-3.6,3,0],[-6.4,5,2],[-5,7,0]],[[2.2,3,0],[4.2,5,2],[5,7,0]]],torso:[[-.8,3,0],[-6.2,-1.6,0]],head:[-5,-6,0],
+      arms:[[[-6.2,-1,-4.5],[-9.2,1.6,-3.5],[-10.6,5,-.7]],[[-6.2,-1,4.5],[-9,2.2,3.5],[-10.4,5.4,.7]]]},
     ab_lean:{...ride,handsBack:false,armKeys:null,torso:[[0,0,0],[-2.6,-6.5,0]],head:[-1,-11,0],
       arms:[[[-2.5,-5.6,-4.5],[-3,-1.8,-5.5],[-2.5,2,-5.5]],[[-2.5,-5.6,4.5],[-3,-1.8,5.5],[-2.5,2,5.5]]]},
     // Ausgraben mit der Lawinenschaufel
@@ -1202,7 +1207,7 @@ function drawBoardWide(g,poly,d,n,lo,P,O,col,hw,bw){
     if(A&&Z&&typeof A==='object'&&typeof Z==='object'&&!Array.isArray(A)&&!Array.isArray(Z)){const o={};for(const k in Z)o[k]=k in A?mixD(A[k],Z[k],u):Z[k];return o}
     return Z};
   for(const LIB of [SKI3,BOARD3])if(LIB.grind&&LIB.ride)LIB.grind_h=mixD(LIB.ride,LIB.grind,.5);
-  for(const LIB of [SKI3,BOARD3])for(const k of ['ab_back','ab_lean'])if(LIB[k])LIB[k+'_h']=mixD(LIB.ride,LIB[k],.5);   // Swaps: Zwischenschritt beim Rumdrehen
+  for(const LIB of [SKI3,BOARD3])for(const k of ['ab_back','ab_lean','ab_hard'])if(LIB[k])LIB[k+'_h']=mixD(LIB.ride,LIB[k],.5);   // Swaps: Zwischenschritt beim Rumdrehen
   // Controller: R2 gehalten = Sprung geladen, Fahrer geht in die Knie (Ski/Board bleiben am Boden)
   {const shY=(o,dy,k)=>Array.isArray(o)&&o.length===3&&typeof o[0]==='number'?(k==='d'?o:[o[0],o[1]+dy,o[2]]):Array.isArray(o)?o.map(v=>shY(v,dy,k)):o&&typeof o==='object'?Object.fromEntries(Object.entries(o).map(([kk,v])=>[kk,shY(v,dy,kk==='d'||kk==='poleDirs'?'d':k)])):o;
    const sk=mixD(SKI3.ride,SKI3.tuck,1);sk.arms=mixD(SKI3.ride.arms,SKI3.tuck.arms,.3);
@@ -2572,7 +2577,7 @@ function playerView(){
     if(p.mode==='ground'&&(Math.abs(p.butterVis||0)>5||p.bs))pose=(p.bs?p.bs.end:p.butterVis)<0?'butter':'nbutter';
     if(p.mode==='ground'&&p.ab){const k=p.ab.kind,t=p.ab.t,d=p.ab.dur;
       if(k==='shifty'){twist=42*p.ab.dir*Math.sin(Math.PI*smooth01(t/d));look=false}
-      else{const L=LIBOF(GEAR);if(L[k])pose=(t<.12||t>d-.12)?k+'_h':k}}
+      else{const L=LIBOF(GEAR),e=k==='ab_hard'?.2:.12;if(L[k])pose=(t<e||t>d-e)?k+'_h':k;if(k==='ab_hard'){twist=30*p.ab.dir*Math.sin(Math.PI*smooth01(t/d));look=false}}}
     const rockHit=p.mode==='crash'||(p.mode==='rail'&&p.rCrash>0)||(p.mode==='dead'&&p.deadReason==='rock');
     if(rockHit){pose='tuck';ang=p.ang+(p.mode==='dead'?90:p.tumble);look=false;phi=0;twist=0}
     const inAva=p.mode==='dead'&&p.deadReason==='wall';
@@ -3310,7 +3315,7 @@ function scoreAir(sketchy){
   const grabs=Object.keys(p.grabT).filter(k=>p.grabT[k]>=.18);
   let pts=0;const nm=[];
   if(p.takeoffSwitch&&(spinDeg||flips||grabs.length)){nm.push(GEAR==='bike'?'Fakie':'Switch');pts+=PTS.switch}
-  const corked=!!p.corkMode&&flips>0;
+  const corked=!!p.corkMode&&flips>0;p.lastCork=corked?flips:0;
   if(flips){nm.push((flips>=3?'Triple ':flips===2?'Double ':'')+(corked?(p.corkMode==='cork'?'Cork':'Misty'):(p.flipAcc<0?'Backflip':'Frontflip')));pts+=flips*(corked?PTS.cork:PTS.flip)}
   if(spinDeg){nm.push(p.fromRail?spinDeg+' Out':String(spinDeg));pts+=spinDeg/180*PTS.spin180}
   for(const k of grabs){nm.push(GEAR==='board'&&BOARD_GRAB_NAMES[k]||GEAR==='bike'&&BIKE_GRAB_NAMES[k]||GRAB_NAMES[k]);pts+=PTS.grab}
@@ -3396,8 +3401,8 @@ function updGround(dt){
    Jede Eingabe außer Gas bricht ab. */
 function startAfterbang(){
   if(GEAR==='bike'){p.ab={kind:'ab_sag',t:0,dur:.55,dir:1,held:(inU()?1:0)|(inD()?2:0)|(inL()?4:0)|(inR()&&!inGas()?8:0)};return}   // Bike: Federung taucht tief ein
-  const L=['shifty','ab_lean','ab_back'],k=L[Math.floor(Math.random()*L.length)];
-  p.ab={kind:k,t:0,dur:1.05,dir:Math.random()<.5?1:-1,held:(inU()?1:0)|(inD()?2:0)|(inL()?4:0)|(inR()&&!inGas()?8:0)};
+  const L=['shifty','ab_lean','ab_back'],hard=(p.lastCork||0)>=2,k=hard?'ab_hard':L[Math.floor(Math.random()*L.length)];   /* nach Double/Triple Cork immer der harte Afterbang */
+  p.lastCork=0;p.ab={kind:k,t:0,dur:hard?1.6:1.05,dir:Math.random()<.5?1:-1,held:(inU()?1:0)|(inD()?2:0)|(inL()?4:0)|(inR()&&!inGas()?8:0)};
 }
 function butterEnd(){const t=p.butterT||0,b=p.butter||0;p.butter=0;p.butterT=0;
   if(b&&t>=.35&&p.mode==='ground')addPoints(PTS.butter,(p.sw?(GEAR==='bike'?'Fakie ':'Switch '):'')+(GEAR==='bike'?(b<0?'Manual':'Nose Manual'):(b<0?'Butter':'Nose Butter')),t.toFixed(1)+'s')}
