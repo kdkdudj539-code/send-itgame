@@ -543,7 +543,7 @@ html.sum .btn.alt{background:#e2f4e5}
 (()=>{
 'use strict';
 const RAD=Math.PI/180, DEG=180/Math.PI;
-const BUTTER180_T=.5,SPIN_TWIST=32,GRAB_BLEND=9,GRIND_SPIN=700,GRIND_REP=.32, G=430, POP=190, JUMP_POP=Math.round(190*Math.SQRT1_2), FOOT=11, VH=342, FLIP_RATE=520, SPIN_RATE=600, CORK_SLOW=.6,CORK_LATE=150, STEP=1/120, VMAX=364, PARK_LEN=13000, FREE_LEN=11000;
+const SPIN_COMMIT=.4,BUTTER180_T=.5,SPIN_TWIST=32,GRAB_BLEND=9,GRIND_SPIN=700,GRIND_REP=.32, G=430, POP=190, JUMP_POP=Math.round(190*Math.SQRT1_2), FOOT=11, VH=342, FLIP_RATE=520, SPIN_RATE=600, CORK_SLOW=.6,CORK_LATE=150, STEP=1/120, VMAX=364, PARK_LEN=13000, FREE_LEN=11000;
 let VW=608;const RS=3;   // Bildpunkte pro Welt-Pixel: die Welt wird 3x vergrößert; ein Bike-Pixel ist 2 Bildpunkte (2/3 Welt-Pixel)
 const rand=(a,b)=>a+Math.random()*(b-a);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
@@ -2720,30 +2720,52 @@ function faunaSprite(type,fr,run){const key=type+fr+(run?'r':'');if(FAUNA_SPR[ke
       ...leg(13.5,22,sw,B),...leg(32.5,22,-sw,B),
       {x:38,y:15,rx:6,ry:5,col:B},{x:43,y:17,rx:3,ry:2.3,col:N},{x:35.6,y:10.2,rx:1.9,ry:1.6,col:B},{x:39.6,y:10.6,rx:1.7,ry:1.5,col:B}];
     c=paintCreature(47,30,parts,'#140c06',g=>{g.fillStyle='#000';g.fillRect(40,14,1,1);g.fillRect(45,16,1,1);g.fillStyle=L;g.fillRect(16,8,10,1)})}
+  else if(type==='panda'){const R='#b8481d',D='#2a140c',L='#d8673a',T1='#c45a2a',T2='#6e2c12',Wt='#f3eadb';   // Roter Panda: rotbraunes Fell, schwarze Beine und Bauch, weißes Gesicht, geringelter buschiger Schwanz
+    const leg=(x,y,r)=>[{x,y,rx:2.2,ry:4.2,r:r*.5,col:D},{x:x-Math.sin(r)*3.5,y:y+3.8,rx:2,ry:1.2,col:'#140904',flat:1}];
+    const tail=[0,1,2,3,4].map(i=>({x:5.5-i*1.4,y:11+i*.9,rx:2.8,ry:2.6,col:i%2?T2:T1}));
+    const parts=[...tail,...leg(10,17,-sw),...leg(22,17,sw),{x:15,y:13,rx:9,ry:5.4,r:-.05,col:R},{x:15,y:16.2,rx:7,ry:1.6,col:D,flat:1},...leg(12,18,sw),...leg(24,18,-sw),
+      {x:25.5,y:9.5,rx:4.6,ry:4,col:R},{x:28.6,y:11,rx:2.1,ry:1.6,col:Wt},{x:23.2,y:5.8,rx:1.6,ry:1.7,col:R},{x:27,y:5.9,rx:1.5,ry:1.6,col:R}];
+    for(const e of parts)e.x+=5;c=paintCreature(38,24,parts,'#1a0b05',g=>{g.translate(5,0);g.fillStyle=Wt;g.fillRect(22,5,2,1);g.fillRect(26,5,2,1);g.fillRect(25,8,2,1);g.fillStyle='#000';g.fillRect(26,9,1,1);g.fillRect(30,11,1,1);g.fillStyle='#7a2a10';g.fillRect(25,10,1,2)})}
+  else if(type==='fox'){const O='#d06a26',D='#2b1a12',Wt='#f6efe4',S='#a64f1b';   // Rotfuchs (Kitsune): orange, weiße Brust und Schwanzspitze, schwarze Läufe, spitze Ohren
+    const leg=(x,y,r)=>[{x,y,rx:1.1,ry:4.4,r,col:D},{x:x-Math.sin(r)*4,y:y+4.2,rx:1.4,ry:.9,col:D,flat:1}];
+    const parts=[{x:4,y:9+(run?-1:1),rx:6,ry:2.6,r:run?-.25:.35,col:O},{x:-.6,y:8+(run?-2:2.6),rx:2,ry:1.8,col:Wt},...leg(9,15,-sw),...leg(20,15,sw),
+      {x:14,y:11,rx:8,ry:3.8,r:-.05,col:O},{x:15,y:13.4,rx:5.5,ry:1.2,col:Wt,flat:1},...leg(11,15.5,sw),...leg(22,15.5,-sw),
+      {x:23,y:8,rx:2.6,ry:3.6,r:.5,col:O},{x:26,y:6,rx:3.4,ry:2.4,r:.25,col:O},{x:29.4,y:7.2,rx:2.2,ry:1.2,r:.25,col:O},{x:25.8,y:7.7,rx:2.4,ry:1.1,col:Wt,flat:1},
+      {x:24.3,y:2.6,rx:1,ry:2.2,r:-.2,col:O},{x:26.4,y:2.8,rx:.9,ry:2,r:.15,col:O}];
+    for(const e of parts)e.x+=4;c=paintCreature(37,22,parts,'#2a1208',g=>{g.translate(4,0);g.fillStyle='#000';g.fillRect(27,5,1,1);g.fillRect(31,7,1,1);g.fillStyle=D;g.fillRect(24,1,1,1);g.fillRect(26,1,1,1)})}
+  else if(type==='serow'){const B='#45403a',S='#34302b',M='#cfc6b4',H='#1c1916',L='#5c564d',Y=4;   // Japanischer Serau (Kamoshika): gedrungen, dunkles zotteliges Fell, heller Halsbart, kurze schwarze Hörner
+    const leg=(x,y,r,col)=>[{x,y:y+Y,rx:2.8,ry:4.6,r:r*.6,col},{x:x-Math.sin(r)*3.5-.4,y:y+6+Y,rx:1.2,ry:3.6,r:r+.1,col},{x:x-Math.sin(r)*6,y:y+10+Y,rx:1.3,ry:.9,col:H,flat:1}];
+    const parts=[...leg(9,19,-sw,S),...leg(23,19,sw,S),{x:8,y:15+Y,rx:5.4,ry:6,col:B},{x:16,y:15.5+Y,rx:10,ry:6.4,r:-.04,col:B},{x:23,y:14+Y,rx:5.6,ry:6.4,r:.15,col:B},
+      ...leg(11,20,sw,B),...leg(25,20,-sw,B),{x:26.5,y:8.5+Y,rx:3.4,ry:6,r:.4,col:B},{x:25.4,y:12+Y,rx:2.6,ry:4.4,r:.35,col:M},
+      {x:30.5,y:4+Y,rx:4,ry:2.8,r:.35,col:B},{x:33.6,y:6+Y,rx:2.1,ry:1.7,r:.35,col:L},{x:28,y:1.5+Y,rx:1.6,ry:1,r:-.6,col:B}];
+    c=paintCreature(37,38,parts,'#12100d',g=>{g.fillStyle='#000';g.fillRect(31,7,1,1);g.fillStyle=H;g.fillRect(29,1,1,3);g.fillRect(30,0,1,2);g.fillStyle='#6a645a';g.fillRect(12,13,6,1);g.fillRect(9,15,4,1)})}
   else{const W=SUMMER?'#a07a52':'#eef2f8',S=SUMMER?'#7d5c3a':'#cdd5e2',P='#ffffff',l=run&&fr?-2:0;
     const parts=[{x:6.2,y:12+l,rx:4,ry:3.8,col:W},{x:10,y:11+l,rx:run?7:6,ry:4,r:-.15,col:W},{x:16,y:8+l,rx:3,ry:2.5,r:.2,col:W},
       {x:15.4,y:3.2+l,rx:1,ry:3.6,r:-.25,col:W},{x:17.2,y:3.6+l,rx:.9,ry:3.4,r:.05,col:W},
       {x:run&&fr?16.5:14,y:15+l,rx:.9,ry:2.2,r:run?(fr?-.6:.3):0,col:S},{x:run&&fr?1.5:5.6,y:16+(run&&fr?-1:0),rx:3,ry:1,col:S,flat:1},{x:2.6,y:10+l,rx:1.6,ry:1.6,col:P,flat:1}];
     c=paintCreature(22,18,parts,'#4a5263',g=>{g.fillStyle='#000';g.fillRect(17,7+l,1,1);g.fillStyle='#1b1f2a';g.fillRect(15,0+Math.max(0,l+0),1,1);g.fillRect(17,0+Math.max(0,l+1),1,1)})}
   FAUNA_SPR[key]=c;return c}
+/* Japan: einheimische Tiere statt der Alpen-Tiere. Roter Panda statt Braunbär, Rotfuchs (Kitsune) statt Hase, Japanischer Serau (Kamoshika) statt Hirsch.
+   FB gibt das Verhalten vor (Panda wie Bär: läuft und bleibt stehen, Fuchs und Serau wie der Hirsch). */
+const FB=t=>t==='panda'?'bear':t==='serow'||t==='fox'?'deer':t;
 function addFauna(x0,x1){
   if(x1-x0<120||Math.random()>.3)return;const x=rand(x0+50,x1-50),g=groundAt(x);if(!g||!isPow(g.seg))return;
-  const r=Math.random(),type=r<.42?'deer':r<.64?'bear':'hare';
-  fauna.push({x,y:g.y,type,dir:Math.random()<.5?1:-1,flee:false,t:Math.random()*5,walk:type==='bear'||Math.random()<.55,pt:rand(2,5)});
+  const r=Math.random(),type=JAPAN?(r<.42?'serow':r<.64?'panda':'fox'):r<.42?'deer':r<.64?'bear':'hare';
+  fauna.push({x,y:g.y,type,dir:Math.random()<.5?1:-1,flee:false,t:Math.random()*5,walk:FB(type)==='bear'||Math.random()<.55,pt:rand(2,5)});
 }
 function updFauna(dt){
   const fx=footX();
-  for(const a of fauna){a.t+=dt;
-    if(!a.flee&&a.x-fx<(a.type==='bear'?150:170)&&a.x-fx>-30){a.flee=true;a.dir=1}
-    if(a.type==='bear'&&!a.flee){a.pt-=dt;if(a.pt<=0){a.walk=!a.walk;a.pt=a.walk?rand(3,6):rand(1,2.2);if(a.walk&&Math.random()<.4)a.dir*=-1}}
-    const hop=a.type==='hare'&&(a.t%1.2)<.45;
-    const sp=a.flee?(a.type==='deer'?330:a.type==='bear'?150:300):a.walk?(a.type==='deer'?10:a.type==='bear'?26:(hop?42:0)):0;
-    if(sp){const nx=a.x+a.dir*sp*dt,g=groundAt(nx);if(g&&isPow(g.seg)){a.x=nx;a.y=g.y}else if(!a.flee){a.dir*=-1;if(a.type==='bear'){a.walk=false;a.pt=rand(1,2)}}else a.flee=false}}
+  for(const a of fauna){a.t+=dt;const b=FB(a.type);
+    if(!a.flee&&a.x-fx<(b==='bear'?150:170)&&a.x-fx>-30){a.flee=true;a.dir=1}
+    if(b==='bear'&&!a.flee){a.pt-=dt;if(a.pt<=0){a.walk=!a.walk;a.pt=a.walk?rand(3,6):rand(1,2.2);if(a.walk&&Math.random()<.4)a.dir*=-1}}
+    const hop=b==='hare'&&(a.t%1.2)<.45;
+    const sp=a.flee?(a.type==='fox'?300:a.type==='panda'?170:b==='deer'?330:b==='bear'?150:300):a.walk?(a.type==='fox'?18:b==='deer'?10:a.type==='panda'?20:b==='bear'?26:(hop?42:0)):0;
+    if(sp){const nx=a.x+a.dir*sp*dt,g=groundAt(nx);if(g&&isPow(g.seg)){a.x=nx;a.y=g.y}else if(!a.flee){a.dir*=-1;if(b==='bear'){a.walk=false;a.pt=rand(1,2)}}else a.flee=false}}
 }
 function drawFauna(cX,cY){
   for(const a of fauna){
-    const moving=a.flee||(a.walk&&(a.type!=='hare'||(a.t%1.2)<.45)),fr=moving?Math.floor(a.t*(a.flee?(a.type==='bear'?6:10):a.type==='bear'?3:4))%2:0;
-    const sp=faunaSprite(a.type,fr,a.flee||(a.type==='hare'&&moving)),w=sp.width,h=sp.height,sx=Math.round(a.x-cX-w/2);if(sx>VW||sx+w<0)continue;
+    const b=FB(a.type),moving=a.flee||(a.walk&&(b!=='hare'||(a.t%1.2)<.45)),fr=moving?Math.floor(a.t*(a.flee?(b==='bear'?7:10):b==='bear'?3:4))%2:0;
+    const sp=faunaSprite(a.type,fr,a.flee||(b==='hare'&&moving)),w=sp.width,h=sp.height,sx=Math.round(a.x-cX-w/2);if(sx>VW||sx+w<0)continue;
     const gl=groundAt(a.x-w*.35),gr=groundAt(a.x+w*.35),base=Math.max(gl?gl.y:a.y,gr?gr.y:a.y)-cY+1,y0=Math.round(base-h);
     // Beine auf der Bergseite stecken im Tiefschnee: was unter der Oberfläche liegt, wird einfach nicht gezeichnet
     ctx.save();clipAboveGround(sx,y0-2,w,cX,cY,1);ctx.translate(sx,y0);if(a.dir<0){ctx.scale(-1,1);ctx.drawImage(sp,-w,0)}else ctx.drawImage(sp,0,0);ctx.restore()}
@@ -3472,7 +3494,8 @@ function updAir(dt){
   }
   else if(l||r){const dir=r?1:-1;p.spin+=dir*SPIN_RATE*cs*dt;p.spinDir=dir;p.spinTarget=null}
   else if(p.spinDir){
-    if(p.spinTarget===null){const st=p.fromRail?90:180;p.spinTarget=p.spinDir>0?Math.ceil(p.spin/st-1e-6)*st:Math.floor(p.spin/st+1e-6)*st}
+    if(p.spinTarget===null){const st=p.fromRail?90:180,fw=p.spinDir>0?Math.ceil(p.spin/st-1e-6)*st:Math.floor(p.spin/st+1e-6)*st,bk=fw-p.spinDir*st,done=st-Math.abs(fw-p.spin);
+      if(done<st*SPIN_COMMIT&&Math.abs(fw-p.spin)>1e-6){p.spinTarget=bk;p.spinDir=-p.spinDir}else p.spinTarget=fw}   /* nur leicht angedreht: zurück in die alte Richtung statt automatisch ein voller 180er */
     const ns=p.spin+p.spinDir*SPIN_RATE*cs*dt;
     if((p.spinDir>0&&ns>=p.spinTarget)||(p.spinDir<0&&ns<=p.spinTarget)){p.spin=p.spinTarget;p.spinDir=0;p.spinTarget=null}else p.spin=ns;
   }
