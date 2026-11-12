@@ -1049,7 +1049,7 @@ const SKI3=(()=>{
       legs:[[[-3,0,-3],[1.5,2.5,-3.5],[3.5,6,-3.5]],[[-2,0,3],[2.5,2.5,3.5],[4,6,3.5]]],
       torso:[[-2.5,0,0],[3.5,-4.5,0]],
       arms:[[[3,-4,-5],[8.5,0,-5],[14.5,4.6,-3.8]],[[4,-4,5],[9.5,0,5],[15,4.6,3.8]]],
-      poleDirs:[[-.9,-.42,0],[-.9,-.42,0]],
+      poleDirs:[[-.45,.89,-.2],[-.45,.89,.2]],poleKeys:[6,6],   // Stöcke hängen aus den Händen an den Spitzen nach unten, gut sichtbar vor den Ski
       head:[6,-7.5,0]},
     // Venom: Ski vorne gekreuzt, jede Hand greift die Spitze des anderen Skis
     venom:{
@@ -1058,7 +1058,7 @@ const SKI3=(()=>{
       legs:[[[-2,0,-3],[3.5,-1.5,-3.5],[1,4,-3]],[[-1,0,3],[4.5,-1.5,3.5],[1.5,4,3]]],
       torso:[[-2,0,0],[1.5,-6.5,0]],
       arms:[[[0,-6,-5],[5.5,-3,-4.5],[10,3.5,-1.6]],[[1.5,-6,5],[6.5,-3,4.5],[10.5,3.5,1.6]]],
-      poleDirs:[[-.9,-.4,0],[-.9,-.4,0]],
+      poleDirs:[[-.45,.89,-.2],[-.45,.89,.2]],poleKeys:[6,6],
       head:[3.5,-10.5,0]},
     // Octograb: Ski gekreuzt, eine Hand an der Spitze des einen Skis, die andere hinten am Ende des anderen
     octo:{
@@ -3318,7 +3318,7 @@ function updGround(dt){
     if(want){p.butterT+=dt;if(Math.random()<.5){const d=(want<0?-9:9)*(p.sw?-1:1);parts.push({x:p.x+Math.cos(a)*d,y:p.y+Math.sin(a)*d-1,vx:-p.s*.2+rand(-25,25),vy:-rand(20,60),life:rand(.2,.45),col:Math.random()<.6?'#ffffff':'#dce8f8',sz:Math.random()<.4?2:1,gr:300})}}
     const tgt=p.bs?0:want<0?(GEAR==='bike'?-24:-14):want>0?(GEAR==='bike'?16:12):0;p.butterVis=(p.butterVis||0)+(tgt-(p.butterVis||0))*Math.min(1,dt*12)}
   p.pushT=p.tuck&&GEAR!=='board'&&!p.sw&&!p.ab?(p.pushT||0)+dt:0;   // Switch und Afterbang: kein Stockeinsatz
-  if(p.tuck){drag*=.55;acc+=165}
+  if(p.tuck){drag*=.55;acc+=165}else drag*=.62;   // ohne Gas rollt man länger mit dem Tempo weiter (Endtempo am Hang ~300 statt ~245)
   if(pow){drag*=g.seg.kind==='deep'?1.25:1.12;acc-=110*clamp(1-p.s/300,0,1)}   // tiefer Powder bremst etwas mehr
   if(p.braking)acc-=260;
   if(!ctrl)acc-=140;
