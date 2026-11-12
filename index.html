@@ -1248,7 +1248,7 @@ const CRANK0=180;   // Grundstellung der Kurbel: Regular (linker Fuß vorne, rec
 function bikeSolve(L0){let L=BIKE_SOLVED.get(L0);if(L)return L;
   const bk=L0.bike||{o:[1.6,11,0]},X=bikeXf(bk),th=((bk.crank||0)+CRANK0)*RAD,c=BK.crank;
   const ped=[X.P([-c*Math.cos(th),-c*Math.sin(th),-BK.ped]),X.P([c*Math.cos(th),c*Math.sin(th),BK.ped])];   // links, rechts
-  const grip=[X.P(X.F([BK.grip[0],BK.grip[1],-4.2])),X.P(X.F([BK.grip[0],BK.grip[1],4.2]))];
+  const grip=[X.P(X.F([BK.grip[0],BK.grip[1],-4.2])),X.P(X.F([BK.grip[0],BK.grip[1],4.2]))];if(L0.saddleHand!=null)grip[L0.saddleHand]=X.P([-1.4,-9.3,L0.saddleHand?1.1:-1.1]);   /* saddleHand: diese Hand hält den Sattel */
   const fw=X.dirB([1,0,0]),kD=v3.add(fw,[0,-.5,0]);
   const t1=L0.torso[1],hips=L0.hips||[[-.4,0,-2.4],[.4,0,2.4]],sh=L0.shoulders||[[t1[0]-.6,t1[1]+.6,(t1[2]||0)-4.4],[t1[0]+.2,t1[1]+.6,(t1[2]||0)+4.4]];
   const legs=[0,1].map(i=>L0.legsX&&L0.legsX[i]||[hips[i],ik2(hips[i],ped[i],BK.thigh,BK.shin,kD),ped[i]]);
@@ -1278,7 +1278,7 @@ function bikeParts(g,L,lo,P,O,parts){const X=L._X,bk=L.bike||{},AX=bkAx(bk),SK=g
   // Räder. Der Reifen hat Breite (TWH = halbe Reifenbreite): von vorne oder schräg sieht man die Lauffläche, von der Seite nur die Flanke.
   const TWH=1;
   const wheel=front=>{const wk=k=>!front&&L._rearUp?Math.max(k,5.22+(k-pl.c[2])):k;   // Whip: Hinterrad vor dem Kopf (Kopf-Key 4,6)
-const C3=front?X.P(X.F(AX.fa)):X.P(AX.ra),pl=plane(C3,front),wr=BK.wr,rTi=wr-1.25,rR=wr-2.05,KN=FINE?32:24,NS=16;
+const C3=front?X.P(X.F(AX.fa)):X.P(AX.ra),pl=plane(C3,front),wr=BK.wr,rTi=wr-1.0,rR=wr-1.8,KN=FINE?32:24,NS=16;
     const ez3=front?X.dir([0,0,1]):X.dirB([0,0,1]),cS=lo(C3),eS=lo(v3.add(C3,v3.mul(ez3,TWH))),ez2=[(eS[0]-cS[0])*K,(eS[1]-cS[1])*K],nearS=eS[2]>cS[2]?1:-1;
     const TR=P.TR,TS=P.TS,TRk=shade(P.TR,.14),RM=P.RM,RMh=shade(P.RM,.4),RMd=shade(P.RM,-.4),SPK=P.SPK,DSC='#c3c8d1',DSh='#7f8794',HUB='#2a2d35',HUBh='#8e96a6',CAS='#9aa1ad';
     // ganzer Reifen: Vereinigung der Reifenringe quer über die Breite, Umriss nur außen
@@ -1381,9 +1381,9 @@ const BIKE3=(()=>{
     nose_max:{bike:B([2.8,9.8,0],{yaw:-36,roll:58,pitch:-58,steer:-14,piv:[4,-6,0]}),torso:[[-.5,0,0],[3.8,-4.6,-4.2]],head:[5.6,-7.6,-6]},
     mute:{bike:B([1.6,9,0],{yaw:-26,roll:82,piv:[8,-10,0]}),torso:T(4.6,-5),head:[7,-8.4,0]},                      // Table Top: Bike liegt flach, hochgezogen
     mute_max:{bike:B([1.6,8.4,0],{yaw:-32,roll:94,piv:[8,-10,0]}),torso:T(4.4,-4.8),head:[6.8,-8.2,0]},
-    blunt:{bike:B([4.2,11.6,0],{pitch:-8}),torso:T(7.2,-2.6),head:[10.4,-4.8,0],                                   // Superman: Beine lang nach hinten, Körper flach über dem Bike
+    blunt:{bike:B([4.2,11.6,0],{pitch:-8}),saddleHand:1,torso:T(7.2,-2.6),head:[10.4,-4.8,0],                                   // Superman: Beine lang nach hinten, Körper flach über dem Bike
       legsX:[[[-.4,0,-2.2],[-6.6,-1.4,-2.4],[-12.8,-2.6,-2.6]],[[.4,0,2.2],[-6.6,-1.8,2.4],[-12.8,-3,2.6]]]},
-    blunt_max:{bike:B([4.6,12,0],{pitch:-10}),torso:T(7.6,-2.2),head:[10.8,-4.2,0],
+    blunt_max:{bike:B([4.6,12,0],{pitch:-10}),saddleHand:1,torso:T(7.6,-2.2),head:[10.8,-4.2,0],
       legsX:[[[-.4,0,-2.2],[-6.4,-2.6,-2.6],[-12.6,-4.8,-3]],[[.4,0,2.2],[-6.4,-3,2.6],[-12.6,-5.2,3]]]},
     tail:{bike:B([1.8,10.8,0]),torso:T(2.6,-6.8),head:[4.2,-10.8,0],                                               // No-Hander: Arme weit auseinander, Brust raus
       armsX:[[[2.2,-6.2,-4.4],[1.4,-9.4,-7.8],[.6,-12.4,-9.6]],[[3,-6.2,4.4],[2.2,-9.4,7.8],[1.4,-12.4,9.6]]]},
@@ -1418,6 +1418,7 @@ const BIKE3=(()=>{
     if(A&&Z&&typeof A==='object'&&typeof Z==='object'&&!Array.isArray(A)&&!Array.isArray(Z)){const o={};for(const k in Z)o[k]=k in A?mixD(A[k],Z[k],u):Z[k];return o}
     return Z};
   for(const g of ['blunt','japan','nose','tail','mute','truck','venom','octo','layout','ftuck'])L[g+'_h']=mixD(tuck,L[g],.5);
+  for(const k of ['blunt','blunt_max']){const S=bikeSolve(L[k]),i=L[k].saddleHand,ax=[null,null];ax[i]=S.arms[i];L[k]=Object.assign({},L[k],{armsX:ax})}   // Superman: Hand am Sattel als feste Armstellung, damit die Zwischenbilder dorthin greifen
   {const DH=[[-.4,0,-2.4],[.4,0,2.4]],mv=(a,b,u)=>a.map((x,i)=>x+(b[i]-x)*u);
    const mixBk=(a,b,u)=>{const o={o:mv(a.o||[1.6,11,0],b.o||[1.6,11,0],u),piv:b.piv||a.piv};for(const k of ['yaw','roll','pitch','steer','crank'])o[k]=(a[k]||0)+((b[k]||0)-(a[k]||0))*u;return o};
    const frame=(A,Z,u)=>{const SA=bikeSolve(A),lim=(k,s)=>[0,1].map(i=>Z[k]&&Z[k][i]?mixD(SA[s][i],Z[k][i],u):null);
@@ -1538,7 +1539,7 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist,hy){
   const hipC=v3.mul(v3.add(L.legs[0][0],L.legs[1][0]),.5),hipIn=j=>v3.add(hipC,v3.mul(v3.add(j,v3.mul(hipC,-1)),.5));
   L.legs.forEach((lg,i)=>{const q=lg.map((j,n)=>lo(n?j:hipIn(j)));const key=L.legsFree?Math.max(q[1][2],q[2][2])-.5:Math.max(Math.max(q[1][2],q[2][2])-.5,bootKey(i)+.02);/* legsFree: Beine dürfen hinter dem Board liegen (Method von der Switch-Seite) */legMax=Math.max(legMax,key);
     const dark=L.legDark?L.legDark[i]:key<-2;
-    const lw=bike?zw(2)+1:zw(5);parts.push({key,draw:()=>{const col=dark?P.p:P.P;if(jGeo){const tg=legCtx();limb(tg,q.map(v=>[v[0],v[1]]),lw,col,O);tg.globalCompositeOperation='destination-out';capsule(tg,jGeo.A,jGeo.B,jGeo.ro,jGeo.rq,'#000');tg.globalCompositeOperation='source-over';g.drawImage(tg.canvas,0,0)}else limb(g,q.map(v=>[v[0],v[1]]),lw,col,O);if(!L.noFlare&&cL>.5){g.fillStyle=col;g.fillRect(Math.round(q[2][0]-(lw+1)/2),Math.round(q[2][1])-2,lw+1,2)}}});   // Bike: Hose einen Fahrer-Pixel breiter
+    const lw=bike?zw(2)+2:zw(5);parts.push({key,draw:()=>{const col=dark?P.p:P.P;if(jGeo){const tg=legCtx();limb(tg,q.map(v=>[v[0],v[1]]),lw,col,O);tg.globalCompositeOperation='destination-out';tubeFill(tg,[jGeo.A,jGeo.B],jGeo.ro,jGeo.rq,(T,v,Lp)=>T<-1/Lp?null:'#000');tg.globalCompositeOperation='source-over';g.drawImage(tg.canvas,0,0)}else limb(g,q.map(v=>[v[0],v[1]]),lw,col,O);if(!L.noFlare&&cL>.5){g.fillStyle=col;g.fillRect(Math.round(q[2][0]-(lw+1)/2),Math.round(q[2][1])-2,lw+1,2)}}});   // Bike: Hose einen Fahrer-Pixel breiter
     if(bike)parts.push({key:key+.001,draw:()=>bikeShoe(i)});   // Bike-Schuh nach dem Bein, damit er nicht vom Hosenbein verdeckt wird
     if(skiBootRow)parts.push({key:key+.001,draw:()=>skiBoot(i)});else if(onBoard(i))parts.push({key:key+.001,draw:()=>boardBoot(i)})});
   {const h0=lo(hipIn(L.legs[0][0])),h1=lo(hipIn(L.legs[1][0]));
@@ -1556,7 +1557,7 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist,hy){
         const k=clamp((u-.12)/.66,0,1),bend=46*(1-k),d=x=>{const m=((x%360)+540)%360-180;return Math.abs(m)};
         return Math.min(d(ps-90-bend),d(ps-270+bend))<20?J:P.D};
       const pat=(u,v)=>u*L2<.1*L0?P.d:pat0(Math.max(.1,(u*L2-E)/L0),v);   // u auf dem langen Trikot -> u am Rumpf (0 = Hüfte); unten der dunkle Saum
-      capsule(g,A,B,ro,rq,O);capsule(g,A,B,ro-1,rq-1,pat);
+      tubeFill(g,[A,B],ro,rq,(T,v,Lp)=>T<-1/Lp?null:O);tubeFill(g,[A,B],ro-1,rq-1,(T,v)=>T<0?null:pat(clamp(T,0,1),v));   /* unten gerade abgeschnitten wie ein Trikotsaum */
       if(P.pr){const sv=Math.sin((180-psc)*RAD);if(Math.cos((180-psc)*RAD)>-.2){const dx=B[0]-h[0],dy=B[1]-h[1],l=Math.hypot(dx,dy)||1,o=sv*(ro-1.7),nx=dy/l*o,ny=-dx/l*o;   // Rückenplatte: eine Pixellinie am Rücken
         capsule(g,[h[0]+dx*.2+nx,h[1]+dy*.2+ny],[h[0]+dx*.92+nx,h[1]+dy*.92+ny],.55,.55,P.pr)}}};
   parts.push({key:TK,draw:()=>{
@@ -2954,6 +2955,7 @@ const K={},TC={},GP={prev:{}};let jumpBuf=0;
 const inL=()=>!p.auto&&(K.ArrowLeft||K.KeyA||TC.left||GP.left),inR=()=>!p.auto&&(K.ArrowRight||K.KeyD||TC.right||GP.right),inU=()=>!p.auto&&(K.ArrowUp||K.KeyW||TC.up||GP.up),inD=()=>!p.auto&&(K.ArrowDown||K.KeyS||TC.down||GP.down),inGas=()=>!p.auto&&(K.ShiftLeft||K.ShiftRight||TC.gas||GP.gas);
 // Grabs: Tasten und rechter Stick. Japan, Truck Driver, Octograb und Venom gibt es nur auf Ski.
 const GRAB_KEYS=[['blunt','KeyJ','Digit1'],['nose','KeyK','Digit2'],['tail','KeyL','Digit3'],['mute','KeyI','Digit4'],['japan','KeyU','Digit5'],['truck','KeyO','Digit6'],['octo','KeyN','Digit7'],['venom','KeyM','Digit8']];
+const BIKE_NO={japan:1,truck:1,venom:1,octo:1};
 const BOARD_DIAG={japan:'method',truck:'melon',venom:'seatbelt',octo:'dracula'};   // Board: die Schräg-Grabs der Ski werden zu Method, Melon, Seatbelt, Dracula
 let jibb=false;   // Handy: Jib-Modus, Standard aus; bleibt an, bis man wieder drückt
 const bU=()=>!p.auto&&(K.ArrowUp||K.KeyW||(TC.up&&jibb)||GP.up),bD=()=>!p.auto&&(K.ArrowDown||K.KeyS||(TC.down&&jibb)||GP.down);   // Butter-Eingaben
@@ -3267,7 +3269,7 @@ function launch(a,pop,sg){
   p.vx=Math.cos(a)*s;p.vy=Math.sin(a)*s-pop;
   p.flipPoseT=0;p.fHeld=0;p.fVis=0;p.grab=null;p.gVis=0;p.gTk=0;p.gName=null;p.gNext=null;p.gIn=false;p.corkMode=null;p.spinTw=0;p.lastSpin=null;p.ab=null;const r=p.ang*RAD;p.x+=FOOTG*Math.sin(r);p.y-=FOOTG*Math.cos(r);
   {const pc=poseCOM(airPose(),p.spin,GEAR);p.x+=pc.cx*Math.cos(r)-pc.cy*Math.sin(r);p.y+=pc.cx*Math.sin(r)+pc.cy*Math.cos(r);p.cx=pc.cx;p.cy=pc.cy;p.cz=pc.cz;p.fx=pc.fx;p.fy=pc.fy;p.fz=pc.fz}
-  p.mode='air';p.bar=null;p.whip=null;p.nBar=0;p.nWhip=0;
+  p.mode='air';p.bar=null;p.whip=null;p.nBar=0;p.nWhip=0;p.bkStick=null;
   p.airT=0;p.base=p.ang;p.spinStart=p.spin;p.flipAcc=0;p.flipDir=0;p.flipTarget=null;p.spinDir=0;p.spinTarget=null;p.grabT={};p.grab=null;
   p.bailed=false;p.wallHit=false;p.fromRail=false;p.bigAir=!!(sg&&sg.big);p.takeoffSwitch=p.sw;p.corkHold=0;p.spinLock=!p.auto&&(K.ArrowLeft||K.KeyA||K.ArrowRight||K.KeyD)&&!inU()&&!inD();p.diagT=0;p.flipCD=wasButter?BUTTER_FLIP_CD:0;   // Handy und Controller: vorgespannte Drehung startet sofort
   if(pop)SFX.jump();
@@ -3501,7 +3503,9 @@ function updAir(dt){
   }
   p.corkHold=(up||dn)&&(l||r)?(p.corkHold||0)+dt:0;   // Cork/Misty erst, wenn kurz schräg gehalten wird, nicht beim Durchrutschen über die Schräge (sonst dreht ein Spin plötzlich langsamer)
   if(!p.corkMode&&p.corkHold>=.07&&(Math.abs(norm(p.flipAcc))<45||Math.abs(p.flipAcc)<CORK_LATE))p.corkMode=dn?'cork':'misty';
-  const gr=inGrab();p.grab=gr;if(gr)p.grabT[gr]=(p.grabT[gr]||0)+dt;
+  let gr=inGrab();
+  if(GEAR==='bike'){const t=gr==='mute'?'bar':gr==='tail'?'whip':null;if(t&&p.bkStick!==gr)bikeTrick(t);p.bkStick=gr;if(t||BIKE_NO[gr])gr=null}   // Bike: Stick unten = Barspin, links = Tailwhip, schräg nichts
+  p.grab=gr;if(gr)p.grabT[gr]=(p.grabT[gr]||0)+dt;
   // Grab wechseln: erst den alten zurück, dann den neuen rein, beides so langsam wie beim normalen Zugreifen
   if(gr&&gr!==p.gName){if(p.gName&&(p.gVis||0)>.02)p.gNext=gr;else{p.gName=gr;p.gNext=null}}else if(!gr||gr===p.gName)p.gNext=null;
   // Landehilfe: kurz vor dem Aufsetzen Flip und Spin auf die nächste landbare Stellung drehen und den Grab loslassen
@@ -4322,7 +4326,7 @@ function applySeason(){SUMMER=SAVE.season==='summer';JAPAN=!SUMMER&&SAVE.map==='
   if(typeof seasonVisuals==='function')seasonVisuals();
   rebuildBg();makeTreeSprites();makeAlmSprites();PATROL_SPR=[makePatrol(true),makePatrol(false)];initFlakes();
   resetRun();updCamera(0,true);refreshMenu()}
-const PAD_LB={n:['BLUNT','SUPER'],ne:['TRUCK','X-UP'],e:['NOSE','WHIP'],se:['VENOM','CAN-CAN'],s:['MUTE','TABLE'],sw:['OCTO','NAC-NAC'],w:['TAIL','NOHAND'],nw:['JAPAN','1-FOOT']};
+const PAD_LB={n:['BLUNT','SUPERMAN'],ne:['TRUCK',''],e:['NOSE','WHIP'],se:['VENOM',''],s:['MUTE','BARSPIN'],sw:['OCTO',''],w:['TAIL','TAILWHIP'],nw:['JAPAN','']};
 function padLabels(){for(const d in PAD_LB){const el=document.querySelector('#gstick .lb.'+d);if(el)el.textContent=GEAR==='bike'?PAD_LB[d][1]:PAD_LB[d][0]}
   if(GEAR==='board'){$('kMute').textContent='INDY';$('kUp').textContent='JAPAN';for(const [d,n] of [['nw','METHOD'],['ne','MELON'],['se','SEATBELT'],['sw','DRACULA']]){const el=document.querySelector('#gstick .lb.'+d);if(el)el.textContent=n}}gstickEl.classList.toggle('brd',GEAR==='board')}
 function refreshMenu(){if(cloudHook)cloudShow();document.documentElement.classList.toggle('sum',SUMMER);volShow();setT($('hAvalT'),SUMMER?TX('MURE','MUDSLIDE'):TX('LAWINE','AVALANCHE'));
