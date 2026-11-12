@@ -3421,7 +3421,7 @@ function crash(s,why,pow,o){
     if(GEAR==='ski'&&sev==='heavy')yardSale(s0);
     if(bike)bikeOff(s0,sev);
     const t=crTitle(sev,dir,why,pow&&!hit,hit);showTrick(t[0],t[1],'bad');
-    SFX.crash(sev);shake=sev==='heavy'?10:sev==='mid'?7:4;hitStop=sev==='heavy'?.1:sev==='mid'?.06:.03;slowT=sev==='heavy'?.4:sev==='mid'?.15:0;
+    SFX.crash(sev);hitStop=sev==='heavy'?.1:sev==='mid'?.06:.03;slowT=sev==='heavy'?.4:sev==='mid'?.15:0;
     if(sev==='light')SFX.slide();
     if(inPow)powderBurst(p.x,p.y,40,150);
   }else SFX.thud(.8);
@@ -3441,7 +3441,7 @@ function updCrItems(dt){const c=p.cr;if(!c||!c.items.length||c.ph==='up')return;
 function updCrash(dt){const c=p.cr;c.t+=dt;c.pt+=dt;
   if(jumpBuf>0){jumpBuf=0;if(c.ph==='slide'||c.ph==='rest'){if(c.r1!=null)c.rot=c.r1;crPh('up')}}   // Sprung-Taste: schneller aufstehen
   if(c.h>0||c.vh<0){c.vh+=G*dt;c.h=Math.max(0,c.h-c.vh*dt);
-    if(c.h<=0&&c.vh>0){if(c.vh>80&&c.ph==='tumble'){const v=c.vh;c.vh*=-.3;c.w*=.8;SFX.thud(Math.min(1,v/320));crSpray(12,.8);shake=Math.max(shake,3)}else c.vh=0}}
+    if(c.h<=0&&c.vh>0){if(c.vh>80&&c.ph==='tumble'){const v=c.vh;c.vh*=-.3;c.w*=.8;SFX.thud(Math.min(1,v/320));crSpray(12,.8)}else c.vh=0}}
   const onG=c.h<=0;
   if(c.ph==='tumble'){c.rot+=c.w*dt;c.w*=Math.exp(-dt*(onG?1.6:.2));if(onG&&Math.random()<.6)crSpray(1,.5);
     if(c.pt>=c.tt&&c.h<=.5){c.r0=c.rot;c.r1=Math.round(c.rot/360)*360;crPh('slide');SFX.slide()}}
@@ -3606,7 +3606,7 @@ function landRail(r,fx){
 // Auf der Pistenraupe gestürzt: man bleibt oben, überschlägt sich kurz, rappelt sich auf und rutscht ohne Punkte bis vorne
 function catCrash(r,fx){const ra=railA(r,fx),s=p.vx*Math.cos(ra)+p.vy*Math.sin(ra);p.x=fx;mountRail(r);
   p.s=clamp(s*.45,60,200);p.rCrash=.7;p.tumble=0;p.gBust=true;p.combo=0;p.bailed=false;
-  showTrick('CRASH!',TX('Auf die Pistenraupe geknallt','Slammed onto the snowcat'),'bad');SFX.crash();shake=5;burst(fx,railY(r,fx)-2,18,['#ffffff','#c9d0da','#8d95a1'],140)}
+  showTrick('CRASH!',TX('Auf die Pistenraupe geknallt','Slammed onto the snowcat'),'bad');SFX.crash();burst(fx,railY(r,fx)-2,18,['#ffffff','#c9d0da','#8d95a1'],140)}
 function mountRail(r){p.mode='rail';p.rail=r;p.gBust=false;p.rCrash=0;if(r.type==='pole')p.s=Math.min(p.s,240);   // die Stange hoch bremst
   p.y=railY(r,p.x);p.grindT=0;p.ang=railA(r,p.x)*DEG;p.spin=p.sw?180:0;p.gEntrySw=!!p.sw;
   p.gspin=p.spin;p.gspinVis=p.spin;p.lastGsv=null;p.gTw=0;p.gHold=0;p.gRepT=0;p.gSwaps=0;p.gParts=[];p.gLastDir=1;p.gPrevL=inL();p.gPrevR=inR();p.butter=0;p.butterVis=0;p.bs=null;gLabel();SFX.land()}
@@ -3713,7 +3713,7 @@ function updAir(dt){
   if(g){
     if(fy>=g.y&&!(p.airT<.06&&p.vy<0)){
       const pg=groundAt(pfx);
-      if(!pg&&fy-g.y>5+Math.abs(p.vy)*dt){p.x-=fx-pfx;p.vx=-p.vx*.15;p.wallHit=true;shake=3;SFX.land();return}
+      if(!pg&&fy-g.y>5+Math.abs(p.vy)*dt){p.x-=fx-pfx;p.vx=-p.vx*.15;p.wallHit=true;SFX.land();return}
       p.noRail=null;land(g,fx);
     }
   }else{
@@ -3771,7 +3771,7 @@ function startHeal(r){run.packUsed=true;
   p.x=xi;{const gi=groundAt(xi)||g;if(gi){p.y=gi.y;p.ang=gi.a*DEG}}
   p.vx=0;p.vy=0;p.s=0;p.spin=0;p.flipAcc=0;p.corkMode=null;p.grab=null;p.gVis=0;p.sw=false;p.bs=null;p.butter=0;p.butterVis=0;p.sink=0;p.sinkV=0;p.tuck=false;p.braking=false;p.combo=0;p.ab=null;
   if(pat.on){pat.on=false;pat.next=rand(24,38)}
-  shake=8;SFX.crash();burst(r.cx,r.y-6,30,['#ffffff','#8d91a3','#e3ecf8'],170);
+  SFX.crash();burst(r.cx,r.y-6,30,['#ffffff','#8d91a3','#e3ecf8'],170);
   showTrick(TX('FELS!','ROCK!'),TX('Verbandszeug raus','First aid kit out'),'bad');
 }
 function updHeal(dt){const h=p.heal;h.t+=dt;
@@ -3787,7 +3787,7 @@ function die(reason){
   const fx0=footX();
   p.inAir=p.mode==='air';
   if(reason==='wall'){p.inAir=false;p.x=fx0;const g=groundAt(fx0);if(g){p.y=g.y;p.ang=g.a*DEG}p.wallSink=0;p.wTumble=0;p.sink=0;p.sinkV=0}
-  p.mode='dead';p.deadReason=reason;p.deadT=0;SFX.die();shake=reason==='void'?0:8;
+  p.mode='dead';p.deadReason=reason;p.deadT=0;SFX.die();shake=reason==='void'||reason==='rock'?0:8;
   if(reason==='patrol')showTrick('BUSTED!',SUMMER?'Ranger':'Ski Patrol','bad');
   if(reason==='wall')showTrick(SUMMER?TX('MURE!','MUDSLIDE!'):TX('LAWINE!','AVALANCHE!'),'','bad');
   if(reason==='rock'){showTrick(TX('FELS!','ROCK!'),TX('Voll dagegen','Straight into it'),'bad');burst(p.x,p.y-6,30,['#ffffff','#8d91a3','#e3ecf8'],170)}
