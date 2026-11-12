@@ -4345,7 +4345,7 @@ function startRun(){
   showHint(isTouch?TX('Rechts tippen: Intro überspringen','Tap right: skip intro'):TX('Leertaste: Intro überspringen','Space: skip intro'),3800);
   layout();
 }
-function setPause(on){if(on&&state==='play'){state='pause';show('pause');persist()}else if(!on&&state==='pause'){state='play';show(null);if(document.activeElement)document.activeElement.blur()}}
+function setPause(on){if(on&&state==='play'){state='pause';show('pause');persist()}else if(!on&&state==='pause'){state='play';show(null);if(document.activeElement)document.activeElement.blur();layout()}}   /* layout(): Handy-Steuerung wieder einblenden (wurde ausgeblendet, wenn während der Pause die Größe neu berechnet wurde, z. B. nach dem Rauswechseln) */
 function gameOver(){
   if(state!=='play')return;
   state='over';$('hud').hidden=true;$('avalGlow').style.opacity='0';clearTimeout(hintTimer);$('hint').hidden=true;
