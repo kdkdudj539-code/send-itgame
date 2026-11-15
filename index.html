@@ -1293,14 +1293,14 @@ function bikeParts(g,L,lo,P,O,parts){const X=L._X,bk=L.bike||{},AX=bkAx(bk),SK=g
   // Räder. Der Reifen hat Breite (TWH = halbe Reifenbreite): von vorne oder schräg sieht man die Lauffläche, von der Seite nur die Flanke.
   const TWH=1;
   const wheel=front=>{const wk=k=>!front&&L._rearUp?Math.max(k,5.22+(k-pl.c[2])):k;   // Whip: Hinterrad vor dem Kopf (Kopf-Key 4,6)
-const C3=front?X.P(X.F(AX.fa)):X.P(AX.ra),pl=plane(C3,front),wr=BK.wr,rTi=wr-1.0,rR=wr-1.8,KN=FINE?32:24,NS=16;
+const C3=front?X.P(X.F(AX.fa)):X.P(AX.ra),pl=plane(C3,front),wr=BK.wr,rTi=wr-.8,rR=wr-1.4,KN=FINE?32:24,NS=16;
     const ez3=front?X.dir([0,0,1]):X.dirB([0,0,1]),cS=lo(C3),eS=lo(v3.add(C3,v3.mul(ez3,TWH))),ez2=[(eS[0]-cS[0])*K,(eS[1]-cS[1])*K],nearS=eS[2]>cS[2]?1:-1;
     const TR=P.TR,TS=P.TS,TRk=shade(P.TR,.14),RM=P.RM,RMh=shade(P.RM,.4),RMd=shade(P.RM,-.4),SPK=P.SPK,DSC='#c3c8d1',DSh='#7f8794',HUB='#2a2d35',HUBh='#8e96a6',CAS='#9aa1ad';
     // ganzer Reifen: Vereinigung der Reifenringe quer über die Breite, Umriss nur außen
     const fatTyre=()=>{const {c,ex,ey,det}=pl,rM=wr+1.2,wx=(Math.abs(ex[0])+Math.abs(ey[0]))*rM+Math.abs(ez2[0])+2,wy=(Math.abs(ex[1])+Math.abs(ey[1]))*rM+Math.abs(ez2[1])+2,SS=[1,.5,0,-.5,-1].map(s=>s*nearS);
       for(let y=Math.floor(c[1]-wy);y<=Math.ceil(c[1]+wy);y++)for(let x=Math.floor(c[0]-wx);x<=Math.ceil(c[0]+wx);x++){let col=null,edge=false;
         for(const s of SS){const dx=x+.5-c[0]-s*ez2[0],dy=y+.5-c[1]-s*ez2[1],a=(dx*ey[1]-dy*ey[0])/det,b=(ex[0]*dy-ex[1]*dx)/det,rho=Math.hypot(a,b);
-          if(rho>rM||rho<rTi)continue;const px=rho>.05?Math.min(1.2,rho/Math.max(.01,Math.hypot(dx,dy))):.3,tw=Math.atan2(b,a)-WA,rO=Math.cos(tw*KN)>.1?wr+.34:wr;
+          if(rho>rM||rho<rTi)continue;const px=rho>.05?Math.min(1.2,rho/Math.max(.01,Math.hypot(dx,dy))):.3,tw=Math.atan2(b,a)-WA,rO=Math.cos(tw*KN)>.1?wr+.26:wr;
           if(rho<=rO){col=rho>wr?TRk:rho>rTi+.5?TR:TS;break}if(rho<=rO+px)edge=true}
         if(col||edge){g.fillStyle=col||O;g.fillRect(x,y,1,1)}}};
     add(wk(pl.c[2]-.6),()=>{
@@ -1332,9 +1332,9 @@ const C3=front?X.P(X.F(AX.fa)):X.P(AX.ra),pl=plane(C3,front),wr=BK.wr,rTi=wr-1.0
   const flush=()=>{for(const k in groups){const L=groups[k];add(+k+L.reduce((s,t)=>s+(t[0][2]+t[1][2])/2,0)/L.length,()=>{for(const [A,B,w] of L){const r=R(w);capsule(g,A,B,r+1,r+1,O)}
       for(const [A,B,w,col,extra] of L){const r=R(w),f=gl(col);capsule(g,A,B,r,r,extra?(u,v,up)=>extra(u,v,up)||f(u,v,up):f)}})}};
   const LK='#202229',bb=W([0,0,0]),ht=W(BK.ht),hb=W(BK.hb),ra=W(AX.ra);
-  const J=W([-.2,-6.65,0]),stT=W([-1.0,-8.15,0]),ttF=W([9.6,-11.3,0]),dtR=W([.55,-.95,0]),dtF=W([10.95,-9.05,0]),YK=W([.9,-4.9,0]),YD=W([3.7,-3.35,0]),T1=W([1.9,-7.6,0]),YK2=W([1.75,-4.45,0]);
-  const UF=W([.85,-4.55,0]),US=W([-.85,-3.7,0]),LF=W([.6,-1.35,0]),LS=W([-1.25,-.95,0]);   // obere und untere Link-Lager (Rahmen bzw. Hinterbau)
-  const shR=W([2.55,-4.0,0]),shF=W([.05,-1.85,0]),tab=W([2.75,-4.45,0]);   // Dämpfer wie beim Vorbild: oberes Auge an der Lasche am Sitzrohr (Y-Strebe), unteres am Hebel des unteren Links beim Tretlager
+  const J=W([.8,-7.0,0]),stT=W([-1.2,-8.5,0]),ttF=W([9.6,-11.2,0]),TTb=W([2.9,-7.45,0]),dtR=W([.55,-.95,0]),dtF=W([10.6,-9.4,0]),ST0=W([3.15,-7.25,0]),YD=W([4.7,-4.45,0]),B0=W([1.25,-6.15,0]),B1=W([3.65,-6.3,0]),SL=W([1.3,-5.5,0]);   /* Oberrohr: vom Steuerrohr steil runter (TTb), dann flacher zum Sitzrohr (J); Strebe vom Knick zum Unterrohr; Brücke unter dem flachen Stück (kleines Fenster) */
+  const UF=W([1.3,-5.55,0]),US=W([.55,-3.6,0]),LF=W([.6,-1.35,0]),LS=W([-1.25,-.95,0]);   // obere und untere Link-Lager (Rahmen bzw. Hinterbau)
+  const shR=W([3.0,-5.55,0]),shF=W([.35,-2.4,0]),tab=W([3.1,-6.15,0]);   // Dämpfer wie beim Vorbild: oberes Auge an der Lasche am Sitzrohr (Y-Strebe), unteres am Hebel des unteren Links beim Tretlager
   const sa=AX.s/BK_SAG;
   // Hinterbau: Kettenstrebe (mit Schutz), Sitzstrebe, Schwinge vorne
   ftube(LS,ra,.4,P.BK,-.14,(u,v)=>v>.25&&u>.12&&u<.9?(Math.floor(u*22)%2?'#2a2d34':'#3a3e48'):null);
@@ -1356,15 +1356,16 @@ const C3=front?X.P(X.F(AX.fa)):X.P(AX.ra),pl=plane(C3,front),wr=BK.wr,rTi=wr-1.0
     for(const E of [shR,shF]){dot(E,R(.34)+1,O);dot(E,R(.34),'#aeb4bf');g.fillStyle='#2a2d35';g.fillRect(Math.round(E[0]),Math.round(E[1]),1,1)}});
   // Hauptrahmen
   ftube(shR,tab,.34,P.BK,0);   // Lasche an der Y-Strebe fürs obere Dämpferauge
-  ftube(J,YK,.46,P.BK,0);ftube(YK,YD,.44,P.BK,0);ftube(T1,YK2,.3,P.BK,0);   // Y-Strebe und kleines Fenster unter dem Oberrohr
-  ftube(J,ttF,.46,P.BK,0);   // Oberrohr
+  ftube(ST0,YD,.46,P.BK,0);ftube(B0,B1,.32,P.BK,0);ftube(J,SL,.4,P.BK,0);   // Strebe zum Unterrohr, Brücke (kleines Fenster), Sitzrohr unten bis zum Link-Lager
+  ftube(J,TTb,.46,P.BK,0);ftube(TTb,ttF,.48,P.BK,0);   // Oberrohr mit Knick
+  ftube(W([9.3,-11.0,0]),W([10.3,-9.5,0]),.6,P.BK,0);ftube(W([8.9,-10.8,0]),W([9.9,-9.2,0]),.4,P.BK,0);   // Ober- und Unterrohr laufen am Steuerrohr zu einem breiten Knoten zusammen
   ftube(J,stT,.44,P.BK,0,u=>u>.82?'#1d2027':null);   // Sitzrohr-Stummel mit Klemme
   const Ldt=Math.hypot(dtF[0]-dtR[0],dtF[1]-dtR[1]);
   ftube(dtR,dtF,.66,P.BK,0,(u,v)=>v>.42&&u>.08&&u<.72?'#2b2e36':(u>.38&&u<.9&&v>-.38&&v<.12?(Math.floor(u*Ldt*1.6+v*3)%4===0?shade(P.bka,.3):P.bka):null));   // Unterrohr: Schutz unten, Akzentstreifen
   ftube(ht,hb,.62,P.BK,0,u=>u<.1||u>.9?'#1d2027':null);   // Steuerrohr mit Steuersatz
   flush();
   add(.06,()=>{dot(bb,R(.9)+1,O);dot(bb,R(.9),gl(P.BK)(0,0,0));dot(bb,R(.55),'#e9ebef');dot(bb,R(.3),'#8e96a6')});   // Tretlager mit hellem Lagerring
-  tube(stT,W([-1.45,-9.25,0]),.3,'#4a4f5b',.02);   // Sattelstütze
+  tube(stT,W([-1.55,-9.3,0]),.3,'#4a4f5b',.02);   // Sattelstütze
   {const s0=W([-3.5,-9.7,0]),s1=W([.5,-9.45,0]),s2=W([-1.7,-9.8,0]);add(.03,()=>{capsule(g,s0,s1,R(.34)+1,R(.34)+1,O);capsule(g,s0,s2,R(.44)+1,R(.44)+1,O);const f=sh3(P.SD);capsule(g,s0,s1,R(.34),R(.34),f);capsule(g,s0,s2,R(.44),R(.44),f)})}   // Sattel
   // Doppelbrücken-Gabel: Standrohre, Tauchrohre mit Abstreifring, zwei Brücken
   const FT=BK_FT,FM=AX.fm;
