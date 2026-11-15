@@ -1244,7 +1244,7 @@ function drawBoardWide(g,poly,d,n,lo,P,O,col,hw,bw){
    Eine Bike-Pose sagt, wo das Tretlager relativ zur Hüfte sitzt (o) und wie das Bike gedreht ist: pitch (Nase hoch), yaw (Heck schwenkt,
    Whip), roll (kippt flach, Table Top), Drehpunkt piv, Lenkeinschlag steer, Kurbelwinkel crank. Füße stehen auf den Pedalen, Hände am Lenker,
    außer eine Pose legt Bein oder Arm selbst fest (legsX/armsX); Knie und Ellbogen rechnet eine kleine IK. */
-const BK={wr:6.5,ra:[-8.6,-1.5,0],fa:[15.4,-1.5,0],ht:[9.5,-11.9,0],hb:[11.3,-8.4,0],crank:3,ped:2.8,thigh:6.5,shin:6.2,uarm:4.6,farm:4.2,grip:[10.2,-14.3],foot:16};
+const BK={wr:6,ra:[-8.6,-1,0],fa:[15.4,-1,0],ht:[9.5,-11.9,0],hb:[11.3,-8.4,0],crank:3,ped:2.8,thigh:6.5,shin:6.2,uarm:4.6,farm:4.2,grip:[10.2,-14.3],foot:16};
 const BK_SA=v3.unit([BK.hb[0]-BK.ht[0],BK.hb[1]-BK.ht[1],0]),BK_SAG=3.4,BK_FT=[9.35,-12.9],BK_FD=v3.unit([BK.fa[0]-BK_FT[0],BK.fa[1]-BK_FT[1],0]);
 const bkAx=bk=>{const s=(bk&&bk.sag)||0;return {s,ra:[BK.ra[0],BK.ra[1]-s,0],fa:[BK.fa[0]-BK_FD[0]*s*1.1,BK.fa[1]-BK_FD[1]*s*1.1,0],fm:[BK_FT[0]+(BK.fa[0]-BK_FT[0])*.6-BK_FD[0]*s*1.1,BK_FT[1]+(BK.fa[1]-BK_FT[1])*.6-BK_FD[1]*s*1.1]}};
 function bikeXf(bk){const R=d=>(d||0)*RAD,piv=bk.piv||[0,0,0],o=bk.o||[1.6,11,0],st=bk.steer||0;
@@ -1628,7 +1628,7 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist,hy){
   const hipC=v3.mul(v3.add(L.legs[0][0],L.legs[1][0]),.5),hipIn=j=>v3.add(hipC,v3.mul(v3.add(j,v3.mul(hipC,-1)),.5));
   L.legs.forEach((lg,i)=>{const q=lg.map((j,n)=>lo(n?j:hipIn(j)));const key=L.legsFree?Math.max(q[1][2],q[2][2])-.5:Math.max(Math.max(q[1][2],q[2][2])-.5,bootKey(i)+.02);/* legsFree: Beine dürfen hinter dem Board liegen (Method von der Switch-Seite) */legMax=Math.max(legMax,key);
     const dark=L.legDark?L.legDark[i]:key<-2;
-    const lw=bike?zw(2)+2:zw(5);parts.push({key,draw:()=>{const col=dark?P.p:P.P;if(jGeo){const tg=legCtx();limb(tg,q.map(v=>[v[0],v[1]]),lw,col,O);tg.globalCompositeOperation='destination-out';tubeFill(tg,[jGeo.A,jGeo.B],jGeo.ro,jGeo.rq,(T,v,Lp)=>T<-1/Lp?null:'#000');tg.globalCompositeOperation='source-over';g.drawImage(tg.canvas,0,0)}else limb(g,q.map(v=>[v[0],v[1]]),lw,col,O);if(!L.noFlare&&cL>.5){g.fillStyle=col;g.fillRect(Math.round(q[2][0]-(lw+1)/2),Math.round(q[2][1])-2,lw+1,2)}}});   // Bike: Hose einen Fahrer-Pixel breiter
+    const lw=bike?zw(2)+1:zw(5);parts.push({key,draw:()=>{const col=dark?P.p:P.P;if(jGeo){const tg=legCtx();limb(tg,q.map(v=>[v[0],v[1]]),lw,col,O);tg.globalCompositeOperation='destination-out';tubeFill(tg,[jGeo.A,jGeo.B],jGeo.ro,jGeo.rq,(T,v,Lp)=>T<-1/Lp?null:'#000');tg.globalCompositeOperation='source-over';g.drawImage(tg.canvas,0,0)}else limb(g,q.map(v=>[v[0],v[1]]),lw,col,O);if(!L.noFlare&&cL>.5){g.fillStyle=col;g.fillRect(Math.round(q[2][0]-(lw+1)/2),Math.round(q[2][1])-2,lw+1,2)}}});   // Bike: Hose einen Fahrer-Pixel breiter
     if(bike)parts.push({key:key+.001,draw:()=>bikeShoe(i)});   // Bike-Schuh nach dem Bein, damit er nicht vom Hosenbein verdeckt wird
     if(skiBootRow)parts.push({key:key+.001,draw:()=>skiBoot(i)});else if(onBoard(i))parts.push({key:key+.001,draw:()=>boardBoot(i)})});
   {const h0=lo(hipIn(L.legs[0][0])),h1=lo(hipIn(L.legs[1][0]));
