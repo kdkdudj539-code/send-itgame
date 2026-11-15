@@ -1336,13 +1336,13 @@ const C3=front?X.P(X.F(AX.fa)):X.P(AX.ra),pl=plane(C3,front),wr=BK.wr,rTi=wr-1.0
   const shF=W([9.95,-9.55,0]),shR=W([4.5,-6.5,0]),tab=W([10.6,-9.9,0]);   // Dämpfer: vorderes Auge an der Lasche hinten am Steuerrohr, hinteres am Hebel
   const sa=AX.s/BK_SAG;
   // Hinterbau: Kettenstrebe (mit Schutz), Sitzstrebe, Schwinge vorne
-  ftube(LS,ra,.62,P.BK,-.14,(u,v)=>v>.25&&u>.12&&u<.9?(Math.floor(u*22)%2?'#2a2d34':'#3a3e48'):null);
-  ftube(ra,US,.5,P.BK,-.14);ftube(LS,US,.66,P.BK,-.14);
+  ftube(LS,ra,.4,P.BK,-.14,(u,v)=>v>.25&&u>.12&&u<.9?(Math.floor(u*22)%2?'#2a2d34':'#3a3e48'):null);
+  ftube(ra,US,.32,P.BK,-.14);ftube(LS,US,.42,P.BK,-.14);
   add(-.12,()=>{const d=[ra[0]-LS[0],ra[1]-LS[1]],l=Math.hypot(d[0],d[1])||1,nx=-d[1]/l,ny=d[0]/l,s=ny>0?1:-1;g.fillStyle='#22252c';   // Zacken am Kettenstrebenschutz
-    for(let k=1;k<11;k++){const u=.14+k*.07,x=LS[0]+d[0]*u+nx*s*R(.82),y=LS[1]+d[1]*u+ny*s*R(.82);g.fillRect(Math.round(x),Math.round(y),Math.max(1,Math.round(R(.18))),Math.max(1,Math.round(R(.4))))}});
+    for(let k=1;k<11;k++){const u=.14+k*.07,x=LS[0]+d[0]*u+nx*s*R(.6),y=LS[1]+d[1]*u+ny*s*R(.6);g.fillRect(Math.round(x),Math.round(y),Math.max(1,Math.round(R(.18))),Math.max(1,Math.round(R(.4))))}});
   ftube(W([AX.ra[0]-.2,AX.ra[1]+.3,0]),W([AX.ra[0]+.9,AX.ra[1]+.9,0]),.22,LK,-.15);   // Schaltauge
   // Links (schwarz) und Lager
-  ftube(UF,US,.55,LK,-.1);ftube(LF,LS,.52,LK,-.1);ftube(UF,shR,.45,LK,-.1);   // oberer Link mit Hebel zum Dämpfer
+  ftube(UF,US,.38,LK,-.1);ftube(LF,LS,.36,LK,-.1);ftube(UF,shR,.32,LK,-.1);   // oberer Link mit Hebel zum Dämpfer
   add(-.09,()=>{for(const Q of [UF,US,LF,LS]){dot(Q,R(.3)+1,O);dot(Q,R(.3),'#9aa1ad')}});
   // Dämpfer: Körper schwarz mit Etikett in der Akzentfarbe des Dämpfers, Ausgleichsbehälter, Feder in der Dämpferfarbe
   add(-.03,()=>{const c0=.3,c1=.86-.16*sa,sp=P.SHK,spH=shade(sp,.38),spD=shade(sp,-.45),L=Math.hypot(shF[0]-shR[0],shF[1]-shR[1]),Lc=L*(c1-c0);
@@ -1354,15 +1354,15 @@ const C3=front?X.P(X.F(AX.fa)):X.P(AX.ra),pl=plane(C3,front),wr=BK.wr,rTi=wr-1.0
     capsule(g,A,B,R(.82),R(.82),(u,v,uu)=>{const ph=(u*Lc+v*R(.5))/2;return ph-Math.floor(ph)<.55?(uu>.35?spH:uu<-.4?spD:sp):'#16181d'});
     for(const E of [shR,shF]){dot(E,R(.34)+1,O);dot(E,R(.34),'#aeb4bf');g.fillStyle='#2a2d35';g.fillRect(Math.round(E[0]),Math.round(E[1]),1,1)}});
   // Hauptrahmen
-  ftube(shF,tab,.55,P.BK,0);   // Lasche am Steuerrohr fürs vordere Dämpferauge
-  ftube(J,YK,.78,P.BK,0);ftube(YK,YD,.74,P.BK,0);ftube(T1,YK2,.5,P.BK,0);   // Y-Strebe und kleines Fenster unter dem Oberrohr
-  ftube(J,ttF,.8,P.BK,0);   // Oberrohr
-  ftube(J,stT,.72,P.BK,0,u=>u>.82?'#1d2027':null);   // Sitzrohr-Stummel mit Klemme
+  ftube(shF,tab,.34,P.BK,0);   // Lasche am Steuerrohr fürs vordere Dämpferauge
+  ftube(J,YK,.46,P.BK,0);ftube(YK,YD,.44,P.BK,0);ftube(T1,YK2,.3,P.BK,0);   // Y-Strebe und kleines Fenster unter dem Oberrohr
+  ftube(J,ttF,.46,P.BK,0);   // Oberrohr
+  ftube(J,stT,.44,P.BK,0,u=>u>.82?'#1d2027':null);   // Sitzrohr-Stummel mit Klemme
   const Ldt=Math.hypot(dtF[0]-dtR[0],dtF[1]-dtR[1]);
-  ftube(dtR,dtF,1.2,P.BK,0,(u,v)=>v>.42&&u>.08&&u<.72?'#2b2e36':(u>.38&&u<.9&&v>-.38&&v<.12?(Math.floor(u*Ldt*1.6+v*3)%4===0?shade(P.bka,.3):P.bka):null));   // Unterrohr: Schutz unten, Akzentstreifen
-  ftube(ht,hb,.8,P.BK,0,u=>u<.1||u>.9?'#1d2027':null);   // Steuerrohr mit Steuersatz
+  ftube(dtR,dtF,.66,P.BK,0,(u,v)=>v>.42&&u>.08&&u<.72?'#2b2e36':(u>.38&&u<.9&&v>-.38&&v<.12?(Math.floor(u*Ldt*1.6+v*3)%4===0?shade(P.bka,.3):P.bka):null));   // Unterrohr: Schutz unten, Akzentstreifen
+  ftube(ht,hb,.62,P.BK,0,u=>u<.1||u>.9?'#1d2027':null);   // Steuerrohr mit Steuersatz
   flush();
-  add(.06,()=>{dot(bb,R(1.15)+1,O);dot(bb,R(1.15),gl(P.BK)(0,0,0));dot(bb,R(.55),'#e9ebef');dot(bb,R(.3),'#8e96a6')});   // Tretlager mit hellem Lagerring
+  add(.06,()=>{dot(bb,R(.9)+1,O);dot(bb,R(.9),gl(P.BK)(0,0,0));dot(bb,R(.55),'#e9ebef');dot(bb,R(.3),'#8e96a6')});   // Tretlager mit hellem Lagerring
   tube(stT,W([-1.45,-9.25,0]),.3,'#4a4f5b',.02);   // Sattelstütze
   {const s0=W([-3.5,-9.7,0]),s1=W([.5,-9.45,0]),s2=W([-1.7,-9.8,0]);add(.03,()=>{capsule(g,s0,s1,R(.34)+1,R(.34)+1,O);capsule(g,s0,s2,R(.44)+1,R(.44)+1,O);const f=sh3(P.SD);capsule(g,s0,s1,R(.34),R(.34),f);capsule(g,s0,s2,R(.44),R(.44),f)})}   // Sattel
   // Doppelbrücken-Gabel: Standrohre, Tauchrohre mit Abstreifring, zwei Brücken
