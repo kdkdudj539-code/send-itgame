@@ -2074,7 +2074,7 @@ function fLogJam(){
 const JT_REQ=315;   // großer Kicker: zieht auf diese Geschwindigkeit, damit der Sprung auch wirklich weit geht
 let JT_SPR=null;
 function jtSprites(){if(JT_SPR)return JT_SPR;JT_SPR=[];
-  for(let i=0;i<6;i++){const h=15+i,w=Math.round(h*.42)+1,[c,g]=mk(w*2+6,h+6);drawTreeVar(g,w+2,h+5,h,w,TREE_COLS[i%TREE_COLS.length],SUMMER?0:.85,3,i*3+7);JT_SPR.push({c,w,h,base:h+5})}
+  for(let i=0;i<6;i++){const h=15+i,w=Math.round(h*.42)+1,[c,g]=mk(w*2+6+(JAPAN?10:0),h+6);if(JAPAN)drawSakura(g,w+7,h+5,h,i*3+7,true);else drawTreeVar(g,w+2,h+5,h,w,TREE_COLS[i%TREE_COLS.length],SUMMER?0:.85,3,i*3+7);JT_SPR.push({c,w,h,base:h+5})}   // Japan: kleine Kirschbäume
   return JT_SPR}
 function addJumpTree(x){const g=groundAt(x);if(!g)return;const S=jtSprites(),k=Math.floor(Math.random()*S.length);const gl=groundAt(x-S[k].w),gr=groundAt(x+S[k].w),ft=Math.max(g.y+1,gl?gl.y:g.y,gr?gr.y:g.y);jtrees.push({x,y:g.y,ft,k,h:S[k].h,w:S[k].w,f:Math.random()<.5,hit:false})}   // ft: Fuß wie gezeichnet
 function fTreeJump(){
@@ -2333,12 +2333,34 @@ function drawBirch(g,X,base,h,tw,seed,far,dark){
       if(i>1&&hash01(seed+k*7.7+i*1.3)<.34){g.fillStyle=TWG;g.fillRect(x+(hash01(seed+i)<.5?1:-1),y-1-Math.floor(hash01(seed*3+i)*2),1,1)}
       if(i===len||i===Math.round(len*.55)){g.fillStyle='#ffffff';g.fillRect(x,y-1,far?1:2,1)}}}
   g.fillStyle='#ffffff';g.fillRect(Math.round(X+lean),base-1-h,1,1)}
+/* Kirschbaum (Sakura) für Japan: dunkler, krummer Stamm, weit ausladende Äste, rosa Blütenwolken mit hellen Spitzen und etwas Schnee obendrauf.
+   X = Stammfuß-Mitte, base = Fußzeile, h = Gesamthöhe. small: kleines Bäumchen (Sprung über die Bäume). */
+function drawSakura(g,X,base,h,seed,small){
+  const BK=['#2a1c1f','#43302f','#5b4340'],BL=['#a3506f','#e88aab','#f7bdd0','#fde4ec'],r=k=>hash01(seed*3.17+k*1.913);
+  const th=Math.round(h*(small?.42:.48)),tw=small?2:Math.max(2,Math.round(h*.055)),lean=(r(1)-.5)*h*.18;
+  for(let y=0;y<th;y++){const u=y/th,x=Math.round(X-tw/2+lean*u*u+Math.sin(u*3+seed)*h*.02),w=tw+(u<.12?1:0);   // Stamm mit Wurzelansatz
+    for(let i=0;i<w;i++){g.fillStyle=i===0?BK[2]:i===w-1?BK[0]:BK[1];g.fillRect(x+i,base-1-y,1,1)}}
+  const tx=X+lean,ty=base-th,W=h*(small?.5:.62),cl=[];
+  const nb=small?3:4+Math.floor(r(2)*2);
+  for(let k=0;k<nb;k++){const a=-Math.PI/2+(k/(nb-1)-.5)*2.3+(r(k+5)-.5)*.35,L=W*(.55+.45*r(k+9)),ex=tx+Math.cos(a)*L,ey=ty+Math.sin(a)*L*.62;
+    const n=Math.ceil(L);for(let i=0;i<=n;i++){const u=i/n,x=Math.round(tx+(ex-tx)*u),y=Math.round(ty+(ey-ty)*u-Math.sin(u*Math.PI)*h*.04);g.fillStyle=u<.5&&!small?BK[1]:BK[0];g.fillRect(x,y,u<.35&&!small?2:1,1)}
+    cl.push([ex,ey])}
+  cl.push([tx,ty-h*(small?.22:.2)]);
+  const R=Math.max(3,h*(small?.2:.15));
+  for(let k=0;k<cl.length;k++){const [x,y]=cl[k];leafCrown(g,x,y-R*.2,R*1.25,R*.85,small?4:7,R*.55,[BL[0],BL[1],BL[2]],seed*7.3+k*2.1)}
+  // helle Blüten-Tupfer und Schnee auf den Kronen
+  const cw=g.canvas.width,ch=g.canvas.height,id=g.getImageData(0,0,cw,ch),d=id.data,isP=i=>d[i+3]&&d[i]>150&&d[i+2]>90;
+  for(let x=0;x<cw;x++){let top=true;for(let y=0;y<ch;y++){const i=(y*cw+x)*4;if(!d[i+3])continue;
+    if(isP(i)){if(top&&hash01(seed+x*.71+y*.13)<.75){d[i]=255;d[i+1]=255;d[i+2]=255;if(y+1<ch&&hash01(seed+x*1.3)<.45){const j=i+cw*4;if(isP(j)){d[j]=232;d[j+1]=240;d[j+2]=250}}}
+      else if(hash01(seed*2+x*.37+y*.91)<.08){d[i]=253;d[i+1]=228;d[i+2]=236}}
+    top=false}}
+  g.putImageData(id,0,0)}
 function birchRow(W,H,n,hmin,hmax,far){
   const [c,g]=mk(W,H),list=[];
   for(let i=0;i<n;i++)list.push({x:Math.floor(Math.random()*W),h:Math.floor(rand(hmin,hmax)),b:H-2-Math.floor(Math.random()*8),k:Math.random()});
   list.sort((a,b)=>a.b-b.b);
   for(const t of list)for(const o of [0,W,-W]){const X=t.x+o;if(X<-30||X>W+30)continue;
-    if(t.k<.15)drawSpruce(g,X,t.b,Math.round(t.h*1.1),Math.max(2,t.h*.14),far?['#3d5863','#4a6672']:['#1e3a33','#2a4c40']);
+    if(t.k<.15)drawSakura(g,X,t.b,Math.round(t.h*.8),t.k*131+3,t.h<34);   // Sakura statt Zedern
     else drawBirch(g,X,t.b,t.h,far?1:2,t.k*97,far)}
   return c}
 function makeCloud(W,H){
@@ -2657,6 +2679,7 @@ function shadeLayer(g,sx,sy,sw,sh,dw,dh){const DS=curDS;g.save();g.setTransform(
   if(DS.dusk>.02){g.fillStyle='rgba('+DUSK_TINT()+','+(.15*DS.dusk)+')';g.fillRect(0,0,dw,dh)}
   if(lightOn&&lightCv)g.drawImage(lightCv,sx,sy,sw,sh,0,0,dw,dh);g.restore()}
 function drawPlayer(cX,cY){
+  crItemsWorld(-1,cX,cY);
   const v=playerView(),spr=getSprite(v.pose,v.phi,v.look,null,null,v.inPow,v.cork,v.twist,0,GEAR==='bike'?((Math.floor((p.wheelA||0)/7.5)%6)+6)%6:0,v.hy);
   if(spr.hi){const tx=Math.round(v.comx-cX),ty=Math.round(v.comy-cY),S=PLH*2*RS;
     if(!plCv){[plCv,plCtx]=mk(S,S);[afterCv,afterCtx]=mk(VW,VH)}
@@ -2667,7 +2690,7 @@ function drawPlayer(cX,cY){
       rotCtx.drawImage(spr,(-SCX-v.ox)*RZ,(-SCY-v.oy)*RZ);const f=RS/RZ;plCtx.drawImage(rotCv,Math.round(S/2-RC/2*f),Math.round(S/2-RC/2*f),RC*f,RC*f)}
     else{plCtx.translate(S/2,S/2);plCtx.rotate(v.ang*RAD);plCtx.drawImage(spr,(-SCX-v.ox)*spr.K,(-SCY-v.oy)*spr.K);plCtx.setTransform(1,0,0,1,0,0)}
     crItemsDraw(1,cX,cY,tx,ty);crStars(v,cX,cY,tx,ty);plCtx.setTransform(1,0,0,1,0,0);
-    HIP={tx,ty};afterCtx.clearRect(0,0,VW,VH);ctx=afterCtx}
+    HIP={tx,ty};afterCtx.clearRect(0,0,VW,VH);ctx=afterCtx;crItemsWorld(1,cX,cY)}
   else{ctx.save();ctx.translate(Math.round(v.comx-cX),Math.round(v.comy-cY));ctx.rotate(v.ang*RAD);ctx.drawImage(spr,-SCX-v.ox,-SCY-v.oy);ctx.restore()}
   if(p.mode==='dig'&&p.dig.mound>.5){const hM=p.dig.mound;for(let dx=-17;dx<=17;dx++){const g=groundAt(p.x+dx);if(!g)continue;
       const u=dx/17,hh=Math.round(hM*Math.sqrt(Math.max(0,1-u*u))*(1+.12*Math.sin(dx*1.7+p.dig.t*2)));if(hh<1)continue;const x=Math.round(p.x+dx-cX),y=Math.round(g.y-cY);
@@ -2870,7 +2893,7 @@ function drawLeafVar(g,X,base,h,w,cols,seed){const tr=Math.round(h*.42);g.fillSt
       g.fillStyle=dark?cols[0]:lit&&n<.8?cols[2]:n<.12?cols[0]:cols[1];g.fillRect(Math.round(cx+xx),Math.round(cy+yy),1,1)}}}}
 function makeTreeSprites(){TREE_SPR=[];JF_SPR=null;AF_SPR=null;SF_SPR=null;
   if(JAPAN){for(let i=0;i<14;i++){const h=Math.round(46+hash01(i*4.7+1)*52);
-      if(i%3===0){const w=Math.ceil(h*.15),tr=Math.round(h*.16),[c,g]=mk(w*2+6,h+6);drawTreeVar(g,w+2,h+5,h,w,TREE_COLS[i%TREE_COLS.length],.95,tr,i+1);TREE_SPR.push({c,w,tr,base:h+5})}
+      if(i%3===0){const R=Math.ceil(h*.72)+4,[c,g]=mk(R*2+4,h+8);drawSakura(g,R+1,h+7,h,i*3.7+1,false);TREE_SPR.push({c,w:2,tr:h,base:h+7})}   // Sakura statt Tanne
       else{const R=Math.ceil(h*.4)+5,[c,g]=mk(R*2+4,h+6);drawBirch(g,R+1,h+5,h,3,i*6.1+3,false,i%4===1);TREE_SPR.push({c,w:2,tr:h,base:h+5})}}
     return}
   if(SUMMER){const LC=[['#2e5a2c','#3f7a38','#5b9a46'],['#355f2a','#4a7d33','#6aa346'],['#2c5530','#3c703c','#56904d']];
@@ -3427,17 +3450,30 @@ function crash(s,why,pow,o){
   }else SFX.thud(.8);
   crSpray(sev==='heavy'?34:sev==='mid'?24:14,1);
 }
-function yardSale(s0){const c=p.cr;c.Y=true;for(const k of ['ski','ski','pole','pole'])c.items.push({k,x:p.x+rand(-4,4),h:3,s:s0*rand(.5,1),vh:-rand(90,180),rot:rand(0,360),w:(Math.random()<.5?-1:1)*rand(500,1100),z:Math.random()<.5?-1:1})}
-function bikeOff(s0,sev){const c=p.cr,g=groundAt(p.x),r0=p.ang-(g?g.a*DEG:0);
-  c.items.push({k:'bike',x:p.x,h:1,s:s0*(sev==='light'?.7:.4),vh:sev==='light'?-30:-rand(90,150),rot:r0,w:sev==='light'?rand(160,260):-rand(250,500),z:-1});
+/* Weggeflogene Ausrüstung: fliegt frei in Weltkoordinaten (x, y = Mitte des Teils, rot = Winkel in der Welt), prallt vom Boden ab, rutscht und kippt flach hin.
+   Über eine Kante fällt sie weiter; in eine Spalte gefallen ist sie weg. Beim Aufstehen fliegt alles in einem Bogen zurück. */
+function crItem(k,vx,vy,rot,w,z){const g=groundAt(p.x),E=CR_EXT[k];return {k,x:p.x+rand(-3,3),y:(g?g.y:p.y)-E[1]-4,vx,vy,rot,w,z}}
+function yardSale(s0){const c=p.cr,g=groundAt(p.x),a=g?g.a:0;c.Y=true;
+  for(const k of ['ski','ski','pole','pole']){const f=rand(.5,1);c.items.push(crItem(k,s0*f*Math.cos(a),s0*f*Math.sin(a)-rand(90,180),rand(0,360),(Math.random()<.5?-1:1)*rand(500,1100),Math.random()<.5?-1:1))}}
+function bikeOff(s0,sev){const c=p.cr,g=groundAt(p.x),a=g?g.a:0,f=sev==='light'?.7:.4;
+  c.items.push(crItem('bike',s0*f*Math.cos(a),s0*f*Math.sin(a)-(sev==='light'?30:rand(90,150)),p.ang,sev==='light'?rand(160,260):-rand(250,500),-1));
   if(sev!=='light'){c.vh=Math.min(c.vh,-120);p.s=s0*.6}}   // über den Lenker: der Fahrer fliegt weiter als das Bike
-function crPh(ph){const c=p.cr;c.ph=ph;c.pt=0;if(ph==='up'){c.stars=false;for(const it of c.items){it.x0=it.x;it.h0=it.h;it.r0=((it.rot%360)+540)%360-180}}}
+function crPh(ph){const c=p.cr;c.ph=ph;c.pt=0;if(ph==='up'){c.stars=false;const g=groundAt(p.x),ga=g?g.a*DEG:0;for(const it of c.items){it.x0=it.x;it.y0=it.y;it.r0=(((it.rot-ga)%360)+540)%360-180}}}
 function updCrItems(dt){const c=p.cr;if(!c||!c.items.length||c.ph==='up')return;
-  for(const it of c.items){const g=groundAt(it.x);if(!g)continue;
-    if(it.h>0||it.vh<0){it.vh+=G*dt;it.h-=it.vh*dt;if(it.h<=0){it.h=0;if(it.vh>70){it.vh*=-.35;it.w*=.5;it.s*=.8}else it.vh=0}}
-    const on=it.h<=0;it.s=Math.max(0,it.s+(G*Math.sin(g.a)-(on?.75:.02)*G*Math.cos(g.a))*dt);
-    it.x+=Math.cos(g.a)*it.s*dt;if(Math.abs(it.x-p.x)>38)it.x=p.x+Math.sign(it.x-p.x)*38;   // bleibt in der Nähe (eigene Fahrer-Ebene)
-    it.rot+=it.w*dt;if(on){it.w*=Math.exp(-dt*6);if(Math.abs(it.w)<240){it.w*=Math.exp(-dt*8);const t=Math.round(it.rot/180)*180;it.rot+=(t-it.rot)*Math.min(1,dt*12)}}}}   // am Boden: kippt flach hin
+  for(const it of c.items){if(it.gone)continue;const E=CR_EXT[it.k];
+    it.vy+=G*dt;it.x+=it.vx*dt;it.y+=it.vy*dt;it.rot+=it.w*dt;
+    if(it.k==='bike'&&Math.abs(it.x-p.x)>36){it.x=p.x+Math.sign(it.x-p.x)*36;it.vx*=.5}   // das Bike bleibt in der feinen Fahrer-Ebene
+    const g=groundAt(it.x);if(!g){if(it.y>p.y+500)it.gone=true;continue}
+    const ca=Math.cos(g.a),sa=Math.sin(g.a),ga=g.a*DEG,rr=(it.rot-ga)*RAD,hg=Math.abs(Math.sin(rr))*E[0]+Math.abs(Math.cos(rr))*E[1],fl=g.y-hg/Math.max(.5,ca);
+    if(it.y<fl)continue;
+    it.y=fl;const vn=it.vy*ca-it.vx*sa,vt=it.vx*ca+it.vy*sa;let nn=0,tt=vt;
+    if(vn>70){nn=-vn*.35;tt*=.8;it.w*=.5}   // abprallen
+    else{const fr=.75*G*ca*dt;tt=Math.abs(tt)<=fr?0:tt-Math.sign(tt)*fr;it.w*=Math.exp(-dt*6);
+      if(Math.abs(it.w)<240){it.w*=Math.exp(-dt*8);const t=ga+Math.round((it.rot-ga)/180)*180;it.rot+=(t-it.rot)*Math.min(1,dt*12)}}   // am Boden: rutscht und kippt flach hin
+    it.vx=tt*ca-nn*sa;it.vy=tt*sa+nn*ca}}
+function crItemAt(it,c){const up=c.ph==='up'?smooth01(c.pt/(CR_UP[c.sev]*.55)):0;if(up>=1||it.gone&&up<=0)return null;if(up<=0)return {x:it.x,y:it.y,rot:it.rot};
+  const g=groundAt(p.x),ga=g?g.a*DEG:0,E=CR_EXT[it.k],tx=p.x+(it.k==='bike'?4:0),ty=(g?g.y:p.y)-E[1],x0=it.gone?p.x:it.x0,y0=it.gone?p.y+40:it.y0;
+  return {x:x0+(tx-x0)*up,y:y0+(ty-y0)*up-Math.sin(Math.PI*up)*10,rot:ga+it.r0*(1-up)}}
 function updCrash(dt){const c=p.cr;c.t+=dt;c.pt+=dt;
   if(jumpBuf>0){jumpBuf=0;if(c.ph==='slide'||c.ph==='rest'){if(c.r1!=null)c.rot=c.r1;crPh('up')}}   // Sprung-Taste: schneller aufstehen
   if(c.h>0||c.vh<0){c.vh+=G*dt;c.h=Math.max(0,c.h-c.vh*dt);
@@ -3485,14 +3521,15 @@ function poleSprite(){const k=eqKey(SAVE.equip);if(POLE_SPR&&POLE_KEY===k)return
   POLE_SPR=c;POLE_KEY=k;return c}
 function drawRZ(spr,X,Y,deg){if(!itCv)[itCv,itCtx]=mk(RC,RC);itCtx.setTransform(1,0,0,1,0,0);itCtx.clearRect(0,0,RC,RC);itCtx.translate(RC/2,RC/2);itCtx.rotate(deg*RAD);itCtx.drawImage(spr,-SCX*RZ,-SCY*RZ);
   const f=RS/RZ;plCtx.drawImage(itCv,Math.round(X-RC/2*f),Math.round(Y-RC/2*f),RC*f,RC*f)}
-function crItemsDraw(front,cX,cY,tx,ty){const c=p.cr;if(!c||!c.items.length||!(p.mode==='crash'||p.mode==='air'&&c.air))return;
-  const up=c.ph==='up'?smooth01(c.pt/(CR_UP[c.sev]*.55)):0;if(up>=1)return;plCtx.setTransform(1,0,0,1,0,0);
-  for(const it of c.items){if((it.z>0)!==(front>0))continue;let x=it.x,h=it.h,rot=it.rot;
-    if(up>0){x=it.x0+(p.x+(it.k==='bike'?4:0)-it.x0)*up;h=it.h0*(1-up)+Math.sin(Math.PI*up)*10;rot=it.r0*(1-up)}
-    const g=groundAt(x);if(!g)continue;const E=CR_EXT[it.k],rr=rot*RAD,hg=Math.abs(Math.sin(rr))*E[0]+Math.abs(Math.cos(rr))*E[1]+h,wx=x+hg*Math.sin(g.a),wy=g.y-hg*Math.cos(g.a),wa=g.a*DEG+rot;
-    const X=(wx-cX-tx+PLH)*RS,Y=(wy-cY-ty+PLH)*RS;
-    if(it.k==='bike'){const sp=getSprite('_bike',0,false,null,'bike',false,null,0,0,0);plCtx.save();plCtx.translate(Math.round(X),Math.round(Y));plCtx.rotate(wa*RAD);plCtx.drawImage(sp,(-SCX-5)*sp.K,(-SCY-6.5)*sp.K);plCtx.restore()}
-    else drawRZ(it.k==='ski'?getSprite('_iski',0,false,null,'ski'):poleSprite(),X,Y,wa)}}
+const crItemsOn=()=>{const c=p.cr;return c&&c.items.length&&(p.mode==='crash'||p.mode==='air'&&c.air)?c:null};
+/* Ski und Stöcke in der Welt-Ebene (hinter dem Fahrer bzw. davor), das Bike in der feinen Fahrer-Ebene */
+function crItemsWorld(front,cX,cY){const c=crItemsOn();if(!c)return;
+  for(const it of c.items){if(it.k==='bike'||(it.z>0)!==(front>0))continue;const P=crItemAt(it,c);if(!P)continue;const sp=it.k==='ski'?getSprite('_iski',0,false,null,'ski'):poleSprite();
+    ctx.save();ctx.translate(Math.round(P.x-cX),Math.round(P.y-cY));ctx.rotate(P.rot*RAD);ctx.scale(1/RZ,1/RZ);ctx.drawImage(sp,-SCX*RZ,-SCY*RZ);ctx.restore()}}
+function crItemsDraw(front,cX,cY,tx,ty){const c=crItemsOn();if(!c)return;plCtx.setTransform(1,0,0,1,0,0);
+  for(const it of c.items){if(it.k!=='bike'||(it.z>0)!==(front>0))continue;const P=crItemAt(it,c);if(!P)continue;
+    const sp=getSprite('_bike',0,false,null,'bike',false,null,0,0,0),X=(P.x-cX-tx+PLH)*RS,Y=(P.y-cY-ty+PLH)*RS;
+    plCtx.save();plCtx.translate(Math.round(X),Math.round(Y));plCtx.rotate(P.rot*RAD);plCtx.drawImage(sp,(-SCX-5)*sp.K,(-SCY-6.5)*sp.K);plCtx.restore()}}
 /* Nach einem schweren Sturz kreisen kleine Sterne um den Kopf */
 function crStars(v,cX,cY,tx,ty){const c=p.cr;if(!c||!c.stars||p.mode!=='crash'||c.ph==='tumble')return;const L0=LIBOF(GEAR)[v.pose];if(!L0||!L0.head)return;
   const hx=L0.head[0]-v.ox,hy=L0.head[1]-v.oy,r=v.ang*RAD,wx=v.comx+hx*Math.cos(r)-hy*Math.sin(r),wy=v.comy+hx*Math.sin(r)+hy*Math.cos(r);plCtx.setTransform(1,0,0,1,0,0);
