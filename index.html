@@ -769,10 +769,11 @@ const CATS=Object.keys(SHOP);
 /* ================= SAVE ================= */
 const DEF={coins:0,best:0,bestDist:0,bestJ:0,bestDistJ:0,owned:{},equip:{helmet:'h_black',goggles:'g_orange',hoodie:'d_grey',sweater:'sw_none',pants:'p_khaki',skis:'s_red',board:'b_black',poles:'po_black',pack:'pk_none',beanie:'bn_black',boots:'bt_black',bike:'bk_carbon',jersey:'j_black',prot:'pr_none',bfork:'fk_gold',bshock:'sh_gold',brim:'rm_black',btire:'tr_black',bbar:'bb_black',bsad:'sd_black',bped:'pd_black',binding:'bd_grey',shoes:'bs_black'},gear:'ski',season:'winter',map:'alps',assist:false,packLast:'pk_free',music:true,vol:100};
 // Stand prüfen und auffüllen (vom Gerät oder aus dem Konto). t = letzte Änderung, uid = Konto, zu dem der Stand gehört, sc = Münzen beim letzten Abgleich mit dem Konto
+const SEASON_EQ=['helmet','beanie','goggles','pants'];   // diese Teile gibt es im Winter und im Downhill: je Saison ein eigenes Outfit
 const mig41=e=>{if(!e.m41&&e.bike==='bk_red')e.bike='bk_carbon';e.m41=1;return e};   // v4.1: neues Standard-Bike, Rot bleibt gratis im Shop
 function normSave(s){s=s&&typeof s==='object'?s:{};const ob=v=>v&&typeof v==='object'&&!Array.isArray(v);
   return {coins:Math.max(0,s.coins|0),best:Math.max(0,s.best|0),bestDist:Math.max(0,s.bestDist|0),bestJ:Math.max(0,s.bestJ|0),bestDistJ:Math.max(0,s.bestDistJ|0),owned:ob(s.owned)?Object.assign({},s.owned):{},
-    equip:mig41(Object.assign({},DEF.equip,ob(s.equip)?s.equip:{})),gear:s.gear==='board'?'board':'ski',season:s.season==='summer'?'summer':'winter',map:s.map==='japan'?'japan':'alps',assist:!!s.assist,music:s.music!==false,vol:Number.isFinite(+s.vol)&&s.vol!==null&&s.vol!==''?clamp(Math.round(+s.vol),0,100):100,packLast:typeof s.packLast==='string'?s.packLast:'pk_free',lang:s.lang==='en'||s.lang==='de'?s.lang:null,
+    equip:mig41(Object.assign({},DEF.equip,ob(s.equip)?s.equip:{})),eqAlt:(()=>{const e=Object.assign({},DEF.equip,ob(s.equip)?s.equip:{}),a=ob(s.eqAlt)?s.eqAlt:{},o={};for(const k of SEASON_EQ)o[k]=typeof a[k]==='string'?a[k]:e[k];return o})(),gear:s.gear==='board'?'board':'ski',season:s.season==='summer'?'summer':'winter',map:s.map==='japan'?'japan':'alps',assist:!!s.assist,music:s.music!==false,vol:Number.isFinite(+s.vol)&&s.vol!==null&&s.vol!==''?clamp(Math.round(+s.vol),0,100):100,packLast:typeof s.packLast==='string'?s.packLast:'pk_free',lang:s.lang==='en'||s.lang==='de'?s.lang:null,
     t:+s.t||0,uid:typeof s.uid==='string'?s.uid:null,sc:Math.max(0,s.sc|0)}}
 function loadSave(){try{const s=JSON.parse(localStorage.getItem('sendit_save_v1')||'null');if(s&&typeof s==='object')return normSave(s)}catch(e){}return normSave(DEF)}
 const SAVE=loadSave();
@@ -3530,7 +3531,7 @@ function crPose(base){const c=p.cr,L=LIBOF(GEAR);return c&&c.Y&&L[base+'Y']?base
 function crTumblePose(){const c=p.cr;return crPose(c.t<.08||c.sev==='heavy'&&Math.floor(Math.abs(c.rot)/170)%2?'cr_star':'cr_ball')}
 function crView(){const c=p.cr,g=groundAt(p.x),ga=(g?g.a:0)*DEG,bike=GEAR==='bike';let pose,rot=0;
   if(c.ph==='tumble'){pose=crTumblePose();rot=c.rot}
-  else if(c.ph==='slide'){pose=crPose(c.sev==='light'?'cr_slide':'cr_lie');rot=c.sev==='light'?0:c.rot}
+  else if(c.ph==='slide'){if(c.sev!=='light'&&c.r1!=null&&c.pt<.14){pose=crPose('cr_ball');rot=c.rot}else{pose=crPose(c.sev==='light'?'cr_slide':'cr_lie');rot=c.sev==='light'?0:c.r1!=null?c.r1:c.rot}}   /* erst zusammengerollt zu Ende drehen, dann flach hinlegen (nie senkrecht stehend) */
   else if(c.ph==='rest')pose=crPose('cr_lie');
   else{const u=c.pt/CR_UP[c.sev],L=LIBOF(GEAR);
     if(c.sev==='light')pose=u<(bike?.55:.4)?'cr_sit':'crouch';
@@ -4791,7 +4792,7 @@ $('bRank').onclick=openRank;$('bNotes').onclick=()=>show('notes');$('bNotesBack'
    seit dem letzten Abgleich dazukam oder ausgegeben wurde), Outfit und Einstellungen vom zuletzt geänderten Gerät.
    Wer ohne Konto gespielt hat und sich anmeldet, nimmt seinen Fortschritt ins Konto mit. Der Stand eines anderen Kontos auf
    diesem Gerät wird dagegen nie übernommen. */
-const CLOUD_KEYS=['coins','best','bestDist','bestJ','bestDistJ','owned','equip','gear','season','assist','packLast','music','vol','lang','t'];
+const CLOUD_KEYS=['coins','best','bestDist','bestJ','bestDistJ','owned','equip','eqAlt','gear','season','assist','packLast','music','vol','lang','t'];
 let cloudState='',cloudTimer=0,cloudRun=null,cloudAgain=false;
 function cloudData(s){const o={};for(const k of CLOUD_KEYS)o[k]=s[k];return o}
 function cloudMerge(local,cloud,uid){
@@ -4799,7 +4800,7 @@ function cloudMerge(local,cloud,uid){
   if(!cloud)return Object.assign({},local,{uid,sc:local.coins});
   const base=mine?local.sc:0,newer=local.t>cloud.t?local:cloud,coins=Math.max(0,cloud.coins+local.coins-base);
   return {coins,best:Math.max(cloud.best,local.best),bestDist:Math.max(cloud.bestDist,local.bestDist),bestJ:Math.max(cloud.bestJ,local.bestJ),bestDistJ:Math.max(cloud.bestDistJ,local.bestDistJ),owned:Object.assign({},cloud.owned,local.owned),
-    equip:Object.assign({},newer.equip),gear:newer.gear,season:newer.season,assist:newer.assist,packLast:newer.packLast,music:newer.music,vol:newer.vol,lang:newer.lang||(newer===local?cloud:local).lang||null,t:Math.max(local.t,cloud.t),uid,sc:coins}}
+    equip:Object.assign({},newer.equip),eqAlt:Object.assign({},newer.eqAlt),gear:newer.gear,season:newer.season,assist:newer.assist,packLast:newer.packLast,music:newer.music,vol:newer.vol,lang:newer.lang||(newer===local?cloud:local).lang||null,t:Math.max(local.t,cloud.t),uid,sc:coins}}
 function cloudSoon(ms){if(!SESS)return;clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>{cloudTimer=0;cloudSync()},ms==null?1500:ms)}
 async function cloudSync(){
   if(!SESS)return;
@@ -4837,7 +4838,8 @@ async function onlineAfterRun(score,meters,trick){const o=$('oRank');
   const m=await sbMyRank(map),ml=map==='japan'?TX('Rangliste Japan','Japan leaderboard'):TX('Rangliste Alpen','Alps leaderboard');o.textContent=m?TX(ml+': Platz '+m.rank+' mit '+m.best+' Punkten',ml+': rank '+m.rank+' with '+m.best+' points'):TX('In der Rangliste eingetragen.','Added to the leaderboard.')}
 
 /* ================= BUTTONS ================= */
-document.querySelectorAll('.opt[data-mode]').forEach(b=>b.onclick=()=>{const m=b.dataset.mode,season=m==='bike'?'summer':'winter',ch=SAVE.season!==season;if(m!=='bike')SAVE.gear=m;SAVE.season=season;setGear();persist();if(ch)applySeason();else refreshMenu()});
+function swapSeasonEq(){const a=SAVE.eqAlt||{},cur={};for(const k of SEASON_EQ){cur[k]=SAVE.equip[k];if(typeof a[k]==='string')SAVE.equip[k]=a[k]}SAVE.eqAlt=cur;tryOn={}}   // Saisonwechsel: das andere Outfit anziehen, das jetzige merken
+document.querySelectorAll('.opt[data-mode]').forEach(b=>b.onclick=()=>{const m=b.dataset.mode,season=m==='bike'?'summer':'winter',ch=SAVE.season!==season;if(m!=='bike')SAVE.gear=m;if(ch)swapSeasonEq();SAVE.season=season;setGear();persist();if(ch)applySeason();else refreshMenu()});
 document.querySelectorAll('.opt[data-map]').forEach(b=>b.onclick=()=>{if(SUMMER||SAVE.map===b.dataset.map)return;SAVE.map=b.dataset.map;persist();applySeason()});
 /* Einstellungen: Zahnrad oben rechts klappt das Feld auf; ein Tipp daneben, Esc oder ein anderer Bildschirm klappt es wieder zu */
 function setOpen(on){$('setPanel').hidden=!on;$('bSettings').setAttribute('aria-expanded',String(on))}
