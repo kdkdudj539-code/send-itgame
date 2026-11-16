@@ -2708,7 +2708,7 @@ function shadeLayer(g,sx,sy,sw,sh,dw,dh){const DS=curDS;g.save();g.setTransform(
   if(DS.dusk>.02){g.fillStyle='rgba('+DUSK_TINT()+','+(.15*DS.dusk)+')';g.fillRect(0,0,dw,dh)}
   if(lightOn&&lightCv)g.drawImage(lightCv,sx,sy,sw,sh,0,0,dw,dh);g.restore()}
 function drawPlayer(cX,cY){
-  crItemsWorld(-1,cX,cY);
+  drawPlayerShadow(cX,cY);crItemsWorld(-1,cX,cY);
   const v=playerView(),spr=getSprite(v.pose,v.phi,v.look,null,null,v.inPow,v.cork,v.twist,0,GEAR==='bike'?((Math.floor((p.wheelA||0)/7.5)%6)+6)%6:0,v.hy);
   if(spr.hi){const tx=Math.round(v.comx-cX),ty=Math.round(v.comy-cY),S=PLH*2*RS;
     if(!plCv){[plCv,plCtx]=mk(S,S);[afterCv,afterCtx]=mk(VW,VH)}
@@ -4019,7 +4019,8 @@ function drawTerrainS(cX,cY){
     if(gr&&y+tb<VH){ctx.fillStyle=CS.grass;ctx.fillRect(sx,y+tb,1,VH);ctx.fillStyle=CS.grassD;ctx.fillRect(sx,y+tb+22+d,1,VH);ctx.fillStyle='#447a2d';ctx.fillRect(sx,y+tb+52+d*2,1,VH);ctx.fillStyle='#386826';ctx.fillRect(sx,y+tb+96+d*2,1,VH);
       ctx.fillStyle=CS.grassL;ctx.fillRect(sx,y+tb,1,1);if(h%4===0){ctx.fillStyle=CS.grass;ctx.fillRect(sx,y+tb-1,1,1)}
       if(h%13===0){ctx.fillStyle=CS.grassD;ctx.fillRect(sx,y+tb+4+(h>>>7)%40,1,2)}else if(h%17===0){ctx.fillStyle=CS.grassL;ctx.fillRect(sx,y+tb+3+(h>>>6)%30,1,1)}
-      else if(h%151===0){const k=(h>>>5)%3;ctx.fillStyle=k===0?'#f2d24a':k===1?'#ffffff':'#c87ad8';ctx.fillRect(sx,y+tb+3+(h>>>9)%20,1,1)}}   // Halme und ein paar Blumen
+      else if(h%151===0){const k=(h>>>5)%3;ctx.fillStyle=k===0?'#f2d24a':k===1?'#ffffff':'#c87ad8';ctx.fillRect(sx,y+tb+3+(h>>>9)%20,1,1)}
+      groundTex(sx,y+tb,wi,d,TEX_S)}   // Halme und ein paar Blumen
     if(h%53===0){ctx.fillStyle='#8f877a';ctx.fillRect(sx,y+(gr?3+(h>>>8)%Math.max(1,tb-4):6+(h>>>8)%22),2,1)}else if(h%71===0&&!gr){ctx.fillStyle='#3e2c1c';ctx.fillRect(sx,y+5+(h>>>9)%14,1,2)}   // Steinchen, Wurzeln
     if(wd<8&&y+4<VH){ctx.globalAlpha=.42*(1-wd/8);ctx.fillStyle='#2e2116';ctx.fillRect(sx,y+4,1,VH-y-4);ctx.globalAlpha=1}
     if(green){const b=h%5===0?2:h%3===0?1:0,pb=s.kind==='deep'?Math.max(0,Math.round(1.6+1.3*Math.sin(wi*.17)+.9*Math.sin(wi*.41+1.3))):0;
@@ -4060,6 +4061,22 @@ function jpTerrainCol(s,sx,y,wx,cY){
 function drawJWood(cX,cY){let i=segIndexAt(cX);if(i<0){i=0;while(i<segs.length-1&&segs[i].x1<=cX)i++}
   for(let sx=0;sx<VW;sx++){const wx=cX+sx+.5;while(i<segs.length-1&&wx>=segs[i].x1)i++;const s=segs[i];if(!s||wx<s.x0||wx>=s.x1||s.gap||(s.kind!=='kicker'&&s.kind!=='deck'))continue;
     const y=Math.round(s.y0+(s.y1-s.y0)*(wx-s.x0)/(s.x1-s.x0))-cY;if(y>=VH)continue;jpTerrainCol(s,sx,y,wx,cY);ctx.fillStyle='#ffffff';ctx.fillRect(sx,y,1,3)}}
+/* Bodenstruktur wie in detailreicher Pixel-Art: unter den Schichten zwei tiefere, dunklere Lagen; an jeder Schichtgrenze eine helle Kante
+   mit Schattenlinie darunter; in jeder Schicht Körnung (Eiskristalle und Poren im Schnee, Halme und Steinchen im Gras). Fest an der Welt-x-Position, flimmert nicht. */
+const TEX_W={deep:[[150,'#88a1cf'],[235,'#7b94c3']],edge:[[16,1,'#f2f7fe','#c3d4ee'],[44,2,'#dfe9f8','#a8bde2'],[88,2,'#c6d6ef','#8aa3d0'],[150,2,'#a9bde0','#7f98c7'],[235,2,'#93abd6','#7189b9']],
+  sp:[[3,15,'#ffffff',7,1],[18,42,'#f0f5fd',9,1],[18,42,'#bccde9',11,2],[47,86,'#d2def2',9,1],[47,86,'#a3b8de',10,2],[92,148,'#b0c3e3',9,1],[92,148,'#889fcd',10,2],[155,232,'#98aed9',9,1],[155,232,'#7a92c2',11,2],[238,330,'#8aa2cf',10,1]]};
+const TEX_S={deep:[[150,'#30591f'],[235,'#294d1b']],edge:[[22,1,'#6aa845','#41752b'],[52,2,'#559037','#3c6c27'],[96,2,'#4a8030','#2f5a20'],[150,2,'#3e6c28','#28501b'],[235,2,'#356123','#224417']],
+  sp:[[2,20,'#78ba50',5,2],[2,20,'#3f7429',6,2],[24,50,'#5a9338',6,2],[24,50,'#37682a',7,2],[54,94,'#4d8733',7,2],[54,94,'#305d22',8,2],[98,148,'#41742a',8,2],[98,148,'#2a521d',9,2],[155,232,'#386426',9,2],[155,232,'#21421a',10,2],[6,90,'#8a8778',37,1],[6,90,'#a8a596',53,1]]};
+function groundTex(sx,y0,wi,d,T){const h=((wi*2654435761)>>>0),h2=((wi*40503+977)>>>0);
+  for(const [o,c] of T.deep){const yy=y0+o+d*2;if(yy<VH){ctx.fillStyle=c;ctx.fillRect(sx,yy,1,VH-yy)}}
+  for(const [o,dm,hi,sh] of T.edge){const yy=y0+o+d*dm;if(yy>=VH||yy<1)continue;ctx.fillStyle=hi;ctx.fillRect(sx,yy-1,1,1);ctx.fillStyle=sh;ctx.fillRect(sx,yy,1,1)}
+  for(let k=0;k<T.sp.length;k++){const q=T.sp[k],hh=((h>>>(k%7*4))^(h2>>>(k*3)))>>>0;if(hh%q[3]!==0)continue;const yy=y0+q[0]+((hh>>>11)%Math.max(1,q[1]-q[0]));if(yy>=VH||yy<0)continue;ctx.fillStyle=q[2];ctx.fillRect(sx,yy,1,q[4])}}
+/* Weicher Schatten unter dem Fahrer: liegt auf dem Boden, wird beim Springen kleiner und blasser */
+function drawPlayerShadow(cX,cY){if(p.mode==='dead'||p.mode==='climb'||p.mode==='dig')return;const air=p.mode==='air'||p.mode==='loop';if(p.mode==='loop')return;
+  const g=groundAt(p.x);if(!g||g.seg.gap)return;const hgt=air?Math.max(0,g.y-p.y-8):p.mode==='crash'&&p.cr?p.cr.h:0,k=Math.max(0,1-hgt/150);if(k<=.05)return;
+  const w=Math.round((GEAR==='bike'?17:12)*(.45+.55*k)),ta=Math.tan(g.a),A=(SUMMER?.34:.26)*k;ctx.fillStyle=SUMMER?'#1d3011':'#3a5285';
+  for(let dx=-w;dx<=w;dx++){const u=dx/w,a=A*Math.sqrt(Math.max(0,1-u*u)),x=Math.round(p.x+dx-cX),y=Math.round(g.y+dx*ta-cY);if(a<.03)continue;ctx.globalAlpha=a;ctx.fillRect(x,y,1,Math.abs(u)<.6?3:2)}
+  ctx.globalAlpha=1}
 function drawTerrain(cX,cY){
   if(SUMMER){drawTerrainS(cX,cY);return}
   let i=segIndexAt(cX);if(i<0){i=0;while(i<segs.length-1&&segs[i].x1<=cX)i++}
@@ -4082,7 +4099,7 @@ function drawTerrain(cX,cY){
     ctx.fillStyle=C.s2;ctx.fillRect(sx,y+16+d,1,VH);
     ctx.fillStyle=C.s3;ctx.fillRect(sx,y+44+d*2,1,VH);
     ctx.fillStyle=C.s4;ctx.fillRect(sx,y+88+d*2,1,VH);
-    if(((wi*2654435761)>>>0)%89===0){ctx.fillStyle='#ffffff';ctx.fillRect(sx,y+5+(wi%9),1,1)}
+    groundTex(sx,y,wi,d,TEX_W);
     // Park: gebaute Schneewand zur Spalte, zur Kante hin im Schatten, außen eine kühle Kante, dazwischen helle Eisstreifen
     if(wd<8&&y+4<VH){ctx.globalAlpha=.42*(1-wd/8);ctx.fillStyle='#4d6797';ctx.fillRect(sx,y+4,1,VH-y-4);ctx.globalAlpha=1;
       if(wd<1){ctx.fillStyle=C.edge;ctx.fillRect(sx,y+3,1,VH-y-3)}
