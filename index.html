@@ -2264,7 +2264,7 @@ function logSprites(){if(LOG_SPR)return LOG_SPR;LOG_SPR=[];
     LOG_SPR.push({c,r,S})}
   return LOG_SPR}
 function addLogObs(x){const g=groundAt(x);if(!g)return;const L=logSprites(),k=Math.random()<.5?0:1,r=L[k].r;jtrees.push({x,y:g.y,ft:g.y+1,k,h:r*2,w:r+.5,f:false,hit:false,shape:'log'})}
-function fLogObs(){const wide=WIEHEN&&!SUMMER,x0=gx,L=rand(300,420)+(wide?140:0);seg(L,rand(25,30));decoTrees(x0,gx,2);   /* Wiehengebirge-Winter: auf Ski mehr Platz zwischen zwei Stämmen */
+function fLogObs(){const wide=!SUMMER,x0=gx,L=rand(300,420)+(wide?140:0);seg(L,rand(25,30));decoTrees(x0,gx,2);   /* Winter: auf Ski und Board mehr Platz zwischen zwei Stämmen */
   let x=x0+rand(110,150);const n=Math.random()<.6?1:2;for(let i=0;i<n&&x<gx-60;i++){addLogObs(x);x+=wide?rand(260,300):rand(150,190)}}
 /* ================= JAPAN =================
    Alles ist aus Baumstämmen gebaut. Log Park (Zone park): Stamm-Kicker über den Bach, Stämme als Rails (gerade, mit Knick,
@@ -3650,7 +3650,7 @@ function launch(a,pop,sg){
   if(p.mode==='ground'&&(Math.abs(Math.round(p.spin/180))%2===1)!==!!p.sw)p.spin+=180;
   if(p.butter)butterEnd();p.butterVis=0;
   let s=p.s;
-  if(sg&&sg.req&&sg.assist&&!p.braking)s=Math.max(s,sg.req*(sg.dirt&&s>=sg.req*.45?1:sg.assist));
+  /* kein automatisches Anschieben am Absprung: gesprungen wird mit genau der Geschwindigkeit, die man mitbringt */
   if(sg&&sg.vmax)s=Math.min(s,sg.vmax);
   if(sg&&sg.kind==='kicker'&&pop)pop*=1.1;
   p.vx=Math.cos(a)*s;p.vy=Math.sin(a)*s-pop;
