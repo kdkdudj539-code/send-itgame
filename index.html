@@ -279,6 +279,7 @@ html.sum .btn.alt{background:#e2f4e5}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
 .item{display:flex;flex-direction:column;gap:6px;align-items:flex-start;text-align:left;padding:10px;background:var(--panel2);border:0;color:var(--ink);cursor:pointer;box-shadow:0 0 0 2px #000;font-family:var(--body)}
 .item .sw{width:100%;height:30px;background:var(--c);box-shadow:inset 0 -6px 0 var(--a,rgba(0,0,0,.25)),0 0 0 2px #000}
+.item.knit .sw{background:repeating-linear-gradient(90deg,var(--p1) 0 6px,var(--c) 6px 9px,var(--p2) 9px 15px,var(--c) 15px 18px) 0 9px/100% 8px no-repeat,var(--c)}
 .item .nm{font-size:20px;line-height:1}
 .item .pr{font-family:var(--ui);font-size:12px;color:var(--gold);display:flex;align-items:center;gap:6px}
 .item .pr .coin{width:9px;height:11px;box-shadow:inset -1px -1px 0 #c48a12,0 0 0 2px #5c3b07}
@@ -614,7 +615,13 @@ const SHOP={
     {id:'bn_pom_black',name:'Bommelmütze Schwarz',price:80,model:'pom',c:'#1f222a',a:'#4a4f5b',pom:'#4a4f5b'},
     {id:'bn_fish_mustard',name:'Fisherman Senf',price:90,model:'fish',c:'#d9a52f',a:'#b88a22'},
     {id:'bn_fish_mint',name:'Fisherman Mint',price:90,model:'fish',c:'#86e0bf',a:'#5fbf9c'},
-    {id:'bn_fish_lilac',name:'Fisherman Flieder',price:100,model:'fish',c:'#b79cf0',a:'#9478d6'}]},
+    {id:'bn_fish_lilac',name:'Fisherman Flieder',price:100,model:'fish',c:'#b79cf0',a:'#9478d6'},
+    /* Ohrenmütze im Norweger-Muster: c Strick, p1/p2 Muster (Blumen, Sterne), fur flauschiger Rand, pom großer Bommel, tie Bändel, spom kleine Bommel */
+    {id:'bn_inka_rose',name:'Ohrenmütze Rosa',price:5000,model:'inka',c:'#f2eee6',p1:'#e8609a',p2:'#b9a23a',fur:'#9aa0aa',pom:'#f7f4ee',tie:'#8d939f',spom:'#9aa0aa',info:'Ohrenmütze im Norweger-Muster mit rosa Blumen, grauem Plüschrand, großem Bommel und Bändeln mit kleinen Bommeln.'},
+    {id:'bn_inka_black',name:'Ohrenmütze Schwarz-Pink',price:5000,model:'inka',c:'#26272e',p1:'#f07aa8',p2:'#f4f1ec',fur:'#34363f',pom:'#f7f4ee',tie:'#1d1f26',spom:'#2e3038',info:'Schwarze Ohrenmütze mit pinken Blumen, weißem Bommel und schwarzen Bändeln.'},
+    {id:'bn_inka_beige',name:'Ohrenmütze Beige-Braun',price:5000,model:'inka',c:'#d8c5a2',p1:'#7a4a2c',p2:'#f4ead8',fur:'#efe5d3',pom:'#6b4228',tie:'#d8c5a2',spom:'#e6dac2',info:'Beige Ohrenmütze mit braunen Sternen, cremeweißem Plüschrand und braunem Bommel.'},
+    {id:'bn_inka_red',name:'Ohrenmütze Rot-Schwarz',price:5000,model:'inka',c:'#2a1f23',p1:'#d0383e',p2:'#f4f1ec',fur:'#f4f1ec',pom:'#1d1f26',tie:'#f4f1ec',spom:'#f4f1ec',info:'Dunkle Ohrenmütze mit roten Blumen, weißem Plüschrand und weißen Bändeln mit Bommeln.'},
+    {id:'bn_inka_bord',name:'Ohrenmütze Bordeaux',price:5000,model:'inka',c:'#e6d5ae',p1:'#8a2d34',p2:'#c39a5c',fur:'#7a2630',pom:'#efe3c4',tie:'#7a2630',spom:'#7a2630',info:'Helle Ohrenmütze mit bordeauxrotem Muster, Plüschrand und Bändeln in Bordeaux.'}]},
   goggles:{label:'Brille',items:[
     {id:'g_orange',name:'Orange Mirror',price:0,c:'#ff9a3c'},
     {id:'g_blue',name:'Blue Mirror',price:25,c:'#4fb6ff'},
@@ -809,7 +816,7 @@ const CATS=Object.keys(SHOP);
    slot: die Form ist ein eigener Ausrüstungsplatz und alle Farben passen zu jeder Form (Bike-Rahmen, Gabel). Weitere Formen kosten Münzen. */
 const FORMS={
   helmet:{list:[{id:'helm',n:['Helm','Helmet'],price:0},{id:'none',n:['Ohne Helm (Mütze)','No helmet (beanie)'],price:0}],of:it=>it.id==='h_none'?'none':'helm'},
-  beanie:{list:[{id:'classic',n:['Beanie','Beanie'],price:0},{id:'pom',n:['Bommelmütze','Pom-pom beanie'],price:500},{id:'fish',n:['Fisherman','Fisherman'],price:500}],of:it=>it.model},
+  beanie:{list:[{id:'classic',n:['Beanie','Beanie'],price:0},{id:'pom',n:['Bommelmütze','Pom-pom beanie'],price:500},{id:'fish',n:['Fisherman','Fisherman'],price:500},{id:'inka',n:['Ohrenmütze','Earflap hat'],price:0}],of:it=>it.model},
   pack:{list:[{id:'none',n:['Ohne Rucksack','No backpack'],price:0},{id:'free',n:['Freeride-Rucksack','Freeride backpack'],price:0},{id:'ghost',n:['Unsichtbarer Rucksack','Invisible backpack'],price:0}],of:it=>it.id==='pk_none'?'none':it.id==='pk_ghost'?'ghost':'free'},
   prot:{list:[{id:'none',n:['Ohne Protektor','No protector'],price:0},{id:'back',n:['Rückenprotektor','Back protector'],price:0}],of:it=>it.id==='pr_none'?'none':'back'},
   helmetS:{slot:'helmf',extra:['h_none'],list:[{id:'ff',n:['Integralhelm','Full-face helmet'],price:0},{id:'mtb',n:['MTB-Helm','Trail helmet'],price:500}]},   /* Downhill: Integralhelm oder offener MTB-Helm */
@@ -863,11 +870,11 @@ function applyLang(){document.documentElement.lang=LANG;
 const CAT_EN={sweater:'Sweater',helmet:'Helmet',beanie:'Beanie',goggles:'Goggles',hoodie:'Zip Hoodie',jersey:'Jersey',prot:'Back Protector',bfork:'Fork',bshock:'Shock',brim:'Rims',btire:'Tires',bbar:'Bar & Grips',bsad:'Saddle',bped:'Pedals',pants:'Baggy Pants',skis:'Twin Tips',board:'Snowboard',bike:'Bike',pack:'Backpack',poles:'Poles',boots:'Ski Boots',binding:'Bindings',shoes:'Bike Shoes'};
 const SHOP_EN={sw_none:'No sweater (jacket)',sw_deer:'Reindeer',sw_flake:'Snowflake',sw_nordic:'Nordic',bd_grey:'Grey',bd_black:'Black',bd_white:'White',bd_red:'Red',bd_orange:'Orange',bd_blue:'Blue',bd_pink:'Pink',bd_lime:'Lime',bd_gold:'Gold',bs_black:'Black',bs_grey:'Grey',bs_white:'White',bs_gum:'Black with Gum Sole',bs_red:'Red',bs_blue:'Blue',bs_orange:'Orange',bs_olive:'Olive',bs_lime:'Lime',bs_gold:'Gold',h_none:'No Helmet (Beanie)',h_black:'Matte Black',h_white:'Chalk White',h_orange:'Safety Orange',h_lilac:'Lilac',
   bn_black:'Beanie Black',bn_grey:'Beanie Grey',bn_red:'Beanie Red',bn_pom_white:'Pom Beanie White',bn_pom_red:'Pom Beanie Red',bn_pom_navy:'Pom Beanie Navy',bn_pom_pink:'Pom Beanie Pink',bn_pom_green:'Pom Beanie Forest',bn_pom_black:'Pom Beanie Black',
-  bn_fish_mustard:'Fisherman Mustard',bn_fish_lilac:'Fisherman Lilac',d_grey:'Heather Grey',d_black:'Black',d_forest:'Forest Green',d_purple:'Purple',d_red:'Red',d_neon:'Neon Yellow',
+  bn_fish_mustard:'Fisherman Mustard',bn_fish_lilac:'Fisherman Lilac',bn_inka_rose:'Earflap Hat Rose',bn_inka_black:'Earflap Hat Black & Pink',bn_inka_beige:'Earflap Hat Beige & Brown',bn_inka_red:'Earflap Hat Red & Black',bn_inka_bord:'Earflap Hat Burgundy',d_grey:'Heather Grey',d_black:'Black',d_forest:'Forest Green',d_purple:'Purple',d_red:'Red',d_neon:'Neon Yellow',
   p_black:'Black',p_white:'White',p_camo:'Snow Camo',s_red:'Red / White',s_wood:'Wood Topsheet',b_wood:'Wood Core',
   pk_none:'No Backpack',pk_ghost:'Invisible Backpack',pk_free:'Freeride Backpack',pk_black:'Backpack Black',pk_navy:'Backpack Navy',pk_olive:'Backpack Olive',pk_orange:'Backpack Orange',pk_mint:'Backpack Mint',pk_purple:'Backpack Purple',pk_stealth:'Backpack Black-Grey',pk_yellow:'Backpack Yellow',
   fk_gold:'Gold Kashima',fk_black:'Black',fk_silver:'Silver',fk_goldw:'Gold & White',fk_orange:'Orange',fk_red:'Red',fk_blue:'Blue',fk_lime:'Lime',sh_gold:'Black / Orange',sh_orange:'Orange',sh_red:'Red',sh_black:'Gold',sh_ti:'Titanium',sh_blue:'Blue',sh_lime:'Lime',sh_purple:'Purple',rm_black:'Black',rm_silver:'Silver',rm_gold:'Gold',rm_red:'Red',rm_blue:'Blue',rm_white:'White',rm_orange:'Orange',rm_purple:'Purple',tr_black:'Black',tr_skin:'Skinwall',tr_white:'Whitewall',tr_red:'Red Wall',tr_blue:'Blue Wall',tr_yellow:'Yellow Wall',tr_gum:'Gumwall',tr_grey:'Grey',bb_black:'Black',bb_red:'Red Grips',bb_blue:'Blue Grips',bb_white:'White Grips',bb_orange:'Orange Grips',bb_lime:'Lime Grips',bb_pink:'Pink Grips',bb_gold:'Gold Bar',sd_black:'Black',sd_white:'White',sd_red:'Red',sd_blue:'Blue',sd_orange:'Orange',sd_camo:'Olive',sd_purple:'Purple',sd_gold:'Gold',pd_black:'Black',pd_silver:'Silver',pd_gold:'Gold',pd_red:'Red',pd_blue:'Blue',pd_orange:'Orange',pd_purple:'Purple',pd_lime:'Lime',pr_none:'No Protector',pr_free:'Back Protector',pr_red:'Protector Red',pr_blue:'Protector Blue',pr_neon:'Protector Neon',pr_orange:'Protector Orange',j_black:'Race Black',j_white:'Race White',j_red:'Red',j_blue:'Blue',j_forest:'Forest Green',j_purple:'Purple',j_gold:'Black-Gold',bk_carbon:'Red / Silver',bk_red:'Red',bk_white:'White',bk_blue:'Racing Blue',bk_raw:'Raw Alloy',bk_purple:'Purple',po_silver:'Alu Silver',po_white:'White',po_red:'Red',po_bamboo:'Bamboo',po_stealth:'Black',bt_black:'Black',bt_turq:'Turquoise',bt_white:'White',bt_red:'Red',bt_lilac:'Lilac'};
-const INFO_EN={sw_deer:'Red Christmas sweater with a white reindeer band. Fits slimmer than the jacket.',sw_flake:'Green sweater with a big snowflake and zigzag sleeves. Fits slimmer than the jacket.',sw_nordic:'Red Norwegian sweater with a white cross pattern. Fits slimmer than the jacket.',pk_ghost:'You can\'t see it, but it\'s there: ice axe, avalanche shovel and first aid kit save you once per run, just like the freeride backpack. Can be switched on and off in the menu.',pr_free:'With a climbing hook, folding spade and first aid kit in its pockets: saves you once per run from whatever gets you first: the abyss, the mudslide or a rock. Can be switched on and off in the menu.',pk_free:'With ice axe, avalanche shovel and first aid kit: saves you once per run from whatever gets you first: the abyss, the avalanche or a rock. Can be switched on and off in the menu.'};
+const INFO_EN={bn_inka_rose:'Nordic-pattern earflap hat with pink flowers, grey plush trim, a big pom-pom and ties with little pom-poms.',bn_inka_black:'Black earflap hat with pink flowers, a white pom-pom and black ties.',bn_inka_beige:'Beige earflap hat with brown stars, cream plush trim and a brown pom-pom.',bn_inka_red:'Dark earflap hat with red flowers, white plush trim and white ties with pom-poms.',bn_inka_bord:'Light earflap hat with a burgundy pattern, plush trim and burgundy ties.',sw_deer:'Red Christmas sweater with a white reindeer band. Fits slimmer than the jacket.',sw_flake:'Green sweater with a big snowflake and zigzag sleeves. Fits slimmer than the jacket.',sw_nordic:'Red Norwegian sweater with a white cross pattern. Fits slimmer than the jacket.',pk_ghost:'You can\'t see it, but it\'s there: ice axe, avalanche shovel and first aid kit save you once per run, just like the freeride backpack. Can be switched on and off in the menu.',pr_free:'With a climbing hook, folding spade and first aid kit in its pockets: saves you once per run from whatever gets you first: the abyss, the mudslide or a rock. Can be switched on and off in the menu.',pk_free:'With ice axe, avalanche shovel and first aid kit: saves you once per run from whatever gets you first: the abyss, the avalanche or a rock. Can be switched on and off in the menu.'};
 const RAIL_EN={'Pistenraupe':'Snowcat','Picknicktisch':'Picnic Table','Treppen-Rail':'Stair Rail','Baumstamm':'Log','Stamm Flat-Down':'Log Flat-Down','Stamm Down-Flat-Down':'Log Down-Flat-Down','Stamm Flat-Down-Flat':'Log Flat-Down-Flat','Krummer Baum':'Bent Tree','Holzstapel':'Log Pile','Stamm A-Frame':'Log A-Frame','Stamm über den Bach':'Creek Log'};
 const catName=c=>SUMMER&&c==='pants'?TX('Bike-Hose','Bike Pants'):LANG==='en'?CAT_EN[c]||SHOP[c].label:SHOP[c].label,itName=it=>LANG==='en'?SHOP_EN[it.id]||it.name:it.name,itInfo=it=>LANG==='en'?INFO_EN[it.id]||it.info:it.info;
 
@@ -920,7 +927,7 @@ function palette(eq){
   const Sw=eq.sweater&&eq.sweater!=='sw_none'?itemOf('sweater',eq.sweater):null,H=itemOf('helmet',eq.helmet).c, L=itemOf('goggles',eq.goggles).c, D=Sw?Sw.c:itemOf('hoodie',eq.hoodie).c, Pi=itemOf('pants',eq.pants), Si=itemOf('skis',eq.skis),Bi=itemOf('board',eq.board),Pl=itemOf('poles',eq.poles),Pk=eq.pack&&eq.pack!=='pk_none'&&!itemOf('pack',eq.pack).invis?itemOf('pack',eq.pack):null,Bn=itemOf('beanie',eq.beanie),Bk=itemOf('bike',eq.bike||'bk_red'),noHelm=eq.helmet==='h_none';
   const Bd=itemOf('binding',eq.binding),Sh=itemOf('shoes',eq.shoes);
   return {SW:Sw,O:'#121626',bnd:[shade(Bd.c,-.38),Bd.c,shade(Bd.c,.6)],SH:Sh.c,SHa:Sh.a,H,h:shade(H,-.38),l:shade(H,.5),L,M:shade(L,.65),G:'#252a39',S:'#eab58f',k:'#c38663',
-    D,d:shade(D,-.3),P:Pi.c,p:shade(Pi.c,-.28),pat:Pi.pat||null,K:Si.c,ka:Si.a,B:Bi.c,ba:Bi.a,PO:Pl.c,pa:Pl.a,pk:Pk?Pk.c:null,pka:Pk?Pk.a:null,hat:noHelm?Bn.model:null,N:Bn.c,n:shade(Bn.c,-.22),C:Bn.a||shade(Bn.c,-.15),Q:Bn.pom||'#ffffff',q:shade(Bn.pom||'#ffffff',-.2),R:'#3b2a20',boot:'#3c4356',bootC:itemOf('boots',eq.boots||'bt_black').c,glove:'#272b38',zip:'#eef1f7',BK:Bk.c,bka:Bk.a};
+    D,d:shade(D,-.3),P:Pi.c,p:shade(Pi.c,-.28),pat:Pi.pat||null,K:Si.c,ka:Si.a,B:Bi.c,ba:Bi.a,PO:Pl.c,pa:Pl.a,pk:Pk?Pk.c:null,pka:Pk?Pk.a:null,hat:noHelm?Bn.model:null,N:Bn.c,n:shade(Bn.c,-.22),C:Bn.a||shade(Bn.c,-.15),Q:Bn.pom||'#ffffff',q:shade(Bn.pom||'#ffffff',-.2),A:Bn.p1||Bn.a||'#e8609a',E:Bn.p2||'#f2c445',F:Bn.fur||'#e8ecf2',f:shade(Bn.fur||'#e8ecf2',-.2),T:Bn.tie||'#8d939f',V:Bn.spom||Bn.pom||'#ffffff',v:shade(Bn.spom||Bn.pom||'#ffffff',-.22),R:'#3b2a20',boot:'#3c4356',bootC:itemOf('boots',eq.boots||'bt_black').c,glove:'#272b38',zip:'#eef1f7',BK:Bk.c,bka:Bk.a};
 }
 const eqKey=eq=>CATS.map(c=>eq[c]).join(',')+','+(eq.bframe||'')+','+(eq.bforkf||'')+','+(eq.helmf||'');
 
@@ -962,9 +969,13 @@ const BN_RAW={
   fish:{side:["...OOOOOOO...","..OXXXXXXXO..",".OCCCCCCCCCO.",".ORRRRRRRRRRO","OGGGGGGLLLLLO","OGGGGGGLLLLLO","OGGGGGLMLLLLO",".OkSSSSSSSSO.","..OkSSSSSSO..","..OkSSSSSSO..","...OOOOOOO..."],
   front:["...OOOOOOO...","..OXXXXXXXO..",".OCCCCCCCCCO.",".ORRRRRRRRRO.","OGLLLLLLLLLGO","OGLLLLLLLLLGO","OGLMLLLLLLLGO",".OSSSSSSSSSO.","..OSSSkSSSO..","..OSSSkSSSO..","...OOOOOOO..."],
   back:["...OOOOOOO...","..OXXXXXXXO..","..OXXXXXXXO..",".OCCCCCCCCCO.",".ORRRRRRRRRO.","OGGGGGGGGGGGO","OGGGGGGGGGGGO","OGGGGGGGGGGGO",".ORRRRRRRRRO.","..OkkkkkkkO..","...OOOOOOO..."]}};
+BN_RAW.inka={side:["....OOOO.....","...OQQQqO....","...OQqqqO....","..OOOOOOOO...",".ONNNnNNNNOO.",".OEANEANEANO.",".OAAEAAEAAEAO",".ONENNENNENNO","OFFFFFFFFFFFO","OFNGGGGLLLLLO","OFAGGGGLLLLLO","OFNGGGLMLLLLO",".OFNkSSSSSSO.",".OFFOSSSSSO..","..OTOOOOOOO..","...T.........","..OVvO.......","..OvvO.......","...OO........"],
+  front:[".....OOO.....","....OQQqO....","....OQqqO....","...OOOOOOO...","..ONNNnNNNO..",".ONEANEANENO.",".OAEAAEAAEAO.",".ONENNENNENO.","OFFFFFFFFFFFO","OFGLLLLLLLGFO","OFGLMLLLLLGFO","ONGLMLLLLLGNO","ONASSSSSSSANO","OFFOSSkSSOFFO",".OTOOOOOOOTO.","..T.......T..",".OVvO...OVvO.",".OvvO...OvvO.","..OO.....OO.."],
+  back:[".....OOO.....","....OQQqO....","....OQqqO....","...OOOOOOO...","..ONNNnNNNO..",".ONEANEANENO.",".OAEAAEAAEAO.",".ONENNENNENO.","OFFFFFFFFFFFO","OFGGGGGGGGGFO","OFGGGGGGGGGFO","ONNEANEANENNO","ONARRRRRRRANO","OFFOkkkkkOFFO",".OTOOOOOOOTO.","..T.......T..",".OVvO...OVvO.",".OvvO...OvvO.","..OO.....OO.."]};
+const BN_TOP={inka:4};   /* Reihen über dem normalen Kopf (Bommel); die Bändel hängen unter dem Kinn */
 const BEANIES=Object.fromEntries(Object.entries(BN_RAW).map(([k,v])=>[k,Object.fromEntries(Object.entries(v).map(([kk,m])=>[kk,m.map(r=>r.replace(/X/g,(_,i)=>i%2?'n':'N'))]))]));
 /* rot = Vierteldrehungen im Uhrzeigersinn (Corks), gedreht um die Kopfmitte; Mützen-Aufbau wächst immer Richtung Kopf-oben */
-function drawHead(g,kind,x,y,P,flip,rot){const m=P.hat?BEANIES[P.hat][kind]:P.ff?HEADS_FF[kind]:P.mtb?HEADS_MTB[kind]:HEADS[kind],e=m.length-11,X=x+6,Y=y+5;
+function drawHead(g,kind,x,y,P,flip,rot){const m=P.hat?BEANIES[P.hat][kind]:P.ff?HEADS_FF[kind]:P.mtb?HEADS_MTB[kind]:HEADS[kind],e=P.hat&&BN_TOP[P.hat]!=null?BN_TOP[P.hat]:m.length-11,X=x+6,Y=y+5;
   for(let r=0;r<m.length;r++)for(let c=0;c<m[r].length;c++){const ch=m[r][c];if(ch==='.')continue;
     const dc=(flip?m[r].length-1-c:c)-6,dr=r-5-e;let sx=dc,sy=dr;
     if(rot===1){sx=-dr;sy=dc}else if(rot===2){sx=-dc;sy=-dr}else if(rot===3){sx=dr;sy=-dc}
@@ -4940,6 +4951,7 @@ function toMenu(){state='menu';$('hud').hidden=true;refreshMenu();resetRun();upd
 
 /* ================= SHOP UI ================= */
 let shopCat='helmet',tryOn={};
+const knitSw=(b,it)=>{if(!it||!it.p1)return;b.classList.add('knit');b.style.setProperty('--p1',it.p1);b.style.setProperty('--p2',it.p2);b.style.setProperty('--a',it.fur)};   /* Farbfeld der Ohrenmützen: Strickmuster und Plüschrand */
 /* Der Shop merkt sich pro Saison den zuletzt offenen Reiter (bei Bike-Teilen die Abteilung) und das zuletzt angetippte Teil, auch nach dem Neuladen. */
 const SHOP_MEM_KEY='sendit_shop_v1';let shopMem={};try{shopMem=JSON.parse(localStorage.getItem(SHOP_MEM_KEY)||'{}')||{}}catch(e){shopMem={}}
 function shopRemember(id){try{const s=SUMMER?'summer':'winter',o=shopMem[s]||{};shopMem[s]={cat:shopCat,sub:bikeSub,id:id!==undefined?id:o.cat===shopCat?o.id:null};localStorage.setItem(SHOP_MEM_KEY,JSON.stringify(shopMem))}catch(e){}}
@@ -4965,7 +4977,7 @@ function renderShopInner(){queueMicrotask(()=>shopRemember());
   if(F&&!fo){   /* Formen-Ebene: jede Form ist ein Ordner, gesperrte Formen kann man kaufen */
     for(const f of F.list){const solo=F.slot?null:SHOP[shopCat].items.filter(it=>F.of(it)===f.id);if(solo&&solo.length===1){grid.appendChild(itemBtn(solo[0]));continue}   /* Form ohne Farben: direkt als Teil, wie vorher */
       const own=formOwned(shopCat,f),act=formOfEquip(shopCat)===f.id,sel=fsel===f.id,show=F.slot?itemOf(shopCat,SAVE.equip[shopCat]):(SHOP[shopCat].items.find(it=>F.of(it)===f.id&&SAVE.equip[shopCat]===it.id)||SHOP[shopCat].items.find(it=>F.of(it)===f.id));
-      const b=document.createElement('button');b.className='item form'+(act?' eq':'')+(sel?' sel':'')+(own&&!act?' owned':'');b.style.setProperty('--c',show.c);if(show.a)b.style.setProperty('--a',show.a);
+      const b=document.createElement('button');b.className='item form'+(act?' eq':'')+(sel?' sel':'')+(own&&!act?' owned':'');b.style.setProperty('--c',show.c);if(show.a)b.style.setProperty('--a',show.a);knitSw(b,show);
       const pr=act?TX('AKTIV · ÖFFNEN','ACTIVE · OPEN'):own?TX('ÖFFNEN','OPEN'):sel?TX('KAUFEN · ','BUY · ')+f.price:String(f.price);
       b.innerHTML='<span class="sw"></span><span class="nm"></span><span class="pr">'+(!own?'<i class="coin"></i>':'')+'<span></span></span>';b.querySelector('.nm').textContent='▸ '+formName(f);b.querySelector('.pr span').textContent=pr;
       b.dataset.id='f_'+f.id;b.onclick=()=>{shopAnchor={id:'f_'+f.id,top:b.getBoundingClientRect().top};formClick(f,b)};grid.appendChild(b)}
@@ -4977,7 +4989,7 @@ function renderShopInner(){queueMicrotask(()=>shopRemember());
   function itemBtn(it){
     const owned=it.price===0||SAVE.owned[it.id],eq=SAVE.equip[shopCat]===it.id&&(!F||!F.slot||F.extra&&F.extra.includes(it.id)||(SAVE.equip[F.slot]||F.list[0].id)===fo),sel=tryOn[shopCat]===it.id;
     const b=document.createElement('button');b.className='item'+(eq?' eq':'')+(sel?' sel':'')+(owned&&!eq?' owned':'');
-    b.style.setProperty('--c',it.c);if(it.a)b.style.setProperty('--a',it.a);if(it.pat)b.style.setProperty('--a',it.pat[0]);
+    b.style.setProperty('--c',it.c);if(it.a)b.style.setProperty('--a',it.a);if(it.pat)b.style.setProperty('--a',it.pat[0]);knitSw(b,it);
     const bp=BIKE_PARTS.includes(shopCat);let pr;if(eq)pr=bp?TX('EINGEBAUT','INSTALLED'):TX('ANGEZOGEN','EQUIPPED');else if(owned)pr=bp?TX('EINBAUEN','INSTALL'):TX('ANZIEHEN','EQUIP');else if(sel)pr=TX('KAUFEN · ','BUY · ')+it.price;else pr=String(it.price);
     b.innerHTML='<span class="sw"></span><span class="nm"></span><span class="pr">'+(!owned?'<i class="coin"></i>':'')+'<span></span></span>';
     b.querySelector('.nm').textContent=itName(it);b.querySelector('.pr span').textContent=pr;
@@ -5023,14 +5035,14 @@ function drawPreview(id,eq,gear,pushAnim,bikeOnly){
    Lootbox-Fenster stehen), danach innerhalb dieser Seltenheit ein Teil, jedes mit derselben Chance. Die Chancen ändern sich nie,
    auch nicht durch das, was man schon hat: Ein doppeltes Teil wird zu Münzen (ein Viertel vom Shop-Preis).
    Gewöhnlich: einfache Farben. Ungewöhnlich: coolere Farben (teure Farben, Bommel- und Fisherman-Mützen, Gold, Neon).
-   Selten: Fully- und Downhill-Rahmen, Freeride-Rucksack, unsichtbarer Rucksack. Sehr selten: die Winter-Pullis. */
+   Selten: Fully- und Downhill-Rahmen, Freeride-Rucksack, unsichtbarer Rucksack. Sehr selten: die Winter-Pullis und die Ohrenmützen. */
 const BOX_PTS=50000,LOOT_DUP=.25;
 const LOOT_TIERS=[{id:'common',n:['GEWÖHNLICH','COMMON'],w:60,col:'#c9d0db'},{id:'uncommon',n:['UNGEWÖHNLICH','UNCOMMON'],w:28,col:'#5fe08a'},
   {id:'rare',n:['SELTEN','RARE'],w:9,col:'#4fb6ff'},{id:'epic',n:['SEHR SELTEN','VERY RARE'],w:3,col:'#f2c445'}];
 let LOOT_P=null;
 function lootPools(){if(LOOT_P)return LOOT_P;const P={common:[],uncommon:[],rare:[],epic:[]};
   for(const c of CATS)for(const it of SHOP[c].items){if(!it.price||it.req)continue;
-    if(c==='sweater'){P.epic.push({cat:c,id:it.id});continue}
+    if(c==='sweater'||it.model==='inka'){P.epic.push({cat:c,id:it.id});continue}   /* sehr selten: Winter-Pullis und Ohrenmützen */
     if(c==='pack'||c==='prot'){if(it.id==='pk_free'||it.id==='pk_ghost')P.rare.push({cat:c,id:it.id});continue}
     const cool=it.price>60*PRICE_X||/gold|neon|galaxy|camo/.test(it.id)||it.model&&it.model!=='classic';   /* Gold, Neon, Galaxy, Camo, teure Farben, Bommel- und Fisherman-Mützen */
     (cool?P.uncommon:P.common).push({cat:c,id:it.id})}
