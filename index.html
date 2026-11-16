@@ -107,6 +107,7 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);font-size:
 .k.hold{width:calc(var(--s)*.36);height:calc(var(--s)*.36);border-radius:50%;padding:0;font-size:calc(var(--s)*.052);letter-spacing:.5px;flex:none;
   background:rgba(36,49,90,.28);color:rgba(255,255,255,.75);box-shadow:inset 0 0 0 2px rgba(255,255,255,.28);-webkit-touch-callout:none}
 .k.hold.on{background:rgba(85,104,168,.55);color:#fff;transform:none;box-shadow:inset 0 0 0 2px rgba(255,208,74,.8)}
+#bBrake{margin-left:calc(var(--s)*.2)}   /* Bremse etwas weiter weg vom Stick, nach rechts */
 /* nirgends Text markieren oder Kopier-Menü */
 *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
@@ -1240,6 +1241,10 @@ function drawBoardWide(g,poly,d,n,lo,P,O,col,hw,bw){
     return Z};
   for(const LIB of [SKI3,BOARD3])if(LIB.grind&&LIB.ride)LIB.grind_h=mixD(LIB.ride,LIB.grind,.5);
   for(const LIB of [SKI3,BOARD3])for(const k of ['ab_back','ab_lean','ab_hard','ab_lean_n','ab_hard_n'])if(LIB[k])LIB[k+'_h']=mixD(LIB.ride,LIB[k],.5);   // Swaps: Zwischenschritt beim Rumdrehen
+  /* Afterbang in 8 Stufen: Körper, Arme, Kopf und Ski gleiten aus der Fahrposition in die Pose und wieder zurück.
+     Schalter wie Hände hinter dem Rücken oder Stöcke wechseln erst ab der Hälfte, damit nichts vorzeitig springt. */
+  {const mixS=(A,Z,u)=>{const P=mixD(A,Z,u);if(u<.5)for(const k in Z){const a=A[k],z=Z[k];if(typeof z==='number'||Array.isArray(z)&&Array.isArray(a)&&a.length===z.length||z&&a&&typeof z==='object'&&typeof a==='object')continue;P[k]=a}return P};
+    for(const LIB of [SKI3,BOARD3])for(const k of ['ab_back','ab_lean','ab_hard','ab_lean_n','ab_hard_n'])if(LIB[k])for(let i=1;i<8;i++)LIB[k+'_s'+i]=mixS(LIB.ride,LIB[k],i/8)}
   // Controller: R2 gehalten = Sprung geladen, Fahrer geht in die Knie (Ski/Board bleiben am Boden)
   {const shY=(o,dy,k)=>Array.isArray(o)&&o.length===3&&typeof o[0]==='number'?(k==='d'?o:[o[0],o[1]+dy,o[2]]):Array.isArray(o)?o.map(v=>shY(v,dy,k)):o&&typeof o==='object'?Object.fromEntries(Object.entries(o).map(([kk,v])=>[kk,shY(v,dy,kk==='d'||kk==='poleDirs'?'d':k)])):o;
    const sk=mixD(SKI3.ride,SKI3.tuck,1);sk.arms=mixD(SKI3.ride.arms,SKI3.tuck.arms,.3);
@@ -2881,7 +2886,8 @@ function playerView(){
     if(p.mode==='ground'&&p.ab){const k=p.ab.kind,t=p.ab.t,d=p.ab.dur;
       if(k==='shifty'){twist=42*p.ab.dir*Math.sin(Math.PI*smooth01(t/d));look=false}
       else if(k==='ab_sag'){const u=t/d,env=u<.28?smooth01(u/.28):1-smooth01((u-.28)/.72),lv=Math.round((p.ab.depth||1)*env*8);pose=lv>0?'ab_sagL'+lv:'ride'}   /* schnell einfedern, langsamer ausfedern; Tiefe je nach Aufprall */
-      else{const L=LIBOF(GEAR),e=k==='ab_hard'?.2:.12,kn=p.sw&&L[k+'_n']?k+'_n':k;if(L[kn])pose=(t<e||t>d-e)?kn+'_h':kn;if(k==='ab_hard'){twist=30*p.ab.dir*Math.sin(Math.PI*smooth01(t/d));look=false}}}
+      else{const L=LIBOF(GEAR),hard=k==='ab_hard',ti=hard?.32:.24,to=hard?.44:.34,kn=p.sw&&L[k+'_n']?k+'_n':k;   /* weich rein (ti s) und langsamer wieder raus (to s), 8 Stufen */
+        if(L[kn]){const env=t<ti?smooth01(t/ti):t>d-to?1-smooth01((t-(d-to))/to):1,lv=Math.round(env*8);pose=lv>=8?kn:lv>0?kn+'_s'+lv:'ride'}if(hard){twist=30*p.ab.dir*Math.sin(Math.PI*smooth01(t/d));look=false}}}
     const rockHit=(p.mode==='crash'&&!p.cr)||(p.mode==='rail'&&p.rCrash>0)||(p.mode==='dead'&&p.deadReason==='rock');
     if(rockHit){const lie=p.mode==='dead'||p.tumble===90;pose=lie?'cr_lie':'cr_ball';ang=p.ang+(lie?0:p.tumble);look=false;phi=0;twist=0}
     const inAva=p.mode==='dead'&&p.deadReason==='wall';
