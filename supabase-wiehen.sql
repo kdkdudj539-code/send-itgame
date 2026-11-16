@@ -1,5 +1,5 @@
--- SEND IT: eigene Rangliste für die Wiehengebirge-Map. Einmal im Supabase SQL Editor ausführen (nach supabase-setup.sql).
--- Die Tabelle "scores" bleibt die Alpen-Rangliste (dazu zählt auch der Alpen-Sommer).
+-- SEND IT: eigene Rangliste für die Wiehengebirge-Map (Ski und Snowboard; Downhill hat eine eigene). Einmal im Supabase SQL Editor ausführen (nach supabase-setup.sql).
+-- Die Tabelle "scores" bleibt die Alpen-Rangliste. Downhill-Läufe haben ihre eigene Rangliste (supabase-downhill.sql).
 -- Läufe auf der Wiehengebirge-Map landen in "scores_wiehen". Lesen darf jeder, eintragen nur der angemeldete Spieler selbst.
 
 create table if not exists public.scores_wiehen (

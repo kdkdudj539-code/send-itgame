@@ -15,4 +15,5 @@ Einmalig im Supabase SQL Editor ausführen:
 3. `supabase-rename.sql`: Spielernamen ändern (Rangliste → NAME ÄNDERN; Login und Profilname ändern sich zusammen)
 4. `supabase-japan.sql`: eigene Rangliste für die Japan-Map (die bisherige Rangliste bleibt die der Alpen)
 5. `supabase-maxscore.sql`: höchster erlaubter Score 100 Millionen (nur nötig, wenn 1. und 4. noch mit der alten Grenze von 2 Millionen angelegt wurden)
-6. `supabase-wiehen.sql`: eigene Rangliste für die Wiehengebirge-Map (Winter und Herbst)
+6. `supabase-wiehen.sql`: eigene Rangliste für die Wiehengebirge-Map (Ski und Snowboard)
+7. `supabase-downhill.sql`: eigene Rangliste für Downhill (alle Bike-Läufe im Sommer, Alpen und Wiehengebirge)
