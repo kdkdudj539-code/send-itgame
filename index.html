@@ -1472,6 +1472,7 @@ const BIKE3=(()=>{
      const M=L[g+'_max']||L[g];L[g+'#9']=frame(L[g],M,.5);L[g+'#10']=M}}
   for(const k of ['ab_back','ab_lean','crouch'])L[k+'_h']=Object.assign(mixD(ride,L[k],.5),{hips:mixD(ride.hips||DH0,L[k].hips||DH0,.5)});
   L.ab_sag_h=mixD(ride,L.ab_sag,.5);L.ab_sag_h.bike.sag=BK_SAG/2;
+  for(let i=1;i<=8;i++){const P=mixD(ride,L.ab_sag,i/8);P.bike.sag=BK_SAG*i/8;L['ab_sagL'+i]=P}   // Einfedern in 8 Stufen (Tiefe je nach Aufprall)
   L._bike=Object.assign({},ride,{bike:B(),noRider:true});   // Shop-Vorschau: Bike an der gewohnten Stelle
   return L})();
 /* Sturz-Posen für alle Geräte: Kugel und Seestern beim Überschlagen, auf dem Rücken liegen, aufsetzen, seitlich wegrutschen.
@@ -2683,6 +2684,7 @@ function playerView(){
     if(p.mode==='ground'&&(Math.abs(p.butterVis||0)>5||p.bs))pose=(p.bs?p.bs.end:p.butterVis)<0?'butter':'nbutter';
     if(p.mode==='ground'&&p.ab){const k=p.ab.kind,t=p.ab.t,d=p.ab.dur;
       if(k==='shifty'){twist=42*p.ab.dir*Math.sin(Math.PI*smooth01(t/d));look=false}
+      else if(k==='ab_sag'){const u=t/d,env=u<.28?smooth01(u/.28):1-smooth01((u-.28)/.72),lv=Math.round((p.ab.depth||1)*env*8);pose=lv>0?'ab_sagL'+lv:'ride'}   /* schnell einfedern, langsamer ausfedern; Tiefe je nach Aufprall */
       else{const L=LIBOF(GEAR),e=k==='ab_hard'?.2:.12,kn=p.sw&&L[k+'_n']?k+'_n':k;if(L[kn])pose=(t<e||t>d-e)?kn+'_h':kn;if(k==='ab_hard'){twist=30*p.ab.dir*Math.sin(Math.PI*smooth01(t/d));look=false}}}
     const rockHit=(p.mode==='crash'&&!p.cr)||(p.mode==='rail'&&p.rCrash>0)||(p.mode==='dead'&&p.deadReason==='rock');
     if(rockHit){const lie=p.mode==='dead'||p.tumble===90;pose=lie?'cr_lie':'cr_ball';ang=p.ang+(lie?0:p.tumble);look=false;phi=0;twist=0}
@@ -3570,12 +3572,12 @@ function land(g,fx){
   if(GEAR==='bike'){for(const k of ['bar','whip'])if(p[k]){p[k]=null;if(k==='bar')p.nBar++;else p.nWhip++}}   // fast rum: zählt noch
   const pow=isPow(g.seg)&&!SUMMER;   // Tiefschnee nur im Winter
   const ok=Math.abs(diff)<(pow?62:46)&&(m<38||m>142)&&!p.bailed&&!p.wallHit&&!btFail;
-  const s=p.vx*Math.cos(g.a)+p.vy*Math.sin(g.a);
+  const s=p.vx*Math.cos(g.a)+p.vy*Math.sin(g.a),vnL=p.vy*Math.cos(g.a)-p.vx*Math.sin(g.a);   /* vnL: Aufprall senkrecht zum Boden */
   p.x=fx;p.y=g.y;p.mode='ground';
   if(ok){
     p.spin=Math.round(p.spin/180)*180;p.sw=Math.abs(Math.round(p.spin/180))%2===1;p.ang=gDeg;
     const sketchy=!!p.grab;p.s=clamp(s*(sketchy?.8:1),70,VMAX);
-    if(!pow&&g.seg.kind!=='deep'&&p.vy>420&&Math.abs(g.a)<.12){p.s*=.7;showTrick('FLAT LANDING',TX('Autsch','Ouch'),'bad')}else{const sc=scoreAir(sketchy);if(!sketchy&&(sc||(p.fromRail&&p.grindPts)))startAfterbang()}
+    if(!pow&&g.seg.kind!=='deep'&&p.vy>420&&Math.abs(g.a)<.12){p.s*=.7;showTrick('FLAT LANDING',TX('Autsch','Ouch'),'bad')}else{const sc=scoreAir(sketchy);if(!sketchy&&(sc||(p.fromRail&&p.grindPts)))startAfterbang(vnL)}
     SFX.land();if(pow){const dp=g.seg.kind==='deep';powderBurst(fx,g.y,(dp?44:26)+Math.min(30,p.vy/14),dp?170:130);p.sink=(dp?9:5)+(JAPAN?3:0);shake=Math.min(2,p.vy/250)}else{burst(fx,g.y,10,['#ffffff','#e4eefb'],90);shake=Math.min(4,p.vy/160)}
   }else{const ad=Math.abs(diff),vn=p.vy*Math.cos(g.a)-p.vx*Math.sin(g.a),side=ad<46&&!p.bailed&&!p.wallHit&&!btFail;   /* nur quer gelandet: Washout */
     const sev=side?'light':(ad>=100||vn>330||s>290&&ad>=70||p.wallHit)?'heavy':'mid';
@@ -3637,8 +3639,8 @@ function updGround(dt){
 /* Afterbangs (Freeski-Slang): nach einer sauberen Landung ca. 1 s lässig weiterfahren, als wäre nichts gewesen.
    Zufällig: Shifty (seitlich schauen), zurücklehnen, Hände hinter den Rücken. Reiner Style: keine Punkte, keine Anzeige.
    Jede Eingabe außer Gas bricht ab. */
-function startAfterbang(){
-  if(GEAR==='bike'){p.ab={kind:'ab_sag',t:0,dur:.55,dir:1,held:(inU()?1:0)|(inD()?2:0)|(inL()?4:0)|(inR()&&!inGas()?8:0)};return}   // Bike: Federung taucht tief ein
+function startAfterbang(vn){
+  if(GEAR==='bike'){const dp=clamp(((vn||250)-80)/380,.15,1);p.ab={kind:'ab_sag',t:0,dur:.38+.3*dp,depth:dp,dir:1,held:(inU()?1:0)|(inD()?2:0)|(inL()?4:0)|(inR()&&!inGas()?8:0)};return}   // Bike: Federung taucht tief ein
   const L=['shifty','ab_lean','ab_back'],hard=(p.lastCork||0)>=2,k=hard?'ab_hard':L[Math.floor(Math.random()*L.length)];   /* nach Double/Triple Cork immer der harte Afterbang */
   p.lastCork=0;p.ab={kind:k,t:0,dur:hard?1.6:1.05,dir:Math.random()<.5?1:-1,held:(inU()?1:0)|(inD()?2:0)|(inL()?4:0)|(inR()&&!inGas()?8:0)};
 }
