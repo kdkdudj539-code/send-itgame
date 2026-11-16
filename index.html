@@ -165,6 +165,24 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,4vw,28px);mar
 .opt:disabled{cursor:default;opacity:.42}
 .mbtns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}
 .btn.hasloot,.btn.loot{background:var(--gold);color:#2a1205}
+#mapRow{grid-template-columns:1fr}.opt.wmopen{flex-direction:row;justify-content:space-between;text-align:left;padding:8px 14px}.wmcur{display:flex;flex-direction:column;gap:4px}
+.wmgo{font-family:var(--ui);font-size:12px;letter-spacing:.1em;color:var(--gold)}
+.wmc{max-width:940px}.wm-wrap{position:relative;width:min(100%,calc((100vh - 170px)*2.5714));margin:4px auto 10px;aspect-ratio:360/140;perspective:1600px;box-shadow:0 0 0 3px #000,0 0 0 6px var(--line)}
+.wm-sheet{position:absolute;inset:0;display:flex}.wm-sheet::after{content:'';position:absolute;left:calc(50% - 1px);top:0;bottom:0;width:2px;background:rgba(0,0,0,.2);pointer-events:none}
+.wm-half{width:50%;height:100%;display:block;image-rendering:pixelated;backface-visibility:hidden}.wm-l{transform-origin:100% 50%}
+.wm-wrap.open .wm-sheet{animation:wmPop .35s ease-out both}.wm-wrap.open .wm-l{animation:wmUnfold .85s .1s cubic-bezier(.25,.8,.3,1) both}.wm-wrap.open .wm-pins{animation:wmFade .35s .85s both}
+@keyframes wmUnfold{0%{transform:rotateY(179deg)}100%{transform:rotateY(0)}}@keyframes wmPop{0%{transform:scale(.7) translateY(16px);opacity:0}100%{transform:none;opacity:1}}@keyframes wmFade{0%{opacity:0;transform:translateY(-6px)}100%{opacity:1;transform:none}}
+.wm-pins{position:absolute;inset:0}.wm-pin{position:absolute;width:0;height:0;padding:0;border:0;background:none;cursor:pointer;z-index:1}.wm-pin[aria-pressed="true"]{z-index:2}
+.wm-pin i{position:absolute;left:-5px;top:-5px;width:10px;height:10px;background:var(--gold);box-shadow:0 0 0 2px #000;transform:rotate(45deg)}
+.wm-pin i::after{content:'';position:absolute;inset:-5px;border:2px solid var(--gold);animation:wmPulse 1.4s infinite}@keyframes wmPulse{0%{transform:scale(.5);opacity:.9}100%{transform:scale(1.7);opacity:0}}
+.wm-pin .wl{position:absolute;white-space:nowrap;font-family:var(--display);font-size:13px;color:#fff;background:var(--panel2);padding:6px 9px;box-shadow:0 0 0 2px #000;line-height:1.2;text-align:left}
+.wm-pin .wl small{display:block;font-family:var(--ui);font-size:11px;color:var(--muted);letter-spacing:.06em;margin-top:3px;text-transform:uppercase}
+.wm-pin .wl.r{left:12px;top:6px}.wm-pin .wl.l{right:12px;bottom:6px}.wm-pin .wl.lb{right:12px;top:8px}
+.wm-pin .wl::before{content:'';position:absolute;width:8px;height:2px;background:#000}.wm-pin .wl.r::before{left:-10px;top:-3px;transform:rotate(40deg)}.wm-pin .wl.l::before{right:-10px;bottom:-3px;transform:rotate(40deg)}.wm-pin .wl.lb::before{right:-10px;top:-3px;transform:rotate(-40deg)}
+.wm-pin[aria-pressed="true"] .wl{background:var(--gold);color:#2a1205}.wm-pin[aria-pressed="true"] .wl small{color:#5a3d10}.wm-pin:hover .wl{box-shadow:0 0 0 2px #fff}
+.wm-pin:disabled{cursor:default}.wm-pin:disabled i{background:#6b7280}.wm-pin:disabled i::after{display:none}.wm-pin:disabled .wl{opacity:.65}.wm-pin:focus-visible .wl{outline:3px solid #fff;outline-offset:2px}
+@media (max-width:640px),(max-height:560px){.wm-pin .wl{font-size:10px;padding:4px 6px}.wm-pin .wl small{display:none}.wm-pin i{left:-4px;top:-4px;width:8px;height:8px}.wm-pin .wl.l{bottom:4px}.wm-pin .wl.lb{top:6px}}
+@media (max-height:560px){.wmc{padding:10px 16px}.wmc .eyebrow,#wmNote{display:none}.wmc h2{margin:0}.wmc .shop-head{margin-bottom:2px}.wm-wrap{width:min(100%,calc((100vh - 96px)*2.5714))}.wmc .btn{padding:9px 12px}}
 .obox{font-family:var(--ui);color:var(--gold);font-size:14px;margin:-10px 0 16px;min-height:1em}
 .lootc{max-width:720px}.loot-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin:6px 0 16px}
 .loot-stage{display:flex;justify-content:center;align-items:center;background:var(--panel2);box-shadow:0 0 0 2px #000;height:216px}
@@ -367,7 +385,7 @@ html.sum .btn.alt{background:#e2f4e5}
         <div class="msec"><p class="mlabel"><b>1</b>MODUS</p>
           <div class="seg three" role="group" aria-label="Modus wählen"><button type="button" class="opt" data-mode="ski" aria-pressed="true">SKI<small>Winter</small></button><button type="button" class="opt" data-mode="board" aria-pressed="false">SNOWBOARD<small>Winter</small></button><button type="button" class="opt" data-mode="bike" aria-pressed="false">DOWNHILL<small>Sommer</small></button></div></div>
         <div class="msec"><p class="mlabel"><b>2</b>MAP</p>
-          <div class="seg three" id="mapRow" role="group" aria-label="Map wählen"><button type="button" class="opt" data-map="alps" aria-pressed="true">ALPEN<small id="mapAlpsSub">Park &amp; Freeride</small></button><button type="button" class="opt" data-map="japan" aria-pressed="false">JAPAN<small id="mapJpSub">Tiefer Powder</small></button><button type="button" class="opt" data-map="wiehen" aria-pressed="false">WIEHEN<small id="mapWhSub">Waldhügel</small></button></div></div>
+          <div class="seg" id="mapRow"><button type="button" class="opt wmopen" id="bMap" aria-label="Weltkarte öffnen"><span class="wmcur"><b id="mapCur">ALPEN</b><small id="mapCurSub">Park &amp; Freeride</small></span><span class="wmgo" id="mapGo">WELTKARTE ▸</span></button></div></div>
         <div class="mbtns">
           <button class="btn" id="bPlay">FAHREN</button>
           <button class="btn ghost" id="bShop">SHOP</button>
@@ -529,6 +547,24 @@ html.sum .btn.alt{background:#e2f4e5}
       </div>
     </div>
     <div class="shop-foot"><div id="shopMsg"></div><button class="btn" id="bShopBack">FERTIG</button></div>
+  </div>
+</section>
+
+<section id="world" class="screen" hidden>
+  <div class="card wmc">
+    <div class="shop-head">
+      <div><p class="eyebrow" id="wmEye">Tippe auf einen Ort</p><h2 id="wmTitle">WELTKARTE</h2></div>
+      <button class="btn ghost" id="bWmBack">ZURÜCK</button>
+    </div>
+    <div class="wm-wrap" id="wmWrap">
+      <div class="wm-sheet"><canvas class="wm-half wm-l" id="wmL" width="180" height="140"></canvas><canvas class="wm-half wm-r" id="wmR" width="180" height="140"></canvas></div>
+      <div class="wm-pins">
+        <button type="button" class="wm-pin" data-map="wiehen" style="left:52.48%;top:21.26%" aria-pressed="false"><i></i><span class="wl l">WIEHENGEBIRGE<small id="mapWhSub">Waldhügel</small></span></button>
+        <button type="button" class="wm-pin" data-map="alps" style="left:53.17%;top:24.81%" aria-pressed="true"><i></i><span class="wl lb">ALPEN<small id="mapAlpsSub">Park &amp; Freeride</small></span></button>
+        <button type="button" class="wm-pin" data-map="japan" style="left:89.08%;top:27.96%" aria-pressed="false"><i></i><span class="wl lb">JAPAN<small id="mapJpSub">Tiefer Powder</small></span></button>
+      </div>
+    </div>
+    <p class="note" id="wmNote"></p>
   </div>
 </section>
 
@@ -4897,7 +4933,7 @@ function drawHud(){
 }
 
 /* ================= FLOW ================= */
-const screens=['menu','help','shop','pause','over','rank','notes','loot'];
+const screens=['menu','help','shop','pause','over','rank','notes','loot','world'];
 function show(id){if(id!=='menu'&&typeof setOpen==='function')setOpen(false);screens.forEach(s=>$(s).hidden=s!==id);if(id){const b=$(id).querySelector('.btn');if(b&&!isTouch)b.focus({preventScroll:true})}}
 /* Saisonwechsel: alles, was nach Schnee oder Sommer aussieht, neu bauen (Hintergrund, Bäume, Alm, Ranger), Bild-Caches leeren, neue Welt */
 function seasonVisuals(){MPAL=WIEHEN?(SUMMER?MPAL_WHS:MPAL_WH):SUMMER?MPAL_S:JAPAN?MPAL_J:MPAL_W;MLAY=WIEHEN?(SUMMER?MLAY_WHS:MLAY_WH):JAPAN?MLAY_J:MLAY_A;avaColors()}
@@ -4911,7 +4947,8 @@ function padLabels(){for(const d in PAD_LB){const el=document.querySelector('#gs
   if(GEAR==='board'){$('kMute').textContent='INDY';$('kUp').textContent='JAPAN';for(const [d,n] of [['nw','METHOD'],['ne','MELON'],['se','SEATBELT'],['sw','DRACULA']]){const el=document.querySelector('#gstick .lb.'+d);if(el)el.textContent=n}}gstickEl.classList.toggle('brd',GEAR==='board')}
 function refreshMenu(){if(cloudHook)cloudShow();document.documentElement.classList.toggle('sum',SUMMER);volShow();setT($('hAvalT'),SUMMER?TX('MURE','MUDSLIDE'):TX('LAWINE','AVALANCHE'));
   {const md=SUMMER?'bike':SAVE.gear;document.querySelectorAll('.opt[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===md)))}   // Modus: Ski, Snowboard (Winter) oder Downhill (Sommer)
-  document.querySelectorAll('.opt[data-map]').forEach(b=>{const jp=b.dataset.map==='japan';b.disabled=SUMMER&&jp;b.setAttribute('aria-pressed',String(b.dataset.map===mapId()))});   // Japan gibt es nur im Winter
+  document.querySelectorAll('.wm-pin[data-map]').forEach(b=>{const jp=b.dataset.map==='japan';b.disabled=SUMMER&&jp;b.setAttribute('aria-pressed',String(b.dataset.map===mapId()))});
+  {const id=mapId();setT($('mapCur'),id==='japan'?'JAPAN':id==='wiehen'?'WIEHENGEBIRGE':TX('ALPEN','ALPS'));setT($('mapCurSub'),id==='japan'?TX('Tiefer Powder','Deep powder'):id==='wiehen'?(SUMMER?TX('Herbstwald','Autumn forest'):TX('Waldhügel','Forest hills')):SUMMER?TX('Bikepark','Bike park'):TX('Park & Freeride','Park & freeride'));setT($('mapGo'),TX('WELTKARTE ▸','WORLD MAP ▸'))}   // Japan gibt es nur im Winter
   setT($('mapAlpsSub'),SUMMER?TX('Bikepark','Bike park'):TX('Park & Freeride','Park & freeride'));setT($('mapJpSub'),SUMMER?TX('Nur Winter','Winter only'):TX('Tiefer Powder','Deep powder'));setT($('mapWhSub'),SUMMER?TX('Herbstwald','Autumn forest'):TX('Waldhügel','Forest hills'));
   setT($('mEyebrow'),WIEHEN?(SUMMER?TX('Downhill MTB · Herbst im Wiehengebirge','Downhill MTB · Autumn in the Wiehengebirge'):TX('Ski & Snowboard · Wiehengebirge','Ski & Snowboard · Wiehengebirge')):SUMMER?TX('Downhill MTB · Bikepark Escape','Downhill MTB · Bike Park Escape'):JAPAN?TX('Ski & Snowboard · Japan Powder Escape','Ski & Snowboard · Japan Powder Escape'):TX('Ski & Snowboard · Snowpark Escape','Ski & Snowboard · Snowpark Escape'));
   setT($('mLede'),SUMMER?TX('Die Mure rollt von hinten. Spring die Dirt Jumps und Drops, steh deine Tricks, sammel Münzen.','The mudslide is rolling in from behind. Jump the dirt jumps and drops, land your tricks, grab the coins.')
@@ -5029,6 +5066,35 @@ function drawPreview(id,eq,gear,pushAnim,bikeOnly){
   if(pushAnim){pose='push'+(Math.floor(((T/.55)%1)*8)%8);phi=0;look=false}
   const sp=getSprite(pose,phi,look,eq,gear);g.drawImage(sp,32-SCX,((gear||GEAR)==='bike'?(pose==='ride'?36:32):pose==='ride'||pushAnim?39:36)-SCY,sp.width/sp.K,sp.height/sp.K);
 }
+
+/* ================= WELTKARTE =================
+   Land und Meer aus den Natural-Earth-Küstenlinien (gemeinfrei), 1 Pixel pro Längen- und Breitengrad, von 82° Nord bis 58° Süd.
+   Gezeichnet im Pixel-Stil: Meer mit flachem Wasser an den Küsten und gepunkteten Gradlinien, Land grün, Wüsten sandig, der hohe
+   Norden und die Hochgebirge mit Schnee. Die Karte klappt beim Öffnen wie eine Faltkarte auf (linke Hälfte schwingt nach links). */
+const WM_LAND='AAAAAAAAAAAAAAA////x////////AAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////5////////wAAAAAAAAAD4fwAAAAPwAAAAAAAAAAAAAAAAAAAAAAAAAAA///+Af//////+AAAAB//wAAAAAAAAAAH8gAAAAAAAAAAAAAAAAAAAAAAAMHzn//5////////4AAAAB/8AAAAAAAAAAAAD4AAAAAAAAAAAAAAAAAAAAAAEcAAxP/Af///////+AAAAAPHAAAAAAAAAAAAA8AAAAAAAAAAAAAAAAAAAAAD/DC8///AP///////5AAAAACAAAAAAAD4AAAAD/+AAAAAAAAAAAAAAAAAAAAAX/x/z/8AAAf/////+AAAAAAAAAAAAH4AAAB////AAAB/kAAAAAAAAAAAAAAOA4AAT/cAAAH/////8AAAAAAAAAAAAfAAAAP///+AAAAIAAAAAAAAAAAAAAAf8AYe+f/gAAD/////4AAAAAAAAAAAA4ACAH/////+HwAGAAAAAAAAAAAAAAA//+4/Y//4AAD/////wAAAAAAAAAAADwAHl3///////4APwAAAAAwAAAAAAAAOf/8M4///gAB/////wAAAAAAAAAAADwAff////////8///gAAABAAAf/gAAAAH//B8f//8AB////+wAAAAAAD/gAAAAAfv/////////////8AAAAAB///+H//H//n+Bxf+AB3////AAAAAAB//4AAQA+fv///////////////n+wAP////////d8HPzwf+AAf///4AAAAAAP///wMHf//v/////////////////+AD////////////34Z/wA///4AAAAAAAP///+M////v//////////////////4E/////////////gD/8A///wAQAAAAAf///+v///////////////////////4f////////////7AH+YAf/4AA/8AAAA/8f+D///////////////////////AgPf///////////zw//gAP/wAAf8AAAD/4/+f//////////////////////+AAA////////////DIA/wAH/gAADAAAAP/z/////////////////////////+AAH///////////8Aw0HAAD/AAAAAAAA//H/////////////////////////+AAP///////////wAA/gAAB/AAAAAAAB/+H//////////////////////jP/AAAH//3////////wAA/4AAAOAAAAAAAB//H/////////////////////+A/4AAAA/7AD///////gAA/4wAAAAAAAAAAB//g////////////////////++DgAAAAAD0AA///////4AA/94AAAAAAAAAYA5+D///////////////////4AAHAAAAAADcAAP//////8AAf/8AAAAAAAAB8AA+i///////////////////wAAfgAAAAAMAAAH///////wCf/+AAAAAAAAA8AO+H///////////////////AAA/gAAAABwAAAD///////+A///AAAAAAAAA8APwH//////////////////+AAB/AAAAAEAAAABf///////z///wAAAAAAAH/AHz///////////////////+AAA/AAAAAQAAAABP///////x///8AAAAAAAPPA//////////////////////6AA8AAAAAAAAAAAH///////5///8AAAAAAAPfz//////////////////////+AA4AAAAAAAAAAAD///////////8AAAAAAAIfn//////////////////////7AAwAAAAAAAAAAAD///////////sAAAAAAAAYf//////////////////////7AAAAAAAAAAAAAAB/////////+MPAAAAAAAAC///////////////////////7AAAAAAAAAAAAAAAf/////////wfgAAAAAAAf///////////////////////yAAAAAAAAAAAAAAAP/////////gHgAAAAAAAH///////////////////////iAAAAAAAAAAAAAAAP/////////5AAAAAAAAAD//////P/h//////////////CAAAAAAAAAAAAAAAP/////////+AAAAAAAAAB/////H//D/////////////+AAAAAAAAAAAAAAAAP////////+4AAAAAAAAAB//n/+AP+H/////////////8CAAAAAAAAAAAAAAAP////////wAAAAAAAAAH//jz/8AD+H/////////////4HwAAAAAAAAAAAAAAf////////gAAAAAAAAAH/4Fw/8AB/D////////////+APAAAAAAAAAAAAAAAP////////wAAAAAAAAAH/4E8f+Ph/g////////////8AIAAAAAAAAAAAAAAAP///////+AAAAAAAAAAH/gMHfP///x///////////v4AMAAAAAAAAAAAAAAAP///////8AAAAAAAAAAH/AMCOP///g//////////+ZwAMAAAAAAAAAAAAAAAH///////4AAAAAAAAAAH/AACHP///g//////////8B4AYAAAAAAAAAAAAAAAH///////wAAAAAAAAAAH+AAYGH///w//////////+w4A4AAAAAAAAAAAAAAAD///////wAAAAAAAAAAAgf+AABt//////////////g8D4AAAAAAAAAAAAAAAB///////wAAAAAAAAAAAh/+AAgA//////////////A4f4AAAAAAAAAAAAAAAB///////gAAAAAAAAAAB//+AAAA//////////////Ax+AAAAAAAAAAAAAAAAAP/////+AAAAAAAAAAAD//+AAAB//////////////gDwAAAAAAAAAAAAAAAAAH/////8AAAAAAAAAAAH///4OAB//////////////gDAAAAAAAAAAAAAAAAAAH/////4AAAAAAAAAAAP///8P4z//////////////wCAAAAAAAAAAAAAAAAAACf////4AAAAAAAAAAAP/////////////////////wAAAAAAAAAAAAAAAAAAABf//3gYAAAAAAAAAAAP/////////P///////////wAAAAAAAAAAAAAAAAAAAAv//AAYAAAAAAAAAAA//////////n///////////wAAAAAAAAAAAAAAAAAAAB3/+AAcAAAAAAAAAAB///////9//j///////////gAAAAAAAAAAAAAAAAAAAAb/+AAMAAAAAAAAAAD///////8//wn//////////AAAAAAAAAAAAAAAAAAAAAJ/+AAEAAAAAAAAAAH///////+f/8T//////////AAAAAAAAAAAAAAAAAAAAAM/8AAAAAAAAAAAAAH///////+f/84Af///////+QAAAAAAAAAAAAAAAAAAAAGf8AAAAAAAAAAAAAP////////P//+AP///////4wAAAAAAAAAAAAAAAAAAAAAP8AAvAAAAAAAAAAf////////H///AH///////ggAAAAAAAAAAAAAAAAAAAAAP+AYBgAAAAAAAAAf////////n//+AD//4P//8AAAAAAAAAAAAAAAAAAAAAAAP+B4A8AAAAAAAAAf////////j//+AAf/4P/+IAAAAAAAAAAAAAAAgAAAAAAAH/B4ABwAAAAAAAAf////////h//8AAf/gH/8YAAAAAAAAAAAAAAAAAAAAAAAD/vwAj5AAAAAAAAP////////x//4AAf/AD/8QAQAAAAAAAAAAAAAAAAAAAAAAf/wAAAAAAAAAAAP////////4//gAAf+AD/+AAwAAAAAAAAAAAAAAAAAAAAAAH/wAAAAAAAAAAAf////////4f+AAAf8AD//AAwAAAAAAAAAAAAAAAAAAAAAAAH/AAAAAAAAAAAf////////8f8AAAPwAAP/gAwAAAAAAAAAAAAAAAAAAAAAAAD/gAAAAAAAAAAf////////+fgAAAPwAAP/gAwAAAAAAAAAAAAAAAAAAAAAAAA/gAAAAAAAAAAf/////////eAAAAHwAAP/gA8AAAAAAAAAAAAAAAAAAAAAAAAHgAAAAAAAAAAf/////////wAAAAHwAAM/gAWAAAAAAAAAAAAAAAAAAAAAAAADABYAAAAAAAAP/////////gIAAAHwAAMfgALAAAAAAAAAAAAAAAAAAAAAAAADgP/aAAAAAAAH//////////4AAADwAAIPABOAAAAAAAAAAAAAAAAAAAAAAAAAyPf+AAAAAAAD//////////4AAADoAAMEAAFAAAAAAAAAAAAAAAAAAAAAAAAAd///AAAAAAAB//////////wAAABIAAMAAAHAAAAAAAAAAAAAAAAAAAAAAAAAE///gAAAAAAB//////////wAAAAMAAGAAAPgAAAAAAAAAAAAAAAAAAAAAAAAA///4AAAAAAAf/////////gAAAAMAADAAMDAAAAAAAAAAAAAAAAAAAAAAAAAAf///gAAAAAAP/B///////gAAAAAABDgAOAAAAAAAAAAAAAAAAAAAAAAAAAAA////wAAAAAACAA///////AAAAAAAAzwA8AAAAAAAAAAAAAAAAAAAAAAAAAAAf///4AAAAAAAAAD/////+AAAAAAAAZwB8AAAAAAAAAAAAAAAAAAAAAAAAAAA////4AAAAAAAAAD/////8AAAAAAAANwH8AAAAAAAAAAAAAAAAAAAAAAAAAAB////8AAAAAAAAAH/////4AAAAAAAAHwf+AYAAAAAAAAAAAAAAAAAAAAAAAAD////8AAAAAAAAAH/////wAAAAAAAAHwf8+YAAAAAAAAAAAAAAAAAAAAAACAH/////AAAAAAAAAH/////gAAAAAAAADwf8ASgAAAAAAAAAAAAAAAAAAAAAAAH/////4AAAAAAAAH/////AAAAAAAAAD4P54BwAAAAAAAAAAAAAAAAAAAAAAAH/////+AAAAAAAAD////+AAAAAAAAAB+P5wA74AAAAAAAAAAAAAAAAAAAAAAH//////4AAAAAAAB////8AAAAAAAAAA8Ax4uf/AAAAAAAAAAAAAAAAAAAAAAH//////8AAAAAAAA////8AAAAAAAAAAcAB4AH/wIAAAAAAAAAAAAAAAAAAAAH///////gAAAAAAA////4AAAAAAAAAAMABIAA/xwAAAAAAAAAAAAAAAAAAAAH///////gAAAAAAA////4AAAAAAAAAAHgAAAI/8BAAAAAAAAAAAAAAAAAAAAD///////gAAAAAAAf///8AAAAAAAAAAB/AABA/4AAAAAAAAAAAAAAAAAAAAAB///////gAAAAAAAf///8AAAAAAAAAAAB+xgAvMAQAAAAAAAAAAAAAAAAAAAB///////gAAAAAAAf///8AAAAAAAAAAAABCAAAHACAAAAAAAAAAAAAAAAAAAA///////AAAAAAAAf///+AAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAA//////+AAAAAAAAP///+AAAAAAAAAAAAAACgCAAAAAAAAAAAAAAAAAAAAAAAf/////8AAAAAAAAf///+AQAAAAAAAAAAAAB+CAAAAAAAAAAAAAAAAAAAAAAAP/////4AAAAAAAAf///+AwAAAAAAAAAAAAD8HAAAAAAAAAAAAAAAAAAAAAAAP/////4AAAAAAAA////+AwAAAAAAAAAAAB38HgAAAAAAAAAAAAAAAAAAAAAAH/////4AAAAAAAA////+D4AAAAAAAAAAAD/+HgAAAAAAAAAAAAAAAAAAAAAAB/////4AAAAAAAA////8PwAAAAAAAAAAAD//HwAAAABAAAAAAAAAAAAAAAAAA/////4AAAAAAAA////wPwAAAAAAAAAAAP///wAAAAGAAAAAAAAAAAAAAAAAAf////wAAAAAAAA////gPgAAAAAAAAAAAP///wAAAAAAAAAAAAAAAAAAAAAAAP////wAAAAAAAAf//+APgAAAAAAAAAAAf///8AAAAAAAAAAAAAAAAAAAAAAAP////wAAAAAAAAf//+APgAAAAAAAAAAD////+AAIAAAAAAAAAAAAAAAAAAAAP////gAAAAAAAAP//+AfAAAAAAAAAAAf////+AAEAAAAAAAAAAAAAAAAAAAAP////AAAAAAAAAP///AfAAAAAAAAAAA//////gAAAAAAAAAAAAAAAAAAAAAAf///4AAAAAAAAAP///APAAAAAAAAAAA//////gAAAAAAAAAAAAAAAAAAAAAAf///gAAAAAAAAAH//+AOAAAAAAAAAAB//////wAAAAAAAAAAAAAAAAAAAAAAf///AAAAAAAAAAH//4AEAAAAAAAAAAA//////4AAAAAAAAAAAAAAAAAAAAAAf///AAAAAAAAAAH//4AAAAAAAAAAAAB//////4AAAAAAAAAAAAAAAAAAAAAAf///AAAAAAAAAAH//4AAAAAAAAAAAAA//////4AAAAAAAAAAAAAAAAAAAAAAf//+AAAAAAAAAAD//wAAAAAAAAAAAAA//////8AAAAAAAAAAAAAAAAAAAAAAf//8AAAAAAAAAAB//gAAAAAAAAAAAAAf/////4AAAAAAAAAAAAAAAAAAAAAA///8AAAAAAAAAAB//gAAAAAAAAAAAAAf/////4AAAAAAAAAAAAAAAAAAAAAA///wAAAAAAAAAAA//AAAAAAAAAAAAAAf/////4AAAAAAAAAAAAAAAAAAAAAA///wAAAAAAAAAAA/+AAAAAAAAAAAAAAP/AP//wAAAAAAAAAAAAAAAAAAAAAA///gAAAAAAAAAAA/4AAAAAAAAAAAAAAf8AH//wAAAAAAAAAAAAAAAAAAAAAA///AAAAAAAAAAAAYAAAAAAAAAAAAAAAeAAF//gAAAAAAAAAAAAAAAAAAAAAB//4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB//gAABgAAAAAAAAAAAAAAAAAB//4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/AAAAgAAAAAAAAAAAAAAAAAD//4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/AAAAQAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADYAAAA8AAAAAAAAAAAAAAAAAB/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAAAAD/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAD/gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcAAADwAAAAAAAAAAAAAAAAAD/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcAAAHAAAAAAAAAAAAAAAAAAB/gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAeAAAAAAAAAAAAAAAAAAD/gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAAAAAH+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB4AAAAAAAAAAAAAAAAAAH+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAAAH/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP8AAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH4BwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/AAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',WM_W=360,WM_H=140,WM_LAT0=82;
+let WM_CV=null;
+function wmDraw(){if(WM_CV)return WM_CV;const raw=atob(WM_LAND),L=new Uint8Array(WM_W*WM_H);for(let i=0;i<WM_W*WM_H;i++)L[i]=(raw.charCodeAt(i>>3)>>(7-(i&7)))&1;
+  const at=(x,y)=>x<0||x>=WM_W||y<0||y>=WM_H?0:L[y*WM_W+((x%WM_W)+WM_W)%WM_W],[c,g]=mk(WM_W,WM_H),id=g.createImageData(WM_W,WM_H),D=id.data;
+  const put=(i,h)=>{D[i*4]=parseInt(h.slice(1,3),16);D[i*4+1]=parseInt(h.slice(3,5),16);D[i*4+2]=parseInt(h.slice(5,7),16);D[i*4+3]=255};
+  /* Gebirge und Wüsten als Linienzüge mit Breite (Grad); der Rand wird mit Rauschen ausgefranst, damit nichts eckig aussieht */
+  const MTN=[[[45.8,6.4],[46.6,10],[47.3,13.6]],1.5,[[36,71],[31,80],[28.2,88],[28,96]],2.6,[[59,-131],[51,-119],[43,-110],[36,-106]],2.8,[[8,-76],[-8,-77],[-17,-70],[-33,-70],[-50,-73.5]],1.8,[[35.6,137.3],[36.8,138.2]],.9,[[43.3,40],[42,47.5]],1.3,[[39,70],[42,79]],1.6],
+    DES=[[[24,-13],[22,2],[24,14],[23,29]],6.5,[[23,44],[20,52]],5,[[43,96],[42.5,110]],3.8,[[-25,121],[-25.5,134]],5.5,[[-21,-69.5],[-26,-70]],1.4,[[27,70.5],[26,73]],2.4,[[-23,20],[-25,22]],2.6];
+  const capD=(lat,lon,pts)=>{let m=1e9;for(let k=0;k<pts.length-1;k++){const [a1,o1]=pts[k],[a2,o2]=pts[k+1],dx=o2-o1,dy=a2-a1,l2=dx*dx+dy*dy,u=l2?clamp(((lon-o1)*dx+(lat-a1)*dy)/l2,0,1):0,ex=lon-o1-dx*u,ey=lat-a1-dy*u;m=Math.min(m,Math.hypot(ex,ey))}return m};
+  const inR=(lat,lon,R,f)=>{for(let k=0;k<R.length;k+=2){const d=capD(lat,lon,R[k])/R[k+1];if(d<1+(vn2(lon/3.1,lat/3.1,f+k*7.7)-.5)*.9)return true}return false};
+  for(let y=0;y<WM_H;y++)for(let x=0;x<WM_W;x++){const i=y*WM_W+x,lat=WM_LAT0-y-.5,lon=x-180+.5,n=hash01(x*.73+y*1.91);
+    if(!L[i]){let near=0;for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)if(at(x+dx,y+dy))near=1;
+      const grid=(((x%30)===0)||y===WM_LAT0)&&((x+y)%2===0);
+      put(i,grid?'#3a6ead':near?(at(x,y-1)||at(x-1,y)?'#4482c4':'#3a76b8'):n<.07?'#2d6099':'#2a5b98');continue}
+    const coast=!at(x,y-1)||!at(x,y+1)||!at(x-1,y)||!at(x+1,y),lit=!at(x,y-1)||!at(x-1,y);
+    const snowL=63+(vn2(lon/7,lat/4,3.3)-.5)*9,snow=lat>snowL||lat<-55||lon>-74&&lon<-11&&lat>59.5+(vn(lon/5,5.1)-.5)*3,mtn=!snow&&inR(lat,lon,MTN,11),desert=!snow&&!mtn&&inR(lat,lon,DES,23);
+    let col=snow?(lit?'#ffffff':n<.3?'#d3deee':'#e9eff8'):mtn?(n<.45?'#f1f5fb':'#9c968a'):desert?(n<.25?'#c9ad74':'#dcc48e'):(n<.22?'#4f8d3f':n>.9?'#76b358':'#5f9e4a');
+    if(coast&&!snow)col=lit?(desert?'#e8d4a2':'#7cbf5a'):(desert?'#b4955e':'#3f7a34');put(i,col)}
+  g.putImageData(id,0,0);return WM_CV=c}
+function wmPaint(){const c=wmDraw();for(const [id,x0] of [['wmL',0],['wmR',180]]){const cv=$(id),g=cv.getContext('2d');g.imageSmoothingEnabled=false;g.clearRect(0,0,180,140);g.drawImage(c,x0,0,180,140,0,0,180,140)}}
+function wmOpen(){wmPaint();refreshMenu();setT($('wmEye'),TX('Tippe auf einen Ort','Tap a place'));setT($('wmTitle'),TX('WELTKARTE','WORLD MAP'));setT($('bWmBack'),TX('ZURÜCK','BACK'));
+  setT($('wmNote'),SUMMER?TX('Im Sommer fährst du Downhill in den Alpen oder im Herbst-Wiehengebirge. Japan gibt es nur im Winter.','In summer you ride downhill in the Alps or the autumn Wiehengebirge. Japan is winter only.'):TX('Alpen: Snowpark und Freeride. Japan: tiefer Powder auf Hokkaido. Wiehengebirge: Waldabfahrt bei Porta Westfalica.','Alps: snow park and freeride. Japan: deep powder on Hokkaido. Wiehengebirge: forest run near Porta Westfalica.'));
+  const w=$('wmWrap');w.classList.remove('open');show('world');void w.offsetWidth;w.classList.add('open');layout()}
+function wmClose(){refreshMenu();show('menu');layout()}
 
 /* ================= LOOTBOX =================
    Pro 50.000 Punkte in einem Lauf gibt es eine Lootbox. Beim Öffnen wird zuerst die Seltenheit gezogen (feste Gewichte, die im
@@ -5267,7 +5333,8 @@ function mapId(){return JAPAN?'japan':WIEHEN?'wiehen':'alps'}
 /* Ranglisten: Ski und Snowboard je Map (Alpen, Japan, Wiehengebirge), Downhill eine eigene für alle Sommer-Läufe */
 function rankId(){return SUMMER?'downhill':mapId()}
 function bestKeys(){return SUMMER?['bestD','bestDistD']:JAPAN?['bestJ','bestDistJ']:WIEHEN?['bestW','bestDistW']:['best','bestDist']}   /* im Sommer ist Japan zu, dann gilt Alpen */
-document.querySelectorAll('.opt[data-map]').forEach(b=>b.onclick=()=>{if(b.dataset.map===mapId()||SUMMER&&b.dataset.map==='japan')return;SAVE.map=b.dataset.map;persist();applySeason()});
+document.querySelectorAll('.wm-pin[data-map]').forEach(b=>b.onclick=()=>{if(SUMMER&&b.dataset.map==='japan')return;unlockAudio();SFX.coin();if(b.dataset.map!==mapId()){SAVE.map=b.dataset.map;persist();applySeason()}else refreshMenu();setTimeout(wmClose,260)});
+$('bMap').onclick=wmOpen;$('bWmBack').onclick=wmClose;
 /* Einstellungen: Zahnrad oben rechts klappt das Feld auf; ein Tipp daneben, Esc oder ein anderer Bildschirm klappt es wieder zu */
 function setOpen(on){$('setPanel').hidden=!on;$('bSettings').setAttribute('aria-expanded',String(on))}
 $('bSettings').onclick=()=>setOpen($('setPanel').hidden);
