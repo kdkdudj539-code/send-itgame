@@ -2178,7 +2178,7 @@ function fDirt(type){
   seg(Math.max(big?220:80,(big?440:170)-leadCut),big?25:rand(18,22));seg(big?36:26,big?7:5);
   const steps=big?[-8,-16,-24,-31,-37]:[-8,-15,-22,-29,-34],sl=big?22:15,ks=[];   /* große Erdhügel: gut doppelt so hoch wie vorher */for(const a of steps)ks.push(seg(sl,a,'kicker'));
   ks[ks.length-1].lip=true;
-  for(const s of ks.slice(2)){s.wood=true;s.kx=ks[2].x0;s.ky=ks[2].y0;s.kb=Math.tan(5*RAD)}   // oberer Teil des Absprungs: Holzbretter auf dem Erdhügel
+  if(!WIEHEN)for(const s of ks.slice(2)){s.wood=true;s.kx=ks[2].x0;s.ky=ks[2].y0;s.kb=Math.tan(5*RAD)}   // oberer Teil des Absprungs: Holzbretter auf dem Erdhügel
   const lipX=gx,lipY=gy,la=steps[steps.length-1];let dist,dropY;
   if(type==='double'){const dep=rand(34,46)+d*10,bot=rand(50,80)+d*35;
     seg(dep/Math.tan(42*RAD),42,'ditch');seg(bot,5,'ditch');const up=gy-(lipY+6);seg(up/Math.tan(30*RAD),-30,'ditch');seg(10,4,'dtop');
@@ -2188,6 +2188,15 @@ function fDirt(type){
   coinArc(lipX,lipY,la,req*1.02,dist+80,big?12:7);
   const fl=flightLen(lipX,lipY,la,VMAX,JUMP_POP*1.1,gx,gy,28);parkEnd=gx+fl;
   seg(clamp(fl+80,240,big?1100:800),28,'landing');seg(60,13);
+}
+/* Wiehengebirge: Drop mit der Schaufel geformt (Herbst aus Erde, Winter aus Schnee). Kurze Absprungkante, darunter eine steile
+   Wand bis zur Landung: kein Holz, kein Loch. */
+function fDropW(){
+  const d=difficulty();seg(Math.max(80,150-leadCut),25);const dk=seg(26,4,'dtop');dk.vmax=360;dk.lip=true;
+  const lipX=gx,lipY=gy,h=rand(56,78)+d*20;seg(h/Math.tan(64*RAD),64,'dface');
+  coinArc(lipX,lipY,4,270,100,6);
+  const fl=flightLen(lipX,lipY,4,360,JUMP_POP,gx,gy,28);parkEnd=gx+fl;
+  seg(clamp(fl+80,260,900),28,'landing');seg(60,14);
 }
 // Sommer-Drop: Holzpodest, darunter eine steile Erdkante bis zur Landung (kein Loch)
 function fDropS(){
@@ -2211,8 +2220,8 @@ function logSprites(){if(LOG_SPR)return LOG_SPR;LOG_SPR=[];
     LOG_SPR.push({c,r,S})}
   return LOG_SPR}
 function addLogObs(x){const g=groundAt(x);if(!g)return;const L=logSprites(),k=Math.random()<.5?0:1,r=L[k].r;jtrees.push({x,y:g.y,ft:g.y+1,k,h:r*2,w:r+.5,f:false,hit:false,shape:'log'})}
-function fLogObs(){const x0=gx,L=rand(300,420);seg(L,rand(25,30));decoTrees(x0,gx,2);
-  let x=x0+rand(110,150);const n=Math.random()<.6?1:2;for(let i=0;i<n&&x<gx-60;i++){addLogObs(x);x+=rand(150,190)}}
+function fLogObs(){const wide=WIEHEN&&!SUMMER,x0=gx,L=rand(300,420)+(wide?140:0);seg(L,rand(25,30));decoTrees(x0,gx,2);   /* Wiehengebirge-Winter: auf Ski mehr Platz zwischen zwei Stämmen */
+  let x=x0+rand(110,150);const n=Math.random()<.6?1:2;for(let i=0;i<n&&x<gx-60;i++){addLogObs(x);x+=wide?rand(260,300):rand(150,190)}}
 /* ================= JAPAN =================
    Alles ist aus Baumstämmen gebaut. Log Park (Zone park): Stamm-Kicker über den Bach, Stämme als Rails (gerade, mit Knick,
    krummer Baum als Bogen), Holzstapel als Box und A-Frame, Baumstümpfe zum Antippen, Stamm über den Bach, Drop von der Stamm-Kante.
@@ -2289,6 +2298,7 @@ function genJapan(z){
 function genFree(){
   const fx0=gx;
   const o=SUMMER?{run:1.3,rocks:.6,treejump:1.3,logobs:1.8,dtable:1.1,ddouble:.9,rollers:.9}   // Sommer: Wald-Trail ohne Klippen und Abgründe, dafür Dirt Jumps und Wellen zwischen den Bäumen
+    :WIEHEN?{run:1.4,cliff:1.2,bigcliff:.5,logs:2.2,rocks:.4,logjam:1.1,treejump:1.4,logobs:1.2}   /* Wiehengebirge: keine Schluchten */
     :sinceGap>=2?{cliff:2,bigcliff:1,hugecliff:.5,cliffgap:2}
     :{run:1.3,cliff:1.8,bigcliff:.8,hugecliff:.45,cliffgap:1.3,logs:2.2,rocks:.35,logjam:1.1,treejump:1.3};
   if(o[lastType])o[lastType]*=.35;const t=pickW(o);
@@ -2307,7 +2317,9 @@ function genNext(){
   if(JAPAN){genJapan(z);return}
   if(z==='free'){genFree();return}
   const d=difficulty();let o;
-  if(SUMMER)o={ddouble:2.6,dtable:2.6,drop:1.5,bigair:.8+d,rollers:2.2};   // Bikepark wie Dirt- und Pumptrack: Doubles, Tables, Holz-Drops, Rollers; keine Rails, keine Abgründe
+  if(WIEHEN&&SUMMER)o={ddouble:3.4,dtable:3,drop:1.3,bigair:1+d,rollers:1.1};   /* Wiehengebirge: fast nur geschaufelte Dirt Jumps */
+  else if(WIEHEN)o={kicker:2.8,drop:1.3,bigair:.8+d,rail:1.1,tube:1.5,kink:1.5,rainbow:.8,box:1.3,cat:.5,table:.5,pole:.6,stairs:.6,bonk:.6,wave:.4,waterfall:.4};   /* Winter ohne Spalten und Gap-Rails */
+  else if(SUMMER)o={ddouble:2.6,dtable:2.6,drop:1.5,bigair:.8+d,rollers:2.2};   // Bikepark wie Dirt- und Pumptrack: Doubles, Tables, Holz-Drops, Rollers; keine Rails, keine Abgründe
   else if(sinceGap>=2)o={kicker:3,drop:2,gaprail:1.1,bigair:1+d*1.5};
   else o={kicker:3,rail:1.1,tube:1.6,drop:1.5,gaprail:.8,bigair:.8+d,kink:1.5,rainbow:.8,box:1.3,cat:.5,table:.5,pole:.6,stairs:.6,bonk:.6,wave:.4,waterfall:.4};
   if(o[lastType])o[lastType]*=.35;
@@ -2318,7 +2330,7 @@ function genNext(){
   if(parkEnd!==null){const L=PARK_SPACE+rand(-15,15)-(gx-parkEnd)-PARK_LEAD[t];
     if(L>8){const x=gx;seg(L,rand(14,20));if(L>140&&Math.random()<.4)coinRow(x+30,Math.floor((L-50)/24),16,12);if(WIEHEN&&SUMMER&&L>130)addFauna(x,x+L)}else leadCut=-L}
   const pickOf=a=>a[Math.floor(Math.random()*a.length)];
-  ({dtable:()=>fDirt('table'),ddouble:()=>fDirt('double'),kicker:()=>fKicker(false),bigair:()=>SUMMER?fDirt('big'):fKicker(true),rail:()=>fRail(false),tube:()=>fRail(true),drop:()=>SUMMER?fDropS():fDrop(),gaprail:fGapRail,loop:fLoop,
+  ({dtable:()=>fDirt('table'),ddouble:()=>fDirt('double'),kicker:()=>WIEHEN?fDirt(Math.random()<.5?'table':'double'):fKicker(false),bigair:()=>SUMMER||WIEHEN?fDirt('big'):fKicker(true),rail:()=>fRail(false),tube:()=>fRail(true),drop:()=>WIEHEN?fDropW():SUMMER?fDropS():fDrop(),gaprail:fGapRail,loop:fLoop,
     kink:()=>fJib(pickOf(['fd','dfd','fdf'])),rainbow:()=>fJib('rainbow'),box:()=>fJib(pickOf(['aframe','battleship','flatbox','downbox'])),cat:()=>fJib('cat'),
     table:()=>SUMMER?fTable():fJib('table'),rollers:fRollers,pole:()=>fJib('pole'),stairs:()=>fJib('stairs'),bonk:fBonks,wave:()=>fJib('wave'),waterfall:()=>fJib('waterfall')})[t]();
   sinceGap=['kicker','bigair','drop','gaprail','dtable','ddouble'].includes(t)?0:sinceGap+1;
@@ -2931,7 +2943,7 @@ function drawPlayer(cX,cY){
 
 /* ================= FLUTLICHT (PARK) ================= */
 const FLOOD_H=46;let floods=[],nextFloodX=0;
-function addFloods(){
+function addFloods(){if(WIEHEN)return;   /* Wiehengebirge: kein Flutlicht, nachts nur die Stirnlampe */
   if(nextFloodX<gx-2400)nextFloodX=gx-2400;
   while(nextFloodX<gx){const x=nextFloodX;nextFloodX+=rand(300,400);const g=groundAt(x);
     if(g&&g.seg.zone==='park'&&!['kicker','landing','deck','loopfloor'].includes(g.seg.kind)&&Math.abs(g.a)<.6)floods.push({x,y:g.y})}
@@ -4257,7 +4269,8 @@ function drawTerrainS(cX,cY){
     if(h%9<2){ctx.fillStyle='#b48d5e';ctx.fillRect(sx,y+1,1,1)}
     if(WIEHEN&&s.kind!=='kicker'){if(h%4===1){ctx.fillStyle=LITC[(h>>>6)%LITC.length];ctx.fillRect(sx,y+((h>>>3)&1),1,1)}if(h%13===0){ctx.fillStyle=LITC[(h>>>9)%LITC.length];ctx.fillRect(sx,y-1,1,1)}}   /* Blätter auf dem Trail */
     else if(h%23===0&&s.kind!=='kicker'){ctx.fillStyle=CS.grass;ctx.fillRect(sx,y-1,1,1)}   // Grasbüschel am Streckenrand
-    if(s.kind==='kicker'&&s.lip&&s.x1-wx<3){ctx.fillStyle=CS.lip;ctx.fillRect(sx,y,1,3)}   // Holzkante am Absprung
+    if(!WIEHEN&&s.kind==='kicker'&&s.lip&&s.x1-wx<3){ctx.fillStyle=CS.lip;ctx.fillRect(sx,y,1,3)}
+    if(WIEHEN&&DIRT_K[s.kind]){const m=((wi%6)+6)%6;if(m<2){ctx.fillStyle='#8e6440';ctx.fillRect(sx,y+3+m,1,2)}if(m===3&&h%3===0){ctx.fillStyle='#c4996a';ctx.fillRect(sx,y+5,1,1)}}   /* Spatenstiche im festgeklopften Lehm */   // Holzkante am Absprung
     if(s.wood)woodCol(s,sx,y,wx,cY);
   }
 }
@@ -4798,11 +4811,11 @@ function render(dt){
   drawTerrain(cX,cY);drawAlm(cX,cY);drawCrevasses(cX,cY);if(JAPAN)drawJWood(cX,cY);drawGapMist(cX,cY);drawCliffs(cX,cY);drawTrees(cX,cY);drawFauna(cX,cY);drawFloods(cX,cY);drawRocks(cX,cY);drawJTrees(cX,cY);drawLoops(cX,cY);drawSigns(cX,cY);drawRails(cX,cY);drawBonks(cX,cY);drawCoins(cX,cY);drawPatrol(cX,cY);drawPlayer(cX,cY);
   for(const q of parts){ctx.fillStyle=SUMMER&&DIRT_MAP[q.col]||q.col;ctx.fillRect(Math.round(q.x-cX),Math.round(q.y-cY),q.sz,q.sz)}
   drawGapFog(cX,cY);drawWall(cX,cY);
-  const lamp=applyNight(cX,cY,curDS,fm);
+  const lm=WIEHEN?1:fm,lamp=applyNight(cX,cY,curDS,lm);   /* lm: Stärke der Stirnlampe (Wiehengebirge überall, sonst nur im Freeride) */
   if(HIP){shadeLayer(worldCtx,0,0,VW,VH,VW,VH);shadeLayer(plCtx,HIP.tx-PLH,HIP.ty-PLH,PLH*2,PLH*2,PLH*2*RS,PLH*2*RS)}   // Dämmerung und Nacht auch auf Welt und Fahrer-Ebene
   ctx=mainCtx;ctx.drawImage(worldCv,0,0);
-  if(lamp)drawBeam(cX,cY,lamp,fm*curDS.night);
-  if(curDS.night>.05&&fm<.95)drawFloodFog(cX,cY,curDS.night*(1-fm));
+  if(lamp)drawBeam(cX,cY,lamp,lm*curDS.night);
+  if(!WIEHEN&&curDS.night>.05&&fm<.95)drawFloodFog(cX,cY,curDS.night*(1-fm));
   if(HIP)ctx=afterCtx;   // ab hier über dem feinen Fahrer
   drawJForestFront(cX,cY);drawFlakes(cX,cY,dt);
   if(state==='play'||state==='pause')drawPatrolPointer(cX,cY);
