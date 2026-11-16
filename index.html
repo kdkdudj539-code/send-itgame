@@ -2449,6 +2449,39 @@ function bareTree(g,X,base,h,tw,seed,far,tips){
     for(let j=0;j<nb;j++){const sp=(j/(nb-1)-.5)*1.1+(r(k+j*4.1)-.5)*.3;limb(px,py,a+sp,len*(.62+.15*r(k+j)),w*.62,d-1,k*1.7+j*3.3+1)}};
   const tx=X+lean,nm=2+Math.floor(r(3)*2);
   for(let j=0;j<nm;j++){const a=-Math.PI/2+(j/(nm-1)-.5)*1.3+(r(j+5)-.5)*.3;limb(tx,fy,a,h*.22,Math.max(1,tw*.7),3,seed+j*7.7)}}
+/* Hohe, schlanke Buche wie im Hallenwald des Wiehengebirges: glatter grauer Stamm, leicht schräg oder gebogen, verzweigt sich
+   erst weit oben. Die Äste laufen im Bogen nach außen und hängen an den Spitzen etwas. Laub nur als lockere, flache Büschel an den
+   äußeren Ästen (dazwischen sieht man Himmel). o: cols = Laubfarben (ohne: kahl), leaf = Dichte, far = hintere Reihe, snow = Schnee. */
+function slimTree(g,X,base,h,tw,seed,o){
+  const r=k=>hash01(seed*1.93+k*2.71),BK=o.far?['#8a847a','#9c968c','#b0aa9e']:['#55524c','#787369','#a39d90'];
+  const top=base-Math.round(h*(.5+.14*r(1))),lean=(r(2)-.5)*h*.14,bow=(r(3)-.5)*h*.07,tx=u=>X+lean*u*u+bow*Math.sin(u*Math.PI);
+  for(let y=top;y<=base;y++){const u=(base-y)/Math.max(1,base-top),w=Math.max(1,Math.round(tw*(1-.4*u)+(u<.06?(.06-u)/.06*tw*.6:0))),x0=Math.round(tx(u)-w/2);
+    for(let x=0;x<w;x++){const n=hash01(seed+y*.37+x*1.7);g.fillStyle=x===0&&w>1?BK[2]:x===w-1&&w>2?BK[0]:n<.05?BK[0]:BK[1];
+      if(!o.far&&u<.07&&n<.4)g.fillStyle=o.snow?'#ffffff':'#4f6b34';g.fillRect(x0+x,y,1,1)}}
+  const pts=[];
+  const limb=(x,y,a,len,w,d,k)=>{let px=x,py=y;const n=Math.max(2,Math.round(len)),bend=(Math.cos(a)>0?1:-1)*(.01+.012*r(k))*(d<=1?1:.3);
+    for(let i=0;i<n;i++){px+=Math.cos(a);py+=Math.sin(a);a+=bend;const ww=Math.max(1,Math.round(w*(1-i/n*.5))),qx=Math.round(px-ww/2),qy=Math.round(py);
+      g.fillStyle=ww>1||o.far?BK[1]:BK[0];g.fillRect(qx,qy,ww,1);
+      if(o.snow&&Math.abs(Math.cos(a))>.4&&r(k*3+i*.7)<.55){g.fillStyle='#ffffff';g.fillRect(qx,qy-1,ww,1)}
+      if(d<=1&&i>n*.25)pts.push([px,py])}
+    if(d<=0)return;
+    const nb=r(k+17)<.35?3:2;for(let j=0;j<nb;j++){const sp=(j/(nb-1)-.5)*(.62+.3*r(k+j))+(r(k+j*5)-.5)*.2;limb(px,py,a+sp,len*(.64+.14*r(k+j*2)),w*.62,d-1,k*1.9+j*3.1+1)}};
+  for(let j=0;j<3;j++){const u=.5+.3*r(j+11),y=Math.round(base-(base-top)*u),s=j%2?1:-1;limb(tx(u),y,-Math.PI/2+s*(.55+.3*r(j+13)),h*.1,1,1,seed+j*9.1+40)}   /* dünne Seitenäste am Stamm */
+  const nm=2+(r(4)<.55?1:0);
+  for(let j=0;j<nm;j++){const a=-Math.PI/2+(j/(nm-1)-.5)*(.7+.3*r(6))+(r(j+7)-.5)*.2;limb(tx(1),top,a,h*.17,Math.max(1,tw*.65),3,seed+j*5.3)}
+  if(!o.cols)return;const dens=o.leaf||.7;
+  for(let k=0;k<pts.length;k++){if(hash01(seed*3+k*.71)>dens)continue;const [x,y]=pts[k],rx=2.5+hash01(seed+k)*(o.far?2:3.4),ry=1.5+hash01(seed*2+k)*(o.far?1:1.6);
+    for(let yy=-Math.ceil(ry);yy<=Math.ceil(ry);yy++){const w=Math.round(rx*Math.sqrt(Math.max(0,1-(yy/ry)**2)));
+      for(let xx=-w;xx<=w;xx++){const n=hash01(seed*5.3+(x+xx)*.37+(y+yy)*.61);if(n<.24)continue;
+        g.fillStyle=yy<0&&n>.6?o.cols[2]:yy>0&&n<.5?o.cols[0]:o.cols[1];g.fillRect(Math.round(x+xx),Math.round(y+yy),1,1)}}}}
+/* Baum für die fernen Baumreihen: dünner Stamm, oben ein paar kleine, lockere Laubbüschel */
+function rowTree(g,X,b,h,cols,seed){const th=Math.round(h*.56),cx0=X+(hash01(seed*7)-.5)*h*.12;g.fillStyle='#4a3e32';
+  for(let y=0;y<th;y++)g.fillRect(Math.round(X+(cx0-X)*y/th),b-y,1,1);
+  const n=3+Math.floor(hash01(seed)*3),cr=Math.max(2,h*.16);
+  for(let k=0;k<n;k++){const cx=cx0+(hash01(seed+k*1.3)-.5)*h*.55,cy=b-th-hash01(seed+k*2.1)*h*.36+cr*.4,rx=cr*(.7+.6*hash01(seed+k*3.7)),ry=rx*.6;
+    strokePts(g,[[cx0,b-th],[cx,cy]],1,'#4a3e32');
+    for(let yy=-Math.ceil(ry);yy<=Math.ceil(ry);yy++){const w=Math.round(rx*Math.sqrt(Math.max(0,1-(yy/ry)**2)));
+      for(let xx=-w;xx<=w;xx++){const q=hash01(seed*2.9+(cx+xx)*.41+(cy+yy)*.77);if(q<.22)continue;g.fillStyle=yy<0&&q>.55?cols[1]:cols[0];g.fillRect(Math.round(cx+xx),Math.round(cy+yy),1,1)}}}}
 /* Herbst: Baum, der schon viel Laub verloren hat. Kahle Äste, nur an den Spitzen noch bunte Büschel. */
 function autumnBare(g,X,base,h,tw,seed,cols){const tips=[];bareTree(g,X,base,h,tw,seed,false,tips);
   for(let k=0;k<tips.length;k++){if(hash01(seed+k*1.31)<.3)continue;const [x,y]=tips[k],r=3+hash01(seed*2+k)*2.6;
@@ -2468,7 +2501,7 @@ function whRow(W,H,n,hmin,hmax,far){
   const SP=SUMMER?(far?['#4f6656','#5d7563']:['#24452a','#2f5934']):(far?['#4c6a70','#5d7d82']:['#183429','#24493b']);
   for(const t of list)for(const o of [0,W,-W]){const X=t.x+o;if(X<-30||X>W+30)continue;
     if(t.k<.3)drawSpruce(g,X,t.b,t.h,Math.max(3,t.h*.2),SP);
-    else if(SUMMER)leafBlob(g,X,t.b,t.h,AC[Math.floor(t.k*97)%4]);
+    else if(SUMMER)rowTree(g,X,t.b,t.h,AC[Math.floor(t.k*97)%4],t.k*113+1);
     else if(t.k<.4)drawBirch(g,X,t.b,t.h,far?1:2,t.k*97,far);
     else drawBirch(g,X,t.b,t.h,far?1:2,t.k*131,far,true)}
   return c}
@@ -3103,11 +3136,11 @@ function makeTreeSprites(){TREE_SPR=[];JF_SPR=null;AF_SPR=null;SF_SPR=null;WF_SP
     return}
   if(SUMMER){const LC=WIEHEN?[['#7a3416','#b8601e','#e0943a'],['#6a2416','#a23c22','#d2683a'],['#7a5418','#b8902a','#e8c24c']]:[['#2e5a2c','#3f7a38','#5b9a46'],['#355f2a','#4a7d33','#6aa346'],['#2c5530','#3c703c','#56904d']];
     for(let i=0;i<14;i++){const h=Math.round(34+hash01(i*4.7+1)*58);
-      if(i%3===1){const w=Math.round(h*.48),[c,g]=mk(w*2+8,h+6);drawBeech(g,w+3,h+5,h,3,i+1,LC[i%3],['#4d4a43','#6f6a5e','#918b7c']);TREE_SPR.push({c,w,tr:Math.round(h*.5),base:h+5})}
+      if(i%3===1){const w=Math.round(h*.48),[c,g]=mk(w*2+8,h+6);if(WIEHEN)slimTree(g,w+3,h+5,h,3,i+1,{cols:LC[i%3]});else drawBeech(g,w+3,h+5,h,3,i+1,LC[i%3],['#4d4a43','#6f6a5e','#918b7c']);TREE_SPR.push({c,w,tr:Math.round(h*.5),base:h+5})}
       else{const pine=i%5===4,w=Math.ceil(h*(pine?.17:.17+hash01(i*2.3+5)*.12)),tr=pine?Math.round(h*.22):3,cols=TREE_COLS[i%TREE_COLS.length],[c,g]=mk(w*2+6,h+6);
         drawTreeVar(g,w+2,h+5,h,w,cols,0,tr,i+1);TREE_SPR.push({c,w,tr,base:h+5})}}
     return}
-  for(let i=0;i<14;i++){if(WIEHEN&&i%3===1){const h=Math.round(50+hash01(i*4.7+1)*50),R=Math.ceil(h*.55)+5,[c,g]=mk(R*2+4,h+6);bareTree(g,R+1,h+5,h,3,i*6.1+3,false);TREE_SPR.push({c,w:2,tr:h,base:h+5});continue}
+  for(let i=0;i<14;i++){if(WIEHEN&&i%3===1){const h=Math.round(60+hash01(i*4.7+1)*50),R=Math.ceil(h*.45)+5,[c,g]=mk(R*2+4,h+6);slimTree(g,R+1,h+5,h,3,i*6.1+3,{snow:true});TREE_SPR.push({c,w:2,tr:h,base:h+5});continue}
     const h=Math.round(34+hash01(i*4.7+1)*58),pine=i%5===4,w=Math.ceil(h*(pine?.17:.17+hash01(i*2.3+5)*.12)),tr=pine?Math.round(h*.22):3,
     cols=TREE_COLS[i%TREE_COLS.length],snow=.25+hash01(i*9.1+2)*.75,[c,g]=mk(w*2+6,h+6);
     drawTreeVar(g,w+2,h+5,h,w,cols,snow,tr,i+1);TREE_SPR.push({c,w,tr,base:h+5})}}
@@ -4529,11 +4562,12 @@ function sfSprites(){if(SF_SPR)return SF_SPR;
   const HAZE=WIEHEN?[['#9a6640','#b07a4a','#c48e58'],['#8c6446','#a27650','#b68a5c']]:[['#5f7d63','#6d8b6d','#7f9b7a'],['#688667','#779475','#89a585']];
   const back=[],mid=[],front=[];
   for(let i=0;i<8;i++){const h=Math.round(46+hash01(i*3.3+1)*34),con=i%3===1,W=Math.ceil(h*.42)+4,[c,g]=mk(W*2+6,h+6);
-    if(con)drawTreeVar(g,W+2,h+5,h,Math.ceil(h*.2),WIEHEN?['#5d6f5a','#6b7d66']:[HAZE[i%2][0],HAZE[i%2][1]],0,4,i*7.3+2);else drawBeech(g,W+2,h+5,h,2,i*7.3+2,HAZE[i%2],WIEHEN?['#7a6e60','#887c6c','#988a78']:['#5c6f5a','#6a7d66','#7a8c74']);
+    if(WIEHEN&&!con)slimTree(g,W+2,h+5,h,2,i*7.3+2,{cols:HAZE[i%2],far:true,leaf:.7});
+    else if(con)drawTreeVar(g,W+2,h+5,h,Math.ceil(h*.2),WIEHEN?['#5d6f5a','#6b7d66']:[HAZE[i%2][0],HAZE[i%2][1]],0,4,i*7.3+2);else drawBeech(g,W+2,h+5,h,2,i*7.3+2,HAZE[i%2],WIEHEN?['#7a6e60','#887c6c','#988a78']:['#5c6f5a','#6a7d66','#7a8c74']);
     back.push({c,ox:W+2,H:h+6})}
-  for(let i=0;i<(WIEHEN?14:10);i++){const h=Math.round(96+hash01(i*5.1+3)*70),tw=6+Math.floor(hash01(i*1.9)*4),W=Math.ceil(h*.52)+6,[c,g]=mk(W*2+6,h+8);
+  for(let i=0;i<(WIEHEN?14:10);i++){const h=Math.round((WIEHEN?120:96)+hash01(i*5.1+3)*70),tw=WIEHEN?4+Math.floor(hash01(i*1.9)*3):6+Math.floor(hash01(i*1.9)*4),W=Math.ceil(h*.52)+6,[c,g]=mk(W*2+6,h+8);
     if(WIEHEN&&i%5===3)drawTreeVar(g,W+2,h+6,h,Math.ceil(h*.15),TREE_COLS[i%TREE_COLS.length],0,Math.round(h*.3),i*9.1+5);   /* Fichte */
-    else if(WIEHEN&&i%5===1)autumnBare(g,W+2,h+6,h,Math.max(3,tw-2),i*9.1+5,LEAF[i%4]);   /* hat schon viel Laub verloren */
+    else if(WIEHEN)slimTree(g,W+2,h+6,h,tw,i*9.1+5,{cols:LEAF[i%4],leaf:i%5===1?.3:.72});   /* schlanke Buche, i%5===1 hat schon viel Laub verloren */
     else drawBeech(g,W+2,h+6,h,tw,i*9.1+5,LEAF[i%(WIEHEN?4:3)],BARK[i%2]);mid.push({c,ox:W+2,H:h+8})}
   /* Riesenstämme: oben eine breite Krone mit Ästen, damit bei hohen Sprüngen kein abgeschnittener Stamm zu sehen ist */
   for(let i=0;i<5;i++){const tw=26+Math.floor(hash01(i*2.7+9)*12),h=320,CR=Math.round(tw*2.1)+10,RX=Math.round(tw*2.6),W=Math.max(tw+22,RX+12),[c,g]=mk(W*2,h+16+CR),X=W,top=CR,base=top+h+8,bk=BARK[i%2];
@@ -4564,11 +4598,11 @@ function wfSprites(){if(WF_SPR)return WF_SPR;
   const back=[],mid=[],front=[];
   for(let i=0;i<9;i++){const h=Math.round(30+hash01(i*3.3+1)*32);
     if(i%3===0){const w=Math.ceil(h*.2),[c,g]=mk(w*2+8,h+6);drawTreeVar(g,w+3,h+3,h,w,['#4c6a70','#5d7d82'],.8,3,i*7.3+2);back.push({c,ox:w+3,H:h+4})}
-    else{const R=Math.ceil(h*.5)+4,[c,g]=mk(R*2+4,h+4);bareTree(g,R+1,h+3,h,2,i*7.3+2,true);back.push({c,ox:R+1,H:h+4})}}
-  for(let i=0;i<12;i++){const h=Math.round(62+hash01(i*5.1+3)*56);
+    else{const R=Math.ceil(h*.45)+4,[c,g]=mk(R*2+4,h+4);slimTree(g,R+1,h+3,h,2,i*7.3+2,{far:true,snow:true});back.push({c,ox:R+1,H:h+4})}}
+  for(let i=0;i<12;i++){const h=Math.round(84+hash01(i*5.1+3)*70);
     if(i%4===0){const w=Math.ceil(h*.19),[c,g]=mk(w*2+8,h+6);drawTreeVar(g,w+3,h+3,h,w,TREE_COLS[i%TREE_COLS.length],.5+hash01(i*9.1)*.4,3,i*9.1+5);mid.push({c,ox:w+3,H:h+4})}
     else if(i===2||i===7){const R=Math.ceil(h*.4)+5,[c,g]=mk(R*2+4,h+4);drawBirch(g,R+1,h+3,h,2,i*9.1+5,false);mid.push({c,ox:R+1,H:h+4})}
-    else{const R=Math.ceil(h*.55)+5,[c,g]=mk(R*2+4,h+4);bareTree(g,R+1,h+3,h,3+(i%3),i*9.1+5,false);mid.push({c,ox:R+1,H:h+4})}}
+    else{const R=Math.ceil(h*.45)+5,[c,g]=mk(R*2+4,h+4);slimTree(g,R+1,h+3,h,3+(i%3),i*9.1+5,{snow:true});mid.push({c,ox:R+1,H:h+4})}}
   for(let i=0;i<5;i++){const h=Math.round(180+hash01(i*2.7+9)*50),tw=7+Math.floor(hash01(i*3.9)*4),R=Math.ceil(h*.55)+6,[c,g]=mk(R*2+4,h+6),X=R+1,b=h+3;
     bareTree(g,X,b,h,tw,i*4.7+11,false);g.fillStyle='#ffffff';g.fillRect(X-tw,b-2,tw*2+2,3);g.fillRect(X-tw+2,b-3,tw*2-2,1);g.fillStyle='#dfe9f7';g.fillRect(X-tw,b+1,tw*2+2,1);
     const [cd,gd]=mk(c.width,c.height);gd.drawImage(c,0,0);gd.globalCompositeOperation='source-atop';gd.fillStyle='rgba(8,12,30,.82)';gd.fillRect(0,0,cd.width,cd.height);front.push({c,cd,ox:X,H:h+4})}
@@ -4579,7 +4613,7 @@ function drawJForest(cX,cY){const S=forSpr();
   for(let x=Math.floor((cX-60)/5)*5;x<cX+VW+60;x+=5){const h=((x*2654435761)>>>0);if(h%(JAPAN||WIEHEN?3:4)!==0)continue;
     const g=groundAt(x);if(!g||JF_NO[g.seg.kind]||!forestOn(g))continue;const far=((h>>>3)%100)<55,L=far?S.back:S.mid,V=L[(h>>>11)%L.length];
     const sx=Math.round(x-cX)-V.ox,sy=Math.round(g.y-cY)-V.H+3;if(sx>VW||sx+V.c.width<0||sy>VH)continue;ctx.drawImage(V.c,sx,sy)}}
-function drawJForestFront(cX,cY){const S=forSpr(),dk=clamp(curDS.night*.85+curDS.dusk*.2,0,.9);
+function drawJForestFront(cX,cY){if(WIEHEN)return;const S=forSpr(),dk=clamp(curDS.night*.85+curDS.dusk*.2,0,.9);
   for(let x=Math.floor((cX-80)/7)*7;x<cX+VW+80;x+=7){const h=((x*40503+977)>>>0);if(h%(SUMMER?47:29)!==0)continue;
     const g=groundAt(x);if(!g||JF_NO[g.seg.kind]||!forestOn(g))continue;const V=S.front[(h>>>9)%S.front.length];
     const sx=Math.round(x-cX)-V.ox,sy=Math.round(g.y-cY)-V.H+9+((h>>>5)%6);if(sx>VW||sx+V.c.width<0)continue;
