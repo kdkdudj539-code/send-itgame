@@ -778,7 +778,7 @@ const FORMS={
   helmetS:{slot:'helmf',extra:['h_none'],list:[{id:'ff',n:['Integralhelm','Full-face helmet'],price:0},{id:'mtb',n:['MTB-Helm','Trail helmet'],price:500}]},   /* Downhill: Integralhelm oder offener MTB-Helm */
   bike:{slot:'bframe',list:[{id:'ht',n:['Hardtail','Hardtail'],price:0},{id:'fs',n:['Fully','Full suspension'],price:2500},{id:'dh',n:['Downhill','Downhill'],price:5000}]},
   bfork:{slot:'bforkf',list:[{id:'sc',n:['Standardgabel','Standard fork'],price:0},{id:'dc',n:['Downhill-Gabel (Doppelbrücke)','Downhill fork (dual crown)'],price:2500}]}};
-const formName=f=>TX(f.n[0],f.n[1]),formsOf=cat=>SUMMER&&cat==='helmet'?FORMS.helmetS:formsOf(cat);
+const formName=f=>TX(f.n[0],f.n[1]),formsOf=cat=>SUMMER&&cat==='helmet'?FORMS.helmetS:FORMS[cat];
 const formOwned=(cat,f)=>{if(!f.price||SAVE.owned['f_'+cat+'_'+f.id])return true;const F=formsOf(cat);return !F.slot&&SHOP[cat].items.some(it=>F.of(it)===f.id&&it.price>0&&SAVE.owned[it.id])};   // wer schon ein Teil dieser Form hat, hat auch die Form
 const formOfEquip=cat=>{const F=formsOf(cat);if(F.extra&&F.extra.includes(SAVE.equip[cat]))return null;return F.slot?(SAVE.equip[F.slot]||F.list[0].id):F.of(itemOf(cat,SAVE.equip[cat]))};
 let shopForm={};
