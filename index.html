@@ -775,15 +775,16 @@ const FORMS={
   beanie:{list:[{id:'classic',n:['Beanie','Beanie'],price:0},{id:'pom',n:['Bommelmütze','Pom-pom beanie'],price:500},{id:'fish',n:['Fisherman','Fisherman'],price:500}],of:it=>it.model},
   pack:{list:[{id:'none',n:['Ohne Rucksack','No backpack'],price:0},{id:'free',n:['Freeride-Rucksack','Freeride backpack'],price:0},{id:'ghost',n:['Unsichtbarer Rucksack','Invisible backpack'],price:0}],of:it=>it.id==='pk_none'?'none':it.id==='pk_ghost'?'ghost':'free'},
   prot:{list:[{id:'none',n:['Ohne Protektor','No protector'],price:0},{id:'back',n:['Rückenprotektor','Back protector'],price:0}],of:it=>it.id==='pr_none'?'none':'back'},
+  helmetS:{slot:'helmf',extra:['h_none'],list:[{id:'ff',n:['Integralhelm','Full-face helmet'],price:0},{id:'mtb',n:['MTB-Helm','Trail helmet'],price:500}]},   /* Downhill: Integralhelm oder offener MTB-Helm */
   bike:{slot:'bframe',list:[{id:'ht',n:['Hardtail','Hardtail'],price:0},{id:'fs',n:['Fully','Full suspension'],price:2500},{id:'dh',n:['Downhill','Downhill'],price:5000}]},
   bfork:{slot:'bforkf',list:[{id:'sc',n:['Standardgabel','Standard fork'],price:0},{id:'dc',n:['Downhill-Gabel (Doppelbrücke)','Downhill fork (dual crown)'],price:2500}]}};
-const formName=f=>TX(f.n[0],f.n[1]);
-const formOwned=(cat,f)=>{if(!f.price||SAVE.owned['f_'+cat+'_'+f.id])return true;const F=FORMS[cat];return !F.slot&&SHOP[cat].items.some(it=>F.of(it)===f.id&&it.price>0&&SAVE.owned[it.id])};   // wer schon ein Teil dieser Form hat, hat auch die Form
-const formOfEquip=cat=>{const F=FORMS[cat];return F.slot?(SAVE.equip[F.slot]||F.list[0].id):F.of(itemOf(cat,SAVE.equip[cat]))};
+const formName=f=>TX(f.n[0],f.n[1]),formsOf=cat=>SUMMER&&cat==='helmet'?FORMS.helmetS:formsOf(cat);
+const formOwned=(cat,f)=>{if(!f.price||SAVE.owned['f_'+cat+'_'+f.id])return true;const F=formsOf(cat);return !F.slot&&SHOP[cat].items.some(it=>F.of(it)===f.id&&it.price>0&&SAVE.owned[it.id])};   // wer schon ein Teil dieser Form hat, hat auch die Form
+const formOfEquip=cat=>{const F=formsOf(cat);if(F.extra&&F.extra.includes(SAVE.equip[cat]))return null;return F.slot?(SAVE.equip[F.slot]||F.list[0].id):F.of(itemOf(cat,SAVE.equip[cat]))};
 let shopForm={};
 
 /* ================= SAVE ================= */
-const DEF={coins:0,best:0,bestDist:0,bestJ:0,bestDistJ:0,owned:{},equip:{helmet:'h_black',goggles:'g_orange',hoodie:'d_grey',sweater:'sw_none',pants:'p_khaki',skis:'s_red',board:'b_black',poles:'po_black',pack:'pk_none',beanie:'bn_black',bframe:'ht',bforkf:'sc',boots:'bt_black',bike:'bk_carbon',jersey:'j_black',prot:'pr_none',bfork:'fk_gold',bshock:'sh_gold',brim:'rm_black',btire:'tr_black',bbar:'bb_black',bsad:'sd_black',bped:'pd_black',binding:'bd_grey',shoes:'bs_black'},gear:'ski',season:'winter',map:'alps',assist:false,packLast:'pk_free',music:true,vol:100};
+const DEF={coins:0,best:0,bestDist:0,bestJ:0,bestDistJ:0,owned:{},equip:{helmet:'h_black',goggles:'g_orange',hoodie:'d_grey',sweater:'sw_none',pants:'p_khaki',skis:'s_red',board:'b_black',poles:'po_black',pack:'pk_none',beanie:'bn_black',bframe:'ht',bforkf:'sc',helmf:'ff',boots:'bt_black',bike:'bk_carbon',jersey:'j_black',prot:'pr_none',bfork:'fk_gold',bshock:'sh_gold',brim:'rm_black',btire:'tr_black',bbar:'bb_black',bsad:'sd_black',bped:'pd_black',binding:'bd_grey',shoes:'bs_black'},gear:'ski',season:'winter',map:'alps',assist:false,packLast:'pk_free',music:true,vol:100};
 // Stand prüfen und auffüllen (vom Gerät oder aus dem Konto). t = letzte Änderung, uid = Konto, zu dem der Stand gehört, sc = Münzen beim letzten Abgleich mit dem Konto
 const SEASON_EQ=['helmet','beanie','goggles','pants'];   // diese Teile gibt es im Winter und im Downhill: je Saison ein eigenes Outfit
 const mig41=e=>{if(!e.m41&&e.bike==='bk_red')e.bike='bk_carbon';e.m41=1;return e};   // v4.1: neues Standard-Bike, Rot bleibt gratis im Shop
@@ -881,7 +882,7 @@ function palette(eq){
   return {SW:Sw,O:'#121626',bnd:[shade(Bd.c,-.38),Bd.c,shade(Bd.c,.6)],SH:Sh.c,SHa:Sh.a,H,h:shade(H,-.38),l:shade(H,.5),L,M:shade(L,.65),G:'#252a39',S:'#eab58f',k:'#c38663',
     D,d:shade(D,-.3),P:Pi.c,p:shade(Pi.c,-.28),pat:Pi.pat||null,K:Si.c,ka:Si.a,B:Bi.c,ba:Bi.a,PO:Pl.c,pa:Pl.a,pk:Pk?Pk.c:null,pka:Pk?Pk.a:null,hat:noHelm?Bn.model:null,N:Bn.c,n:shade(Bn.c,-.22),C:Bn.a||shade(Bn.c,-.15),Q:Bn.pom||'#ffffff',q:shade(Bn.pom||'#ffffff',-.2),R:'#3b2a20',boot:'#3c4356',bootC:itemOf('boots',eq.boots||'bt_black').c,glove:'#272b38',zip:'#eef1f7',BK:Bk.c,bka:Bk.a};
 }
-const eqKey=eq=>CATS.map(c=>eq[c]).join(',')+','+(eq.bframe||'')+','+(eq.bforkf||'');
+const eqKey=eq=>CATS.map(c=>eq[c]).join(',')+','+(eq.bframe||'')+','+(eq.bforkf||'')+','+(eq.helmf||'');
 
 /* ================= SPRITES ================= */
 function mk(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');g.imageSmoothingEnabled=false;return [c,g]}
@@ -905,6 +906,10 @@ const HEADS={side:["...OOOOOOO...","..OHHHlHHHO..",".OHHllHHHHHO.",".OHHHHHHHHHh
 const HEADS_FF={side:["..OOOOOOO....",".OHHHllHHOOO.","OHHHlHHHJJJJO","OHHHHHHHHOOO.","OHHHHHHHHOOO.","OHHHHHHGLLLO.","OHHHHHHGLMLO.","OHHHHHHGLMLO.","OHHHHHHHHOSO.",".OHHHHHHJJhJO","..OOOOOOOOOO."],
   front:["..OOOOOOOOO..",".OHHHlHHHHHO.","OJJJJJJJJJJJO","OHGLLLLLLLGHO","OHGLLLLLLLGHO","OHGLLMLLLLGHO","OHHOOSSSOOHHO","OHHOOSSSOOHHO","OHJJJhJhJJJHO",".OHHHHHHHHHO.","..OOOOOOOOO.."],
   back:["..OOOOOOOOO..",".OHHHlHHHHHO.","OHHHHHHHHHHHO","OHHHHHHHHHHHO","OHHHHHHHHHHHO","OGGGGGGGGGGGO","OHHHHHHHHHHHO","OHHHHHHHHHHHO","OHHHhHHHhHHHO",".OHHHHHHHHHO.","..OOOOOOOOO.."]};
+// Downhill: offener MTB-Helm mit Schirm, Gesicht frei, Sportbrille
+const HEADS_MTB={side:["...OOOOOOO...","..OHHHlHHHO..",".OHHllHHHHHO.",".OHHHHHHHhhhO","OHHHHHHOOOOO.","OHHHHkSGLLLO.",".OHHkSSSSSSO.",".OkSSSSSSSSO.","..OkSSSSSSO..","..OkSSSSSSO..","...OOOOOOO..."],
+  front:["...OOOOOOO...","..OHHHlHHHO..",".OHHllHHHHHO.",".OhhhhhhhhhO.","OHOSSSSSSSOHO","OHGLLGGGLLGHO","OhSSSSkSSSShO",".OSSSSSSSSSO.","..OSSSSSSSO..","..OSSSkSSSO..","...OOOOOOO..."],
+  back:["...OOOOOOO...","..OHHHlHHHO..",".OHhHHhHHhHO.",".OHHHHHHHHHO.","OHHHHHHHHHHHO","OHHHHHHHHHHHO",".OHHHHHHHHHO.",".OkkkkkkkkkO.","..OkkkkkkkO..","..OkkkkkkkO..","...OOOOOOO..."]};
 /* Mützen statt Helm. X = Strick (wird zu senkrechten Rippen N/n), C Umschlag, Q/q Bommel, R Haare.
    classic = Slouch-Beanie (hängt nach hinten), pom = Bommelmütze, fish = kurze Fisherman-Mütze */
 const BN_RAW={
@@ -919,7 +924,7 @@ const BN_RAW={
   back:["...OOOOOOO...","..OXXXXXXXO..","..OXXXXXXXO..",".OCCCCCCCCCO.",".ORRRRRRRRRO.","OGGGGGGGGGGGO","OGGGGGGGGGGGO","OGGGGGGGGGGGO",".ORRRRRRRRRO.","..OkkkkkkkO..","...OOOOOOO..."]}};
 const BEANIES=Object.fromEntries(Object.entries(BN_RAW).map(([k,v])=>[k,Object.fromEntries(Object.entries(v).map(([kk,m])=>[kk,m.map(r=>r.replace(/X/g,(_,i)=>i%2?'n':'N'))]))]));
 /* rot = Vierteldrehungen im Uhrzeigersinn (Corks), gedreht um die Kopfmitte; Mützen-Aufbau wächst immer Richtung Kopf-oben */
-function drawHead(g,kind,x,y,P,flip,rot){const m=P.hat?BEANIES[P.hat][kind]:P.ff?HEADS_FF[kind]:HEADS[kind],e=m.length-11,X=x+6,Y=y+5;
+function drawHead(g,kind,x,y,P,flip,rot){const m=P.hat?BEANIES[P.hat][kind]:P.ff?HEADS_FF[kind]:P.mtb?HEADS_MTB[kind]:HEADS[kind],e=m.length-11,X=x+6,Y=y+5;
   for(let r=0;r<m.length;r++)for(let c=0;c<m[r].length;c++){const ch=m[r][c];if(ch==='.')continue;
     const dc=(flip?m[r].length-1-c:c)-6,dr=r-5-e;let sx=dc,sy=dr;
     if(rot===1){sx=-dr;sy=dc}else if(rot===2){sx=-dc;sy=-dr}else if(rot===3){sx=dr;sy=-dc}
@@ -1755,7 +1760,7 @@ function getSprite(pose,phi,look,eq,gear,pow,cork,twist,K,wf,hy){
   eq=eq||SAVE.equip;gear=gear||GEAR;K=K||(gear==='bike'?RS:RZ);wf=gear==='bike'?(wf||0):0;
   const ph=((Math.round(phi/15)*15)%360+360)%360,ck=cork?{m:cork.m,t:((Math.round(cork.t/15)*15)%360+360)%360}:null,tq=Math.round((twist||0)/15)*15,key=pose+'|'+ph+'|'+(look?1:0)+'|'+(pow?1:0)+'|'+(ck?ck.m+ck.t:'')+'|'+gear+'|'+tq+'|'+eqKey(eq)+'|'+K+'|'+wf+'|'+(hy==null?'':Math.round(hy/15)*15);
   let s=sprCache.get(key);if(s){sprCache.delete(key);sprCache.set(key,s);return s}
-  const P=palette(eq);P.wf=wf;if(gear==='bike'){const Ji=itemOf('jersey',eq.jersey||'j_black');P.SW=null;P.D=Ji.c;P.d=shade(Ji.c,-.3);P.J2=Ji.a;P.pk=null;{const Pr=eq.prot&&eq.prot!=='pr_none'?itemOf('prot',eq.prot):null;P.pr=Pr?Pr.c:null;P.pra=Pr?Pr.a:null}{const a=hexRgb(Ji.a),b=hexRgb(P.H),lum=(b[0]*.3+b[1]*.59+b[2]*.11)/255;const la=(a[0]*.3+a[1]*.59+a[2]*.11)/255;P.J=shade(P.H,lum>.5?-.22:.32)}if(!P.hat)P.ff=true;   // Helm-Details (Schirm, Kinnbügel) nur in der Helmfarbe, nicht in der Trikotfarbe
+  const P=palette(eq);P.wf=wf;if(gear==='bike'){const Ji=itemOf('jersey',eq.jersey||'j_black');P.SW=null;P.D=Ji.c;P.d=shade(Ji.c,-.3);P.J2=Ji.a;P.pk=null;{const Pr=eq.prot&&eq.prot!=='pr_none'?itemOf('prot',eq.prot):null;P.pr=Pr?Pr.c:null;P.pra=Pr?Pr.a:null}{const a=hexRgb(Ji.a),b=hexRgb(P.H),lum=(b[0]*.3+b[1]*.59+b[2]*.11)/255;const la=(a[0]*.3+a[1]*.59+a[2]*.11)/255;P.J=shade(P.H,lum>.5?-.22:.32)}if(!P.hat){if(eq.helmf==='mtb')P.mtb=true;else P.ff=true}   // Helm-Details (Schirm, Kinnbügel) nur in der Helmfarbe, nicht in der Trikotfarbe
     {const it=c=>itemOf(c,eq[c]),Fo=it('bfork'),Sh=it('bshock'),Ri=it('brim'),Ti=it('btire'),Ba=it('bbar'),Sa=it('bsad'),Pe=it('bped');   // Bike-Teile aus dem Shop
      P.FK=Fo.c;P.FL=Fo.a;P.SHK=Sh.c;P.SHA=Sh.a||null;P.FRM=eq.bframe||'ht';P.FKF=eq.bforkf||'sc';P.RM=Ri.c;P.SPK=Ri.a;P.TR=Ti.c;P.TS=Ti.a;P.GR=Ba.c;P.BR=Ba.a;P.SD=Sa.c;P.PD=Pe.c;P.CR=Pe.a}}
   // Ski/Board: das Sprite ist direkt das Fahrer-Raster. Bike: Sprite im Bild-Raster, der Fahrer kommt aus dem Fahrer-Raster dazwischen.
@@ -4692,20 +4697,21 @@ function renderShopInner(){queueMicrotask(()=>shopRemember());
   for(const c of cats){const b=document.createElement('button');b.className='tab';b.role='tab';b.textContent=catName(c);b.setAttribute('aria-selected',c===shopCat||(c==='bike'&&inBike));b.onclick=()=>{shopAnchor={sel:'#tabs .tab[aria-selected="true"]',top:b.getBoundingClientRect().top};shopCat=c==='bike'?bikeSub:c;renderShop()};tabs.appendChild(b)}
   {const sub=$('subtabs');sub.innerHTML='';sub.hidden=!inBike;if(inBike){bikeSub=shopCat;   // Bike: Abteilungen für jedes Teil
     for(const c of BIKE_PARTS){const b=document.createElement('button');b.className='tab';b.role='tab';b.textContent=c==='bike'?TX('Rahmen','Frame'):catName(c);b.setAttribute('aria-selected',c===shopCat);b.onclick=()=>{shopAnchor={sel:'#subtabs .tab[aria-selected="true"]',top:b.getBoundingClientRect().top};shopCat=c;renderShop()};sub.appendChild(b)}}}
-  const grid=$('grid');grid.innerHTML='';const F=FORMS[shopCat],fo=F?shopForm[shopCat]:null,fsel=F?tryOn['f_'+shopCat]:null;
+  const grid=$('grid');grid.innerHTML='';const F=formsOf(shopCat),fo=F?shopForm[shopCat]:null,fsel=F?tryOn['f_'+shopCat]:null;
   if(F&&!fo){   /* Formen-Ebene: jede Form ist ein Ordner, gesperrte Formen kann man kaufen */
     for(const f of F.list){const solo=F.slot?null:SHOP[shopCat].items.filter(it=>F.of(it)===f.id);if(solo&&solo.length===1){grid.appendChild(itemBtn(solo[0]));continue}   /* Form ohne Farben: direkt als Teil, wie vorher */
       const own=formOwned(shopCat,f),act=formOfEquip(shopCat)===f.id,sel=fsel===f.id,show=F.slot?itemOf(shopCat,SAVE.equip[shopCat]):(SHOP[shopCat].items.find(it=>F.of(it)===f.id&&SAVE.equip[shopCat]===it.id)||SHOP[shopCat].items.find(it=>F.of(it)===f.id));
       const b=document.createElement('button');b.className='item form'+(act?' eq':'')+(sel?' sel':'')+(own&&!act?' owned':'');b.style.setProperty('--c',show.c);if(show.a)b.style.setProperty('--a',show.a);
       const pr=act?TX('AKTIV · ÖFFNEN','ACTIVE · OPEN'):own?TX('ÖFFNEN','OPEN'):sel?TX('KAUFEN · ','BUY · ')+f.price:String(f.price);
       b.innerHTML='<span class="sw"></span><span class="nm"></span><span class="pr">'+(!own?'<i class="coin"></i>':'')+'<span></span></span>';b.querySelector('.nm').textContent='▸ '+formName(f);b.querySelector('.pr span').textContent=pr;
-      b.dataset.id='f_'+f.id;b.onclick=()=>{shopAnchor={id:'f_'+f.id,top:b.getBoundingClientRect().top};formClick(f,b)};grid.appendChild(b)}}
+      b.dataset.id='f_'+f.id;b.onclick=()=>{shopAnchor={id:'f_'+f.id,top:b.getBoundingClientRect().top};formClick(f,b)};grid.appendChild(b)}
+    for(const id of F.extra||[])grid.appendChild(itemBtn(itemOf(shopCat,id)))}
   else{
   if(F){const bk=document.createElement('button');bk.className='item back';bk.innerHTML='<span class="nm"></span><span class="pr"><span></span></span>';bk.querySelector('.nm').textContent='◂ '+formName(F.list.find(f=>f.id===fo));bk.querySelector('.pr span').textContent=TX('ZURÜCK ZU DEN FORMEN','BACK TO SHAPES');
     bk.onclick=()=>{shopForm[shopCat]=null;delete tryOn['f_'+shopCat];if(F.slot)delete tryOn[F.slot];delete tryOn[shopCat];renderShop()};grid.appendChild(bk)}
-  for(const it of SHOP[shopCat].items){if(F&&!F.slot&&F.of(it)!==fo)continue;grid.appendChild(itemBtn(it))}}
+  for(const it of SHOP[shopCat].items){if(F&&(!F.slot&&F.of(it)!==fo||F.extra&&F.extra.includes(it.id)))continue;grid.appendChild(itemBtn(it))}}
   function itemBtn(it){
-    const owned=it.price===0||SAVE.owned[it.id],eq=SAVE.equip[shopCat]===it.id&&(!F||!F.slot||(SAVE.equip[F.slot]||F.list[0].id)===fo),sel=tryOn[shopCat]===it.id;
+    const owned=it.price===0||SAVE.owned[it.id],eq=SAVE.equip[shopCat]===it.id&&(!F||!F.slot||F.extra&&F.extra.includes(it.id)||(SAVE.equip[F.slot]||F.list[0].id)===fo),sel=tryOn[shopCat]===it.id;
     const b=document.createElement('button');b.className='item'+(eq?' eq':'')+(sel?' sel':'')+(owned&&!eq?' owned':'');
     b.style.setProperty('--c',it.c);if(it.a)b.style.setProperty('--a',it.a);if(it.pat)b.style.setProperty('--a',it.pat[0]);
     const bp=BIKE_PARTS.includes(shopCat);let pr;if(eq)pr=bp?TX('EINGEBAUT','INSTALLED'):TX('ANGEZOGEN','EQUIPPED');else if(owned)pr=bp?TX('EINBAUEN','INSTALL'):TX('ANZIEHEN','EQUIP');else if(sel)pr=TX('KAUFEN · ','BUY · ')+it.price;else pr=String(it.price);
@@ -4715,13 +4721,13 @@ function renderShopInner(){queueMicrotask(()=>shopRemember());
   }
   const t=tryOn[shopCat],ti=t?itemOf(shopCat,t):null;$('prevNote').textContent=ti?TX('Vorschau: ','Preview: ')+itName(ti)+'. '+(ti.info?itInfo(ti)+' ':'')+TX('Nochmal tippen zum Kaufen.','Tap again to buy.'):TX('Tippe ein Teil an für die Vorschau.','Tap an item to preview it.');
 }
-function formClick(f,el){const F=FORMS[shopCat],key='f_'+shopCat;
+function formClick(f,el){const F=formsOf(shopCat),key='f_'+shopCat;
   if(formOwned(shopCat,f)){shopForm[shopCat]=f.id;delete tryOn[key];if(F.slot)tryOn[F.slot]=f.id;$('shopMsg').textContent='';renderShop();$('shop').scrollTop=0;return}
   if(tryOn[key]!==f.id){tryOn[key]=f.id;if(F.slot)tryOn[F.slot]=f.id;else{const it=SHOP[shopCat].items.find(i=>F.of(i)===f.id);if(it)tryOn[shopCat]=it.id}$('shopMsg').textContent=TX('Vorschau: ','Preview: ')+formName(f)+TX('. Nochmal tippen zum Kaufen.','. Tap again to buy.');renderShop();return}
   if(SAVE.coins<f.price){$('shopMsg').textContent=TX('Dir fehlen '+(f.price-SAVE.coins)+' Münzen.','You need '+(f.price-SAVE.coins)+' more coins.');el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');return}
   SAVE.coins-=f.price;SAVE.owned[key+'_'+f.id]=true;delete tryOn[key];if(!F.slot)delete tryOn[shopCat];persist();unlockAudio();SFX.trick();
   shopForm[shopCat]=f.id;if(F.slot)tryOn[F.slot]=f.id;$('shopMsg').textContent=formName(f)+TX(' gekauft. Jetzt eine Farbe wählen.',' bought. Now pick a color.');renderShop();$('shop').scrollTop=0}
-function shopEquip(it){SAVE.equip[shopCat]=it.id;{const F=FORMS[shopCat];if(F&&F.slot&&shopForm[shopCat]){SAVE.equip[F.slot]=shopForm[shopCat];delete tryOn[F.slot]}}
+function shopEquip(it){SAVE.equip[shopCat]=it.id;{const F=formsOf(shopCat);if(F&&F.slot&&shopForm[shopCat]){SAVE.equip[F.slot]=shopForm[shopCat];delete tryOn[F.slot]}}
   if(shopCat==='beanie'&&SAVE.equip.helmet!=='h_none'){SAVE.equip.helmet='h_none';return TX(' Helm abgesetzt, damit man die Mütze sieht.',' Helmet taken off so the beanie shows.')}
   if(shopCat==='hoodie'&&SAVE.equip.sweater&&SAVE.equip.sweater!=='sw_none'){SAVE.equip.sweater='sw_none';return TX(' Pulli ausgezogen, damit man die Jacke sieht.',' Sweater taken off so the jacket shows.')}
   if(shopCat==='pack'&&it.id!=='pk_none')SAVE.packLast=it.id;
