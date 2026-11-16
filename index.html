@@ -272,7 +272,6 @@ html.sum .btn.alt{background:#e2f4e5}
 .item.eq{box-shadow:0 0 0 3px var(--ok)}
 .item.eq .pr{color:var(--ok)}
 .item.sel{box-shadow:0 0 0 3px var(--gold);background:#28365e}
-.item.form .nm{font-weight:bold}
 .item.back{background:var(--panel);justify-content:center}
 .item.back .pr{color:var(--ink);opacity:.7}
 .item.owned .pr{color:var(--ice)}
@@ -4695,7 +4694,8 @@ function renderShopInner(){queueMicrotask(()=>shopRemember());
     for(const c of BIKE_PARTS){const b=document.createElement('button');b.className='tab';b.role='tab';b.textContent=c==='bike'?TX('Rahmen','Frame'):catName(c);b.setAttribute('aria-selected',c===shopCat);b.onclick=()=>{shopAnchor={sel:'#subtabs .tab[aria-selected="true"]',top:b.getBoundingClientRect().top};shopCat=c;renderShop()};sub.appendChild(b)}}}
   const grid=$('grid');grid.innerHTML='';const F=FORMS[shopCat],fo=F?shopForm[shopCat]:null,fsel=F?tryOn['f_'+shopCat]:null;
   if(F&&!fo){   /* Formen-Ebene: jede Form ist ein Ordner, gesperrte Formen kann man kaufen */
-    for(const f of F.list){const own=formOwned(shopCat,f),act=formOfEquip(shopCat)===f.id,sel=fsel===f.id,show=F.slot?itemOf(shopCat,SAVE.equip[shopCat]):(SHOP[shopCat].items.find(it=>F.of(it)===f.id&&SAVE.equip[shopCat]===it.id)||SHOP[shopCat].items.find(it=>F.of(it)===f.id));
+    for(const f of F.list){const solo=F.slot?null:SHOP[shopCat].items.filter(it=>F.of(it)===f.id);if(solo&&solo.length===1){grid.appendChild(itemBtn(solo[0]));continue}   /* Form ohne Farben: direkt als Teil, wie vorher */
+      const own=formOwned(shopCat,f),act=formOfEquip(shopCat)===f.id,sel=fsel===f.id,show=F.slot?itemOf(shopCat,SAVE.equip[shopCat]):(SHOP[shopCat].items.find(it=>F.of(it)===f.id&&SAVE.equip[shopCat]===it.id)||SHOP[shopCat].items.find(it=>F.of(it)===f.id));
       const b=document.createElement('button');b.className='item form'+(act?' eq':'')+(sel?' sel':'')+(own&&!act?' owned':'');b.style.setProperty('--c',show.c);if(show.a)b.style.setProperty('--a',show.a);
       const pr=act?TX('AKTIV · ÖFFNEN','ACTIVE · OPEN'):own?TX('ÖFFNEN','OPEN'):sel?TX('KAUFEN · ','BUY · ')+f.price:String(f.price);
       b.innerHTML='<span class="sw"></span><span class="nm"></span><span class="pr">'+(!own?'<i class="coin"></i>':'')+'<span></span></span>';b.querySelector('.nm').textContent='▸ '+formName(f);b.querySelector('.pr span').textContent=pr;
@@ -4703,15 +4703,16 @@ function renderShopInner(){queueMicrotask(()=>shopRemember());
   else{
   if(F){const bk=document.createElement('button');bk.className='item back';bk.innerHTML='<span class="nm"></span><span class="pr"><span></span></span>';bk.querySelector('.nm').textContent='◂ '+formName(F.list.find(f=>f.id===fo));bk.querySelector('.pr span').textContent=TX('ZURÜCK ZU DEN FORMEN','BACK TO SHAPES');
     bk.onclick=()=>{shopForm[shopCat]=null;delete tryOn['f_'+shopCat];if(F.slot)delete tryOn[F.slot];delete tryOn[shopCat];renderShop()};grid.appendChild(bk)}
-  for(const it of SHOP[shopCat].items){if(F&&!F.slot&&F.of(it)!==fo)continue;
+  for(const it of SHOP[shopCat].items){if(F&&!F.slot&&F.of(it)!==fo)continue;grid.appendChild(itemBtn(it))}}
+  function itemBtn(it){
     const owned=it.price===0||SAVE.owned[it.id],eq=SAVE.equip[shopCat]===it.id&&(!F||!F.slot||(SAVE.equip[F.slot]||F.list[0].id)===fo),sel=tryOn[shopCat]===it.id;
     const b=document.createElement('button');b.className='item'+(eq?' eq':'')+(sel?' sel':'')+(owned&&!eq?' owned':'');
     b.style.setProperty('--c',it.c);if(it.a)b.style.setProperty('--a',it.a);if(it.pat)b.style.setProperty('--a',it.pat[0]);
     const bp=BIKE_PARTS.includes(shopCat);let pr;if(eq)pr=bp?TX('EINGEBAUT','INSTALLED'):TX('ANGEZOGEN','EQUIPPED');else if(owned)pr=bp?TX('EINBAUEN','INSTALL'):TX('ANZIEHEN','EQUIP');else if(sel)pr=TX('KAUFEN · ','BUY · ')+it.price;else pr=String(it.price);
     b.innerHTML='<span class="sw"></span><span class="nm"></span><span class="pr">'+(!owned?'<i class="coin"></i>':'')+'<span></span></span>';
     b.querySelector('.nm').textContent=itName(it);b.querySelector('.pr span').textContent=pr;
-    b.dataset.id=it.id;b.onclick=()=>{shopAnchor={id:it.id,top:b.getBoundingClientRect().top};shopRemember(it.id);shopClick(it,b)};grid.appendChild(b);
-  }}
+    b.dataset.id=it.id;b.onclick=()=>{shopAnchor={id:it.id,top:b.getBoundingClientRect().top};shopRemember(it.id);shopClick(it,b)};return b;
+  }
   const t=tryOn[shopCat],ti=t?itemOf(shopCat,t):null;$('prevNote').textContent=ti?TX('Vorschau: ','Preview: ')+itName(ti)+'. '+(ti.info?itInfo(ti)+' ':'')+TX('Nochmal tippen zum Kaufen.','Tap again to buy.'):TX('Tippe ein Teil an für die Vorschau.','Tap an item to preview it.');
 }
 function formClick(f,el){const F=FORMS[shopCat],key='f_'+shopCat;
