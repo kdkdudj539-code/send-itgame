@@ -4083,8 +4083,9 @@ function updAir(dt){
     if(pl||pr||((l||r)&&Math.abs(p.spinTarget-p.spin)<.5))p.spinTarget+=(r?1:-1)*((((p.spinTarget%180)+180)%180===0)?180:90);
     const d=p.spinTarget-p.spin,mx=SPIN_RATE*cs*dt;p.spin+=clamp(d,-mx,mx);
   }
-  else if(l||r){const dir=r?1:-1;p.spin+=dir*SPIN_RATE*cs*dt;p.spinDir=dir;p.spinTarget=null}
-  else if(p.spinDir){
+  else if(l||r){const dir=r?1:-1;p.spin+=dir*SPIN_RATE*cs*dt;p.spinDir=dir;p.spinTarget=null;p.spinKB=!!(K.ArrowLeft||K.KeyA||K.ArrowRight||K.KeyD)}
+  else if(p.spinDir&&!p.spinKB){p.spinDir=0;p.spinTarget=null}   /* Controller und Handy: der Spin stoppt genau da, wo man den Stick loslässt (wie bei Flips und Corks) */
+  else if(p.spinDir){   /* Tastatur: angefangenen 180er fertig drehen */
     if(p.spinTarget===null){const st=p.fromRail?90:180,fw=p.spinDir>0?Math.ceil(p.spin/st-1e-6)*st:Math.floor(p.spin/st+1e-6)*st,bk=fw-p.spinDir*st,done=st-Math.abs(fw-p.spin);
       if(done<st*SPIN_COMMIT&&Math.abs(fw-p.spin)>1e-6){p.spinTarget=bk;p.spinDir=-p.spinDir}else p.spinTarget=fw}   /* nur leicht angedreht: zurück in die alte Richtung statt automatisch ein voller 180er */
     const ns=p.spin+p.spinDir*SPIN_RATE*cs*dt;
