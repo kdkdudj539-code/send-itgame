@@ -3277,6 +3277,33 @@ function makeHut(){const W=132,H=100,[c,g]=mk(W,H),R=almR(g),yr=x=>Math.round(40
     if(SUMMER){R(x,y-5,1,4,(x>>1)%2?'#5a5f6b':'#4b505b');R(x,y-5,1,1,'#6c717d')}   // Schindeldach
     else{R(x,y-5,1,4,'#ffffff');R(x,y-1,1,1,'#d7e6f6');if(x%7===3&&Math.abs(x-66)>18)R(x,y+4,1,2+Math.floor(hash01(x)*3),'#d7f0fb')}}
   return c}
+/* Wiehengebirge: Waldgasthaus "Zum Wilden Schmied" bei Minden. Weißer Putz, flaches rotbraunes Ziegeldach (im Winter mit Schnee),
+   drei dunkle Schornsteine, Bruchstein-Sockel, Fenster mit Blumenkästen, Tür mit Treppe, Namensschild, runde grüne Tafel am Eck, davor eine alte Lore. */
+const HUTW_WIN=[[33,54],[57,54],[75,54],[99,54],[113,54]];
+function makeHutW(){const W=132,H=100,[c,g]=mk(W,H),R=almR(g),PU='#eceae4',PS='#d3d0c8',DK='#2b2724';
+  for(const [x,w,t] of [[38,5,10],[70,5,12],[94,7,4]]){R(x-1,t-1,w+2,30-t,DK);R(x,t,w,30-t,'#3a3d48');R(x,t,1,30-t,'#555a66');R(x-1,t-1,w+2,2,'#24262e');if(!SUMMER)R(x-1,t-2,w+2,2,'#ffffff')}   // Schornsteine
+  for(let y=18;y<=34;y++){const u=(y-18)/16,xl=Math.round(34-30*u),xr=Math.round(98+30*u);R(xl-1,y,xr-xl+3,1,DK);
+    for(let x=xl;x<=xr;x++){let col=(y-18)%3===2?'#5c2a20':((x+((y-18)/3|0)*2)%4===0?'#6a3024':'#80402e');
+      if(!SUMMER&&y<32){col=y===31?'#c3cfe0':(x+y)%9===0?'#e3eaf5':'#f4f7fc'}R(x,y,1,1,col)}}
+  R(2,34,128,2,DK);R(4,35,124,1,'#4a4440');   // Traufe mit Regenrinne
+  if(!SUMMER)for(let x=6;x<126;x+=5)R(x+(x%3),36,1,1+Math.floor(hash01(x)*3),'#d7f0fb');
+  R(8,36,116,49,PU);R(8,36,116,2,PS);R(8,36,2,49,PS);for(let i=0;i<40;i++)R(10+Math.floor(hash01(i*2.7)*112),40+Math.floor(hash01(i*5.1)*42),1,1,PS);   // Putz
+  R(6,84,120,15,'#6e6457');for(let i=0;i<70;i++){const x=6+Math.floor(hash01(i*3.3+.4)*114),y=85+Math.floor(hash01(i*7.1+.2)*12),w=3+Math.floor(hash01(i*1.9)*5);R(x,y,w,2+(i%2),['#8a7f70','#7a6f60','#5f564a','#968a78'][i%4])}R(6,84,120,1,'#4a4238');   // Bruchstein-Sockel
+  for(const [x,y] of HUTW_WIN){R(x-1,y-1,10,13,'#b9b6ae');R(x,y,8,11,'#2a2c33');R(x+4,y,1,11,'#e9e7e1');R(x,y+5,8,1,'#e9e7e1');R(x+1,y+1,2,3,'#46505e');   // Fenster
+    R(x-1,y+12,10,3,'#6b4a2f');for(let i=0;i<10;i++){R(x-1+i,y+10+(i%2),1,2,i%3===0?'#3f7a34':i%2?'#e05a7a':'#d8405a')}}   // Blumenkasten
+  R(13,58,11,27,'#b9b6ae');R(14,59,9,26,'#3a2c22');R(15,60,7,12,'#4a382c');R(20,72,1,2,'#c9a64a');   // Tür
+  for(let i=0;i<4;i++)R(10-i*2,84-i*3,16+i*4,3,i%2?'#7a7468':'#8a8478');R(8,70,1,14,'#8d939f');R(26,70,1,14,'#8d939f');R(8,70,19,1,'#c3c8d1');   // Treppe mit Geländer
+  R(27,60,3,4,'#2f6b3f');R(28,61,1,2,'#f6e7b8');   // Wandlaterne
+  R(41,38,50,15,'#2f5a3a');R(42,39,48,13,'#f2efe4');   // Namensschild
+  const F={Z:['###','..#','.#.','#..','###'],U:['#.#','#.#','#.#','#.#','###'],M:['#...#','##.##','#.#.#','#...#','#...#'],W:['#...#','#...#','#.#.#','##.##','#...#'],I:['#','#','#','#','#'],
+    L:['#..','#..','#..','#..','###'],D:['##.','#.#','#.#','#.#','##.'],E:['###','#..','##.','#..','###'],N:['#..#','##.#','#.##','#..#','#..#'],S:['.##','#..','.#.','..#','##.'],C:['.##','#..','#..','#..','.##'],H:['#.#','#.#','###','#.#','#.#'],' ':['.','.','.','.','.']};
+  const txt=(t,y)=>{let w=0;for(const ch of t)w+=F[ch][0].length+1;w--;let x=66-Math.floor(w/2);for(const ch of t){const m=F[ch];m.forEach((row,j)=>{for(let i=0;i<row.length;i++)if(row[i]==='#')R(x+i,y+j,1,1,'#24402c')});x+=m[0].length+1}};
+  txt('ZUM WILDEN',40);txt('SCHMIED',46);
+  R(124,44,2,1,DK);R(122,40,1,5,DK);for(let y=-5;y<=5;y++)for(let x=-5;x<=5;x++){const d=Math.hypot(x,y);if(d<=5.2)R(126+x,47+y,1,1,d>4.1?'#c9a64a':'#2f6b3f')}R(125,46,3,2,'#e8ecf2');   // runde grüne Tafel
+  R(30,88,24,9,'#1f2126');R(30,88,24,1,'#4a4d57');R(31,89,22,1,'#33363f');for(const x of [33,49])R(x,96,4,3,'#121418');R(29,87,26,1,'#121418');   // alte Lore
+  return c}
+function makeLampPost(){const [c,g]=mk(26,58),R=almR(g);R(11,12,3,46,'#24402c');R(12,12,1,46,'#3f7a50');R(9,54,7,4,'#24402c');
+  R(8,4,9,9,'#24402c');R(9,5,7,7,'#f6e7b8');R(12,5,1,7,'#24402c');R(9,8,7,1,'#24402c');R(7,3,11,2,'#1d3324');R(11,1,3,2,'#1d3324');if(!SUMMER)R(7,2,11,1,'#ffffff');return c}
 /* Japan: Berghütte (Onsen-Ryokan). Geschwungenes Dach mit dicker Schneedecke und hochgezogenen Ecken, helle Putzfelder mit dunklem
    Fachwerk, unten Holz, Shoji-Fenster, Schiebetür mit blauem Noren, Schild mit dem Onsen-Zeichen, rote Papierlaternen. Tür an derselben Stelle wie bei der Alm. */
 function makeHutJ(){const W=132,H=100,[c,g]=mk(W,H),R=almR(g),DK='#3b2a20',PL='#e9e2d2';
@@ -3341,7 +3368,7 @@ function makeBikeRack(){const [c,g]=mk(34,28),R=almR(g);R(0,9,34,2,'#6e4a26');R(
   const cols=['#d63a3a','#2f6fd0','#b8f03c'];for(let i=0;i<3;i++){const x=5+i*9,col=cols[i];
     for(const wy of [13,24]){for(let a=0;a<12;a++){const t=a/12*6.283;g.fillStyle='#22252e';g.fillRect(Math.round(x+2+Math.cos(t)*3),Math.round(wy+Math.sin(t)*3),1,1)}}   // Räder (hängend)
     R(x+2,13,1,11,col);R(x+1,15,2,1,col);R(x+3,20,1,4,col)}return c}
-function makeAlmSprites(){ALM_SPR={hut:JAPAN?makeHutJ():makeHut(),flag:[0,1,2].map(JAPAN?makeNobori:makeFlag),rack:SUMMER?makeBikeRack():makeSkiRack(),snowman:SUMMER?makeCow():makeSnowman()}}
+function makeAlmSprites(){ALM_SPR={hut:JAPAN?makeHutJ():WIEHEN?makeHutW():makeHut(),flag:WIEHEN?[0,1,2].map(makeLampPost):[0,1,2].map(JAPAN?makeNobori:makeFlag),rack:SUMMER?makeBikeRack():makeSkiRack(),snowman:SUMMER?makeCow():makeSnowman()}}
 function makeAlmDeco(){almDeco=[];const pick=a=>a[Math.floor(Math.random()*a.length)];const add=o=>{const g=groundAt(o.x),g2=groundAt(o.x+(o.w||0));if(g){o.y=Math.max(g.y,g2?g2.y:g.y);almDeco.push(o)}};
   add({t:'hut',x:ALM_HUT,w:132});add({t:'flag',x:-790});
   if(JAPAN){for(const [x,pose] of [[-772,'wave'],[-758,'stand'],[-744,'cheer']])add({t:'p',x,pose,jk:pick(ALM_JK),hat:pick(ALM_HAT),cheer:0})}   // Japan: keine Blaskapelle
@@ -3361,7 +3388,8 @@ function drawAlm(cX,cY){if(!ALM_SPR||!almDeco.length||cX>ALM_END+260)return;cons
     ctx.save();clipAboveGround(sx,sy-2,W,cX,cY,1);ctx.drawImage(sp,sx,sy);ctx.restore();
     if(d.t==='hut'){   // Rauch aus dem Kamin, nachts leuchtende Fenster
       for(let i=0;i<6;i++){const a=(T*.45+i/6)%1,x=sx+96+a*16+Math.sin(T*1.3+i)*2,y=sy+6-a*34,r=1.5+a*4;ctx.globalAlpha=.55*(1-a);ctx.fillStyle='#e9eef6';ctx.fillRect(Math.round(x-r),Math.round(y-r),Math.round(r*2),Math.round(r*2))}ctx.globalAlpha=1;
-      if(lit)for(const [wx,wy] of (JAPAN?[[32,51],[100,51],[28,79],[104,79],[45,67],[86,67],[66,24]]:[[32,51],[100,51],[28,77],[104,77]]))emissive.push({x:sx+wx,y:sy+wy,r:9})}}}
+      if(lit)for(const [wx,wy] of (JAPAN?[[32,51],[100,51],[28,79],[104,79],[45,67],[86,67],[66,24]]:WIEHEN?HUTW_WIN.map(([x,y])=>[x+4,y+5]).concat([[28,62]]):[[32,51],[100,51],[28,77],[104,77]]))emissive.push({x:sx+wx,y:sy+wy,r:9})}
+    if(d.t==='flag'&&WIEHEN&&lit)emissive.push({x:sx+12+ox,y:sy+8,r:14})}}
 
 /* ================= STATE ================= */
 const cv=$('cv');let ctx=cv.getContext('2d'),visCtx=null,frameCv=null,frameCtx=null;   // visCtx: sichtbares 3x-Bild, frameCtx: Welt in 1x
