@@ -986,9 +986,13 @@ const HEADS={side:["...OOOOOOO...","..OHHHlHHHO..",".OHHllHHHHHO.",".OHHHHHHHHHh
   front:["...OOOOOOO...","..OHHHlHHHO..",".OHHllHHHHHO.",".OHHHHHHHHHO.",".OHHHHHHHHHO.","OGLLLLLLLLLGO","OGLMLLLLLLLGO","OGLMLLLLLLLGO",".OSSSSSSSSSO.","..OSSSkSSSO..","...OOOOOOO..."],
   back:["...OOOOOOO...","..OHHHlHHHO..",".OHhHHhHHhHO.",".OHHHHHHHHHO.",".OHHHHHHHHHO.","OGGGGGGGGGGGO","OGGGGGGGGGGGO","OGGGGGGGGGGGO",".OHHHHHHHHHO.","..OkkkkkkkO..","...OOOOOOO..."]};
 // Downhill: Fullface-Helm mit Kinnbügel, darüber die Brille
-const HEADS_FF={side:["..OOOOOOO....",".OHHHllHHOOO.","OHHHlHHHJJJJO","OHHHHHHHHOOO.","OHHHHHHHHOOO.","OHHHHHHGLLLO.","OHHHHHHGLMLO.","OHHHHHHGLMLO.","OHHHHHHHHOSO.",".OHHHHHHJJhJO","..OOOOOOOOOO."],
-  front:["..OOOOOOOOO..",".OHHHlHHHHHO.","OJJJJJJJJJJJO","OHGLLLLLLLGHO","OHGLLLLLLLGHO","OHGLLMLLLLGHO","OHHOOSSSOOHHO","OHHOOSSSOOHHO","OHJJJhJhJJJHO",".OHHHHHHHHHO.","..OOOOOOOOO.."],
-  back:["..OOOOOOOOO..",".OHHHlHHHHHO.","OHHHHHHHHHHHO","OHHHHHHHHHHHO","OHHHHHHHHHHHO","OGGGGGGGGGGGO","OHHHHHHHHHHHO","OHHHHHHHHHHHO","OHHHhHHHhHHHO",".OHHHHHHHHHO.","..OOOOOOOOO.."]};
+/* Integralhelm (Downhill): größer als der Kopf. Von der Seite: runde Schale, vorne oben der Schirm (Akzentfarbe J), darunter die
+   eingezogene Brillenöffnung mit der Brille, darunter der Kinnbügel, der wieder weit nach vorne ragt (mit Lüftungsschlitzen);
+   die Unterkante steigt nach hinten zum Nacken an. Von vorne: Schirm, Brille, Mundöffnung, Kinnbügel mit Gitter. */
+const HEADS_FF={side:[".....OOOOOOO......","...OOHHHlllHOO....","..OHHHlHHHHHHHOOO.",".OHHHHHHHHHHHHJJJO","OHHHHHHHHHHHHJJJO.","OHHHHHHHHHHHOOOO..","OHHHHHHHHHHGLLO...","OGGGGGGGGGGGLMO...","OHHHHHHHHHHGLLO...","OHHHHHHHHHHHOSO...","OHHHHHHHHHHHHJJO..",".OHHhGhhHHHGHGJJO.","..OhhhhhhhhhhhJJJO","...OOOOOOOOOOOOOO."],
+  front:[".....OOOOO.....","...OOHHlHHOO...","..OHHlHHHHHHO..",".OJJJJJJJJJJJO.","OJJJJJJJJJJJJJO","OHOOOOOOOOOOOHO","OHGLLLLLLLLLGHO","OGGLMLLLLLLLGGO","OHGGGGGGGGGGGHO","OHHOOSSkSSOOHHO",".OHJJOOOOOJJHO.",".OHJGJGJGJGJHO.","..OhJJJJJJJhO..","...OOOOOOOOO..."],
+  back:[".....OOOOO.....","...OOHHlHHOO...","..OHHlHHHHHHO..",".OHHHGHHHGHHHO.","OHHHHGHHHGHHHHO","OHHHHHHHHHHHHHO","OHHHHHHHHHHHHHO","OGGGGGGGGGGGGGO","OHHHHHHHHHHHHHO","OHHhHHHHHHHhHHO","OHhGHHHHHHHGhHO",".OhhHHHHHHHhhO.","..OOhhhhhhhOO..","....OOOOOOO...."]};
+const FF_GEO={side:{cx:7,top:1},front:{cx:7,top:1},back:{cx:7,top:1}};   /* Spalte der Kopfmitte, Reihen über dem Kopf */
 // Downhill: offener MTB-Helm mit Schirm, Gesicht frei, Sportbrille
 const HEADS_MTB={side:["...OOOOOOO...","..OHHHlHHHO..",".OHHllHHHHHO.",".OHHHHHHHhhhO","OHHHHHHOOOOO.","OHHHHkSGLLLO.",".OHHkSSSSSSO.",".OkSSSSSSSSO.","..OkSSSSSSO..","..OkSSSSSSO..","...OOOOOOO..."],
   front:["...OOOOOOO...","..OHHHlHHHO..",".OHHllHHHHHO.",".OhhhhhhhhhO.","OHOSSSSSSSOHO","OHGLLGGGLLGHO","OhSSSSkSSSShO",".OSSSSSSSSSO.","..OSSSSSSSO..","..OSSSkSSSO..","...OOOOOOO..."],
@@ -1011,9 +1015,9 @@ BN_RAW.inka={side:["....OOOO.....","...OQQQqO....","...OQqqqO....","..OOOOOOOO..
 const BN_TOP={inka:4};   /* Reihen über dem normalen Kopf (Bommel); die Bändel hängen unter dem Kinn, von der Seite genau in der Mitte am Ohr */
 const BEANIES=Object.fromEntries(Object.entries(BN_RAW).map(([k,v])=>[k,Object.fromEntries(Object.entries(v).map(([kk,m])=>[kk,m.map(r=>r.replace(/X/g,(_,i)=>i%2?'n':'N'))]))]));
 /* rot = Vierteldrehungen im Uhrzeigersinn (Corks), gedreht um die Kopfmitte; Mützen-Aufbau wächst immer Richtung Kopf-oben */
-function drawHead(g,kind,x,y,P,flip,rot){const m=P.hat?BEANIES[P.hat][kind]:P.ff?HEADS_FF[kind]:P.mtb?HEADS_MTB[kind]:HEADS[kind],e=P.hat&&BN_TOP[P.hat]!=null?BN_TOP[P.hat]:m.length-11,X=x+6,Y=y+5;
+function drawHead(g,kind,x,y,P,flip,rot){const m=P.hat?BEANIES[P.hat][kind]:P.ff?HEADS_FF[kind]:P.mtb?HEADS_MTB[kind]:HEADS[kind],geo=!P.hat&&P.ff?FF_GEO[kind]:null,e=P.hat&&BN_TOP[P.hat]!=null?BN_TOP[P.hat]:geo?geo.top:m.length-11,cx=geo?geo.cx:6,X=x+6,Y=y+5;
   for(let r=0;r<m.length;r++)for(let c=0;c<m[r].length;c++){const ch=m[r][c];if(ch==='.')continue;
-    const dc=(flip?m[r].length-1-c:c)-6,dr=r-5-e;let sx=dc,sy=dr;
+    const dc=flip?cx-c:c-cx,dr=r-5-e;let sx=dc,sy=dr;
     if(rot===1){sx=-dr;sy=dc}else if(rot===2){sx=-dc;sy=-dr}else if(rot===3){sx=dr;sy=-dc}
     g.fillStyle=P[ch];g.fillRect(X+sx,Y+sy,1,1)}}
 
