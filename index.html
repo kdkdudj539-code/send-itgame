@@ -5098,13 +5098,15 @@ function wmClose(){refreshMenu();show('menu');layout()}
 
 /* ================= LOOTBOX =================
    Pro 50.000 Punkte in einem Lauf gibt es eine Lootbox. Beim Öffnen wird zuerst die Seltenheit gezogen (feste Gewichte, die im
-   Lootbox-Fenster stehen), danach innerhalb dieser Seltenheit ein Teil, jedes mit derselben Chance. Die Chancen ändern sich nie,
-   auch nicht durch das, was man schon hat: Ein doppeltes Teil wird zu Münzen (ein Viertel vom Shop-Preis).
+   Lootbox-Fenster stehen), danach innerhalb dieser Seltenheit ein Teil, das man noch nicht hat, jedes mit derselben Chance.
+   Doppelte gibt es nie: Was man schon hat, fällt aus der Ziehung, dadurch steigt die Chance der übrigen Teile; die Chance der
+   Seltenheit selbst bleibt immer gleich. Hat man aus einer Seltenheit schon alles, gibt es stattdessen Münzen
+   (gewöhnlich 100, ungewöhnlich 400, selten 5000, sehr selten 10000).
    Gewöhnlich: einfache Farben. Ungewöhnlich: coolere Farben (teure Farben, Bommel- und Fisherman-Mützen, Gold, Neon).
    Selten: Fully- und Downhill-Rahmen, Freeride-Rucksack, unsichtbarer Rucksack. Sehr selten: die Winter-Pullis und die Ohrenmützen. */
-const BOX_PTS=50000,LOOT_DUP=.25;
-const LOOT_TIERS=[{id:'common',n:['GEWÖHNLICH','COMMON'],w:60,col:'#c9d0db'},{id:'uncommon',n:['UNGEWÖHNLICH','UNCOMMON'],w:28,col:'#5fe08a'},
-  {id:'rare',n:['SELTEN','RARE'],w:9,col:'#4fb6ff'},{id:'epic',n:['SEHR SELTEN','VERY RARE'],w:3,col:'#f2c445'}];
+const BOX_PTS=50000;
+const LOOT_TIERS=[{id:'common',n:['GEWÖHNLICH','COMMON'],w:60,col:'#c9d0db',coins:100},{id:'uncommon',n:['UNGEWÖHNLICH','UNCOMMON'],w:28,col:'#5fe08a',coins:400},
+  {id:'rare',n:['SELTEN','RARE'],w:9,col:'#4fb6ff',coins:5000},{id:'epic',n:['SEHR SELTEN','VERY RARE'],w:3,col:'#f2c445',coins:10000}];   /* coins: Ersatz, wenn man aus der Seltenheit schon alles hat */
 let LOOT_P=null;
 function lootPools(){if(LOOT_P)return LOOT_P;const P={common:[],uncommon:[],rare:[],epic:[]};
   for(const c of CATS)for(const it of SHOP[c].items){if(!it.price||it.req)continue;
@@ -5115,14 +5117,17 @@ function lootPools(){if(LOOT_P)return LOOT_P;const P={common:[],uncommon:[],rare
   for(const f of FORMS.bike.list)if(f.price)P.rare.push({cat:'bike',form:f.id});
   return LOOT_P=P}
 const lootRnd=()=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296}catch(e){return Math.random()}};   /* echter Zufall aus dem Browser */
-function lootRoll(){const P=lootPools(),T=LOOT_TIERS.filter(t=>P[t.id].length),tot=T.reduce((a,t)=>a+t.w,0);let r=lootRnd()*tot,tier=T[T.length-1];
-  for(const t of T){r-=t.w;if(r<0){tier=t;break}}
-  const pool=P[tier.id];return Object.assign({tier},pool[Math.floor(lootRnd()*pool.length)])}
+const lootKey=e=>e.form?'f_bike_'+e.form:e.id,lootLeft=(P,t)=>P[t.id].filter(e=>!SAVE.owned[lootKey(e)]);
+const lootTierCoins=t=>t.coins;
+function lootRoll(){const P=lootPools(),tot=LOOT_TIERS.reduce((a,t)=>a+t.w,0);let r=lootRnd()*tot,tier=LOOT_TIERS[LOOT_TIERS.length-1];
+  for(const t of LOOT_TIERS){r-=t.w;if(r<0){tier=t;break}}   /* Seltenheit: immer 60 / 28 / 9 / 3 % */
+  const left=lootLeft(P,tier);if(!left.length)return {tier,coinsOnly:true};   /* alles aus dieser Seltenheit schon da: Münzen */
+  return Object.assign({tier},left[Math.floor(lootRnd()*left.length)])}
 function lootInfo(d){if(d.form){const f=FORMS.bike.list.find(q=>q.id===d.form);return {name:formName(f)+TX('-Rahmen',' frame'),catN:TX('Bike-Rahmen','Bike frame'),price:f.price,key:'f_bike_'+d.form}}
   const it=itemOf(d.cat,d.id);return {name:itName(it),catN:catName(d.cat),price:it.price,key:it.id}}
-function lootOpen(){if((SAVE.boxes|0)<1)return null;const d=lootRoll(),I=lootInfo(d),dup=!!SAVE.owned[I.key];
-  SAVE.boxes--;let coins=0;if(dup){coins=Math.round(I.price*LOOT_DUP);SAVE.coins+=coins}else SAVE.owned[I.key]=true;
-  persist();return Object.assign(d,I,{dup,coins})}
+function lootOpen(){if((SAVE.boxes|0)<1)return null;const d=lootRoll();SAVE.boxes--;
+  if(d.coinsOnly){const coins=lootTierCoins(d.tier);SAVE.coins+=coins;persist();return Object.assign(d,{name:'+'+coins+TX(' Münzen',' coins'),catN:TX('Aus dieser Seltenheit hast du schon alles','You already have everything of this rarity'),coins})}
+  const I=lootInfo(d);SAVE.owned[I.key]=true;persist();return Object.assign(d,I,{coins:0})}
 const LOOT_SUM=['jersey','prot','shoes'].concat(BIKE_PARTS),LOOT_SKI=['skis','binding','poles','boots'],LOOT_WIN=['hoodie','sweater','pack'];
 function lootPv(d){const eq=Object.assign({},SAVE.equip,d.form?{bframe:d.form}:{[d.cat]:d.id},d.cat==='beanie'?{helmet:'h_none'}:{},d.cat==='hoodie'?{sweater:'sw_none'}:{});
   const gear=d.form||LOOT_SUM.includes(d.cat)?'bike':d.cat==='board'?'board':LOOT_SKI.includes(d.cat)?'ski':LOOT_WIN.includes(d.cat)?SAVE.gear:SUMMER?'bike':SAVE.gear;
@@ -5134,17 +5139,18 @@ function lootRender(){const n=SAVE.boxes|0,P=lootPools(),busy=LB.st==='shake'||L
   setT($('lCoins'),String(SAVE.coins));setT($('lootEye'),TX('Pro 50.000 Punkte in einem Lauf eine Box','One box per 50,000 points in a run'));
   setT($('lootCount'),n?TX('Du hast '+n+' Lootbox'+(n>1?'en':''),'You have '+n+' loot box'+(n>1?'es':'')):TX('Keine Lootbox. Fahr einen Lauf mit 50.000 Punkten!','No loot box. Score 50,000 points in a run!'));
   setT($('lootOddsH'),TX('CHANCEN','ODDS'));
-  $('lootOdds').innerHTML=LOOT_TIERS.map(t=>{const k=P[t.id].length,each=k?t.w/k:0;return '<li><span class="dot" style="background:'+t.col+'"></span><b style="color:'+t.col+'">'+TX(t.n[0],t.n[1])+'</b><span class="pc">'+t.w+' %</span><small>'+k+TX(' Teile · je ',' items · each ')+each.toFixed(each<1?2:1).replace('.',LANG==='en'?'.':',')+' %</small></li>'}).join('');
-  setT($('lootNote'),TX('Erst wird die Seltenheit gezogen, dann ein Teil daraus. Die Chancen ändern sich nie. Hast du ein Teil schon, bekommst du ein Viertel seines Shop-Preises in Münzen.','First the rarity is drawn, then an item from it. The odds never change. If you already own the item, you get a quarter of its shop price in coins.'));
+  $('lootOdds').innerHTML=LOOT_TIERS.map(t=>{const all=P[t.id].length,k=lootLeft(P,t).length,each=k?t.w/k:0,pc=each.toFixed(each<1?2:1).replace('.',LANG==='en'?'.':',');
+    return '<li><span class="dot" style="background:'+t.col+'"></span><b style="color:'+t.col+'">'+TX(t.n[0],t.n[1])+'</b><span class="pc">'+t.w+' %</span><small>'+(k?TX(k+' von '+all+' übrig · je '+pc+' %',k+' of '+all+' left · each '+pc+' %'):TX('Alles gesammelt · '+lootTierCoins(t)+' Münzen','All collected · '+lootTierCoins(t)+' coins'))+'</small></li>'}).join('');
+  setT($('lootNote'),TX('Erst wird die Seltenheit gezogen, dann ein Teil daraus, das du noch nicht hast. Doppelte gibt es nie: Je mehr du hast, desto höher die Chance auf die übrigen Teile. Die Chance der Seltenheit bleibt immer gleich. Hast du daraus alles, gibt es Münzen.','First the rarity is drawn, then an item from it that you don\'t own yet. No duplicates ever: the more you own, the higher the chance for the rest. The rarity\'s chance always stays the same. Once you have all of it, you get coins.'));
   const bo=$('bLootOpen');bo.disabled=busy||n<1;setT(bo,LB.st==='show'&&n>0?TX('NOCHMAL ÖFFNEN','OPEN ANOTHER'):TX('ÖFFNEN','OPEN'));
   setT($('bLootBack'),TX('ZURÜCK','BACK'));setT($('bLootEquip'),TX('ANZIEHEN','EQUIP'));
-  const r=LB.res,sh=LB.st==='show'&&r;$('lootCv').hidden=!!sh;$('pvLoot').hidden=!sh;
-  $('bLootEquip').hidden=!(sh&&!r.dup&&!r.equipped);
+  const r=LB.res,sh=LB.st==='show'&&r,item=sh&&!r.coinsOnly;$('lootCv').hidden=!!item;$('pvLoot').hidden=!item;
+  $('bLootEquip').hidden=!(item&&!r.equipped);
   if(sh){const t=$('lootTier');t.textContent=TX(r.tier.n[0],r.tier.n[1]);t.style.color=r.tier.col;$('lootName').textContent=r.name;
-    $('lootSub').textContent=r.catN+' · '+(r.dup?TX('Hast du schon: +'+r.coins+' Münzen','Already owned: +'+r.coins+' coins'):r.equipped?TX('Angezogen!','Equipped!'):TX('NEU! Liegt jetzt in deinem Shop.','NEW! Now in your shop.'))}
+    $('lootSub').textContent=r.coinsOnly?r.catN:r.catN+' · '+(r.equipped?TX('Angezogen!','Equipped!'):TX('NEU! Liegt jetzt in deinem Shop.','NEW! Now in your shop.'))}
   else{$('lootTier').textContent=busy?'':'';$('lootName').textContent=busy?TX('Wird geöffnet …','Opening …'):'';$('lootSub').textContent=''}}
 function openLoot(from){LB.from=from||'menu';if(LB.st!=='shake'&&LB.st!=='burst'){LB.st='idle';LB.res=null}LB.t=0;show('loot');lootRender();layout()}
-function lootStart(){if(LB.st==='shake'||LB.st==='burst')return;const r=lootOpen();if(!r)return;unlockAudio();LB.res=r;LB.st='shake';LB.t=0;LB.parts=[];LB.pv=lootPv(r);lootRender();lootMenu()}
+function lootStart(){if(LB.st==='shake'||LB.st==='burst')return;const r=lootOpen();if(!r)return;unlockAudio();LB.res=r;LB.st='shake';LB.t=0;LB.parts=[];LB.pv=r.coinsOnly?null:lootPv(r);lootRender();lootMenu()}
 /* Die Box: Holzkiste mit Goldbeschlägen. Wackelt immer stärker, kurz vor dem Aufgehen leuchtet sie in der Farbe der Seltenheit,
    dann fliegt der Deckel weg, Lichtstrahlen und Funken. */
 function drawLoot(dt){const c=$('lootCv');if(!c||c.hidden)return;const g=c.getContext('2d'),W=96,H=72;g.imageSmoothingEnabled=false;
@@ -5164,6 +5170,7 @@ function drawLoot(dt){const c=$('lootCv');if(!c||c.hidden)return;const g=c.getCo
   if(st!=='show'){g.save();if(lift){g.globalAlpha=Math.max(0,1-t/.5)}P(lx-1,ly-1,46,10,'#0a0f20');P(lx,ly,44,8,'#8a5530');P(lx,ly,44,2,'#b07440');P(lx,ly+7,44,1,'#5a341a');P(lx,ly,3,8,'#e0b43a');P(lx+41,ly,3,8,'#e0b43a');P(lx+19,ly,6,8,'#f2c445');
     if(!lift){P(bx+16,by-3,8,8,'#0a0f20');P(bx+17,by-2,6,6,'#f2c445');P(bx+17,by-2,6,1,'#fff0a0');P(bx+19,by,2,3,'#5a4210')}g.restore()}
   if(st==='idle'&&LB.res===null)for(let k=0;k<3;k++){const ph=(T*.8+k/3)%1,sx=20+((k*37+Math.floor(T*.8+k/3)*29)%56);g.globalAlpha=Math.sin(ph*Math.PI);P(sx,14+((k*23)%14),1,3,'#ffffff');P(sx-1,15+((k*23)%14),3,1,'#ffffff');g.globalAlpha=1}
+  if(st==='show'&&LB.res&&LB.res.coinsOnly)for(const [cx,cy] of [[40,30],[46,29],[52,30],[43,26],[49,25],[46,22]]){P(cx-1,cy-1,7,6,'#0a0f20');P(cx,cy,5,4,'#f2c445');P(cx,cy,5,1,'#fff0a0');P(cx+1,cy+3,4,1,'#b88a22')}
   for(const q of LB.parts){q.l-=dt;if(q.l<=0)continue;q.vy+=120*dt;q.x+=q.vx*dt;q.y+=q.vy*dt;P(q.x,q.y,2,2,col)}LB.parts=LB.parts.filter(q=>q.l>0)}
 
 /* ================= LAYOUT ================= */
@@ -5355,7 +5362,7 @@ let prevScreen='menu';
 $('bOverShop').onclick=()=>{prevScreen='over';openShop()};$('bShop').addEventListener('click',()=>prevScreen='menu');
 $('bAgain').onclick=startRun;$('bOverMenu').onclick=toMenu;
 $('bLoot').onclick=()=>openLoot('menu');$('bOverLoot').onclick=()=>openLoot('over');$('bLootOpen').onclick=lootStart;
-$('bLootEquip').onclick=()=>{const r=LB.res;if(!r||r.dup)return;lootEquip(r);r.equipped=true;lootRender()};
+$('bLootEquip').onclick=()=>{const r=LB.res;if(!r||r.coinsOnly)return;lootEquip(r);r.equipped=true;lootRender()};
 $('bLootBack').onclick=()=>{if(LB.st==='shake'||LB.st==='burst')return;LB.st='idle';LB.res=null;if(LB.from==='over'){$('bOverLoot').hidden=!(SAVE.boxes>0);show('over')}else{refreshMenu();show('menu')}layout()};
 $('bResume').onclick=()=>setPause(false);$('bQuit').onclick=()=>{setPause(false);p.mode='dead';p.deadReason='quit';gameOver()};
 $('bPause').onclick=()=>setPause(true);
