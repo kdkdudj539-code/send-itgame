@@ -986,13 +986,13 @@ const HEADS={side:["...OOOOOOO...","..OHHHlHHHO..",".OHHllHHHHHO.",".OHHHHHHHHHh
   front:["...OOOOOOO...","..OHHHlHHHO..",".OHHllHHHHHO.",".OHHHHHHHHHO.",".OHHHHHHHHHO.","OGLLLLLLLLLGO","OGLMLLLLLLLGO","OGLMLLLLLLLGO",".OSSSSSSSSSO.","..OSSSkSSSO..","...OOOOOOO..."],
   back:["...OOOOOOO...","..OHHHlHHHO..",".OHhHHhHHhHO.",".OHHHHHHHHHO.",".OHHHHHHHHHO.","OGGGGGGGGGGGO","OGGGGGGGGGGGO","OGGGGGGGGGGGO",".OHHHHHHHHHO.","..OkkkkkkkO..","...OOOOOOO..."]};
 // Downhill: Fullface-Helm mit Kinnbügel, darüber die Brille
-/* Integralhelm (Downhill): größer als der Kopf. Von der Seite: runde Schale, vorne oben der Schirm (Akzentfarbe J), darunter die
+/* Integralhelm (Downhill): kaum größer als der Kopf (eine Reihe höher, Schirm und Kinnbügel stehen vorne 3 Pixel vor). Von der Seite: runde Schale, vorne oben der Schirm (Akzentfarbe J), darunter die
    eingezogene Brillenöffnung mit der Brille, darunter der Kinnbügel, der wieder weit nach vorne ragt (mit Lüftungsschlitzen);
    die Unterkante steigt nach hinten zum Nacken an. Von vorne: Schirm, Brille, Mundöffnung, Kinnbügel mit Gitter. */
-const HEADS_FF={side:[".....OOOOOOO......","...OOHHHlllHOO....","..OHHHlHHHHHHHOOO.",".OHHHHHHHHHHHHJJJO","OHHHHHHHHHHHHJJJO.","OHHHHHHHHHHHOOOO..","OHHHHHHHHHHGLLO...","OGGGGGGGGGGGLMO...","OHHHHHHHHHHGLLO...","OHHHHHHHHHHHOSO...","OHHHHHHHHHHHHJJO..",".OHHhGhhHHHGHGJJO.","..OhhhhhhhhhhhJJJO","...OOOOOOOOOOOOOO."],
-  front:[".....OOOOO.....","...OOHHlHHOO...","..OHHlHHHHHHO..",".OJJJJJJJJJJJO.","OJJJJJJJJJJJJJO","OHOOOOOOOOOOOHO","OHGLLLLLLLLLGHO","OGGLMLLLLLLLGGO","OHGGGGGGGGGGGHO","OHHOOSSkSSOOHHO",".OHJJOOOOOJJHO.",".OHJGJGJGJGJHO.","..OhJJJJJJJhO..","...OOOOOOOOO..."],
-  back:[".....OOOOO.....","...OOHHlHHOO...","..OHHlHHHHHHO..",".OHHHGHHHGHHHO.","OHHHHGHHHGHHHHO","OHHHHHHHHHHHHHO","OHHHHHHHHHHHHHO","OGGGGGGGGGGGGGO","OHHHHHHHHHHHHHO","OHHhHHHHHHHhHHO","OHhGHHHHHHHGhHO",".OhhHHHHHHHhhO.","..OOhhhhhhhOO..","....OOOOOOO...."]};
-const FF_GEO={side:{cx:7,top:1},front:{cx:7,top:1},back:{cx:7,top:1}};   /* Spalte der Kopfmitte, Reihen über dem Kopf */
+const HEADS_FF={side:["...OOOOOO.......","..OHHlllHO......",".OHlHHHHHHOOO...",".OHHHHHHHHJJJJO.","OHHHHHHHHOOOOO..","OGGGGGGGGGLLO...","OHHHHHHHHGLMO...","OHHHHHHHHHOSO...","OHHhGhHHHHHJJJO.",".OHHHHHHHGHJJJO.","..OhhhhhhhhhhhO.","...OOOOOOOOOOO.."],
+  front:["....OOOOO....","..OOHHlHHOO..",".OHHlHHHHHHO.","OJJJJJJJJJJJO","OHOOOOOOOOOHO","OGLLLLLLLLLGO","OGLMLLLLLLLGO","OHGGGGGGGGGHO","OHHOSSkSSOHHO","OHJOOOOOOOJHO",".OHJGJGJGJHO.","..OOOOOOOOO.."],
+  back:["....OOOOO....","..OOHHlHHOO..",".OHHlHHHHHHO.","OHHHGHHHGHHHO","OHHHGHHHGHHHO","OHHHHHHHHHHHO","OGGGGGGGGGGGO","OHHHHHHHHHHHO","OHhHHHHHHHhHO","OHhGHHHHHGhHO",".OhhhhhhhhhO.","..OOOOOOOOO.."]};
+const FF_GEO={side:{cx:6,top:1},front:{cx:6,top:1},back:{cx:6,top:1}};   /* Spalte der Kopfmitte, Reihen über dem Kopf */
 // Downhill: offener MTB-Helm mit Schirm, Gesicht frei, Sportbrille
 const HEADS_MTB={side:["...OOOOOOO...","..OHHHlHHHO..",".OHHllHHHHHO.",".OHHHHHHHhhhO","OHHHHHHOOOOO.","OHHHHkSGLLLO.",".OHHkSSSSSSO.",".OkSSSSSSSSO.","..OkSSSSSSO..","..OkSSSSSSO..","...OOOOOOO..."],
   front:["...OOOOOOO...","..OHHHlHHHO..",".OHHllHHHHHO.",".OhhhhhhhhhO.","OHOSSSSSSSOHO","OHGLLGGGLLGHO","OhSSSSkSSSShO",".OSSSSSSSSSO.","..OSSSSSSSO..","..OSSSkSSSO..","...OOOOOOO..."],
