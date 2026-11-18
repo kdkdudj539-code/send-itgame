@@ -301,6 +301,10 @@ html.sum .btn.alt{background:#e2f4e5}
 .item .nm{font-size:20px;line-height:1}
 .item .pr{font-family:var(--ui);font-size:12px;color:var(--gold);display:flex;align-items:center;gap:6px}
 .item .pr .coin{width:9px;height:11px;box-shadow:inset -1px -1px 0 #c48a12,0 0 0 2px #5c3b07}
+.item.legend{box-shadow:0 0 0 2px #ff6b3d}
+.item.legend .nm{color:#ffb08c}
+.item.legend.locked .sw{filter:grayscale(.7) brightness(.55)}
+.item.legend.locked .pr{color:#ff6b3d}
 .item.eq{box-shadow:0 0 0 3px var(--ok)}
 .item.eq .pr{color:var(--ok)}
 .item.sel{box-shadow:0 0 0 3px var(--gold);background:#28365e}
@@ -628,6 +632,15 @@ const $=id=>document.getElementById(id);
 
 /* ================= SHOP DATA ================= */
 const SHOP={
+  /* Skins: legendär, gibt es nur aus der Lootbox (1 % pro Box), nicht zu kaufen. Ein Skin ersetzt Kopf, Helm, Brille und Kleidung;
+     Ski, Board, Bike und Schuhe bleiben. head = Vorlage in SKIN_HEADS, c Anzug, face Haut, hair/hair2 Haare und rasierte Stellen,
+     lip Mund, zip Knopfleiste oder Krawatte. Neue Skins: Eintrag hier und Kopf in SKIN_HEADS. */
+  skin:{label:'Skins',items:[
+    {id:'sk_none',name:'Kein Skin',price:0,c:'#3b4152'},
+    {id:'sk_kim',name:'Kim Jong-un',price:0,legend:true,head:'kim',c:'#26282e',a:'#efc39b',face:'#efc39b',hair:'#141418',hair2:'#6b5a52',lip:'#7e3f3a',zip:'#50545e',
+      info:'Legendärer Skin: Kim Jong-un mit der berühmten Frisur, oben lang und an den Seiten kurz rasiert, im schwarzen Mao-Anzug.'},
+    {id:'sk_putin',name:'Wladimir Putin',price:0,legend:true,head:'putin',c:'#1e2740',a:'#efc0a6',face:'#efc0a6',hair:'#b4a48a',hair2:'#8e7f68',lip:'#8e4e48',zip:'#b8323a',shirt:'#eef1f7',
+      info:'Legendärer Skin: Wladimir Putin mit hoher Stirn und kurzen hellen Haaren, im dunklen Anzug mit roter Krawatte.'}]},
   helmet:{label:'Helm',items:[
     {id:'h_none',name:'Ohne Helm (Mütze)',price:0,c:'#3b4152',a:'#c8442e'},
     {id:'h_black',name:'Matt Schwarz',price:0,c:'#2e313d'},
@@ -866,13 +879,15 @@ const PRICE_X=4;for(const c in SHOP)for(const it of SHOP[c].items)it.price*=PRIC
 let shopForm={};
 
 /* ================= SAVE ================= */
-const DEF={coins:0,best:0,bestDist:0,bestJ:0,bestDistJ:0,bestW:0,bestDistW:0,bestD:0,bestDistD:0,boxes:0,owned:{},equip:{helmet:'h_black',goggles:'g_orange',hoodie:'d_grey',sweater:'sw_none',pants:'p_khaki',skis:'s_red',board:'b_black',poles:'po_black',pack:'pk_none',beanie:'bn_black',bframe:'ht',bforkf:'sc',helmf:'ff',boots:'bt_black',bike:'bk_carbon',jersey:'j_black',prot:'pr_none',bfork:'fk_gold',bshock:'sh_gold',brim:'rm_black',btire:'tr_black',bbar:'bb_black',bsad:'sd_black',bped:'pd_black',binding:'bd_grey',shoes:'bs_black'},gear:'ski',season:'winter',map:'alps',assist:false,packLast:'pk_free',music:true,vol:100};
+const DEF={coins:0,best:0,bestDist:0,bestJ:0,bestDistJ:0,bestW:0,bestDistW:0,bestD:0,bestDistD:0,boxes:0,owned:{},equip:{skin:'sk_none',helmet:'h_black',goggles:'g_orange',hoodie:'d_grey',sweater:'sw_none',pants:'p_khaki',skis:'s_red',board:'b_black',poles:'po_black',pack:'pk_none',beanie:'bn_black',bframe:'ht',bforkf:'sc',helmf:'ff',boots:'bt_black',bike:'bk_carbon',jersey:'j_black',prot:'pr_none',bfork:'fk_gold',bshock:'sh_gold',brim:'rm_black',btire:'tr_black',bbar:'bb_black',bsad:'sd_black',bped:'pd_black',binding:'bd_grey',shoes:'bs_black'},gear:'ski',season:'winter',map:'alps',assist:false,packLast:'pk_free',music:true,vol:100};
 // Stand prüfen und auffüllen (vom Gerät oder aus dem Konto). t = letzte Änderung, uid = Konto, zu dem der Stand gehört, sc = Münzen beim letzten Abgleich mit dem Konto
 const SEASON_EQ=['helmet','beanie','goggles','pants','sweater'];   // diese Teile gibt es im Winter und im Downhill: je Saison ein eigenes Outfit
 const mig41=e=>{if(!e.m41&&e.bike==='bk_red')e.bike='bk_carbon';e.m41=1;return e};   // v4.1: neues Standard-Bike, Rot bleibt gratis im Shop
 /* Pulli je Saison (seit er auch im Downhill geht): alte Spielstände behalten den Winter-Pulli im Winter, im Sommer ohne Pulli */
 function normSave(s){const r=normSave0(s),a=s&&typeof s==='object'&&s.eqAlt&&typeof s.eqAlt==='object'?s.eqAlt:null;
-  if(!(a&&typeof a.sweater==='string')){if(r.season==='summer'){r.eqAlt.sweater=r.equip.sweater||'sw_none';r.equip.sweater='sw_none'}else r.eqAlt.sweater='sw_none'}return r}
+  if(!(a&&typeof a.sweater==='string')){if(r.season==='summer'){r.eqAlt.sweater=r.equip.sweater||'sw_none';r.equip.sweater='sw_none'}else r.eqAlt.sweater='sw_none'}
+  if(typeof r.equip.skin!=='string'||r.equip.skin!=='sk_none'&&!r.owned[r.equip.skin])r.equip.skin='sk_none';   /* Skin nur, wenn man ihn aus der Lootbox hat */
+  return r}
 function normSave0(s){s=s&&typeof s==='object'?s:{};const ob=v=>v&&typeof v==='object'&&!Array.isArray(v);
   return {coins:Math.max(0,s.coins|0),best:Math.max(0,s.best|0),bestDist:Math.max(0,s.bestDist|0),bestJ:Math.max(0,s.bestJ|0),bestDistJ:Math.max(0,s.bestDistJ|0),bestW:Math.max(0,s.bestW|0),bestDistW:Math.max(0,s.bestDistW|0),bestD:Math.max(0,s.bestD|0),bestDistD:Math.max(0,s.bestDistD|0),boxes:Math.max(0,s.boxes|0),owned:ob(s.owned)?Object.assign({},s.owned):{},
     equip:mig41(Object.assign({},DEF.equip,ob(s.equip)?s.equip:{})),eqAlt:(()=>{const e=Object.assign({},DEF.equip,ob(s.equip)?s.equip:{}),a=ob(s.eqAlt)?s.eqAlt:{},o={};for(const k of SEASON_EQ)o[k]=typeof a[k]==='string'?a[k]:e[k];return o})(),gear:s.gear==='board'?'board':'ski',season:s.season==='summer'?'summer':'winter',map:s.map==='japan'||s.map==='wiehen'?s.map:'alps',assist:!!s.assist,music:s.music!==false,vol:Number.isFinite(+s.vol)&&s.vol!==null&&s.vol!==''?clamp(Math.round(+s.vol),0,100):100,packLast:typeof s.packLast==='string'?s.packLast:'pk_free',lang:s.lang==='en'||s.lang==='de'?s.lang:null,
@@ -906,14 +921,14 @@ function applyLang(){document.documentElement.lang=LANG;
   for(const o of I18N){const v=LANG==='en'?o.en:o.de;if(o.n)o.n.nodeValue=v;else o.el.setAttribute(o.a,v)}
   document.querySelectorAll('.tog[data-lang]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LANG)))}
 // Shop-Namen auf Englisch (fehlt ein Eintrag, ist der Name schon englisch)
-const CAT_EN={sweater:'Sweater',helmet:'Helmet',beanie:'Beanie',goggles:'Goggles',hoodie:'Zip Hoodie',jersey:'Jersey',prot:'Back Protector',bfork:'Fork',bshock:'Shock',brim:'Rims',btire:'Tires',bbar:'Bar & Grips',bsad:'Saddle',bped:'Pedals',pants:'Baggy Pants',skis:'Twin Tips',board:'Snowboard',bike:'Bike',pack:'Backpack',poles:'Poles',boots:'Ski Boots',binding:'Bindings',shoes:'Bike Shoes'};
-const SHOP_EN={sw_none:'No sweater (jacket)',sw_deer:'Reindeer',sw_flake:'Snowflake',sw_nordic:'Nordic',bd_grey:'Grey',bd_black:'Black',bd_white:'White',bd_red:'Red',bd_orange:'Orange',bd_blue:'Blue',bd_pink:'Pink',bd_lime:'Lime',bd_gold:'Gold',bs_black:'Black',bs_grey:'Grey',bs_white:'White',bs_gum:'Black with Gum Sole',bs_red:'Red',bs_blue:'Blue',bs_orange:'Orange',bs_olive:'Olive',bs_lime:'Lime',bs_gold:'Gold',h_none:'No Helmet (Beanie)',h_black:'Matte Black',h_white:'Chalk White',h_orange:'Safety Orange',h_lilac:'Lilac',
+const CAT_EN={skin:'Skins',sweater:'Sweater',helmet:'Helmet',beanie:'Beanie',goggles:'Goggles',hoodie:'Zip Hoodie',jersey:'Jersey',prot:'Back Protector',bfork:'Fork',bshock:'Shock',brim:'Rims',btire:'Tires',bbar:'Bar & Grips',bsad:'Saddle',bped:'Pedals',pants:'Baggy Pants',skis:'Twin Tips',board:'Snowboard',bike:'Bike',pack:'Backpack',poles:'Poles',boots:'Ski Boots',binding:'Bindings',shoes:'Bike Shoes'};
+const SHOP_EN={sk_none:'No skin',sk_kim:'Kim Jong-un',sk_putin:'Vladimir Putin',sw_none:'No sweater (jacket)',sw_deer:'Reindeer',sw_flake:'Snowflake',sw_nordic:'Nordic',bd_grey:'Grey',bd_black:'Black',bd_white:'White',bd_red:'Red',bd_orange:'Orange',bd_blue:'Blue',bd_pink:'Pink',bd_lime:'Lime',bd_gold:'Gold',bs_black:'Black',bs_grey:'Grey',bs_white:'White',bs_gum:'Black with Gum Sole',bs_red:'Red',bs_blue:'Blue',bs_orange:'Orange',bs_olive:'Olive',bs_lime:'Lime',bs_gold:'Gold',h_none:'No Helmet (Beanie)',h_black:'Matte Black',h_white:'Chalk White',h_orange:'Safety Orange',h_lilac:'Lilac',
   bn_black:'Beanie Black',bn_grey:'Beanie Grey',bn_red:'Beanie Red',bn_pom_white:'Pom Beanie White',bn_pom_red:'Pom Beanie Red',bn_pom_navy:'Pom Beanie Navy',bn_pom_pink:'Pom Beanie Pink',bn_pom_green:'Pom Beanie Forest',bn_pom_black:'Pom Beanie Black',
   bn_fish_mustard:'Fisherman Mustard',bn_fish_lilac:'Fisherman Lilac',bn_inka_rose:'Earflap Hat Rose',bn_inka_black:'Earflap Hat Black & Pink',bn_inka_beige:'Earflap Hat Beige & Brown',bn_inka_red:'Earflap Hat Red & Black',bn_inka_bord:'Earflap Hat Burgundy',d_grey:'Heather Grey',d_black:'Black',d_forest:'Forest Green',d_purple:'Purple',d_red:'Red',d_neon:'Neon Yellow',
   p_black:'Black',p_white:'White',p_camo:'Snow Camo',s_red:'Red / White',s_wood:'Wood Topsheet',b_wood:'Wood Core',
   pk_none:'No Backpack',pk_ghost:'Invisible Backpack',pk_free:'Freeride Backpack',pk_black:'Backpack Black',pk_navy:'Backpack Navy',pk_olive:'Backpack Olive',pk_orange:'Backpack Orange',pk_mint:'Backpack Mint',pk_purple:'Backpack Purple',pk_stealth:'Backpack Black-Grey',pk_yellow:'Backpack Yellow',
   fk_gold:'Gold Kashima',fk_black:'Black',fk_silver:'Silver',fk_goldw:'Gold & White',fk_orange:'Orange',fk_red:'Red',fk_blue:'Blue',fk_lime:'Lime',sh_gold:'Black / Orange',sh_orange:'Orange',sh_red:'Red',sh_black:'Gold',sh_ti:'Titanium',sh_blue:'Blue',sh_lime:'Lime',sh_purple:'Purple',rm_black:'Black',rm_silver:'Silver',rm_gold:'Gold',rm_red:'Red',rm_blue:'Blue',rm_white:'White',rm_orange:'Orange',rm_purple:'Purple',tr_black:'Black',tr_skin:'Skinwall',tr_white:'Whitewall',tr_red:'Red Wall',tr_blue:'Blue Wall',tr_yellow:'Yellow Wall',tr_gum:'Gumwall',tr_grey:'Grey',bb_black:'Black',bb_red:'Red Grips',bb_blue:'Blue Grips',bb_white:'White Grips',bb_orange:'Orange Grips',bb_lime:'Lime Grips',bb_pink:'Pink Grips',bb_gold:'Gold Bar',sd_black:'Black',sd_white:'White',sd_red:'Red',sd_blue:'Blue',sd_orange:'Orange',sd_camo:'Olive',sd_purple:'Purple',sd_gold:'Gold',pd_black:'Black',pd_silver:'Silver',pd_gold:'Gold',pd_red:'Red',pd_blue:'Blue',pd_orange:'Orange',pd_purple:'Purple',pd_lime:'Lime',pr_none:'No Protector',pr_free:'Back Protector',pr_red:'Protector Red',pr_blue:'Protector Blue',pr_neon:'Protector Neon',pr_orange:'Protector Orange',j_black:'Race Black',j_white:'Race White',j_red:'Red',j_blue:'Blue',j_forest:'Forest Green',j_purple:'Purple',j_gold:'Black-Gold',bk_carbon:'Red / Silver',bk_red:'Red',bk_white:'White',bk_blue:'Racing Blue',bk_raw:'Raw Alloy',bk_purple:'Purple',po_silver:'Alu Silver',po_white:'White',po_red:'Red',po_bamboo:'Bamboo',po_stealth:'Black',bt_black:'Black',bt_turq:'Turquoise',bt_white:'White',bt_red:'Red',bt_lilac:'Lilac'};
-const INFO_EN={bn_inka_rose:'Nordic-pattern earflap hat with pink flowers, grey plush trim, a big pom-pom and ties with little pom-poms.',bn_inka_black:'Black earflap hat with pink flowers, a white pom-pom and black ties.',bn_inka_beige:'Beige earflap hat with brown stars, cream plush trim and a brown pom-pom.',bn_inka_red:'Dark earflap hat with red flowers, white plush trim and white ties with pom-poms.',bn_inka_bord:'Light earflap hat with a burgundy pattern, plush trim and burgundy ties.',sw_deer:'Red Christmas sweater with a white reindeer band. Fits slimmer than the jacket.',sw_flake:'Green sweater with a big snowflake and zigzag sleeves. Fits slimmer than the jacket.',sw_nordic:'Red Norwegian sweater with a white cross pattern. Fits slimmer than the jacket.',pk_ghost:'You can\'t see it, but it\'s there: ice axe, avalanche shovel and first aid kit save you once per run, just like the freeride backpack. Can be switched on and off in the menu.',pr_free:'With a climbing hook, folding spade and first aid kit in its pockets: saves you once per run from whatever gets you first: the abyss, the mudslide or a rock. Can be switched on and off in the menu.',pk_free:'With ice axe, avalanche shovel and first aid kit: saves you once per run from whatever gets you first: the abyss, the avalanche or a rock. Can be switched on and off in the menu.'};
+const INFO_EN={sk_kim:'Legendary skin: Kim Jong-un with his famous haircut, long on top and shaved short at the sides, in a black Mao suit.',sk_putin:'Legendary skin: Vladimir Putin with a high forehead and short light hair, in a dark suit with a red tie.',bn_inka_rose:'Nordic-pattern earflap hat with pink flowers, grey plush trim, a big pom-pom and ties with little pom-poms.',bn_inka_black:'Black earflap hat with pink flowers, a white pom-pom and black ties.',bn_inka_beige:'Beige earflap hat with brown stars, cream plush trim and a brown pom-pom.',bn_inka_red:'Dark earflap hat with red flowers, white plush trim and white ties with pom-poms.',bn_inka_bord:'Light earflap hat with a burgundy pattern, plush trim and burgundy ties.',sw_deer:'Red Christmas sweater with a white reindeer band. Fits slimmer than the jacket.',sw_flake:'Green sweater with a big snowflake and zigzag sleeves. Fits slimmer than the jacket.',sw_nordic:'Red Norwegian sweater with a white cross pattern. Fits slimmer than the jacket.',pk_ghost:'You can\'t see it, but it\'s there: ice axe, avalanche shovel and first aid kit save you once per run, just like the freeride backpack. Can be switched on and off in the menu.',pr_free:'With a climbing hook, folding spade and first aid kit in its pockets: saves you once per run from whatever gets you first: the abyss, the mudslide or a rock. Can be switched on and off in the menu.',pk_free:'With ice axe, avalanche shovel and first aid kit: saves you once per run from whatever gets you first: the abyss, the avalanche or a rock. Can be switched on and off in the menu.'};
 const RAIL_EN={'Pistenraupe':'Snowcat','Picknicktisch':'Picnic Table','Treppen-Rail':'Stair Rail','Baumstamm':'Log','Stamm Flat-Down':'Log Flat-Down','Stamm Down-Flat-Down':'Log Down-Flat-Down','Stamm Flat-Down-Flat':'Log Flat-Down-Flat','Krummer Baum':'Bent Tree','Holzstapel':'Log Pile','Stamm A-Frame':'Log A-Frame','Stamm über den Bach':'Creek Log'};
 const catName=c=>SUMMER&&c==='pants'?TX('Bike-Hose','Bike Pants'):LANG==='en'?CAT_EN[c]||SHOP[c].label:SHOP[c].label,itName=it=>SUMMER&&it.id==='sw_none'?TX('Ohne Pulli (Trikot)','No sweater (jersey)'):LANG==='en'?SHOP_EN[it.id]||it.name:it.name,itInfo=it=>LANG==='en'?INFO_EN[it.id]||it.info:it.info;
 
@@ -965,9 +980,12 @@ function itemOf(cat,id){const L=SHOP[cat].items;return L.find(i=>i.id===id)||L[0
 function palette(eq){
   const Sw=eq.sweater&&eq.sweater!=='sw_none'?itemOf('sweater',eq.sweater):null,H=itemOf('helmet',eq.helmet).c, L=itemOf('goggles',eq.goggles).c, D=Sw?Sw.c:itemOf('hoodie',eq.hoodie).c, Pi=itemOf('pants',eq.pants), Si=itemOf('skis',eq.skis),Bi=itemOf('board',eq.board),Pl=itemOf('poles',eq.poles),Pk=eq.pack&&eq.pack!=='pk_none'&&!itemOf('pack',eq.pack).invis?itemOf('pack',eq.pack):null,Bn=itemOf('beanie',eq.beanie),Bk=itemOf('bike',eq.bike||'bk_red'),noHelm=eq.helmet==='h_none';
   const Bd=itemOf('binding',eq.binding),Sh=itemOf('shoes',eq.shoes);
-  return {SW:Sw,O:'#121626',bnd:[shade(Bd.c,-.38),Bd.c,shade(Bd.c,.6)],SH:Sh.c,SHa:Sh.a,H,h:shade(H,-.38),l:shade(H,.5),L,M:shade(L,.65),G:'#252a39',S:'#eab58f',k:'#c38663',
+  const R={SW:Sw,O:'#121626',bnd:[shade(Bd.c,-.38),Bd.c,shade(Bd.c,.6)],SH:Sh.c,SHa:Sh.a,H,h:shade(H,-.38),l:shade(H,.5),L,M:shade(L,.65),G:'#252a39',S:'#eab58f',k:'#c38663',
     D,d:shade(D,-.3),P:Pi.c,p:shade(Pi.c,-.28),pat:Pi.pat||null,K:Si.c,ka:Si.a,B:Bi.c,ba:Bi.a,PO:Pl.c,pa:Pl.a,pk:Pk?Pk.c:null,pka:Pk?Pk.a:null,hat:noHelm?Bn.model:null,N:Bn.c,n:shade(Bn.c,-.22),C:Bn.a||shade(Bn.c,-.15),Q:Bn.pom||'#ffffff',q:shade(Bn.pom||'#ffffff',-.2),A:Bn.p1||Bn.a||'#e8609a',E:Bn.p2||'#f2c445',F:Bn.fur||'#e8ecf2',f:shade(Bn.fur||'#e8ecf2',-.2),T:Bn.tie||'#8d939f',V:Bn.spom||Bn.pom||'#ffffff',v:shade(Bn.spom||Bn.pom||'#ffffff',-.22),R:'#3b2a20',boot:'#3c4356',bootC:itemOf('boots',eq.boots||'bt_black').c,glove:'#272b38',zip:'#eef1f7',BK:Bk.c,bka:Bk.a};
-}
+  const Sk=eq.skin&&eq.skin!=='sk_none'?itemOf('skin',eq.skin):null;
+  if(Sk&&Sk.head)Object.assign(R,{skinH:Sk.head,hat:null,SW:null,D:Sk.c,d:shade(Sk.c,-.3),P:Sk.c,p:shade(Sk.c,-.28),pat:null,pk:null,pka:null,zip:Sk.zip,
+    shirt:Sk.shirt||null,S:Sk.face,k:shade(Sk.face,-.18),W:shade(Sk.face,.4),R:Sk.hair,r:Sk.hair2,Y:'#1d1d26',U:Sk.lip});   /* Skin: eigener Kopf, Anzug als Oberteil und Hose */
+  return R}
 const eqKey=eq=>CATS.map(c=>eq[c]).join(',')+','+(eq.bframe||'')+','+(eq.bforkf||'')+','+(eq.helmf||'');
 
 /* ================= SPRITES ================= */
@@ -1020,8 +1038,18 @@ BN_RAW.inka={side:["....OOOO.....","...OQQQqO....","...OQqqqO....","..OOOOOOOO..
   back:[".....OOO.....","....OQQqO....","....OQqqO....","...OOOOOOO...","..ONNNnNNNO..",".ONEANEANENO.",".OAEAAEAAEAO.",".ONENNENNENO.","OFFFFFFFFFFFO","OFGGGGGGGGGFO","OFGGGGGGGGGFO","ONNEANEANENNO","ONARRRRRRRANO","OFFOkkkkkOFFO",".OTOOOOOOOTO.","..T.......T..",".OVvO...OVvO.",".OvvO...OvvO.","..OO.....OO.."]};
 const BN_TOP={inka:4};   /* Reihen über dem normalen Kopf (Bommel); die Bändel hängen unter dem Kinn, von der Seite genau in der Mitte am Ohr */
 const BEANIES=Object.fromEntries(Object.entries(BN_RAW).map(([k,v])=>[k,Object.fromEntries(Object.entries(v).map(([kk,m])=>[kk,m.map(r=>r.replace(/X/g,(_,i)=>i%2?'n':'N'))]))]));
+/* Skin-Köpfe ohne Helm und Brille. S Haut, k Hautschatten, W Glanz auf der Glatze, R Haare, r rasierte Stellen, Y Augen, U Mund.
+   Kim (eine Reihe höher): hohe, flache Haarplatte oben, Seiten und Hinterkopf kurz rasiert, rundes Gesicht mit vollen Wangen.
+   Putin: Glatze mit hoher Stirn, kurze helle Haare nur an den Seiten und hinten, schmales Kinn, schmaler Mund. */
+const SKIN_HEADS={
+  kim:{side:["..OOOOOOOO...",".ORRRRRRRRRO.",".ORRRRRRRRRO.",".OrRRRRRRRRRO","OrrrRRRRRRRO.","OrrrrkSSSSSO.","OrrkkSSSYSSO.","OrkSkSSSSSSSO","OkkSSSSSSSUO.",".OkSSSSSSSSO.","..OkSSSSSSO..","...OOOOOOO..."],
+    front:["..OOOOOOOOO..",".ORRRRRRRRRO.",".ORRRRRRRRRO.",".ORRRRRRRRRO.","OrRRRRRRRRRrO","OrkSSSSSSSkrO","OkSYYSSSYYSkO","OkSSSSkSSSSkO","OSSSSUUUSSSSO",".OSSSSSSSSSO.","..OkSSSSSkO..","...OOOOOOO..."],
+    back:["..OOOOOOOOO..",".ORRRRRRRRRO.",".ORRRRRRRRRO.",".ORRRRRRRRRO.","OrrrrrrrrrrrO","OrrrrrrrrrrrO","OkrrrrrrrrrkO","OkrrrrrrrrrkO",".OkkkkkkkkkO.",".OSSSSSSSSSO.","..OkSSSSSkO..","...OOOOOOO..."]},
+  putin:{side:["...OOOOOO....","..OSSWWSSO...",".ORSSWSSSSO..",".ORRSSSSSSSO.","ORRRkSSSSSSO.","ORRkkSSSYSSO.","ORRkSSSSSSSSO",".OkSSSSSSSUO.","..OkSSSSSSO..","..OkSSSSSO...","...OOOOOO...."],
+    front:["....OOOOO....","..OOSWWSSOO..",".OSSWSSSSSSO.",".ORSSSSSSSRO.","ORRSSSSSSSRRO","OkSSYSSSYSSkO",".OSSSSkSSSSO.",".OSSSUUUSSSO.","..OkSSSSSkO..","...OkSSSkO...","....OOOOO...."],
+    back:["....OOOOO....","..OOSSWSSOO..",".OSSSSSSSSSO.",".ORRRSSSRRRO.","ORRRRRRRRRRRO","OkRRRRRRRRRkO",".ORRRRRRRRRO.",".OkRRRRRRRkO.","..OkkkkkkkO..","...OSSSSSO...","....OOOOO...."]}};
 /* rot = Vierteldrehungen im Uhrzeigersinn (Corks), gedreht um die Kopfmitte; Mützen-Aufbau wächst immer Richtung Kopf-oben */
-function drawHead(g,kind,x,y,P,flip,rot){const m=P.hat?BEANIES[P.hat][kind]:P.ff?HEADS_FF[kind]:P.mtb?HEADS_MTB[kind]:HEADS[kind],geo=!P.hat&&P.ff?FF_GEO[kind]:null,e=P.hat&&BN_TOP[P.hat]!=null?BN_TOP[P.hat]:geo?geo.top:m.length-11,cx=geo?geo.cx:6,X=x+6,Y=y+5;
+function drawHead(g,kind,x,y,P,flip,rot){const m=P.skinH?SKIN_HEADS[P.skinH][kind]:P.hat?BEANIES[P.hat][kind]:P.ff?HEADS_FF[kind]:P.mtb?HEADS_MTB[kind]:HEADS[kind],geo=!P.hat&&P.ff?FF_GEO[kind]:null,e=P.hat&&BN_TOP[P.hat]!=null?BN_TOP[P.hat]:geo?geo.top:m.length-11,cx=geo?geo.cx:6,X=x+6,Y=y+5;
   for(let r=0;r<m.length;r++)for(let c=0;c<m[r].length;c++){const ch=m[r][c];if(ch==='.')continue;
     const dc=flip?cx-c:c-cx,dr=r-5-e;let sx=dc,sy=dr;
     if(rot===1){sx=-dr;sy=dc}else if(rot===2){sx=-dc;sy=-dr}else if(rot===3){sx=dr;sy=-dc}
@@ -1802,8 +1830,10 @@ function renderFigure(g,poseName,phi,look,P,gear,pow,cork,twist,hy){
     strokeRects(g,line,w+2,hh+2,O);strokeRects(g,line,w,hh,P.D);
     if(side)strokePts(g,[[s[0]+hx,s[1]],[s[0]+hx,s[1]+2*S]],kw,P.d);
     g.fillStyle=P.d;g.fillRect(Math.round(h[0]-w/2),Math.round(h[1])+(side?1:0),w,side?1:2);
-    if(backF)rectO(g,Math.round(s[0]-w/2),Math.round(s[1]-S),w,zw(5),P.d,O);
-    if(sf>-.25){const zx=2*cf*S;strokePts(g,[[s[0]+zx,s[1]+1],[h[0]+zx,h[1]-1]],1,P.zip);
+    if(backF&&!P.skinH)rectO(g,Math.round(s[0]-w/2),Math.round(s[1]-S),w,zw(5),P.d,O);
+    if(sf>-.25){const zx=2*cf*S,tx=Math.round(s[0]+zx-.5),ty=Math.round(s[1]);
+      if(P.shirt){g.fillStyle=P.shirt;g.fillRect(tx-1,ty,3,1);g.fillRect(tx-1,ty+1,1,2);g.fillRect(tx+1,ty+1,1,2);g.fillStyle=P.zip;g.fillRect(tx,ty+1,1,Math.max(3,Math.round((h[1]-s[1])*.55)))}   /* Skin im Anzug: weißer Hemdkragen, Krawatte bis über den Bauch */
+      else strokePts(g,[[s[0]+zx,s[1]+1],[h[0]+zx,h[1]-1]],1,P.zip);
       if(frontF&&Math.abs(cf)<.45&&wW>=11){g.fillStyle=P.zip;g.fillRect(Math.round(s[0]+zx-2*S),Math.round(s[1]+1),1,2);g.fillRect(Math.round(s[0]+zx+2*S),Math.round(s[1]+1),1,2);
         g.fillStyle=P.d;g.fillRect(Math.round(h[0]-5*S),Math.round(h[1]-3*S),Math.round(3*S),1);g.fillRect(Math.round(h[0]+3*S),Math.round(h[1]-3*S),Math.round(3*S),1)}}
   }});
@@ -1861,7 +1891,7 @@ function getSprite(pose,phi,look,eq,gear,pow,cork,twist,K,wf,hy){
   eq=eq||SAVE.equip;gear=gear||GEAR;K=K||(gear==='bike'?RS:RZ);wf=gear==='bike'?(wf||0):0;
   const ph=((Math.round(phi/15)*15)%360+360)%360,ck=cork?{m:cork.m,t:((Math.round(cork.t/15)*15)%360+360)%360}:null,tq=Math.round((twist||0)/15)*15,key=pose+'|'+ph+'|'+(look?1:0)+'|'+(pow?1:0)+'|'+(ck?ck.m+ck.t:'')+'|'+gear+'|'+tq+'|'+eqKey(eq)+'|'+K+'|'+wf+'|'+(hy==null?'':Math.round(hy/15)*15);
   let s=sprCache.get(key);if(s){sprCache.delete(key);sprCache.set(key,s);return s}
-  const P=palette(eq);P.wf=wf;if(gear==='bike'){const Ji=itemOf('jersey',eq.jersey||'j_black');if(P.SW)P.J2=null;else{P.D=Ji.c;P.d=shade(Ji.c,-.3);P.J2=Ji.a}   /* Winter-Pulli über dem Trikot, wenn einer angezogen ist */P.pk=null;{const Pr=eq.prot&&eq.prot!=='pr_none'?itemOf('prot',eq.prot):null;P.pr=Pr?Pr.c:null;P.pra=Pr?Pr.a:null}{const a=hexRgb(Ji.a),b=hexRgb(P.H),lum=(b[0]*.3+b[1]*.59+b[2]*.11)/255;const la=(a[0]*.3+a[1]*.59+a[2]*.11)/255;P.J=shade(P.H,lum>.5?-.22:.32)}if(!P.hat){if(eq.helmf==='mtb')P.mtb=true;else P.ff=true}   // Helm-Details (Schirm, Kinnbügel) nur in der Helmfarbe, nicht in der Trikotfarbe
+  const P=palette(eq);P.wf=wf;if(gear==='bike'){const Ji=itemOf('jersey',eq.jersey||'j_black');if(P.SW||P.skinH)P.J2=null;else{P.D=Ji.c;P.d=shade(Ji.c,-.3);P.J2=Ji.a}   /* Winter-Pulli über dem Trikot, wenn einer angezogen ist */P.pk=null;{const Pr=eq.prot&&eq.prot!=='pr_none'&&!P.skinH?itemOf('prot',eq.prot):null;P.pr=Pr?Pr.c:null;P.pra=Pr?Pr.a:null}{const a=hexRgb(Ji.a),b=hexRgb(P.H),lum=(b[0]*.3+b[1]*.59+b[2]*.11)/255;const la=(a[0]*.3+a[1]*.59+a[2]*.11)/255;P.J=shade(P.H,lum>.5?-.22:.32)}if(!P.hat&&!P.skinH){if(eq.helmf==='mtb')P.mtb=true;else P.ff=true}   // Helm-Details (Schirm, Kinnbügel) nur in der Helmfarbe, nicht in der Trikotfarbe
     {const it=c=>itemOf(c,eq[c]),Fo=it('bfork'),Sh=it('bshock'),Ri=it('brim'),Ti=it('btire'),Ba=it('bbar'),Sa=it('bsad'),Pe=it('bped');   // Bike-Teile aus dem Shop
      P.FK=Fo.c;P.FL=Fo.a;P.SHK=Sh.c;P.SHA=Sh.a||null;P.FRM=eq.bframe||'ht';P.FKF=eq.bforkf||'sc';P.RM=Ri.c;P.SPK=Ri.a;P.TR=Ti.c;P.TS=Ti.a;P.GR=Ba.c;P.BR=Ba.a;P.SD=Sa.c;P.PD=Pe.c;P.CR=Pe.a}}
   // Ski/Board: das Sprite ist direkt das Fahrer-Raster. Bike: Sprite im Bild-Raster, der Fahrer kommt aus dem Fahrer-Raster dazwischen.
@@ -5063,15 +5093,15 @@ function renderShopInner(){queueMicrotask(()=>shopRemember());
     bk.onclick=()=>{shopForm[shopCat]=null;delete tryOn['f_'+shopCat];if(F.slot)delete tryOn[F.slot];delete tryOn[shopCat];renderShop()};grid.appendChild(bk)}
   for(const it of SHOP[shopCat].items){if(F&&(!F.slot&&F.of(it)!==fo||F.extra&&F.extra.includes(it.id)))continue;grid.appendChild(itemBtn(it))}}
   function itemBtn(it){
-    const owned=it.price===0||SAVE.owned[it.id],eq=SAVE.equip[shopCat]===it.id&&(!F||!F.slot||F.extra&&F.extra.includes(it.id)||(SAVE.equip[F.slot]||F.list[0].id)===fo),sel=tryOn[shopCat]===it.id;
-    const b=document.createElement('button');b.className='item'+(eq?' eq':'')+(sel?' sel':'')+(owned&&!eq?' owned':'');
+    const owned=it.legend?!!SAVE.owned[it.id]:it.price===0||SAVE.owned[it.id],eq=SAVE.equip[shopCat]===it.id&&(!F||!F.slot||F.extra&&F.extra.includes(it.id)||(SAVE.equip[F.slot]||F.list[0].id)===fo),sel=tryOn[shopCat]===it.id;
+    const b=document.createElement('button');b.className='item'+(eq?' eq':'')+(sel?' sel':'')+(owned&&!eq?' owned':'')+(it.legend?' legend'+(owned?'':' locked'):'');
     b.style.setProperty('--c',it.c);if(it.a)b.style.setProperty('--a',it.a);if(it.pat)b.style.setProperty('--a',it.pat[0]);knitSw(b,it);
-    const bp=BIKE_PARTS.includes(shopCat);let pr;if(eq)pr=bp?TX('EINGEBAUT','INSTALLED'):TX('ANGEZOGEN','EQUIPPED');else if(owned)pr=bp?TX('EINBAUEN','INSTALL'):TX('ANZIEHEN','EQUIP');else if(sel)pr=TX('KAUFEN · ','BUY · ')+it.price;else pr=String(it.price);
-    b.innerHTML='<span class="sw"></span><span class="nm"></span><span class="pr">'+(!owned?'<i class="coin"></i>':'')+'<span></span></span>';
+    const bp=BIKE_PARTS.includes(shopCat);let pr;if(eq)pr=bp?TX('EINGEBAUT','INSTALLED'):TX('ANGEZOGEN','EQUIPPED');else if(owned)pr=bp?TX('EINBAUEN','INSTALL'):TX('ANZIEHEN','EQUIP');else if(it.legend)pr=TX('NUR AUS DER LOOTBOX','LOOT BOX ONLY');else if(sel)pr=TX('KAUFEN · ','BUY · ')+it.price;else pr=String(it.price);
+    b.innerHTML='<span class="sw"></span><span class="nm"></span><span class="pr">'+(!owned&&!it.legend?'<i class="coin"></i>':'')+'<span></span></span>';
     b.querySelector('.nm').textContent=itName(it);b.querySelector('.pr span').textContent=pr;
     b.dataset.id=it.id;b.onclick=()=>{shopAnchor={id:it.id,top:b.getBoundingClientRect().top};shopRemember(it.id);shopClick(it,b)};return b;
   }
-  const t=tryOn[shopCat],ti=t?itemOf(shopCat,t):null;$('prevNote').textContent=ti?TX('Vorschau: ','Preview: ')+itName(ti)+'. '+(ti.info?itInfo(ti)+' ':'')+TX('Nochmal tippen zum Kaufen.','Tap again to buy.'):TX('Tippe ein Teil an für die Vorschau.','Tap an item to preview it.');
+  const t=tryOn[shopCat],ti=t?itemOf(shopCat,t):null;$('prevNote').textContent=ti?TX('Vorschau: ','Preview: ')+itName(ti)+'. '+(ti.info?itInfo(ti)+' ':'')+(ti.legend?TX('Gibt es nur aus der Lootbox (legendär, 1 %).','Loot box only (legendary, 1%).'):TX('Nochmal tippen zum Kaufen.','Tap again to buy.')):TX('Tippe ein Teil an für die Vorschau.','Tap an item to preview it.');
 }
 function formClick(f,el){const F=formsOf(shopCat),key='f_'+shopCat;
   if(formOwned(shopCat,f)){shopForm[shopCat]=f.id;delete tryOn[key];if(F.slot)tryOn[F.slot]=f.id;$('shopMsg').textContent='';renderShop();$('shop').scrollTop=0;return}
@@ -5079,13 +5109,16 @@ function formClick(f,el){const F=formsOf(shopCat),key='f_'+shopCat;
   if(SAVE.coins<f.price){$('shopMsg').textContent=TX('Dir fehlen '+(f.price-SAVE.coins)+' Münzen.','You need '+(f.price-SAVE.coins)+' more coins.');el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');return}
   SAVE.coins-=f.price;SAVE.owned[key+'_'+f.id]=true;delete tryOn[key];if(!F.slot)delete tryOn[shopCat];persist();unlockAudio();SFX.trick();
   shopForm[shopCat]=f.id;if(F.slot)tryOn[F.slot]=f.id;$('shopMsg').textContent=formName(f)+TX(' gekauft. Jetzt eine Farbe wählen.',' bought. Now pick a color.');renderShop();$('shop').scrollTop=0}
-function shopEquip(it){SAVE.equip[shopCat]=it.id;{const F=formsOf(shopCat);if(F&&F.slot&&shopForm[shopCat]){SAVE.equip[F.slot]=shopForm[shopCat];delete tryOn[F.slot]}}
+function shopEquip(it){const sk=SKIN_OFF.includes(shopCat)&&SAVE.equip.skin&&SAVE.equip.skin!=='sk_none';if(sk)SAVE.equip.skin='sk_none';const ex=shopEquip0(it);
+  return (sk?TX(' Skin abgelegt, damit man das Teil sieht.',' Skin taken off so the item shows.'):'')+ex+(shopCat==='skin'&&it.id!=='sk_none'?TX(' Helm, Brille und Kleidung kommen jetzt vom Skin.',' Helmet, goggles and clothes now come from the skin.'):'')}
+function shopEquip0(it){SAVE.equip[shopCat]=it.id;{const F=formsOf(shopCat);if(F&&F.slot&&shopForm[shopCat]){SAVE.equip[F.slot]=shopForm[shopCat];delete tryOn[F.slot]}}
   if(shopCat==='beanie'&&SAVE.equip.helmet!=='h_none'){SAVE.equip.helmet='h_none';return TX(' Helm abgesetzt, damit man die Mütze sieht.',' Helmet taken off so the beanie shows.')}
   if(shopCat==='hoodie'&&SAVE.equip.sweater&&SAVE.equip.sweater!=='sw_none'){SAVE.equip.sweater='sw_none';return TX(' Pulli ausgezogen, damit man die Jacke sieht.',' Sweater taken off so the jacket shows.')}
   if(shopCat==='pack'&&it.id!=='pk_none')SAVE.packLast=it.id;
   if(shopCat==='prot'&&it.id!=='pr_none')SAVE.equip.prl=it.id;return ''}
 function shopClick(it,el){
-  const owned=it.price===0||SAVE.owned[it.id];
+  const owned=it.legend?!!SAVE.owned[it.id]:it.price===0||SAVE.owned[it.id];
+  if(!owned&&it.legend){tryOn[shopCat]=it.id;$('shopMsg').textContent=TX('Diesen Skin gibt es nur aus der Lootbox: legendär, 1 % pro Box.','This skin only comes from loot boxes: legendary, 1% per box.');renderShop();return}
   if(!owned&&it.req&&!SAVE.owned[it.req]){$('shopMsg').textContent=TX('Erst den '+itName(itemOf(shopCat,it.req))+' kaufen, dann gibt es ihn in anderen Farben.','Buy the '+itName(itemOf(shopCat,it.req))+' first, then you can get it in other colors.');el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');return}
   if(owned){const ex=shopEquip(it);delete tryOn[shopCat];persist();$('shopMsg').textContent=itName(it)+(BIKE_PARTS.includes(shopCat)?TX(' eingebaut.',' installed.'):TX(' angezogen.',' equipped.'))+ex;renderShop();return}
   if(tryOn[shopCat]!==it.id){tryOn[shopCat]=it.id;$('shopMsg').textContent='';renderShop();return}
@@ -5140,15 +5173,18 @@ function wmClose(){refreshMenu();show('menu');layout()}
    Lootbox-Fenster stehen), danach innerhalb dieser Seltenheit ein Teil, das man noch nicht hat, jedes mit derselben Chance.
    Doppelte gibt es nie: Was man schon hat, fällt aus der Ziehung, dadurch steigt die Chance der übrigen Teile; die Chance der
    Seltenheit selbst bleibt immer gleich. Hat man aus einer Seltenheit schon alles, gibt es stattdessen Münzen
-   (gewöhnlich 100, ungewöhnlich 400, selten 5000, sehr selten 10000).
+   (gewöhnlich 100, ungewöhnlich 400, selten 5000, sehr selten 10000, legendär 25000).
    Gewöhnlich: einfache Farben. Ungewöhnlich: coolere Farben (teure Farben, Bommel- und Fisherman-Mützen, Gold, Neon).
-   Selten: Fully- und Downhill-Rahmen, Freeride-Rucksack, unsichtbarer Rucksack. Sehr selten: die Winter-Pullis und die Ohrenmützen. */
+   Selten: Fully- und Downhill-Rahmen, Freeride-Rucksack, unsichtbarer Rucksack. Sehr selten: die Winter-Pullis und die Ohrenmützen.
+   Legendär (1 %): die Skins, die es nicht im Shop zu kaufen gibt. */
 const BOX_PTS=50000;
-const LOOT_TIERS=[{id:'common',n:['GEWÖHNLICH','COMMON'],w:60,col:'#c9d0db',coins:100},{id:'uncommon',n:['UNGEWÖHNLICH','UNCOMMON'],w:28,col:'#5fe08a',coins:400},
-  {id:'rare',n:['SELTEN','RARE'],w:9,col:'#4fb6ff',coins:5000},{id:'epic',n:['SEHR SELTEN','VERY RARE'],w:3,col:'#f2c445',coins:10000}];   /* coins: Ersatz, wenn man aus der Seltenheit schon alles hat */
+const LOOT_TIERS=[{id:'common',n:['GEWÖHNLICH','COMMON'],w:59,col:'#c9d0db',coins:100},{id:'uncommon',n:['UNGEWÖHNLICH','UNCOMMON'],w:28,col:'#5fe08a',coins:400},
+  {id:'rare',n:['SELTEN','RARE'],w:9,col:'#4fb6ff',coins:5000},{id:'epic',n:['SEHR SELTEN','VERY RARE'],w:3,col:'#f2c445',coins:10000},
+  {id:'legend',n:['LEGENDÄR','LEGENDARY'],w:1,col:'#ff6b3d',coins:25000}];   /* coins: Ersatz, wenn man aus der Seltenheit schon alles hat */
 let LOOT_P=null;
-function lootPools(){if(LOOT_P)return LOOT_P;const P={common:[],uncommon:[],rare:[],epic:[]};
-  for(const c of CATS)for(const it of SHOP[c].items){if(!it.price||it.req)continue;
+function lootPools(){if(LOOT_P)return LOOT_P;const P={common:[],uncommon:[],rare:[],epic:[],legend:[]};
+  for(const c of CATS)for(const it of SHOP[c].items){if(it.legend){P.legend.push({cat:c,id:it.id});continue}   /* legendär: die Skins */
+    if(!it.price||it.req)continue;
     if(c==='sweater'||it.model==='inka'){P.epic.push({cat:c,id:it.id});continue}   /* sehr selten: Winter-Pullis und Ohrenmützen */
     if(c==='pack'||c==='prot'){if(it.id==='pk_free'||it.id==='pk_ghost')P.rare.push({cat:c,id:it.id});continue}
     const cool=it.price>60*PRICE_X||/gold|neon|galaxy|camo/.test(it.id)||it.model&&it.model!=='classic';   /* Gold, Neon, Galaxy, Camo, teure Farben, Bommel- und Fisherman-Mützen */
@@ -5159,19 +5195,21 @@ const lootRnd=()=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);retu
 const lootKey=e=>e.form?'f_bike_'+e.form:e.id,lootLeft=(P,t)=>P[t.id].filter(e=>!SAVE.owned[lootKey(e)]);
 const lootTierCoins=t=>t.coins;
 function lootRoll(){const P=lootPools(),tot=LOOT_TIERS.reduce((a,t)=>a+t.w,0);let r=lootRnd()*tot,tier=LOOT_TIERS[LOOT_TIERS.length-1];
-  for(const t of LOOT_TIERS){r-=t.w;if(r<0){tier=t;break}}   /* Seltenheit: immer 60 / 28 / 9 / 3 % */
+  for(const t of LOOT_TIERS){r-=t.w;if(r<0){tier=t;break}}   /* Seltenheit: immer 59 / 28 / 9 / 3 / 1 % */
   const left=lootLeft(P,tier);if(!left.length)return {tier,coinsOnly:true};   /* alles aus dieser Seltenheit schon da: Münzen */
   return Object.assign({tier},left[Math.floor(lootRnd()*left.length)])}
 function lootInfo(d){if(d.form){const f=FORMS.bike.list.find(q=>q.id===d.form);return {name:formName(f)+TX('-Rahmen',' frame'),catN:TX('Bike-Rahmen','Bike frame'),price:f.price,key:'f_bike_'+d.form}}
-  const it=itemOf(d.cat,d.id);return {name:itName(it),catN:catName(d.cat),price:it.price,key:it.id}}
+  const it=itemOf(d.cat,d.id);return {name:itName(it),catN:d.cat==='skin'?TX('Legendärer Skin','Legendary skin'):catName(d.cat),price:it.price,key:it.id}}
 function lootOpen(){if((SAVE.boxes|0)<1)return null;const d=lootRoll();SAVE.boxes--;
   if(d.coinsOnly){const coins=lootTierCoins(d.tier);SAVE.coins+=coins;persist();return Object.assign(d,{name:'+'+coins+TX(' Münzen',' coins'),catN:TX('Aus dieser Seltenheit hast du schon alles','You already have everything of this rarity'),coins})}
   const I=lootInfo(d);SAVE.owned[I.key]=true;persist();return Object.assign(d,I,{coins:0})}
+/* Teile, die ein Skin verdeckt: wer eins davon anzieht, legt den Skin ab */
+const SKIN_OFF=['helmet','beanie','goggles','hoodie','sweater','pants','jersey','prot','pack'];
 const LOOT_SUM=['jersey','prot','shoes'].concat(BIKE_PARTS),LOOT_SKI=['skis','binding','poles','boots'],LOOT_WIN=['hoodie','sweater','pack'];
-function lootPv(d){const eq=Object.assign({},SAVE.equip,d.form?{bframe:d.form}:{[d.cat]:d.id},d.cat==='beanie'?{helmet:'h_none'}:{},d.cat==='hoodie'?{sweater:'sw_none'}:{});
+function lootPv(d){const eq=Object.assign({},SAVE.equip,d.form?{bframe:d.form}:{[d.cat]:d.id},SKIN_OFF.includes(d.cat)?{skin:'sk_none'}:{},d.cat==='beanie'?{helmet:'h_none'}:{},d.cat==='hoodie'?{sweater:'sw_none'}:{});
   const gear=d.form||LOOT_SUM.includes(d.cat)?'bike':d.cat==='board'?'board':LOOT_SKI.includes(d.cat)?'ski':LOOT_WIN.includes(d.cat)?SAVE.gear:SUMMER?'bike':SAVE.gear;
   return {eq,gear,bikeOnly:!!d.form||BIKE_PARTS.includes(d.cat)}}
-function lootEquip(d){if(d.form)SAVE.equip.bframe=d.form;else{SAVE.equip[d.cat]=d.id;if(d.cat==='beanie')SAVE.equip.helmet='h_none';if(d.cat==='hoodie')SAVE.equip.sweater='sw_none'}persist()}
+function lootEquip(d){if(d.form)SAVE.equip.bframe=d.form;else{SAVE.equip[d.cat]=d.id;if(SKIN_OFF.includes(d.cat))SAVE.equip.skin='sk_none';if(d.cat==='beanie')SAVE.equip.helmet='h_none';if(d.cat==='hoodie')SAVE.equip.sweater='sw_none'}persist()}
 let LB={st:'idle',t:0,res:null,from:'menu',pv:null,parts:[]};
 function lootMenu(){const n=SAVE.boxes|0,b=$('bLoot');if(!b)return;setT(b,n?'LOOTBOX · '+n:'LOOTBOX');b.classList.toggle('hasloot',n>0)}
 function lootRender(){const n=SAVE.boxes|0,P=lootPools(),busy=LB.st==='shake'||LB.st==='burst';
@@ -5194,7 +5232,7 @@ function lootStart(){if(LB.st==='shake'||LB.st==='burst')return;const r=lootOpen
    dann fliegt der Deckel weg, Lichtstrahlen und Funken. */
 function drawLoot(dt){const c=$('lootCv');if(!c||c.hidden)return;const g=c.getContext('2d'),W=96,H=72;g.imageSmoothingEnabled=false;
   LB.t+=dt;if(LB.st==='shake'&&LB.t>1.15){LB.st='burst';LB.t=0;SFX.trick();
-    for(let i=0;i<34;i++){const a=lootRnd()*Math.PI*2,v=30+lootRnd()*70;LB.parts.push({x:48,y:36,vx:Math.cos(a)*v,vy:Math.sin(a)*v-40,l:.5+lootRnd()*.6})}}
+    for(let i=0,nP=LB.res&&LB.res.tier.id==='legend'?80:34;i<nP;i++){const a=lootRnd()*Math.PI*2,v=30+lootRnd()*70;LB.parts.push({x:48,y:36,vx:Math.cos(a)*v,vy:Math.sin(a)*v-40,l:.5+lootRnd()*.6})}}
   if(LB.st==='burst'&&LB.t>.7){LB.st='show';LB.t=0;lootRender()}
   g.clearRect(0,0,W,H);const st=LB.st,t=LB.t,col=LB.res?LB.res.tier.col:'#ffffff';
   const P=(x,y,w,h,f)=>{g.fillStyle=f;g.fillRect(Math.round(x),Math.round(y),w,h)};
@@ -5466,7 +5504,7 @@ function frame(t){
   render(dt);musicMix();
   if(state==='menu')drawPreview('pvMenu');
   if(!$('loot').hidden){drawLoot(dt);if(LB.st==='show'&&LB.pv)drawPreview('pvLoot',LB.pv.eq,LB.pv.gear,false,LB.pv.bikeOnly)}
-  if(!$('shop').hidden)drawPreview('pvShop',Object.assign({},SAVE.equip,tryOn,shopCat==='beanie'?{helmet:'h_none'}:{},shopCat==='hoodie'?{sweater:'sw_none'}:{}),SUMMER?'bike':shopCat==='board'?'board':(shopCat==='skis'||shopCat==='poles'||shopCat==='boots'||shopCat==='binding')?'ski':SAVE.gear,!SUMMER&&shopCat==='poles',SUMMER&&BIKE_PARTS.includes(shopCat));
+  if(!$('shop').hidden)drawPreview('pvShop',Object.assign({},SAVE.equip,tryOn,SKIN_OFF.includes(shopCat)&&tryOn[shopCat]?{skin:'sk_none'}:{},shopCat==='beanie'?{helmet:'h_none'}:{},shopCat==='hoodie'?{sweater:'sw_none'}:{}),SUMMER?'bike':shopCat==='board'?'board':(shopCat==='skis'||shopCat==='poles'||shopCat==='boots'||shopCat==='binding')?'ski':SAVE.gear,!SUMMER&&shopCat==='poles',SUMMER&&BIKE_PARTS.includes(shopCat));
   requestAnimationFrame(frame);
 }
 function start(){
