@@ -3042,12 +3042,12 @@ function drawPlayer(cX,cY){
   if(spr.hi){const tx=Math.round(v.comx-cX),ty=Math.round(v.comy-cY),S=PLH*2*RS;
     if(!plCv){[plCv,plCtx]=mk(S,S);[afterCv,afterCtx]=mk(VW,VH)}
     plCtx.setTransform(1,0,0,1,0,0);plCtx.globalCompositeOperation='source-over';plCtx.clearRect(0,0,S,S);
-    crItemsDraw(-1,cX,cY,tx,ty);plCtx.setTransform(1,0,0,1,0,0);
+    crBikeLayer(cX,cY);
     if(spr.K===RZ){   // Ski/Board: im Fahrer-Raster drehen (die Pixel bleiben auf dem 1,2er-Raster wie früher auf dem Welt-Raster), dann scharf hochskalieren
       if(!rotCv)[rotCv,rotCtx]=mk(RC,RC);rotCtx.setTransform(1,0,0,1,0,0);rotCtx.clearRect(0,0,RC,RC);rotCtx.translate(RC/2,RC/2);rotCtx.rotate(v.ang*RAD);
       rotCtx.drawImage(spr,(-SCX-v.ox)*RZ,(-SCY-v.oy)*RZ);const f=RS/RZ;plCtx.drawImage(rotCv,Math.round(S/2-RC/2*f),Math.round(S/2-RC/2*f),RC*f,RC*f)}
     else{plCtx.translate(S/2,S/2);plCtx.rotate(v.ang*RAD);plCtx.drawImage(spr,(-SCX-v.ox)*spr.K,(-SCY-v.oy)*spr.K);plCtx.setTransform(1,0,0,1,0,0)}
-    crItemsDraw(1,cX,cY,tx,ty);crStars(v,cX,cY,tx,ty);plCtx.setTransform(1,0,0,1,0,0);
+    crStars(v,cX,cY,tx,ty);plCtx.setTransform(1,0,0,1,0,0);
     HIP={tx,ty};afterCtx.clearRect(0,0,VW,VH);ctx=afterCtx;crItemsWorld(1,cX,cY)}
   else{ctx.save();ctx.translate(Math.round(v.comx-cX),Math.round(v.comy-cY));ctx.rotate(v.ang*RAD);ctx.drawImage(spr,-SCX-v.ox,-SCY-v.oy);ctx.restore()}
   if(p.mode==='dig'&&p.dig.mound>.5){const hM=p.dig.mound;for(let dx=-17;dx<=17;dx++){const g=groundAt(p.x+dx);if(!g)continue;
@@ -3870,7 +3870,7 @@ function crPh(ph){const c=p.cr;c.ph=ph;c.pt=0;if(ph==='up'){c.stars=false;const 
 function updCrItems(dt){const c=p.cr;if(!c||!c.items.length||c.ph==='up')return;
   for(const it of c.items){if(it.gone)continue;const E=CR_EXT[it.k];
     it.vy+=G*dt;it.x+=it.vx*dt;it.y+=it.vy*dt;it.rot+=it.w*dt;
-    if(it.k==='bike'&&Math.abs(it.x-p.x)>36){it.x=p.x+Math.sign(it.x-p.x)*36;it.vx*=.5}   // das Bike bleibt in der feinen Fahrer-Ebene
+    if(it.k==='bike'){const dx=it.x-p.x;if(Math.abs(dx)>70){it.x=p.x+Math.sign(dx)*70;const hv=hSpeed();if(Math.sign(it.vx-hv)===Math.sign(dx))it.vx=hv}}   /* nicht zu weit vom Fahrer, damit es beim Aufstehen in einem kurzen Bogen zurückkommt */
     const g=groundAt(it.x);if(!g){if(it.y>p.y+500)it.gone=true;continue}
     const ca=Math.cos(g.a),sa=Math.sin(g.a),ga=g.a*DEG,rr=(it.rot-ga)*RAD,hg=Math.abs(Math.sin(rr))*E[0]+Math.abs(Math.cos(rr))*E[1],fl=g.y-hg/Math.max(.5,ca);
     if(it.y<fl)continue;
@@ -3934,10 +3934,17 @@ const crItemsOn=()=>{const c=p.cr;return c&&c.items.length&&(p.mode==='crash'||p
 function crItemsWorld(front,cX,cY){const c=crItemsOn();if(!c)return;
   for(const it of c.items){if(it.k==='bike'||(it.z>0)!==(front>0))continue;const P=crItemAt(it,c);if(!P)continue;const sp=it.k==='ski'?getSprite('_iski',0,false,null,'ski'):poleSprite();
     ctx.save();ctx.translate(Math.round(P.x-cX),Math.round(P.y-cY));ctx.rotate(P.rot*RAD);ctx.scale(1/RZ,1/RZ);ctx.drawImage(sp,-SCX*RZ,-SCY*RZ);ctx.restore()}}
-function crItemsDraw(front,cX,cY,tx,ty){const c=crItemsOn();if(!c)return;plCtx.setTransform(1,0,0,1,0,0);
-  for(const it of c.items){if(it.k!=='bike'||(it.z>0)!==(front>0))continue;const P=crItemAt(it,c);if(!P)continue;
-    const sp=getSprite('_bike',0,false,null,'bike',false,null,0,0,0),X=(P.x-cX-tx+PLH)*RS,Y=(P.y-cY-ty+PLH)*RS;
-    plCtx.save();plCtx.translate(Math.round(X),Math.round(Y));plCtx.rotate(P.rot*RAD);plCtx.drawImage(sp,(-SCX-5)*sp.K,(-SCY-6.5)*sp.K);plCtx.restore()}}
+/* Das weggeflogene Bike hat eine eigene feine Ebene, die mit dem Bike mitwandert (wie die Fahrer-Ebene mit dem Fahrer).
+   So wird es nie am Rand der Fahrer-Ebene abgeschnitten, egal wie weit es fliegt, und muss nicht künstlich beim Fahrer bleiben.
+   BKH = halbe Seitenlänge in Welt-Pixeln (das Bike ist gedreht höchstens gut 21 Pixel vom Mittelpunkt entfernt). */
+let bkCv=null,bkCtx=null,BKL=null;const BKH=30;
+function crBikeLayer(cX,cY){BKL=null;const c=crItemsOn();if(!c)return;
+  for(const it of c.items){if(it.k!=='bike')continue;const P=crItemAt(it,c);if(!P)continue;
+    const S=BKH*2*RS,sp=getSprite('_bike',0,false,null,'bike',false,null,0,0,0),wx=P.x-cX,wy=P.y-cY,tx=Math.round(wx),ty=Math.round(wy);
+    if(!bkCv)[bkCv,bkCtx]=mk(S,S);
+    bkCtx.setTransform(1,0,0,1,0,0);bkCtx.globalCompositeOperation='source-over';bkCtx.clearRect(0,0,S,S);
+    bkCtx.translate(Math.round((wx-tx+BKH)*RS),Math.round((wy-ty+BKH)*RS));bkCtx.rotate(P.rot*RAD);bkCtx.drawImage(sp,(-SCX-5)*sp.K,(-SCY-6.5)*sp.K);bkCtx.setTransform(1,0,0,1,0,0);
+    BKL={tx,ty,front:it.z>0};return}}
 /* Nach einem schweren Sturz kreisen kleine Sterne um den Kopf */
 function crStars(v,cX,cY,tx,ty){const c=p.cr;if(!c||!c.stars||p.mode!=='crash'||c.ph==='tumble')return;const L0=LIBOF(GEAR)[v.pose];if(!L0||!L0.head)return;
   const hx=L0.head[0]-v.ox,hy=L0.head[1]-v.oy,r=v.ang*RAD,wx=v.comx+hx*Math.cos(r)-hy*Math.sin(r),wy=v.comy+hx*Math.sin(r)+hy*Math.cos(r);plCtx.setTransform(1,0,0,1,0,0);
@@ -4970,12 +4977,12 @@ function render(dt){
   ctx=mainCtx;ctx.drawImage(bgCv,0,0);
   // Welt: Piste, Klippen, alles Bewegliche; nachts Flutlicht und Stirnlampe
   if(!worldCv||worldCv.width!==VW){[worldCv,worldCtx]=mk(VW,VH)}
-  ctx=worldCtx;ctx.clearRect(0,0,VW,VH);HIP=null;
+  ctx=worldCtx;ctx.clearRect(0,0,VW,VH);HIP=null;BKL=null;
   drawTerrain(cX,cY);drawAlm(cX,cY);drawCrevasses(cX,cY);if(JAPAN)drawJWood(cX,cY);drawGapMist(cX,cY);drawCliffs(cX,cY);drawTrees(cX,cY);drawFauna(cX,cY);drawFloods(cX,cY);drawRocks(cX,cY);drawJTrees(cX,cY);drawLoops(cX,cY);drawSigns(cX,cY);drawRails(cX,cY);drawBonks(cX,cY);drawCoins(cX,cY);drawPatrol(cX,cY);drawPlayer(cX,cY);
   for(const q of parts){ctx.fillStyle=SUMMER&&DIRT_MAP[q.col]||q.col;ctx.fillRect(Math.round(q.x-cX),Math.round(q.y-cY),q.sz,q.sz)}
   drawGapFog(cX,cY);drawWall(cX,cY);
   const lm=WIEHEN?1:fm,lamp=applyNight(cX,cY,curDS,lm);   /* lm: Stärke der Stirnlampe (Wiehengebirge überall, sonst nur im Freeride) */
-  if(HIP){shadeLayer(worldCtx,0,0,VW,VH,VW,VH);shadeLayer(plCtx,HIP.tx-PLH,HIP.ty-PLH,PLH*2,PLH*2,PLH*2*RS,PLH*2*RS)}   // Dämmerung und Nacht auch auf Welt und Fahrer-Ebene
+  if(HIP){shadeLayer(worldCtx,0,0,VW,VH,VW,VH);shadeLayer(plCtx,HIP.tx-PLH,HIP.ty-PLH,PLH*2,PLH*2,PLH*2*RS,PLH*2*RS);if(BKL)shadeLayer(bkCtx,BKL.tx-BKH,BKL.ty-BKH,BKH*2,BKH*2,BKH*2*RS,BKH*2*RS)}   // Dämmerung und Nacht auch auf Welt und Fahrer-Ebene
   ctx=mainCtx;ctx.drawImage(worldCv,0,0);
   if(lamp)drawBeam(cX,cY,lamp,lm*curDS.night);
   if(!WIEHEN&&curDS.night>.05&&fm<.95)drawFloodFog(cX,cY,curDS.night*(1-fm));
@@ -4984,7 +4991,7 @@ function render(dt){
   if(state==='play'||state==='pause')drawPatrolPointer(cX,cY);
   if(whiteout>0){ctx.fillStyle=(SUMMER?'rgba(92,66,40,':'rgba(255,255,255,')+whiteout.toFixed(3)+')';ctx.fillRect(0,0,VW,VH)}
   ctx=mainCtx;
-  if(visCtx){visCtx.drawImage(frameCv,0,0);if(HIP){visCtx.drawImage(plCv,HIP.tx-PLH,HIP.ty-PLH,PLH*2,PLH*2);visCtx.drawImage(afterCv,0,0)}}   // 1x-Welt hochskaliert, feiner Fahrer, Ebene darüber
+  if(visCtx){visCtx.drawImage(frameCv,0,0);if(HIP){const bk=()=>visCtx.drawImage(bkCv,BKL.tx-BKH,BKL.ty-BKH,BKH*2,BKH*2);if(BKL&&!BKL.front)bk();visCtx.drawImage(plCv,HIP.tx-PLH,HIP.ty-PLH,PLH*2,PLH*2);if(BKL&&BKL.front)bk();visCtx.drawImage(afterCv,0,0)}}   // 1x-Welt hochskaliert, feiner Fahrer, Ebene darüber
   if(state==='play'||state==='pause')drawHud();
 }
 
