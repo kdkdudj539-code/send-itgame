@@ -2221,7 +2221,7 @@ function drawGapFog(cX,cY){for(const f of gapFogs){const sx=f.x-cX,sy=f.y-cY;if(
   ctx.drawImage(f.spr,0,0,f.W,f.H,sx,sy,f.W,f.H);let y=sy+f.H;if(y<-8)y+=Math.floor((-y)/8)*8;
   for(;y<VH;y+=8)ctx.drawImage(f.spr,0,f.H,f.W,8,sx,y,f.W,8)}}
 /* ---- Freeride ---- */
-function decoTrees(x0,x1,n){for(let i=0;i<n;i++){const x=rand(x0,x1),g=groundAt(x),B=bioAt(x);if(B&&Math.random()>bioLerp(B,'forest'))continue;if(g&&isPow(g.seg))trees.push({x,y:g.y,k:Math.floor(Math.random()*14),f:Math.random()<.5})}}
+function decoTrees(x0,x1,n){for(let i=0;i<n;i++){const x=rand(x0,x1),g=groundAt(x),B=bioAt(x);if(B&&Math.random()>1+(BIO_DEF[B.id].forest-1)*B.k)continue;if(g&&isPow(g.seg))trees.push({x,y:g.y,k:Math.floor(Math.random()*14),f:Math.random()<.5})}}
 function fZone(z){const x=gx;seg(220,z==='free'?22:18);addSign(x+40,z==='free'?'FREERIDE ZONE':'SNOWPARK');if(z==='free')decoTrees(x+90,gx,2)}
 function addRock(x,big){const g=groundAt(x);if(!g||!isPow(g.seg))return;const w=big?rand(17,22):rand(8,11),h=big?rand(10,13):rand(4,5);/* flacher, passend zum halb so hohen Sprung */rocks.push({cx:x,y:g.y,w,h,big,hit:false,spr:makeRock(Math.round(w),Math.round(h),big)})}
 function fFreeRun(){const x=gx,L=rand(130,230);seg(L,rand(26,34));decoTrees(x,gx,Math.floor(rand(1,4)));if(Math.random()<.5)coinRow(x+30,Math.floor(L/26),18,12)}
@@ -2443,7 +2443,7 @@ function genNext(){
   if(RACE){seg(600,2,'finish');return}   /* Race: hinter dem Ziel nur noch Auslauf */
   const z=zoneAt(gx);
   if(z!==curZone){curZone=z;fZone(z);sinceGap=0;lastType='';parkEnd=null;return}
-  if(bioGen())return;   /* Landschaft: ab und zu Hindernisse zum Drüberspringen oder ein anderer Untergrund */
+  if(bioGen())return;   /* Landschaft: ab und zu ein anderer Untergrund */
   if(JAPAN){genJapan(z);return}
   if(z==='free'){genFree();return}
   const d=difficulty();let o;
@@ -3207,30 +3207,22 @@ function drawVillages(cX,base){
 }
 
 /* ================= LANDSCHAFTEN =================
-   Alle paar hundert Meter fährt man eine Weile durch eine eigene Landschaft der Region: anderer Hintergrund im Tal,
-   anderer Wald neben der Strecke, eigene Hindernisse und Untergründe. Reihenfolge und Abstände kommen aus dem Startwert der Fahrt
-   (im DH Race aus einem festen Wert, alle sehen dieselbe Strecke). An den Rändern wird über BIO_FADE px weich überblendet.
-   trees/vill/lift: wie stark Baumreihen, Dörfer und Lifte im Tal bleiben; forest: Dichte des Walds neben der Strecke; fset: eigene Bäume. */
+   Alle paar hundert Meter fährt man eine Weile durch eine eigene Landschaft der Region: eigener Hügel bzw. See im Hintergrund,
+   anderer Wald neben der Strecke, eigene Untergründe. Reihenfolge und Abstände kommen aus dem Startwert der Fahrt
+   (im DH Race aus einem festen Wert, alle sehen dieselbe Strecke). Der Wald an der Strecke wechselt über BIO_FADE px Platz für Platz,
+   der Hintergrund zieht als Landschaft von rechts herein (nichts wird überblendet).
+   forest: Dichte des Walds neben der Strecke; fset: eigene Bäume. */
 const BIO_FADE=700;
-const BIO_DEF={
-  glacier:{trees:0,  vill:0,  lift:.6, forest:0},
-  lake:   {trees:.35,vill:.3, lift:.4, forest:.35},
-  alm:    {trees:.4, vill:0,  lift:.3, forest:.12},
-  scree:  {trees:0,  vill:0,  lift:0,  forest:0},
-  bamboo: {trees:.5, vill:1,  lift:1,  forest:1, fset:'bamboo'},
-  onsen:  {trees:.55,vill:0,  lift:1,  forest:.6},
-  shrine: {trees:.5, vill:0,  lift:1,  forest:.65,fset:'cedar'},
-  fields: {trees:.2, vill:.4, lift:1,  forest:.12},
-  weser:  {trees:.45,vill:.5, lift:1,  forest:.45},
-  quarry: {trees:.6, vill:0,  lift:1,  forest:.5}};
+const BIO_DEF={glacier:{forest:0},lake:{forest:.35},alm:{forest:.12},scree:{forest:0},bamboo:{forest:1,fset:'bamboo'},onsen:{forest:.6},shrine:{forest:.65,fset:'cedar'},
+  fields:{forest:.12},weser:{forest:.45},quarry:{forest:.5}};
 const BIO_SETS={alps_w:['glacier','lake','alm'],alps_s:['alm','lake','scree'],japan:['bamboo','onsen','shrine'],wiehen:['fields','weser','quarry']};
-/* Was auf der Strecke vorkommt: obs = Hindernisse zum Drüberspringen, ter = Untergründe. base gilt zwischen den Landschaften. */
+/* Untergründe, die vorkommen; base gilt zwischen den Landschaften */
 const BIO_POOL={
-  alps_w:{base:{obs:['fence','sled'],ter:['mogul','ice']},glacier:{obs:['iceblock','iceblock','boulder'],ter:['ice','ice','mogul']},lake:{obs:['fence','sled'],ter:['ice','ice']},alm:{obs:['fence','haybale','sled'],ter:['mogul']}},
-  alps_s:{base:{obs:['fence','boulder'],ter:['gravel','mud']},alm:{obs:['fence','haybale','trough'],ter:['mud','gravel']},lake:{obs:['fence','boulder'],ter:['planks','gravel']},scree:{obs:['boulder','cairn'],ter:['gravel','gravel']}},
-  japan:{base:{obs:['jizo','lantern'],ter:[]},bamboo:{obs:['bamboofence','bamboofence','jizo'],ter:[]},onsen:{obs:['lantern','jizo'],ter:[]},shrine:{obs:['lantern','jizo'],ter:['stairs']}},
-  wiehen_s:{base:{obs:['woodpile','fence'],ter:['mud','gravel']},fields:{obs:['roundbale','roundbale','fence'],ter:['gravel','mud']},weser:{obs:['fence','woodpile'],ter:['planks','mud']},quarry:{obs:['boulder','woodpile'],ter:['gravel']}},
-  wiehen_w:{base:{obs:['woodpile','fence'],ter:['ice']},fields:{obs:['roundbale','roundbale','fence'],ter:['ice']},weser:{obs:['fence','woodpile'],ter:['planks','ice']},quarry:{obs:['boulder','woodpile'],ter:[]}}};
+  alps_w:{base:['mogul','ice'],glacier:['ice','ice','mogul'],lake:['ice','ice'],alm:['mogul']},
+  alps_s:{base:['gravel','mud'],alm:['mud','gravel'],lake:['planks','gravel'],scree:['gravel','gravel']},
+  japan:{base:[],bamboo:[],onsen:[],shrine:['stairs']},
+  wiehen_s:{base:['mud','gravel'],fields:['gravel','mud'],weser:['planks','mud'],quarry:['gravel']},
+  wiehen_w:{base:['ice'],fields:['ice'],weser:['planks','ice'],quarry:[]}};
 let bioList=[];const BIO_R={id:null,k:0,b:null};
 const bioSet=()=>BIO_SETS[JAPAN?'japan':WIEHEN?'wiehen':SUMMER?'alps_s':'alps_w'];
 const bioPoolKey=()=>JAPAN?'japan':WIEHEN?(SUMMER?'wiehen_s':'wiehen_w'):SUMMER?'alps_s':'alps_w';
@@ -3241,7 +3233,6 @@ function bioAt(x){let lo=0,hi=bioList.length-1;
   while(lo<=hi){const m=(lo+hi)>>1,b=bioList[m];if(x<b.x0-BIO_FADE)hi=m-1;else if(x>b.x1+BIO_FADE)lo=m+1;
     else{BIO_R.id=b.id;BIO_R.b=b;BIO_R.k=smooth01(Math.min(x-b.x0+BIO_FADE,b.x1+BIO_FADE-x)/(2*BIO_FADE));return BIO_R}}
   return null}
-const bioLerp=(B,key)=>B?1+(BIO_DEF[B.id][key]-1)*B.k:1;
 /* Waldplatz bei x: 0 = kein Baum, 1 = normaler Baum, 2 = Baum der Landschaft (Bambus, Zeder). h: Hash des Platzes */
 let bioTreeId=null;
 function bioTree(x,h){const B=bioAt(x);if(!B)return 1;const D=BIO_DEF[B.id],u=((h>>>17)%1000)/1000,v=((h>>>7)%997)/997;
@@ -3275,13 +3266,12 @@ function paintHill(g,W,H,crest,P){for(let x=0;x<W;x++){const t=crest(x),dy=crest
     const lv=.5+s*.5*Math.max(0,1-dep*.6);c=lv>.62+(b-.5)*.3?P.lit:lv<.38+(b-.5)*.3?P.sh:P.mid;
     if(dep>1&&b<Math.min(1,(dep-1)*.8))c=P.base;if(y===Math.floor(t))c=s>-.1?P.top:P.mid;PX(g,c,x,y)}}}
 function band(key,W,H,fn){let o=BSPR.get(key);if(o)return o;const [c,g]=mk(W,H),old=ctx;BAKE={lights:[],smoke:[],mills:[],steam:[]};ctx=g;bbuf(g,W,H);try{fn(g,W,H)}finally{bflush();ctx=old}o={c,...BAKE};BAKE=null;BSPR.set(key,o);return o}
-/* Band kacheln und die bewegten Teile dazu */
-function drawBand(Bd,off,y){const W=Bd.c.width,n=curDS.night>.3;let x0=-(((off%W)+W)%W);y=Math.round(y);
-  for(let x=Math.round(x0);x<VW;x+=W){ctx.drawImage(Bd.c,x,y);
-    for(const [sx,sy,seed] of Bd.smoke)if(x+sx>-20&&x+sx<VW+20)drawSmoke(x+sx,y+sy,seed);
-    for(const [sx,sy,w,seed] of Bd.steam)if(x+sx>-60&&x+sx<VW+60)drawSteam(x+sx,y+sy,w,seed);
-    for(const [sx,sy,seed] of Bd.mills)if(x+sx>-30&&x+sx<VW+30)drawSails(x+sx,y+sy,seed);
-    if(n)for(const [sx,sy,w,h,col] of Bd.lights){const X=x+sx,Y=y+sy;if(X<-4||X>VW+4)continue;ctx.fillStyle=col||'#ffd36b';ctx.fillRect(X,Y,w,h);emissiveBg.push({x:X+w/2,y:Y+h/2,r:col?6:3})}}}
+/* Band an x zeichnen und die bewegten Teile dazu */
+function drawBandAt(Bd,x,y){const n=curDS.night>.3;x=Math.round(x);y=Math.round(y);ctx.drawImage(Bd.c,x,y);
+  for(const [sx,sy,seed] of Bd.smoke)if(x+sx>-20&&x+sx<VW+20)drawSmoke(x+sx,y+sy,seed);
+  for(const [sx,sy,w,seed] of Bd.steam)if(x+sx>-60&&x+sx<VW+60)drawSteam(x+sx,y+sy,w,seed);
+  for(const [sx,sy,seed] of Bd.mills)if(x+sx>-30&&x+sx<VW+30)drawSails(x+sx,y+sy,seed);
+  if(n)for(const [sx,sy,w,h,col] of Bd.lights){const X=x+sx,Y=y+sy;if(X<-4||X>VW+4)continue;ctx.fillStyle=col||'#ffd36b';ctx.fillRect(X,Y,w,h);emissiveBg.push({x:X+w/2,y:Y+h/2,r:col?6:3})}}
 function drawSmoke(x,y,seed){const a0=ctx.globalAlpha;for(let s=0;s<5;s++){const tt=((T*.45+s/5+hash01(seed))%1);ctx.globalAlpha=a0*(1-tt)*.5;ctx.fillStyle='#d4dbe6';ctx.fillRect(Math.round(x+tt*8),Math.round(y-tt*16),2,2)}ctx.globalAlpha=a0}
 function drawSteam(x,y,w,seed){const a0=ctx.globalAlpha;for(let s=0;s<10;s++){const tt=((T*.14+s/10+hash01(seed+s*.3))%1),r=2+Math.round(tt*8),X=x+(hash01(seed+s)-.5)*w+Math.sin(T*.6+s*2.1)*3+tt*16,Y=y-2-tt*58;
   ctx.globalAlpha=a0*Math.min(1,tt*6)*(1-tt)*.6;disc(X,Y,r+1,'#dfe8f4');disc(X-1,Y-1,r,'#ffffff')}ctx.globalAlpha=a0}
@@ -3364,66 +3354,78 @@ function drawBarge(x,base,f){const O='#1a1d24';ctx.save();if(f){ctx.translate(x*
 /* kleiner Nadelbaum für die Bänder */
 function bandSpruce(g,X,base,h,snow,cols){bflush();const w=Math.max(2,Math.round(h*.28));drawTreeVar(g,X,base,h,w,cols,snow?.8:0,2,X*.37+h)}
 
-/* ---------- Die Bänder der einzelnen Landschaften ---------- */
+/* ---------- Die Bänder der einzelnen Landschaften ----------
+   Jedes Band ist ein endliches Stück Landschaft (keine Kachel): es zieht beim Fahren von rechts ins Bild und links wieder hinaus.
+   An beiden Enden läuft es über TAP px flach ins Tal aus, deshalb gibt es keine Kante und nichts wird ein- oder ausgeblendet.
+   Hügel (Alm, Onsen, Schrein, Felder, Steinbruch, Felswand) liegen am nächsten (vor Baumreihen und Dörfern),
+   See und Fluss liegen weiter hinten am Fuß der Berge, die Baumreihen im Tal stehen davor. */
+const TAP=190;
+const tapE=(x,W)=>smooth01(Math.min(x,W-1-x)/TAP);
+const taper=(cr,W,H)=>x=>{const t=tapE(x,W);return t>=1?cr(x):H+2-(H+2-cr(x))*t};
 const HILLW={top:'#ffffff',lit:'#ffffff',mid:'#ecf2fb',sh:'#d6e1f1',base:'#dde8f6'},HILLS={top:'#a2cf6c',lit:'#8fc05c',mid:'#7fb150',sh:'#6c9c44',base:'#93bf6a'};
+const VALC=()=>WIEHEN&&SUMMER?'#b0a46c':SUMMER?'#93bf6a':'#dde8f6';
+/* untere Zeilen des Bands gerastert in die Talfarbe */
+function bandFoot(g,W,H,n,col){for(let y=H-n;y<H;y++)for(let x=0;x<W;x++)if(bayer(x,y)<(y-(H-n))/n)PX(g,col,x,y)}
 /* Alm: weicher Wiesen- bzw. Schneehügel mit Hütten, Stadeln, Zäunen, ein paar Fichten; im Sommer Kühe und ein Weg */
-function almBand(){return band('alm'+bSeas(),1300,120,(g,W,H)=>{
-  const cr=x=>30+8*Math.sin(TAU*2*x/W+.5)+4*Math.sin(TAU*5*x/W+1.3)+1.5*Math.sin(TAU*13*x/W);
+function almBand(){return band('alm'+bSeas(),1500,138,(g,W,H)=>{
+  const cr=taper(x=>32+8*Math.sin(TAU*2*x/1300+.5)+4*Math.sin(TAU*5*x/1300+1.3)+1.5*Math.sin(TAU*13*x/1300),W,H);
   paintHill(g,W,H,cr,SUMMER?HILLS:HILLW);
-  if(SUMMER){let x=60,y=cr(60)+4;for(let k=0;k<120;k++){PX(g,'#c9b48a',Math.round(x),Math.round(y));x+=1+(k%9<5?1:0);y+=.55*Math.sin(k*.11)+.35;if(y>H)break}}
+  const HUTS=[330,600,880,1150];
+  if(SUMMER){let x=380,y=cr(380)+4;for(let k=0;k<130;k++){PX(g,'#c9b48a',Math.round(x),Math.round(y));x+=1+(k%9<5?1:0);y+=.55*Math.sin(k*.11)+.35;if(y>H-30)break}}
   const TC=SUMMER?['#2f5a30','#3f7039']:['#2b4f47','#36614f'];
-  for(let i=0;i<26;i++){const x=Math.floor(hash01(i*3.7+1)*W);if([140,470,820,1120].some(c=>x>c-14&&x<c+50))continue;const n=1+Math.floor(hash01(i*1.3)*3);for(let k=0;k<n;k++){const xx=x+k*5,h=10+Math.floor(hash01(i+k*7)*10);bandSpruce(g,xx,Math.round(cr(xx))+3,h,!SUMMER,TC)}}
-  for(const [i,cx] of [140,470,820,1120].entries()){const w=22+Math.floor(hash01(i*5.1)*7),b=Math.round(Math.max(cr(cx),cr(cx+w)))+5;
+  for(let i=0;i<34;i++){const x=Math.floor(TAP+hash01(i*3.7+1)*(W-2*TAP));if(HUTS.some(c=>x>c-14&&x<c+50))continue;const n=1+Math.floor(hash01(i*1.3)*3);for(let k=0;k<n;k++){const xx=x+k*5,h=10+Math.floor(hash01(i+k*7)*10);bandSpruce(g,xx,Math.round(cr(xx))+3,h,!SUMMER,TC)}}
+  for(const [i,cx] of HUTS.entries()){const w=22+Math.floor(hash01(i*5.1)*7),b=Math.round(Math.max(cr(cx),cr(cx+w)))+5;
     drawChalet(cx,b,w,12,i*11+3);if(i%2===0)drawStadel(cx+w+10,Math.round(cr(cx+w+16))+6);
     for(let k=0;k<8;k++){const fx=cx-32+k*5,fy=Math.round(cr(fx))+9;PX(g,'#4a2f1a',fx,fy-4,1,4);if(k<7)PX(g,'#4a2f1a',fx,fy-3,5,1)}}
-  if(SUMMER)for(let k=0;k<9;k++){const x=Math.floor(hash01(k*9.7+2)*(W-20)),y=Math.round(cr(x))+12+Math.floor(hash01(k*3.1)*24);drawCow(x,y,hash01(k*1.9)<.5,k*7+1)}})}
-/* Bergsee: das Wasser liegt vor dem Fuß der Berge. Hinten ein Ufer mit Bäumchen, Spiegelung, Glanz, vorne Kies bzw. Schnee; eine Kapelle auf einer Landzunge, Bootshäuser */
-function lakeBand(){return band('lake'+bSeas(),1400,70,(g,W,H)=>{const L0=30;
-  for(let x=0;x<W;x++){
-    for(let y=L0+6;y<L0+29;y++){const t=(y-L0-6)/23,b=bayer(x,y);let c;
-      if(SUMMER)c=t<.16?'#2f6a64':t<.24?(b<(.24-t)/.08?'#2f6a64':'#3994a9'):t<.62?'#3994a9':(b<(t-.62)/.3?'#55b2c3':'#3994a9');
-      else c=t<.16?'#b6c9e2':t<.24?(b<(.24-t)/.08?'#b6c9e2':'#dfecf9'):'#e6f1fb';
+  if(SUMMER)for(let k=0;k<11;k++){const x=Math.floor(TAP+30+hash01(k*9.7+2)*(W-2*TAP-60)),y=Math.round(cr(x))+12+Math.floor(hash01(k*3.1)*24);drawCow(x,y,hash01(k*1.9)<.5,k*7+1)}})}
+/* Bergsee am Fuß der Berge: hinten ein Ufer mit Bäumchen, Spiegelung, Glanz, vorne Kies bzw. Schnee; zu den Enden hin wird er schmal
+   und läuft im Talboden aus. Eine Kapelle auf einer Landzunge, Bootshäuser */
+function lakeBand(){return band('lake'+bSeas(),1550,88,(g,W,H)=>{const L0=30,VB=72,MID=L0+17,HW=11.5,VC=VALC();
+  const geo=x=>{const t=tapE(x,W),mid=MID+(1-t)*(VB-MID),hw=HW*t;return [t,Math.round(mid-hw),Math.round(mid+hw)]};
+  for(let x=0;x<W;x++){const [t,top,bot]=geo(x);
+    for(let y=top;y<bot;y++){const tt=(y-top)/Math.max(1,bot-top),b=bayer(x,y);let c;
+      if(SUMMER)c=tt<.16?'#2f6a64':tt<.24?(b<(.24-tt)/.08?'#2f6a64':'#3994a9'):tt<.62?'#3994a9':(b<(tt-.62)/.3?'#55b2c3':'#3994a9');
+      else c=tt<.16?'#b6c9e2':tt<.24?(b<(.24-tt)/.08?'#b6c9e2':'#dfecf9'):'#e6f1fb';
       PX(g,c,x,y)}
-    PX(g,SUMMER?'#4c7a3c':'#9fb4d2',x,L0+4,1,2);
-    const th=hash01(x*.71);if(th<.55){const h=2+Math.floor(hash01(x*1.9)*5);PX(g,SUMMER?(th<.2?'#28482a':'#33583a'):(th<.2?'#5f748e':'#6f86a2'),x,L0+4-h,1,h);if(!SUMMER&&h>3)PX(g,'#eef4fb',x,L0+4-h,1,1)}
-    PX(g,SUMMER?'#d9d2b4':'#c9d8ec',x,L0+29,1,2);PX(g,SUMMER?'#93bf6a':'#dde8f6',x,L0+31,1,H-L0-31)}
-  for(let i=0;i<60;i++){const x=Math.floor(hash01(i*4.3)*W),y=L0+9+Math.floor(hash01(i*7.9)*18),w=3+Math.floor(hash01(i*2.2)*10);PX(g,SUMMER?'#cdeff3':'#ffffff',x,y,w,1)}
-  if(!SUMMER)for(let i=0;i<30;i++){const x=Math.floor(hash01(i*5.9+1)*W),y=L0+10+Math.floor(hash01(i*3.3)*16);PX(g,'#b4cde8',x,y,1,1);PX(g,'#b4cde8',x+1,y+1,2,1)}
-  for(const kx of [380,1080]){for(let k=-36;k<=36;k++){const hh=Math.round(16*Math.max(0,1-Math.pow(k/36,2)));for(let y=L0+29-hh;y<L0+31;y++)PX(g,y===L0+29-hh?(SUMMER?'#a2cf6c':'#ffffff'):(k>0?(SUMMER?'#8fc05c':'#ffffff'):(SUMMER?'#7fb150':'#e6eef9')),kx+k,y)}
+    if(t>.1){PX(g,SUMMER?'#4c7a3c':'#9fb4d2',x,top-2,1,2);const th=hash01(x*.71);if(th<.55){const h=Math.round((2+Math.floor(hash01(x*1.9)*5))*Math.min(1,t*1.4));if(h>0){PX(g,SUMMER?(th<.2?'#28482a':'#33583a'):(th<.2?'#5f748e':'#6f86a2'),x,top-2-h,1,h);if(!SUMMER&&h>3)PX(g,'#eef4fb',x,top-2-h,1,1)}}}
+    PX(g,t>.1?(SUMMER?'#d9d2b4':'#c9d8ec'):VC,x,bot,1,2);PX(g,VC,x,bot+2,1,Math.max(0,H-bot-2))}
+  for(let i=0;i<80;i++){const x=Math.floor(TAP+hash01(i*4.3)*(W-2*TAP)),[t,top,bot]=geo(x),y=top+3+Math.floor(hash01(i*7.9)*Math.max(1,bot-top-5)),w=3+Math.floor(hash01(i*2.2)*10);PX(g,SUMMER?'#cdeff3':'#ffffff',x,y,w,1)}
+  if(!SUMMER)for(let i=0;i<36;i++){const x=Math.floor(TAP+hash01(i*5.9+1)*(W-2*TAP)),[t,top,bot]=geo(x),y=top+4+Math.floor(hash01(i*3.3)*Math.max(1,bot-top-7));PX(g,'#b4cde8',x,y,1,1);PX(g,'#b4cde8',x+1,y+1,2,1)}
+  for(const kx of [470,1080]){for(let k=-36;k<=36;k++){const hh=Math.round(16*Math.max(0,1-Math.pow(k/36,2)));for(let y=L0+29-hh;y<L0+31;y++)PX(g,y===L0+29-hh?(SUMMER?'#a2cf6c':'#ffffff'):(k>0?(SUMMER?'#8fc05c':'#ffffff'):(SUMMER?'#7fb150':'#e6eef9')),kx+k,y)}
     bandSpruce(g,kx-20,L0+20,12,!SUMMER,SUMMER?['#2f5a30','#3f7039']:['#2b4f47','#36614f']);drawChapel(kx-4,L0+15)}
-  drawBoathouse(720,L0+20);drawBoathouse(760,L0+21);drawBoathouse(230,L0+19)})}
-/* Felswand mit Schuttkegeln (Sommer): klare Flächen, Licht von rechts, unten grüne Matten */
-function screeBand(){return band('scree'+bSeas(),1000,120,(g,W,H)=>{
-  const top=x=>16+7*Math.sin(TAU*3*x/W)+4*Math.sin(TAU*7*x/W+1)+3*Math.abs(Math.sin(x*.09)),cb=x=>top(x)+30+4*Math.sin(TAU*4*x/W);
+  drawBoathouse(780,L0+20);drawBoathouse(820,L0+21);drawBoathouse(330,L0+19);drawBoathouse(1290,L0+20)})}
+/* Felswand mit Schuttkegeln (Sommer): klare Flächen, Licht von rechts, unten grüne Matten; zu den Enden hin sinkt die Wand ins Tal */
+function screeBand(){return band('scree'+bSeas(),1500,166,(g,W,H)=>{
+  const top=taper(x=>16+7*Math.sin(TAU*3*x/1000)+4*Math.sin(TAU*7*x/1000+1)+3*Math.abs(Math.sin(x*.09)),W,H),cb=x=>Math.min(H+2,top(x)+(30+4*Math.sin(TAU*4*x/1000))*tapE(x,W));
   for(let x=0;x<W;x++){const t=Math.round(top(x)),b=Math.round(cb(x)),f=Math.floor((x+Math.floor(hash01(Math.floor(x/14))*6))/14),lit=hash01(f*2.3)<.55;
     for(let y=t;y<H;y++){let c;
       if(y<b){c=lit?'#a8abb4':'#8a8d97';if((x+Math.floor(hash01(Math.floor(x/14))*6))%14===0&&y>t+2)c='#6e717a';if(y===t)c=lit?'#c0c3cb':'#9ea1aa';if(y>b-3&&bayer(x,y)<.5)c='#7c8a62'}
       else c=bayer(x,y)<clamp((y-b)/40,0,1)*.6?'#86b858':'#76a64c';
       PX(g,c,x,y)}}
-  for(const [cx,hw] of [[90,70],[300,96],[520,80],[740,104],[930,64]]){const ap=Math.round(cb(cx))-4;
-    for(let x=cx-hw;x<cx+hw;x++){const u=(x-cx)/hw,X=((x%W)+W)%W,yt=Math.round(ap+(H-ap)*Math.pow(Math.abs(u),1.15)*.95+(Math.abs(u)<.08?2:0));
-      for(let y=yt;y<H;y++){const v=(y-ap)/(H-ap),ray=hash01(Math.round((x-cx)/Math.max(.25,v)/9)*1.7+cx)<.22;let c=u>0?(ray?'#a9a79e':'#b5b3aa'):(ray?'#878580':'#93918a');if(y===yt)c=u>0?'#c8c6bc':'#a19f98';
-        if(Math.abs(u)>.8&&bayer(X,y)<(Math.abs(u)-.8)*3)c='#7c9a56';PX(g,c,X,y)}}
-    for(let k=0;k<7;k++){const bx=cx-hw*.8+Math.floor(hash01(cx+k*3.3)*hw*1.6),by=H-26-Math.floor(hash01(cx*1.7+k)*10);PX(g,'#6e6c66',((Math.round(bx)%W)+W)%W,by,3,2);PX(g,'#c4c2b8',((Math.round(bx)%W)+W)%W,by,2,1)}}
-  for(let y=H-24;y<H;y++)for(let x=0;x<W;x++)if(bayer(x,y)<(y-(H-24))/24)PX(g,'#93bf6a',x,y)})}
+  for(const [cx,hw] of [[330,90],[560,110],[790,84],[1020,110],[1240,80]]){const ap=Math.round(cb(cx))-4,HB=H-34;
+    for(let x=cx-hw;x<cx+hw;x++){const u=(x-cx)/hw,yt=Math.round(ap+(HB-ap)*Math.pow(Math.abs(u),1.15)*.95+(Math.abs(u)<.08?2:0));
+      for(let y=yt;y<HB+Math.round(4*(1-Math.abs(u)));y++){const H=HB;const v=(y-ap)/(H-ap),ray=hash01(Math.round((x-cx)/Math.max(.25,v)/9)*1.7+cx)<.22;let c=u>0?(ray?'#a9a79e':'#b5b3aa'):(ray?'#878580':'#93918a');if(y===yt)c=u>0?'#c8c6bc':'#a19f98';
+        if(Math.abs(u)>.8&&bayer(x,y)<(Math.abs(u)-.8)*3)c='#7c9a56';PX(g,c,x,y)}}
+    for(let k=0;k<7;k++){const bx=Math.round(cx-hw*.8+Math.floor(hash01(cx+k*3.3)*hw*1.6)),by=H-62-Math.floor(hash01(cx*1.7+k)*10);PX(g,'#6e6c66',bx,by,3,2);PX(g,'#c4c2b8',bx,by,2,1)}}
+  bandFoot(g,W,H,26,'#93bf6a')})}
 /* Onsen: verschneiter Hang mit Terrassen, Ryokan, dampfende Becken, Steinlaternen, ein paar Zedern */
-function onsenBand(){return band('onsen'+bSeas(),1200,110,(g,W,H)=>{
-  const cr=x=>32+7*Math.sin(TAU*2*x/W+2)+3*Math.sin(TAU*6*x/W);paintHill(g,W,H,cr,HILLW);
-  for(let i=0;i<20;i++){const x=Math.floor(hash01(i*5.3+2)*W);bandSpruce(g,x,Math.round(cr(x))+3,12+Math.floor(hash01(i)*12),true,['#1f3a2a','#2d4a32'])}
-  for(const [i,rx] of [160,620,990].entries()){const w=46+Math.floor(hash01(i*2.9)*16),b=Math.round(Math.max(cr(rx),cr(rx+w)))+10;drawRyokan(rx,b,w);
+function onsenBand(){return band('onsen'+bSeas(),1400,136,(g,W,H)=>{
+  const cr=taper(x=>32+7*Math.sin(TAU*2*x/1200+2)+3*Math.sin(TAU*6*x/1200),W,H);paintHill(g,W,H,cr,HILLW);
+  for(let i=0;i<24;i++){const x=Math.floor(TAP+hash01(i*5.3+2)*(W-2*TAP));bandSpruce(g,x,Math.round(cr(x))+3,12+Math.floor(hash01(i)*12),true,['#1f3a2a','#2d4a32'])}
+  for(const [i,rx] of [330,700,1010].entries()){const w=46+Math.floor(hash01(i*2.9)*16),b=Math.round(Math.max(cr(rx),cr(rx+w)))+10;drawRyokan(rx,b,w);
     drawPool(rx-38,b+8,30,i*5+1);drawPool(rx+w+8,b+12,24,i*5+3);
     for(const lx of [rx-6,rx+w+3]){PX(g,'#6d717c',lx,b+2,3,4);PX(g,'#9aa0aa',lx+1,b-1,1,3);PX(g,'#f4f8ff',lx,b-2,3,1)}}})}
 /* Schrein: Hügel mit dichtem Zedernwald, Steintreppe mit roten Torii den Hang hinauf, oben die Halle */
-function shrineBand(){return band('shrine'+bSeas(),1300,130,(g,W,H)=>{
-  const cr=x=>36+10*Math.sin(TAU*2*x/W+.8)+4*Math.sin(TAU*5*x/W+2);paintHill(g,W,H,cr,HILLW);
-  for(let x=0;x<W;x+=3){if(hash01(x*.37)<.45)continue;const h=14+Math.floor(hash01(x*1.3)*16);bandSpruce(g,x,Math.round(cr(x))+4+Math.floor(hash01(x)*4),h,true,['#1f3a2a','#2d4a32'])}
-  for(const x0 of [200,860]){const xt=x0+100,yt=Math.round(cr(xt))+16,yb=Math.round(cr(x0))+52,n=10;
+function shrineBand(){return band('shrine'+bSeas(),1400,158,(g,W,H)=>{
+  const cr=taper(x=>36+10*Math.sin(TAU*2*x/1300+.8)+4*Math.sin(TAU*5*x/1300+2),W,H);paintHill(g,W,H,cr,HILLW);
+  for(let x=0;x<W;x+=3){if(hash01(x*.37)<.45||tapE(x,W)<.6)continue;const h=14+Math.floor(hash01(x*1.3)*16);bandSpruce(g,x,Math.round(cr(x))+4+Math.floor(hash01(x)*4),h,true,['#1f3a2a','#2d4a32'])}
+  for(const x0 of [330,860]){const xt=x0+100,yt=Math.round(cr(xt))+16,yb=Math.round(cr(x0))+52,n=10;
     for(let i=0;i<=n;i++){const u=i/n,x=Math.round(x0+(xt-x0)*u),y=Math.round(yb+(yt-yb)*u);PX(g,'#9aa0aa',x-1,y,10,1);PX(g,'#f4f8ff',x-1,y-1,10,1)}
     for(let i=0;i<=n;i++){const u=i/n,x=Math.round(x0+(xt-x0)*u),y=Math.round(yb+(yt-yb)*u);if(i%2===0)drawToriiS(x,y,10-Math.round(u*2))}
     drawHall(xt+6,yt-2)}})}
 /* Felder (Mühlenkreis): Hügel, auf dessen Hang Parzellen in Reihen liegen, Hecken dazwischen, Mühle und Höfe oben */
-function fieldBand(){return band('fields'+bSeas(),1300,130,(g,W,H)=>{
-  const cr=x=>26+10*Math.sin(TAU*x/W+1)+5*Math.sin(TAU*3*x/W+.2);
+function fieldBand(){return band('fields'+bSeas(),1500,138,(g,W,H)=>{
+  const cr=taper(x=>26+10*Math.sin(TAU*x/1300+1)+5*Math.sin(TAU*3*x/1300+.2),W,H);
   const CR=SUMMER?[['#8a5a36','#7a4e2e'],['#cfae5c','#bfa04e'],['#7a9a46','#6e8e3e'],['#a87a48','#986c3e'],['#9aa850','#8c9a46'],['#6f9a48','#638c40']]:[['#f4f8fd','#e2eaf5'],['#eef3fb','#dce5f2'],['#f8fbff','#e8eef7']];
   const HC=SUMMER?'#4e4420':'#6a707c',TR=SUMMER?['#b8601e','#c49a3a','#8a6a24']:['#7a808a','#8a909a'];
   const rowAt=(x,y)=>{const d=y-cr(x),f=d/11+.3*Math.sin(x*.011),row=Math.floor(f);return [row,(f-row)*11]};
@@ -3435,43 +3437,45 @@ function fieldBand(){return band('fields'+bSeas(),1300,130,(g,W,H)=>{
       if(y===Math.floor(t))c=SUMMER?'#8aa84a':'#ffffff';PX(g,c,x,y)}}
   for(let x=0;x<W;x++)for(let y=Math.floor(cr(x))+11;y<H;y++){const [row,rd]=rowAt(x,y);if(rd>=1||hash01(row*7.1+Math.floor((x+row*53)/span(row))*1.9)>=.4||hash01(x*.91+row)>.05)continue;
     PX(g,'#3a2a1e',x,y-3,1,3);PX(g,TR[(x+row)%TR.length],x-1,y-6,3,3);PX(g,TR[(x+row)%TR.length],x,y-7,1,1)}
-  if(SUMMER)for(let k=0;k<36;k++){const x=Math.floor(hash01(k*6.1)*W),y=Math.round(cr(x))+14+Math.floor(hash01(k*2.7)*40),[row]=rowAt(x,y),par=Math.floor((x+row*53)/span(row));
+  if(SUMMER)for(let k=0;k<44;k++){const x=Math.floor(TAP+hash01(k*6.1)*(W-2*TAP)),y=Math.round(cr(x))+14+Math.floor(hash01(k*2.7)*40),[row]=rowAt(x,y),par=Math.floor((x+row*53)/span(row));
     if(Math.floor(hash01(par*3.7+row*11.3)*CR.length)!==1)continue;PX(g,'#7a5a24',x,y+1,2,1);PX(g,'#e8c868',x,y,2,1)}
-  for(const [i,mx] of [300,900].entries()){bflush();const b=Math.round(cr(mx))+3;drawMillBody(mx,b,i*7+2);drawHouseF(mx+24,Math.round(cr(mx+33))+7,18,10,i*20+3);if(i===0)drawHouseF(mx+46,Math.round(cr(mx+53))+9,15,9,i*20+4)}})}
-/* Weser: Fluss vor dem Fuß des Gebirges, Weiden am anderen Ufer, Spiegelung, vorne Uferstreifen */
-function riverBand(){return band('weser'+bSeas(),1600,56,(g,W,H)=>{const R0=24;
-  for(let x=0;x<W;x++){for(let y=R0+4;y<R0+20;y++){const t=(y-R0-4)/16,b=bayer(x,y);PX(g,SUMMER?(t<.25?(b<(.3-t)*4?'#3e5a5e':'#5d7e92'):'#5d7e92'):(t<.25?(b<(.3-t)*4?'#3e5068':'#56708a'):'#56708a'),x,y)}
-    PX(g,SUMMER?'#6a6a3a':'#9aa4b4',x,R0+2,1,2);if(!SUMMER){PX(g,'#eef4fd',x,R0+4,1,1);if(hash01(x*.31)<.6)PX(g,'#eef4fd',x,R0+19,1,1)}
-    PX(g,SUMMER?'#7a6a42':'#c9d6ea',x,R0+20,1,2);PX(g,SUMMER?'#b0a46c':'#dde8f6',x,R0+22,1,H-R0-22)}
-  for(let i=0;i<70;i++){const x=Math.floor(hash01(i*4.3)*W),y=R0+7+Math.floor(hash01(i*7.9)*12),w=2+Math.floor(hash01(i*2.2)*7);PX(g,SUMMER?'#a9c3d0':'#a8bdd2',x,y,w,1)}
-  for(let x=0;x<W;x+=2){if(hash01(x*.41)<.4)continue;const h=6+Math.floor(hash01(x*2.1)*10),r=2+Math.floor(hash01(x*1.3)*3),cl=SUMMER?(hash01(x)<.4?['#7a5418','#b8902a']:hash01(x)<.7?['#6a2416','#a23c22']:['#56501e','#86782a']):['#5a606c','#7a808c'];
-    PX(g,'#3a2a1e',x,R0+3-h,1,h);for(let yy=-r;yy<=r;yy++){const ww=Math.round(Math.sqrt(r*r-yy*yy));PX(g,cl[yy<0?1:0],x-ww,R0+3-h+yy,ww*2+1,1)}if(!SUMMER)PX(g,'#eef4fd',x-1,R0+2-h-r,3,1)}})}
+  bandFoot(g,W,H,24,VALC());
+  for(const [i,mx] of [400,1000].entries()){bflush();const b=Math.round(cr(mx))+3;drawMillBody(mx,b,i*7+2);drawHouseF(mx+24,Math.round(cr(mx+33))+7,18,10,i*20+3);if(i===0)drawHouseF(mx+46,Math.round(cr(mx+53))+9,15,9,i*20+4)}})}
+/* Weser vor dem Fuß des Gebirges: Weiden am anderen Ufer, Spiegelung, vorne Uferstreifen; zu den Enden hin wird sie schmal */
+function riverBand(){return band('weser'+bSeas(),1550,82,(g,W,H)=>{const R0=24,VB=66,MID=R0+12,HW=8,VC=VALC();
+  const geo=x=>{const t=tapE(x,W),mid=MID+(1-t)*(VB-MID),hw=HW*t;return [t,Math.round(mid-hw),Math.round(mid+hw)]};
+  for(let x=0;x<W;x++){const [t,top,bot]=geo(x);
+    for(let y=top;y<bot;y++){const tt=(y-top)/Math.max(1,bot-top),b=bayer(x,y);PX(g,SUMMER?(tt<.25?(b<(.3-tt)*4?'#3e5a5e':'#5d7e92'):'#5d7e92'):(tt<.25?(b<(.3-tt)*4?'#3e5068':'#56708a'):'#56708a'),x,y)}
+    if(t>.1){PX(g,SUMMER?'#6a6a3a':'#9aa4b4',x,top-2,1,2);if(!SUMMER&&bot>top+2){PX(g,'#eef4fd',x,top,1,1);if(hash01(x*.31)<.6)PX(g,'#eef4fd',x,bot-1,1,1)}}
+    PX(g,t>.1?(SUMMER?'#7a6a42':'#c9d6ea'):VC,x,bot,1,2);PX(g,VC,x,bot+2,1,Math.max(0,H-bot-2))}
+  for(let i=0;i<80;i++){const x=Math.floor(TAP+hash01(i*4.3)*(W-2*TAP)),[t,top,bot]=geo(x),y=top+3+Math.floor(hash01(i*7.9)*Math.max(1,bot-top-4)),w=2+Math.floor(hash01(i*2.2)*7);PX(g,SUMMER?'#a9c3d0':'#a8bdd2',x,y,w,1)}
+  for(let x=0;x<W;x+=2){const [t,top]=geo(x);if(hash01(x*.41)<.4||t<.15)continue;const h=Math.round((6+Math.floor(hash01(x*2.1)*10))*Math.min(1,t*1.3)),r=Math.max(1,Math.round((2+Math.floor(hash01(x*1.3)*3))*Math.min(1,t*1.3))),cl=SUMMER?(hash01(x)<.4?['#7a5418','#b8902a']:hash01(x)<.7?['#6a2416','#a23c22']:['#56501e','#86782a']):['#5a606c','#7a808c'];
+    PX(g,'#3a2a1e',x,top-1-h,1,h);for(let yy=-r;yy<=r;yy++){const ww=Math.round(Math.sqrt(r*r-yy*yy));PX(g,cl[yy<0?1:0],x-ww,top-1-h+yy,ww*2+1,1)}if(!SUMMER)PX(g,'#eef4fd',x-1,top-2-h-r,3,1)}})}
 /* Steinbruch: Waldhügel mit einem Anschnitt aus Sandstein in Stufen, Schutt, kleiner Bagger */
-function quarryBand(){return band('quarry'+bSeas(),1100,120,(g,W,H)=>{
-  const cr=x=>24+12*Math.sin(TAU*x/W+.3)+4*Math.sin(TAU*4*x/W);
+function quarryBand(){return band('quarry'+bSeas(),1500,152,(g,W,H)=>{
+  const cr=taper(x=>24+12*Math.sin(TAU*x/1100+.3)+4*Math.sin(TAU*4*x/1100),W,H);
   const P=SUMMER?{top:'#a0582a',lit:'#8e5226',mid:'#7a4622',sh:'#64391c',base:'#b0a46c'}:{top:'#ffffff',lit:'#f4f8fd',mid:'#e2e9f4',sh:'#c8d3e4',base:'#dde8f6'};
   paintHill(g,W,H,cr,P);
   const PAL=SUMMER?[['#7a3416','#b8601e','#d88a3a'],['#7a5418','#b8902a','#dcb44a'],['#56501e','#86782a','#a89a3a'],['#6a2416','#a23c22','#c85a32']]:[['#5a606c','#727884','#8a909c']];
-  const Q=[[330,540],[830,960]],pit=(x,y)=>{for(const [q0,q1] of Q){if(x<q0||x>=q1)continue;const top=Math.round(cr(x))+3;if(y<top)return false;const lev=Math.floor((y-top)/11),l0=q0+lev*14+Math.round(4*Math.sin(lev*1.7)),r0=q1-lev*11-Math.round(3*Math.sin(lev*2.3));return lev<=6&&r0-l0>=16&&x>=l0&&x<r0}return false},inQ=(x,y)=>pit(x,y)||pit(x-3,y)||pit(x+3,y)||pit(x,y+3);
+  const Q=[[420,630],[930,1060]],pit=(x,y)=>{for(const [q0,q1] of Q){if(x<q0||x>=q1)continue;const top=Math.round(cr(x))+3;if(y<top)return false;const lev=Math.floor((y-top)/11),l0=q0+lev*14+Math.round(4*Math.sin(lev*1.7)),r0=q1-lev*11-Math.round(3*Math.sin(lev*2.3));return lev<=6&&r0-l0>=16&&x>=l0&&x<r0}return false},inQ=(x,y)=>pit(x,y)||pit(x-3,y)||pit(x+3,y)||pit(x,y+3);
   for(let y0=0;y0<H;y0+=4)for(let x0=0;x0<W;x0+=4){const x=x0+Math.floor(hash01(x0*1.3+y0*7.1)*4),y=y0+Math.floor(hash01(x0*3.1+y0)*3);if(y<cr(x)+1||y>H-14||inQ(x,y))continue;
     if(!SUMMER){if(hash01(x*.7+y*1.3)<.28){const th=4+Math.floor(hash01(x+y)*5);PX(g,'#8e939c',x,y-th,1,th);PX(g,'#a8adb6',x-1,y-th+1,1,1);PX(g,'#a8adb6',x+1,y-th+2,1,1);PX(g,'#ffffff',x,y-th-1,1,1)}continue}
     const pl=PAL[Math.floor(hash01(x*.17+y*.71)*PAL.length)],r=2;
-    for(let yy=-r;yy<=r;yy++){const ww=Math.round(Math.sqrt(r*r-yy*yy)+.3);for(let xx=-ww;xx<=ww;xx++)PX(g,pl[yy<0&&xx>-1?2:yy>0||xx<-1?0:1],x+xx,y+yy)}
-    if(!SUMMER)PX(g,'#f4f8fd',x-1,y-r,3,1)}
-  for(let x=0;x<W;x+=2){const t=Math.round(cr(x));if(inQ(x,t+2))continue;if(!SUMMER){const th=6+Math.floor(hash01(x*1.7)*8);PX(g,'#8e939c',x,t-th,1,th);PX(g,'#a8adb6',x-1,t-th+2,1,1);PX(g,'#a8adb6',x+1,t-th+3,1,1);PX(g,'#ffffff',x,t-th-1,1,1);continue}
+    for(let yy=-r;yy<=r;yy++){const ww=Math.round(Math.sqrt(r*r-yy*yy)+.3);for(let xx=-ww;xx<=ww;xx++)PX(g,pl[yy<0&&xx>-1?2:yy>0||xx<-1?0:1],x+xx,y+yy)}}
+  for(let x=0;x<W;x+=2){const t=Math.round(cr(x));if(t>=H||inQ(x,t+2))continue;if(!SUMMER){const th=6+Math.floor(hash01(x*1.7)*8);PX(g,'#8e939c',x,t-th,1,th);PX(g,'#a8adb6',x-1,t-th+2,1,1);PX(g,'#a8adb6',x+1,t-th+3,1,1);PX(g,'#ffffff',x,t-th-1,1,1);continue}
     const pl=PAL[Math.floor(hash01(x*.37)*PAL.length)],r=2+Math.floor(hash01(x*.9)*2);
-    for(let yy=-r;yy<=r;yy++){const ww=Math.round(Math.sqrt(r*r-yy*yy));PX(g,pl[yy<0?2:1],x-ww,t-1+yy,ww*2+1,1)}if(!SUMMER)PX(g,'#f4f8fd',x-1,t-1-r,3,1)}
+    for(let yy=-r;yy<=r;yy++){const ww=Math.round(Math.sqrt(r*r-yy*yy));PX(g,pl[yy<0?2:1],x-ww,t-1+yy,ww*2+1,1)}}
   for(const [q0,q1] of Q){const qw=q1-q0;
-    for(let y=0;y<H;y++)for(let x=q0;x<q1;x++){const top=Math.round(cr(x))+3;if(y<top)continue;const lev=Math.floor((y-top)/11),ly=(y-top)%11,l0=q0+lev*14+Math.round(4*Math.sin(lev*1.7)),r0=q1-lev*11-Math.round(3*Math.sin(lev*2.3));
-      if(!pit(x,y))continue;let c=ly<8?(lev%2?'#c9a46e':'#bf9a64'):ly===8?(SUMMER?'#dcc08e':'#f4f8ff'):'#9a7a50';
+    for(let y=0;y<H;y++)for(let x=q0;x<q1;x++){const top=Math.round(cr(x))+3;if(y<top||!pit(x,y))continue;const lev=Math.floor((y-top)/11),ly=(y-top)%11,l0=q0+lev*14+Math.round(4*Math.sin(lev*1.7)),r0=q1-lev*11-Math.round(3*Math.sin(lev*2.3));
+      let c=ly<8?(lev%2?'#c9a46e':'#bf9a64'):ly===8?(SUMMER?'#dcc08e':'#f4f8ff'):'#9a7a50';
       if(ly<8&&hash01(Math.floor(x/5)*3.1+lev*7+Math.floor(ly/3))<.12)c='#b08a5a';if(x<l0+2)c='#7a5a38';if(x>=r0-1)c='#d4b27c';if(y>H-16&&bayer(x,y)<(y-(H-16))/16)c=hash01(x+y)<.5?'#b8b0a0':'#9a9284';PX(g,c,x,y)}
     const ex=q0+Math.round(qw*.5);let ey=0;for(let y=H-1;y>0;y--)if(pit(ex+6,y)){ey=y-1;break}ey=Math.min(ey,H-8);PX(g,'#2a2216',ex,ey,12,2);PX(g,'#e0b030',ex+1,ey-5,8,5);PX(g,'#2a3346',ex+2,ey-4,3,2);PX(g,'#c89a20',ex+8,ey-8,1,4);PX(g,'#c89a20',ex+9,ey-9,6,1);PX(g,'#c89a20',ex+14,ey-9,1,5);PX(g,'#2a2216',ex+13,ey-4,3,2)}
-  for(let y=H-22;y<H;y++)for(let x=0;x<W;x++)if(bayer(x,y)<(y-(H-22))/22)PX(g,P.base,x,y)})}
+  bandFoot(g,W,H,22,P.base)})}
 /* Gletscher: eigenes Bergmassiv vor den anderen Bergen. Zwei Gipfel, dazwischen fließt die Zunge ins Tal:
    oben Firn, dann Eis mit Querspalten, ein Eisbruch mit Séracs, unten das Gletschertor; Ränder mit Moräne */
-function glacierSpr(){return bspr('glacier5',460,190,(g,W,H)=>{
-  const P1=[120,12],P2=[348,30],c1=x=>P1[1]+Math.abs(x-P1[0])*.86+3*Math.sin(x*.21),c2=x=>P2[1]+Math.abs(x-P2[0])*.84+3*Math.sin(x*.17+1),top=x=>Math.min(c1(x),c2(x));
-  const G0=70,gc=y=>234+(y-G0)/(H-G0)*20+6*Math.sin(y*.045),gw=y=>78*Math.sqrt(Math.min(1,(y-G0)/26))*(1-.52*Math.pow((y-G0)/(H-G0),.8));
+function glacierSpr(){return bspr('glacier6',640,190,(g,W,H)=>{
+  const P1=[210,12],P2=[438,30],c1=x=>P1[1]+Math.abs(x-P1[0])*.86+3*Math.sin(x*.21),c2=x=>P2[1]+Math.abs(x-P2[0])*.84+3*Math.sin(x*.17+1),top=x=>Math.min(c1(x),c2(x));
+  const G0=70,gc=y=>324+(y-G0)/(H-G0)*20+6*Math.sin(y*.045),gw=y=>78*Math.sqrt(Math.min(1,(y-G0)/26))*(1-.52*Math.pow((y-G0)/(H-G0),.8));
   for(let x=0;x<W;x++){const t=Math.round(top(x)),A=c1(x)<c2(x)?P1:P2,lit=x>A[0];
     for(let y=Math.max(0,t);y<H;y++){const b=bayer(x,y),d=y-t,dy=y-A[1];
       let c=lit?(x-A[0]<dy*.38?'#b6c6dc':'#a3b6d0'):(A[0]-x<dy*.3?'#93a9c6':'#8299b8');
@@ -3487,25 +3491,30 @@ function glacierSpr(){return bspr('glacier5',460,190,(g,W,H)=>{
           if(Math.abs(u)>.93&&k>.35)c='#8f929b'}}
       if(y>=H-18&&b<(y-(H-18))/18)c='#cadcf2';
       PX(g,c,x,y)}}})}
-/* Feste Plätze im Abschnitt (alle sp Welt-Pixel einer), Bildschirm-x so, dass sie beim Durchfahren durchs Bild ziehen */
-function bioEach(B,cX,par,sp,fn){const b=B.b,cc=cX+VW*.6;for(let ax=b.x0-BIO_FADE+sp*.35,i=0;ax<b.x1+BIO_FADE;ax+=sp,i++){const sx=Math.round(VW*.74+(ax-cc)*par);if(sx<-240||sx>VW+240)continue;fn(sx,i,b.x0*.001+i*7.31)}}
-/* hinter dem Tal: Gletschermassiv, Windräder */
-function drawBioFar(cX,by,B){if(!B)return;ctx.globalAlpha=B.k;const id=B.id;
-  if(id==='glacier'){const S=glacierSpr(),b=B.b,sx=Math.round(VW*.68+((b.x0+b.x1)/2-(cX+VW*.6))*.06)-S.width/2;ctx.drawImage(S,sx,by+14-S.height)}
-  else if(id==='fields')bioEach(B,cX,.12,1300,(sx,i,s)=>{drawTurbine(sx,by-18,s);drawTurbine(sx+42,by-15,s+1);if(i%2)drawTurbine(sx+90,by-17,s+2)});
-  ctx.globalAlpha=1}
-/* naher Hügelzug bzw. Wasser vor den Bergen */
-function drawBioBand(cX,by,B){if(!B)return;ctx.globalAlpha=B.k;const id=B.id,o=cX*.2;
-  if(id==='alm')drawBand(almBand(),o,by-62);
-  else if(id==='lake')drawBand(lakeBand(),cX*.26,by-60);
-  else if(id==='scree')drawBand(screeBand(),o,by-90);
-  else if(id==='onsen')drawBand(onsenBand(),o,by-60);
-  else if(id==='shrine')drawBand(shrineBand(),o,by-84);
-  else if(id==='fields')drawBand(fieldBand(),o,by-56);
-  else if(id==='quarry')drawBand(quarryBand(),o,by-70);
-  else if(id==='weser'){drawBand(riverBand(),cX*.26,by-54);bioEach(B,cX,.26,1700,(sx,i)=>{const u=((T*4+i*300)%900+900)%900;drawBarge(Math.round(sx-160+u*.4),by-13,i%2===1)});
-    const a0=ctx.globalAlpha;for(let k=0;k<3;k++){ctx.globalAlpha=a0*(.1+.05*Math.sin(T*.3+k));ctx.fillStyle='#ffffff';ctx.fillRect(0,by-25+k*4,VW,2)}ctx.globalAlpha=a0}
-  ctx.globalAlpha=1}
+/* Landschaften in der Nähe der Kamera. Ein Band steht in der Welt fest: sein linkes Ende erreicht den rechten Bildrand,
+   wenn die Kamera BIO_PRE px vor dem Abschnitt ist, danach zieht es mit seiner Parallaxe durchs Bild. */
+const BIO_PRE=450;
+function bioNear(cc,fn){for(const b of bioList){if(b.x0-14000>cc)break;if(b.x1+14000<cc)continue;fn(b)}}
+const bandX=(b,cc,par)=>Math.round(VW+(b.x0-BIO_PRE-cc)*par);
+/* hinter dem Tal: das Gletschermassiv schiebt sich von rechts vor die Berge, Windräder hinter den Feldern */
+function drawBioFar(cX,by){const cc=cX+VW*.6;bioNear(cc,b=>{
+  if(b.id==='glacier'){const S=glacierSpr(),sx=Math.round(VW+70+(b.x0-BIO_PRE-cc)*.14);if(sx<VW&&sx+S.width>0)ctx.drawImage(S,sx,by+14-S.height)}
+  else if(b.id==='fields'){const x0=bandX(b,cc,.12);for(let i=0;i<6;i++){const sx=x0+50+i*95+Math.round(hash01(b.x0*.001+i)*40);if(sx>-30&&sx<VW+30)drawTurbine(sx,by-18+(i%2)*3,b.x0*.001+i)}}})}
+/* weiter hinten im Tal (vor den Baumreihen gezeichnet, die stehen davor): See und Fluss */
+function drawBioWater(cX,by){const cc=cX+VW*.6;bioNear(cc,b=>{
+  if(b.id==='lake'){const B=lakeBand(),sx=bandX(b,cc,.26);if(sx<VW&&sx+B.c.width>0)drawBandAt(B,sx,by-60)}
+  else if(b.id==='weser'){const B=riverBand(),sx=bandX(b,cc,.26);if(sx>=VW||sx+B.c.width<=0)return;drawBandAt(B,sx,by-54);
+    for(let i=0;i<2;i++){const u=((T*5+i*520)%1100+1100)%1100,bx=Math.round(sx+TAP+30+(i?1100-u:u));if(bx>-40&&bx<VW+4)drawBarge(bx,by-14,i===1)}
+    const a0=ctx.globalAlpha,m0=Math.max(0,sx+TAP),m1=Math.min(VW,sx+B.c.width-TAP);if(m1>m0)for(let k=0;k<3;k++){ctx.globalAlpha=a0*(.1+.05*Math.sin(T*.3+k));ctx.fillStyle='#ffffff';ctx.fillRect(m0,by-25+k*4,m1-m0,2)}ctx.globalAlpha=a0}})}
+/* am nächsten (nach Baumreihen und Dörfern gezeichnet): die Hügel der Landschaften */
+function drawBioBand(cX,by){const cc=cX+VW*.6;bioNear(cc,b=>{const id=b.id;
+  const at=(Bd,y)=>{const sx=bandX(b,cc,.34);if(sx<VW&&sx+Bd.c.width>0)drawBandAt(Bd,sx,y)};
+  if(id==='alm')at(almBand(),by-62);
+  else if(id==='scree')at(screeBand(),by-90);
+  else if(id==='onsen')at(onsenBand(),by-60);
+  else if(id==='shrine')at(shrineBand(),by-84);
+  else if(id==='fields')at(fieldBand(),by-56);
+  else if(id==='quarry')at(quarryBand(),by-70)})}
 
 /* ---------- Wald neben der Strecke: Bambus und Zedern ---------- */
 let BAM_SPR=null,CED_SPR=null;
@@ -3539,75 +3548,21 @@ function bioPrebake(){const L=[...bioSet()],run=()=>{const id=L.shift();if(!id)r
   })[id]?.()}catch(e){}sched()},sched=()=>{if(window.requestIdleCallback)requestIdleCallback(run,{timeout:1500});else setTimeout(run,120)};sched()}
 const bioFsetSpr=id=>id==='bamboo'?bambooSprites():cedarSprites();
 
-/* ---------- Hindernisse ---------- */
-/* Kleine, schlichte Sachen auf der Strecke: drüberspringen, sonst Sturz. Jede Pixelspalte steht auf dem Hang (wie die Felsen).
-   prof: oberste Zeile je Spalte für die Kollision. */
-const OBS_SPR=new Map();
-const OBS_NAME={fence:['ZAUN!','FENCE!'],sled:['SCHLITTEN!','SLED!'],haybale:['HEUBALLEN!','HAY BALE!'],roundbale:['STROHBALLEN!','STRAW BALE!'],trough:['TRÄNKE!','TROUGH!'],
-  iceblock:['EIS!','ICE!'],boulder:['STEIN!','STONE!'],cairn:['STEINMANN!','CAIRN!'],lantern:['LATERNE!','LANTERN!'],jizo:['JIZO!','JIZO!'],bamboofence:['BAMBUS!','BAMBOO!'],woodpile:['HOLZ!','WOODPILE!']};
-const OBS_BURST={fence:['#8a5d34','#b07f48','#ffffff'],sled:['#8a5d34','#c9a06e','#ffffff'],haybale:['#d9b54a','#efd27a','#a8842e'],roundbale:['#d9b54a','#efd27a','#a8842e'],trough:['#8a5d34','#9fd0ee','#ffffff'],
-  iceblock:['#cfeaf8','#9fd0ee','#ffffff'],boulder:['#878b9c','#6b6f80','#ffffff'],cairn:['#9a9a94','#c4c2b8','#ffffff'],lantern:['#9aa0aa','#ffffff','#6d717c'],jizo:['#9aa0aa','#d0382e','#ffffff'],bamboofence:['#9ccb62','#6f9e3e','#ffffff'],woodpile:['#c9a06e','#8a6440','#5a3d26']};
-function obsSprite(type){const key=type+bSeas();let o=OBS_SPR.get(key);if(o)return o;const snow=!SUMMER,S='#ffffff',SS='#dfe9f7';let W,H,draw;
-  const O='#2a1d14';
-  if(type==='fence'){W=25;H=13;draw=g=>{for(const y of [3,8]){PX(g,O,0,y-1,W,4);PX(g,'#9a6a3e',0,y,W,2);PX(g,'#c08f55',0,y,W,1)}
-      for(const x of [1,12,22]){PX(g,O,x-1,0,4,H);PX(g,'#8a5d34',x,1,2,H-1);PX(g,'#b07f48',x,1,1,H-1)}
-      if(snow){PX(g,S,0,1,W,1);PX(g,S,0,6,W,1);for(const x of [1,12,22])PX(g,S,x-1,0,4,1)}}}
-  else if(type==='sled'){W=22;H=9;draw=g=>{PX(g,O,0,4,22,4);PX(g,'#b07f48',1,5,20,2);PX(g,'#c9a06e',1,5,20,1);for(const x of [3,9,15])PX(g,O,x,7,2,2);PX(g,O,1,H-1,20,1);
-      PX(g,O,19,0,3,5);PX(g,'#8a5d34',20,1,1,4);PX(g,O,17,0,3,1);PX(g,'#8a5d34',18,0,2,1);if(snow){PX(g,S,1,4,18,1)}}}
-  else if(type==='haybale'){W=17;H=10;draw=g=>{PX(g,O,0,snow?2:0,W,H-(snow?2:0));PX(g,'#d9b54a',1,(snow?3:1),W-2,H-(snow?4:2));PX(g,'#efd27a',1,(snow?3:1),W-2,1);PX(g,'#b8963e',1,H-3,W-2,2);
-      for(const x of [5,11]){PX(g,'#7a5a24',x,(snow?3:1),1,H-(snow?4:2))}for(let k=0;k<6;k++)PX(g,'#a8842e',2+k*2,4+(k%3),1,1);if(snow){PX(g,S,0,0,W,3);PX(g,S,2,0,W-4,1);PX(g,SS,1,2,W-2,1)}}}
-  else if(type==='roundbale'){W=14;H=14;draw=g=>{const c=6.5;for(let y=0;y<H;y++)for(let x=0;x<W;x++){const dx=x+.5-7,dy=y+.5-7,d=Math.hypot(dx,dy);if(d>c+.6)continue;
-      const ring=Math.floor(d*1.2+Math.atan2(dy,dx)*.8)%2;PX(g,d>c-.4?O:ring?'#d9b54a':'#c49e3a',x,y);if(d<c-.4&&d>c-1.6&&dy<0)PX(g,'#efd27a',x,y)}
-      PX(g,'#8a6a24',7,7);if(snow){for(let x=2;x<12;x++){const t=Math.round(7-Math.sqrt(Math.max(0,42-(x+.5-7)*(x+.5-7))))-1;PX(g,S,x,Math.max(0,t),1,2)}}}}
-  else if(type==='trough'){W=20;H=8;draw=g=>{PX(g,O,0,1,W,H-1);PX(g,'#8a5d34',1,2,W-2,H-3);PX(g,'#b07f48',1,2,W-2,1);PX(g,'#5c3b21',1,H-2,W-2,1);PX(g,'#5f93b5',2,1,W-4,1);PX(g,'#a9d3ef',3,1,4,1);for(const x of [2,W-4])PX(g,O,x,H-1,2,1)}}
-  else if(type==='iceblock'){W=15;H=11;draw=g=>{const top=x=>Math.round(2+2.5*Math.abs(Math.sin(x*.7+1))+(x<3||x>11?2:0));
-      for(let x=0;x<W;x++){const t=top(x);PX(g,'#3a6a9a',x,t-1,1,H-t+1);for(let y=t;y<H;y++){const u=(x+.5)/W;PX(g,y<t+2?'#ffffff':u>.6?'#cfeaf8':(x+y)%5===0?'#8fc2e6':'#a9d6f2',x,y)}}
-      PX(g,'#ffffff',4,5,1,3);PX(g,'#ffffff',5,4,1,1);PX(g,'#6fa6d6',9,6,1,4)}}
-  else if(type==='boulder'){const w=16,h=10;W=w+2;H=h+2;draw=g=>g.drawImage(makeRock(w,h,true),0,0)}
-  else if(type==='cairn'){W=11;H=14;draw=g=>{const st=[[0,11,3],[1,8,3],[2,6,3],[3,4,3],[4,2,2]];let y=H;
-      for(const [i,w,h] of st){const x0=Math.round((W-w)/2+(i%2?1:-1)*.5);y-=h;PX(g,O,x0-1,y-1,w+2,h+1);PX(g,i%2?'#9a9a94':'#b4b2a8',x0,y,w,h-1);PX(g,'#c8c6bc',x0,y,w,1);PX(g,'#7c7c76',x0+w-2,y+1,2,h-2)}
-      if(snow)PX(g,S,4,0,3,1)}}
-  else if(type==='lantern'){W=11;H=15;draw=g=>{const G='#9aa0aa',GL='#b8bec8',GD='#6d717c';PX(g,O,1,H-3,9,3);PX(g,G,2,H-2,7,2);PX(g,O,4,7,3,6);PX(g,G,5,7,1,6);PX(g,O,2,4,7,4);PX(g,G,3,5,5,2);PX(g,'#2a2420',4,5,3,2);
-      PX(g,O,0,2,11,2);PX(g,GD,1,3,9,1);PX(g,O,3,0,5,2);PX(g,GL,4,1,3,1);PX(g,S,0,1,11,1);PX(g,S,3,0,5,1);PX(g,GL,8,H-2,1,2)}}
-  else if(type==='jizo'){W=8;H=11;draw=g=>{const G='#9aa0aa';PX(g,O,1,3,6,8);PX(g,G,2,4,4,7);PX(g,'#b8bec8',5,4,1,7);PX(g,O,2,0,4,4);PX(g,G,3,1,2,3);PX(g,'#d0382e',1,6,6,3);PX(g,'#a8281e',1,8,6,1);
-      PX(g,S,2,0,4,1);PX(g,S,1,1,1,1);PX(g,S,6,1,1,1);PX(g,'#3a3430',3,2,1,1)}}
-  else if(type==='bamboofence'){W=24;H=10;draw=g=>{for(let x=0;x<W;x+=3){const h=H-1-((x/3)%2);PX(g,O,x,H-h,3,h);PX(g,'#7fae4a',x+1,H-h+1,1,h-1);PX(g,'#a8cf6a',x+1,H-h+1,1,1);PX(g,'#4e7a2e',x+2,H-h+1,1,h-1)}
-      PX(g,'#3a2a1e',0,4,W,1);PX(g,'#6a4a2a',0,5,W,1);if(snow)for(let x=0;x<W;x+=3)PX(g,S,x,H-(H-1-((x/3)%2))-1,3,1)}}
-  else{W=19;H=11;draw=g=>{const L=[[3,8],[9,8],[15,8],[6,3],[12,3]];for(const [cx,cy] of L)for(let y=-3;y<=3;y++)for(let x=-3;x<=3;x++){const d=Math.hypot(x,y);if(d>3.2)continue;PX(g,d>2.4?O:d>1.6?'#5a3d26':(Math.floor(d*1.6)%2?'#c9a06e':'#b48a58'),cx+x,cy+y)}
-      if(snow){PX(g,S,3,0,7,1);PX(g,S,10,0,6,1);PX(g,S,0,4,3,1);PX(g,S,16,4,3,1)}}}
-  const [c,g]=mk(W,H);draw(g);const id=g.getImageData(0,0,W,H).data,prof=[];
-  for(let x=0;x<W;x++){let t=H;for(let y=0;y<H;y++)if(id[(y*W+x)*4+3]>0){t=y;break}prof.push(t)}
-  o={c,W,H,prof};OBS_SPR.set(key,o);return o}
-function addObs(x,type){const g=groundAt(x);if(!g)return;const S=obsSprite(type);jtrees.push({x,y:g.y,ft:g.y,k:0,h:S.H,w:S.W/2,f:false,hit:false,shape:'obs',type})}
-function drawObs(q,cX,cY){const S=obsSprite(q.type),x0=q.x-S.W/2,sx=Math.round(x0-cX);if(sx>VW||sx+S.W<0)return;
-  for(let i=0;i<S.W;i++){const g=groundAt(x0+i+.5),y=Math.round((g?g.y:q.y)-cY)-S.H+1;if(y>VH||y+S.H<0)continue;ctx.drawImage(S.c,i,0,1,S.H,sx+i,y,1,S.H)}
-  if(q.type==='lantern'&&curDS.night>.15){const g=groundAt(q.x);if(g)emissive.push({x:Math.round(q.x-cX),y:Math.round(g.y-cY)-S.H+7,r:7})}}
-/* Kollision: Fuß unter der obersten Pixelzeile der Spalte (1 px Spiel) */
-function obsTop(q,fx){const S=obsSprite(q.type),i=Math.floor(fx-(q.x-S.W/2));if(i<0||i>=S.W||S.prof[i]>=S.H)return null;const g=groundAt(fx);return (g?g.y:q.y)+1-S.H+S.prof[i]}
-
-/* ---------- Strecke: Abschnitte mit Hindernissen und Untergründen ---------- */
+/* ---------- Strecke: Abschnitte mit anderem Untergrund ---------- */
 let bioLastX=-1e9,bioN=0;
 function bioGen(){
   if(RACE)return false;const B=bioAt(gx+180),id=B&&B.k>.5?B.id:null;
-  if(gx-bioLastX<(id?300:650)||Math.random()>(id?.55:.24))return false;
-  const P=BIO_POOL[bioPoolKey()][id||'base'];if(!P)return false;
-  const free=curZone==='free',wk=WIEHEN?.8:1,deg=(free?rand(22,27):rand(13,17));
-  let lead=110;if(parkEnd!==null)lead=Math.max(lead,290-(gx-parkEnd));
-  const ter=P.ter.length&&(!P.obs.length||Math.random()<.4),x0=gx;
-  if(ter){const t=P.ter[Math.floor(Math.random()*P.ter.length)];seg(lead,deg);
-    if(t==='ice'){const n=2+Math.floor(Math.random()*2);for(let i=0;i<n;i++)seg(rand(80,130),(deg+rand(-2,3))*wk,'ice');}
-    else if(t==='mogul'){const L=rand(260,380),amp=rand(14,18),wl=rand(56,70),ph=Math.random()*6.283;for(let d=0;d<L;){const l=Math.min(6,L-d),s=seg(l,(deg+amp*Math.sin(ph+6.283*(d+l/2)/wl))*wk,'mogul');s.ma=deg*wk*RAD;d+=l}}
-    else if(t==='mud'){seg(rand(120,190),deg*.8*wk,'mud')}
-    else if(t==='gravel'){seg(rand(150,220),deg*wk,'gravel');seg(rand(90,150),(deg+3)*wk,'gravel')}
-    else if(t==='planks'){seg(rand(96,140),clamp(deg*.45,4,8),'planks')}
-    else if(t==='stairs'){seg(rand(150,220),(deg+4)*wk,'stairs')}
-    seg(free?80:60,deg);if(free)decoTrees(x0,gx,1)}
-  else{const types=P.obs,n=Math.random()<.45?1:Math.random()<.7?2:3,sp=rand(270,320);
-    seg(lead,deg);seg(n*sp+110,deg);let x=x0+lead+30;
-    for(let i=0;i<n;i++){const ty=types[Math.floor(Math.random()*types.length)];addObs(x,ty);const S=obsSprite(ty),g=groundAt(x);
-      if(g)for(const [dx,dh] of [[-16,7],[0,11],[16,7]]){const gg=groundAt(x+dx);if(gg)coins.push({x:x+dx,y:gg.y-S.H-dh,ph:Math.random()*4})}
-      x+=sp}
-    if(free)decoTrees(x0,gx,2)}
+  if(gx-bioLastX<(id?320:700)||Math.random()>(id?.5:.22))return false;
+  const P=BIO_POOL[bioPoolKey()][id||'base'];if(!P||!P.length)return false;
+  const free=curZone==='free',wk=WIEHEN?.8:1,deg=(free?rand(22,27):rand(13,17)),t=P[Math.floor(Math.random()*P.length)],x0=gx;
+  let lead=110;if(parkEnd!==null)lead=Math.max(lead,290-(gx-parkEnd));seg(lead,deg);
+  if(t==='ice'){const n=2+Math.floor(Math.random()*2);for(let i=0;i<n;i++)seg(rand(80,130),(deg+rand(-2,3))*wk,'ice')}
+  else if(t==='mogul'){const L=rand(260,380),amp=rand(14,18),wl=rand(56,70),ph=Math.random()*6.283;for(let d=0;d<L;){const l=Math.min(6,L-d),s=seg(l,(deg+amp*Math.sin(ph+6.283*(d+l/2)/wl))*wk,'mogul');s.ma=deg*wk*RAD;d+=l}}
+  else if(t==='mud')seg(rand(120,190),deg*.8*wk,'mud');
+  else if(t==='gravel'){seg(rand(150,220),deg*wk,'gravel');seg(rand(90,150),(deg+3)*wk,'gravel')}
+  else if(t==='planks')seg(rand(96,140),clamp(deg*.45,4,8),'planks');
+  else if(t==='stairs')seg(rand(150,220),(deg+4)*wk,'stairs');
+  seg(free?80:60,deg);if(free)decoTrees(x0,gx,1);
   bioLastX=gx;bioN++;parkEnd=gx;lastType='bio';if(!free)addFloods();
   return true}
 
@@ -3623,15 +3578,16 @@ function bioTerColW(s,sx,y,wx,wi,TH){const h=((wi*2654435761)>>>0);
     ctx.fillStyle='#eef4fd';ctx.fillRect(sx,y,1,dep+1);ctx.fillStyle='#ffffff';ctx.fillRect(sx,y,1,1);
     ctx.fillStyle='#b8bec8';ctx.fillRect(sx,y+dep+1,1,1);ctx.fillStyle='#8d919c';ctx.fillRect(sx,y+dep+2,1,4);ctx.fillStyle='#6d717c';ctx.fillRect(sx,y+dep+6,1,1);
     if(u>P-1.5){ctx.fillStyle='#5a5e68';ctx.fillRect(sx,y+1,1,dep+6)}return}}
-/* Holzsteg über einen Bach: Senke darunter (Bachbett, Wasser bzw. Eis), Bohlen mit Fugen, Pfosten. Zwischen Steg und Wasser ist frei. */
-function planksCol(s,sx,y,wx,wi,d,TH){const u=(wx-s.x0)/(s.x1-s.x0),D=Math.round(4+15*Math.pow(Math.max(0,Math.sin(Math.PI*u)),.6)),wl=y+12,yb=y+D,k=Math.floor(wx-s.x0);
-  if(SUMMER){const L=CS.soil;ctx.fillStyle=L[0];ctx.fillRect(sx,yb,1,TH-yb+1);ctx.fillStyle=L[1];ctx.fillRect(sx,Math.max(yb,y+16+d),1,TH);ctx.fillStyle=L[2];ctx.fillRect(sx,Math.max(yb,y+44+d*2),1,TH);ctx.fillStyle=L[3];ctx.fillRect(sx,Math.max(yb,y+88+d*2),1,TH);
-    ctx.fillStyle='#4a3a26';ctx.fillRect(sx,yb,1,2);if(yb>wl){ctx.fillStyle='#4f86a8';ctx.fillRect(sx,wl,1,yb-wl);ctx.fillStyle=((wi%11)<3)?'#cfe8f4':'#8fbdd8';ctx.fillRect(sx,wl,1,1)}}
-  else{ctx.fillStyle='#eef4fd';ctx.fillRect(sx,yb,1,TH-yb+1);ctx.fillStyle=C.s2;ctx.fillRect(sx,Math.max(yb,y+16+d),1,TH);ctx.fillStyle=C.s3;ctx.fillRect(sx,Math.max(yb,y+44+d*2),1,TH);ctx.fillStyle=C.s4;ctx.fillRect(sx,Math.max(yb,y+88+d*2),1,TH);
-    ctx.fillStyle='#ffffff';ctx.fillRect(sx,yb,1,1);if(yb>wl){ctx.fillStyle='#cfe6f6';ctx.fillRect(sx,wl,1,yb-wl);ctx.fillStyle=((wi%13)<2)?'#ffffff':'#a9d0ee';ctx.fillRect(sx,wl,1,1)}}
-  if(k%20<2&&D>5){ctx.fillStyle='#3e2716';ctx.fillRect(sx,y+3,1,D-2);ctx.fillStyle=k%20===0?'#5c3b21':'#3e2716';ctx.fillRect(sx,y+3,1,D-3)}
-  ctx.fillStyle='#4a2f1a';ctx.fillRect(sx,y-1,1,5);ctx.fillStyle=k%5===4?'#6b4529':'#a8784a';ctx.fillRect(sx,y,1,2);ctx.fillStyle='#c4955e';if(k%5!==4)ctx.fillRect(sx,y,1,1);ctx.fillStyle='#5c3b21';ctx.fillRect(sx,y+2,1,1);
-  if(!SUMMER){ctx.fillStyle='#ffffff';ctx.fillRect(sx,y-1,1,1)}}
+/* Holzsteg über einen Bach: der Boden darunter wird als Senke ganz normal gezeichnet (wie daneben, nur tiefer),
+   danach kommen in einem zweiten Durchgang Wasser bzw. Eis, Pfosten und Bohlen dazu. Zwischen Steg und Wasser ist frei. */
+const planksD=(s,wx)=>Math.round(4+15*Math.pow(Math.max(0,Math.sin(Math.PI*(wx-s.x0)/(s.x1-s.x0))),.6));
+function planksPass(cX,cY,TW,TH){let i=segIndexAt(cX);if(i<0){i=0;while(i<segs.length-1&&segs[i].x1<=cX)i++}
+  for(let sx=0;sx<TW;sx++){const wx=cX+sx+.5;while(i<segs.length-1&&wx>=segs[i].x1)i++;const s=segs[i];if(!s||s.kind!=='planks'||wx<s.x0||wx>=s.x1)continue;
+    const y=Math.round(s.y0+(s.y1-s.y0)*(wx-s.x0)/(s.x1-s.x0))-cY;if(y>=TH)continue;const wi=cX+sx,D=planksD(s,wx),wl=y+12,yb=y+D,k=Math.floor(wx-s.x0);
+    if(yb>wl){ctx.fillStyle=SUMMER?'#4f86a8':'#cfe6f6';ctx.fillRect(sx,wl,1,yb-wl+1);ctx.fillStyle=SUMMER?((wi%11)<3?'#cfe8f4':'#8fbdd8'):((wi%13)<2?'#ffffff':'#a9d0ee');ctx.fillRect(sx,wl,1,1)}
+    if(k%20<2&&D>5){ctx.fillStyle=k%20===0?'#5c3b21':'#3e2716';ctx.fillRect(sx,y+3,1,D-2)}
+    ctx.fillStyle='#4a2f1a';ctx.fillRect(sx,y-1,1,5);ctx.fillStyle=k%5===4?'#6b4529':'#a8784a';ctx.fillRect(sx,y,1,2);ctx.fillStyle='#c4955e';if(k%5!==4)ctx.fillRect(sx,y,1,1);ctx.fillStyle='#5c3b21';ctx.fillRect(sx,y+2,1,1);
+    if(!SUMMER){ctx.fillStyle='#ffffff';ctx.fillRect(sx,y-1,1,1)}}}
 /* Sommer: Schlamm (dunkel, nass, Pfützen spiegeln den Himmel), Schotter (graue und helle Steinchen) */
 function bioTerColS(s,sx,y,wi){const h=((wi*2654435761)>>>0);
   if(s.kind==='mud'){ctx.fillStyle='#4e3420';ctx.fillRect(sx,y,1,4);ctx.fillStyle='#664429';ctx.fillRect(sx,y,1,1);
@@ -4784,11 +4740,11 @@ function updJTrees(){
   const fx=footX(),fy=footY();
   for(const q of jtrees){
     if(q.hit)continue;const hw=q.w;if(fx<q.x-hw||fx>q.x+hw)continue;
-    const u=Math.abs(fx-q.x)/hw,top=q.shape==='obs'?obsTop(q,fx):q.shape==='log'?q.ft-q.h*.5-Math.sqrt(Math.max(0,1-u*u))*q.h*.5:q.ft-q.h*(1-u)*.95;if(top===null||fy<=top)continue;
+    const u=Math.abs(fx-q.x)/hw,top=q.shape==='log'?q.ft-q.h*.5-Math.sqrt(Math.max(0,1-u*u))*q.h*.5:q.ft-q.h*(1-u)*.95;if(fy<=top)continue;
     q.hit=true;const g=groundAt(fx),wasAir=p.mode==='air',s=wasAir?Math.hypot(p.vx,p.vy):p.s;
     if(wasAir&&g){p.x=fx;p.y=g.y;p.mode='ground';p.ang=g.a*DEG}
-    burst(q.x,q.y-q.h*.6,18,q.shape==='obs'?OBS_BURST[q.type]:q.shape==='log'?['#c9a06e','#8a6440','#5a3d26']:['#ffffff','#eef4fb','#2b5a43'],120);
-    if(p.mode!=='crash')crash(s,q.shape==='obs'?TX(...OBS_NAME[q.type]):q.shape==='log'?TX('BAUMSTAMM!','LOG!'):TX('BAUM!','TREE!'),false,{hit:true});
+    burst(q.x,q.y-q.h*.6,18,q.shape==='log'?['#c9a06e','#8a6440','#5a3d26']:['#ffffff','#eef4fb','#2b5a43'],120);
+    if(p.mode!=='crash')crash(s,q.shape==='log'?TX('BAUMSTAMM!','LOG!'):TX('BAUM!','TREE!'),false,{hit:true});
     return}
 }
 function updDead(dt){
@@ -4938,8 +4894,8 @@ function drawTerrainS(cX,cY,TW,TH){TW=TW||VW;TH=TH||VH;TERR_H=TH;
     const wi=cX+sx,d=wi&1,h=((wi*2654435761)>>>0),wood=s.zone==='free'||s.kind==='alm'||s.kind==='start'||s.kind==='deep',green=wood&&!DIRT_K[s.kind],L=wood?CS.soil:CS.dirt;   // im Wald: Erdschichten wie daneben, nur die Oberfläche der Sprünge ist sandig
     if(s.kind==='rock'){const yr=Math.round(s.y0)-cY,yf=Math.round(s.y1)+20-cY;if(yf>=TH)continue;
       ctx.fillStyle=L[0];ctx.fillRect(sx,yf,1,TH-yf+1);ctx.fillStyle=L[1];ctx.fillRect(sx,Math.max(yf,yr+16+d),1,TH);ctx.fillStyle=L[2];ctx.fillRect(sx,Math.max(yf,yr+44+d*2),1,TH);ctx.fillStyle=L[3];ctx.fillRect(sx,Math.max(yf,yr+88+d*2),1,TH);continue}
-    const y=Math.round(s.y0+(s.y1-s.y0)*(wx-s.x0)/(s.x1-s.x0))-cY;if(y>=TH)continue;
-    if(s.kind==='planks'){planksCol(s,sx,y,wx,wi,d,TH);continue}
+    let y=Math.round(s.y0+(s.y1-s.y0)*(wx-s.x0)/(s.x1-s.x0))-cY;if(y>=TH)continue;
+    if(s.kind==='planks')y+=planksD(s,wx);   /* Steg: darunter die Senke des Bachs */
     let wd=99;if(!green){const nx=segs[i+1],pv=segs[i-1];if(nx&&nx.gap&&s.x1-wx<8)wd=s.x1-wx;else if(pv&&pv.gap&&wx-s.x0<8)wd=wx-s.x0}
     ctx.fillStyle=green?L[0]:(DIRT_K[s.kind]?CS.kick:L[0]);ctx.fillRect(sx,y,1,TH-y+1);
     ctx.fillStyle=L[1];ctx.fillRect(sx,y+16+d,1,TH);ctx.fillStyle=L[2];ctx.fillRect(sx,y+44+d*2,1,TH);ctx.fillStyle=L[3];ctx.fillRect(sx,y+88+d*2,1,TH);
@@ -4970,6 +4926,7 @@ function drawTerrainS(cX,cY,TW,TH){TW=TW||VW;TH=TH||VH;TERR_H=TH;
     if(WIEHEN&&DIRT_K[s.kind]){const m=((wi%6)+6)%6;if(m<2){ctx.fillStyle='#8e6440';ctx.fillRect(sx,y+3+m,1,2)}if(m===3&&h%3===0){ctx.fillStyle='#c4996a';ctx.fillRect(sx,y+5,1,1)}}   /* Spatenstiche im festgeklopften Lehm */   // Holzkante am Absprung
     if(s.wood)woodCol(s,sx,y,wx,cY);
   }
+  planksPass(cX,cY,TW,TH);
 }
 const DIRT_K={kicker:1,dtop:1,ditch:1,deck:1,dface:1};   // Dirt-Jump-Teile sind auch im Wald aus Erde
 /* Holz im Bikepark, eine Pixelspalte: Lip aus senkrechten Brettern auf dem Erdhügel (Seitenwand mit Rahmen), Drop-Podest aus Bohlen mit Pfosten */
@@ -5041,8 +4998,8 @@ function drawTerrain(cX,cY,TW,TH){TW=TW||VW;TH=TH||VH;TERR_H=TH;
       ctx.fillStyle='#eef4fd';ctx.fillRect(sx,yf,1,TH-yf+1);
       ctx.fillStyle=C.s2;ctx.fillRect(sx,Math.max(yf,yr+16+d),1,TH);ctx.fillStyle=C.s3;ctx.fillRect(sx,Math.max(yf,yr+44+d*2),1,TH);ctx.fillStyle=C.s4;ctx.fillRect(sx,Math.max(yf,yr+88+d*2),1,TH);continue}
     else y=Math.round(s.y0+(s.y1-s.y0)*(wx-s.x0)/(s.x1-s.x0))-cY;
+    if(s.kind==='planks')y+=planksD(s,wx);   /* Steg: darunter die Senke des Bachs */
     if(y>=TH)continue;
-    if(s.kind==='planks'){planksCol(s,sx,y,wx,wi,d,TH);continue}
     let wd=99;if(!fz){const nx=segs[i+1],pv=segs[i-1];if(nx&&nx.gap&&s.x1-wx<8)wd=s.x1-wx;else if(pv&&pv.gap&&wx-s.x0<8)wd=wx-s.x0}
     ctx.fillStyle=fz?'#eef4fd':(s.kind==='kicker'?C.kick:C.s1);ctx.fillRect(sx,y,1,TH-y+1);
     ctx.fillStyle=C.s2;ctx.fillRect(sx,y+16+d,1,TH);
@@ -5065,6 +5022,7 @@ function drawTerrain(cX,cY,TW,TH){TW=TW||VW;TH=TH||VH;TERR_H=TH;
     if(s.kind==='kicker'&&s.lip&&s.x1-wx<3){ctx.fillStyle='#ff7a2f';ctx.fillRect(sx,y+1,1,3)}
     if(s.kind==='loopfloor'){ctx.fillStyle='#c3d6f0';ctx.fillRect(sx,y+2,1,1)}
   }
+  planksPass(cX,cY,TW,TH);
 }
 function drawRails(cX,cY){
   for(const r of rails){
@@ -5341,7 +5299,6 @@ function drawTrees(cX,cY){drawJForest(cX,cY);for(let pass=0;pass<2;pass++)for(co
   const foot=Math.max(y0+2,low+2-(V.tr-3)),sx=Math.round(t.x-cX-W/2),sy=Math.round(foot-cY-V.base);if(sx>VW||sx+W<0||sy>VH||sy+sp.height<0)continue;
   ctx.save();clipAboveGround(sx,sy-2,W,cX,cY,1);if(t.f){ctx.translate(sx*2+W,0);ctx.scale(-1,1)}ctx.drawImage(sp,sx,sy);ctx.restore()}}
 function drawJTrees(cX,cY){if(!jtrees.length)return;const S=jtSprites();for(const q of jtrees){
-  if(q.shape==='obs'){drawObs(q,cX,cY);continue}
   if(q.shape==='log'){const L=logSprites()[q.k],sx=Math.round(q.x-cX-L.S/2),sy=Math.round(q.ft-cY-L.r*2-1.5);if(sx>VW||sx+L.S<0||sy>VH||sy+L.S<0)continue;ctx.drawImage(L.c,sx,sy);continue}
   const V=S[q.k],sp=V.c,W=sp.width;
   const g0=groundAt(q.x),gl=groundAt(q.x-V.w),gr=groundAt(q.x+V.w),y0=g0?g0.y:q.y,low=Math.max(gl?gl.y:y0,gr?gr.y:y0);
@@ -5514,17 +5471,16 @@ function render(dt){
   // Talboden, Skiberg, Baumreihen, Dörfer: eigene Ebene, nachts nur von Fenstern beleuchtet
   if(!bgCv||bgCv.width!==VW){[bgCv,bgCtx]=mk(VW,VH)}
   ctx=bgCtx;ctx.clearRect(0,0,VW,VH);
-  const B0=bioAt(cX+VW*.6),bio=B0?{id:B0.id,k:B0.k,b:B0.b}:null,tA=bioLerp(bio,'trees');   /* Landschaft vor der Kamera */
-  drawBioFar(cX,by,bio);
+  drawBioFar(cX,by);   /* Landschaften: Gletscher und Windräder hinten, See und Fluss im Tal, Hügel ganz vorne */
   ctx.drawImage(BG.valley,0,by+12);
-  drawBioBand(cX,by,bio);
-  if(!JAPAN&&!WIEHEN)drawLifts(cX,(1-fm)*bioLerp(bio,'lift'));
-  if(fm<1){ctx.globalAlpha=(1-fm)*tA;tile(BG.treesB,cX*.24,by+2)}
-  if(fm>0){ctx.globalAlpha=fm*tA;tile(BG.ftreesB,cX*.24,by-12)}
+  drawBioWater(cX,by);
+  if(!JAPAN&&!WIEHEN)drawLifts(cX,1-fm);
+  if(fm<1){ctx.globalAlpha=1-fm;tile(BG.treesB,cX*.24,by+2)}
+  if(fm>0){ctx.globalAlpha=fm;tile(BG.ftreesB,cX*.24,by-12)}
   ctx.globalAlpha=1;
-  if(fm<1){ctx.globalAlpha=(1-fm)*tA;tile(BG.treesF,cX*.32,by-8)}
-  if(fm>0){ctx.globalAlpha=fm*tA;tile(BG.ftreesF,cX*.32,by-34)}
-  ctx.globalAlpha=bioLerp(bio,'vill');drawVillages(cX,by+65);ctx.globalAlpha=1;
+  if(fm<1){ctx.globalAlpha=1-fm;tile(BG.treesF,cX*.32,by-8)}
+  if(fm>0){ctx.globalAlpha=fm;tile(BG.ftreesF,cX*.32,by-34)}
+  ctx.globalAlpha=1;drawVillages(cX,by+65);drawBioBand(cX,by);
   nightPass(curDS,emissiveBg,null);
   ctx=mainCtx;ctx.drawImage(bgCv,0,0);
   // Welt: Piste, Klippen, alles Bewegliche; nachts Flutlicht und Stirnlampe
