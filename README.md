@@ -17,5 +17,6 @@ Einmalig im Supabase SQL Editor ausführen:
 5. `supabase-maxscore.sql`: höchster erlaubter Score 100 Millionen (nur nötig, wenn 1. und 4. noch mit der alten Grenze von 2 Millionen angelegt wurden)
 6. `supabase-wiehen.sql`: eigene Rangliste für die Wiehengebirge-Map (Ski und Snowboard)
 7. `supabase-downhill.sql`: eigene Rangliste für Downhill (alle Bike-Läufe im Sommer, Alpen und Wiehengebirge)
+8. `supabase-race-friends.sql`: DH-Race-Rangliste (Bestzeit, kleinste zählt) und Freunde (per Spielername hinzufügen, Ansicht ALLE/FREUNDE in der Rangliste); sichert außerdem ab, dass es keinen Spielernamen doppelt gibt
 
 Weltkarte im Menü: Küstenlinien aus Natural Earth (naturalearthdata.com, gemeinfrei), als kleine Pixelkarte eingebaut.
