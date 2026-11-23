@@ -18,5 +18,6 @@ Einmalig im Supabase SQL Editor ausführen:
 6. `supabase-wiehen.sql`: eigene Rangliste für die Wiehengebirge-Map (Ski und Snowboard)
 7. `supabase-downhill.sql`: eigene Rangliste für Downhill (alle Bike-Läufe im Sommer, Alpen und Wiehengebirge)
 8. `supabase-race-friends.sql`: DH-Race-Rangliste (Bestzeit, kleinste zählt) und Freunde (per Spielername hinzufügen, Ansicht ALLE/FREUNDE in der Rangliste); sichert außerdem ab, dass es keinen Spielernamen doppelt gibt
+9. `supabase-stats.sql`: anonyme Spiel-Statistik (zufällige Geräte-Kennung, ein Ereignis beim Öffnen und nach jedem Lauf; im Spiel unter Einstellungen → Statistik abschaltbar). Unten in der Datei stehen fertige Abfragen für die Auswertung: Spieler pro Tag, Wiederkehr am nächsten Tag, Läufe pro Modus, Spielzeit
 
 Weltkarte im Menü: Küstenlinien aus Natural Earth (naturalearthdata.com, gemeinfrei), als kleine Pixelkarte eingebaut.
