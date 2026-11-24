@@ -2221,7 +2221,9 @@ function drawGapFog(cX,cY){for(const f of gapFogs){const sx=f.x-cX,sy=f.y-cY;if(
   ctx.drawImage(f.spr,0,0,f.W,f.H,sx,sy,f.W,f.H);let y=sy+f.H;if(y<-8)y+=Math.floor((-y)/8)*8;
   for(;y<VH;y+=8)ctx.drawImage(f.spr,0,f.H,f.W,8,sx,y,f.W,8)}}
 /* ---- Freeride ---- */
-function decoTrees(x0,x1,n){for(let i=0;i<n;i++){const x=rand(x0,x1),g=groundAt(x),B=bioAt(x);if(B&&Math.random()>1+(BIO_DEF[B.id].forest-1)*B.k)continue;if(g&&isPow(g.seg))trees.push({x,y:g.y,k:Math.floor(Math.random()*14),f:Math.random()<.5})}}
+function decoTrees(x0,x1,n){for(let i=0;i<n;i++){const x=rand(x0,x1),g=groundAt(x),B=bioAt(x);if(B&&Math.random()>1+(BIO_DEF[B.id].forest-1)*B.k)continue;
+  let k=Math.floor(Math.random()*14);if(JAPAN&&B&&B.id==='bamboo'&&k%3===0)k++;   /* Bambuswald: keine Kirschbäume (in Japan ist jeder dritte Baum eine Sakura) */
+  if(g&&isPow(g.seg))trees.push({x,y:g.y,k,f:Math.random()<.5})}}
 function fZone(z){const x=gx;seg(220,z==='free'?22:18);addSign(x+40,z==='free'?'FREERIDE ZONE':'SNOWPARK');if(z==='free')decoTrees(x+90,gx,2)}
 function addRock(x,big){const g=groundAt(x);if(!g||!isPow(g.seg))return;const w=big?rand(17,22):rand(8,11),h=big?rand(10,13):rand(4,5);/* flacher, passend zum halb so hohen Sprung */rocks.push({cx:x,y:g.y,w,h,big,hit:false,spr:makeRock(Math.round(w),Math.round(h),big)})}
 function fFreeRun(){const x=gx,L=rand(130,230);seg(L,rand(26,34));decoTrees(x,gx,Math.floor(rand(1,4)));if(Math.random()<.5)coinRow(x+30,Math.floor(L/26),18,12)}
@@ -2271,11 +2273,14 @@ function fLogJam(){
 /* Baum-Sprung (Freeride): natürlicher Powder-Kicker ohne Park-Markierung, dahinter kleine Tannen im Steilstück (drüber springen!),
    gelandet wird in einem flachen Feld mit tiefem Powder. Wer nicht bremst, kommt mit dem Kicker sicher drüber. */
 const JT_REQ=315;   // großer Kicker: zieht auf diese Geschwindigkeit, damit der Sprung auch wirklich weit geht
-let JT_SPR=null;
+let JT_SPR=null,JT_SPR2=null;
+function jtSprites2(){if(JT_SPR2)return JT_SPR2;JT_SPR2=[];   /* junge Zedern (Bambuswald) */
+  for(let i=0;i<6;i++){const h=15+i,w=Math.round(h*.3)+1,[c,g]=mk(w*2+6,h+6);drawTreeVar(g,w+2,h+5,h,w,['#1f3a2a','#2d4a32'],.8,3,i*3+7);JT_SPR2.push({c,w,h,base:h+5})}
+  return JT_SPR2}
 function jtSprites(){if(JT_SPR)return JT_SPR;JT_SPR=[];
   for(let i=0;i<6;i++){const h=15+i,w=Math.round(h*.42)+1,[c,g]=mk(w*2+6+(JAPAN?10:0),h+6);if(JAPAN)drawSakura(g,w+7,h+5,h,i*3+7,true);else drawTreeVar(g,w+2,h+5,h,w,TREE_COLS[i%TREE_COLS.length],SUMMER?0:.85,3,i*3+7);JT_SPR.push({c,w,h,base:h+5})}   // Japan: kleine Kirschbäume
   return JT_SPR}
-function addJumpTree(x){const g=groundAt(x);if(!g)return;const S=jtSprites(),k=Math.floor(Math.random()*S.length);const gl=groundAt(x-S[k].w),gr=groundAt(x+S[k].w),ft=Math.max(g.y+1,gl?gl.y:g.y,gr?gr.y:g.y);jtrees.push({x,y:g.y,ft,k,h:S[k].h,w:S[k].w,f:Math.random()<.5,hit:false})}   // ft: Fuß wie gezeichnet
+function addJumpTree(x){const g=groundAt(x);if(!g)return;const B=JAPAN?bioAt(x):null,alt=!!(B&&B.id==='bamboo'),S=alt?jtSprites2():jtSprites(),k=Math.floor(Math.random()*S.length);const gl=groundAt(x-S[k].w),gr=groundAt(x+S[k].w),ft=Math.max(g.y+1,gl?gl.y:g.y,gr?gr.y:g.y);jtrees.push({x,y:g.y,ft,k,h:S[k].h,w:S[k].w,f:Math.random()<.5,hit:false,alt})}   // ft: Fuß wie gezeichnet
 function fTreeJump(){
   const x0=gx;seg(rand(130,180),rand(25,29));decoTrees(x0,gx-60,1);
   const steps=[-6,-12,-18,-24,-29],ks=[];for(const a of steps)ks.push(seg(16,a,'pkick'));ks[ks.length-1].lip=true;   // großer Kicker: gut 3x so hoch wie früher
@@ -2630,12 +2635,13 @@ function drawSakura(g,X,base,h,seed,small){
       else if(hash01(seed*2+x*.37+y*.91)<.08){d[i]=253;d[i+1]=228;d[i+2]=236}}
     top=false}}
   g.putImageData(id,0,0)}
+let NO_SAKURA=false;   /* Bambuswald: Baumreihen ohne Kirschbäume */
 function birchRow(W,H,n,hmin,hmax,far){
   const [c,g]=mk(W,H),list=[];
   for(let i=0;i<n;i++)list.push({x:Math.floor(Math.random()*W),h:Math.floor(rand(hmin,hmax)),b:H-2-Math.floor(Math.random()*8),k:Math.random()});
   list.sort((a,b)=>a.b-b.b);
   for(const t of list)for(const o of [0,W,-W]){const X=t.x+o;if(X<-30||X>W+30)continue;
-    if(t.k<.15)drawSakura(g,X,t.b,Math.round(t.h*.8),t.k*131+3,t.h<34);   // Sakura statt Zedern
+    if(t.k<.15&&!NO_SAKURA)drawSakura(g,X,t.b,Math.round(t.h*.8),t.k*131+3,t.h<34);   // Sakura statt Zedern
     else drawBirch(g,X,t.b,t.h,far?1:2,t.k*97,far)}
   return c}
 /* Kahler Laubbaum (Buche/Eiche im Winter): Stamm bis zur Gabel, dann Äste, die sich dreimal teilen. Im Winter liegt Schnee
@@ -2916,6 +2922,8 @@ function rebuildBg(){
     BG.skyDusk=gradSky(['#2a1846','#4a1f5e','#7a2670','#a82e78','#d2397c','#ea5482','#f4708e','#f894a6','#fbbcc4']);   // rot/pink
     BG.skyNight=gradSky(['#04060f','#060a19','#091024','#0c152f','#101b3a','#142144','#19294f','#1f3159','#263a63'],true);
     BG.treesB=birchRow(520,56,95,10,26,true);BG.treesF=birchRow(560,74,64,24,60,false);
+    {const s=Math.random;let q=4711;Math.random=()=>{q=(q*1103515245+12345)&0x7fffffff;return q/0x7fffffff};NO_SAKURA=true;   /* eigener Zufall, damit der Spielablauf gleich bleibt */
+      try{BG.treesBn=birchRow(520,56,95,10,26,true);BG.treesFn=birchRow(560,74,64,24,60,false);BG.ftreesBn=birchRow(520,70,105,14,40,true);BG.ftreesFn=birchRow(560,100,72,34,90,false)}finally{NO_SAKURA=false;Math.random=s}}
     BG.ftreesB=birchRow(520,70,105,14,40,true);BG.ftreesF=birchRow(560,100,72,34,90,false);
     BG.clouds=[makeCloud(70,20),makeCloud(48,15),makeCloud(92,24),makeCloud(60,18)];BG.valley=makeValley();BG.sky=1;return}
   BG.skyDay=gradSky(['#2f63b8','#3a72c4','#4a82cf','#5b93d9','#6fa4e2','#86b6ea','#a1c8f1','#bdd9f6','#d4e6fa']);
@@ -3494,7 +3502,7 @@ function glacierSpr(){return bspr('glacier6',640,190,(g,W,H)=>{
    Hügel, See, Fluss, Gletscher und Windräder nur in ihrer. Nichts wird ein- oder ausgeblendet. */
 const OCC_P=.5,OCC_W=220,OCC_C=110;
 const seamX=(xs,cc)=>VW/2+(xs-cc)*OCC_P;
-const bioBg=b=>b&&b.id!=='bamboo';   /* Bambus ändert nur den Wald an der Strecke */
+const bioBg=b=>!!b;
 function bioWipe(cc){const M=OCC_W/2+12;
   for(const b of bioList){if(b.x0-6000>cc)break;if(b.x1+6000<cc||!bioBg(b))continue;
     const se=seamX(b.x0,cc),sx=seamX(b.x1,cc);
@@ -3510,7 +3518,13 @@ function bioPart(WP,part,cX,by,fm){
     if(!full)for(let i=emissiveBg.length-1;i>=n0;i--){const e=emissiveBg[i];if(e.x<x0||e.x>=x1)emissiveBg.splice(i,1)}};
   if(WP.seam===null)run(WP.A,0,VW);else{const s=Math.round(WP.seam);run(WP.A,0,s);run(WP.B,s,VW)}}
 function drawBandTiled(Bd,off,y){const W=Bd.c.width;for(let x=-(((off%W)+W)%W);x<VW;x+=W)drawBandAt(Bd,x,y)}
+/* Baumreihen im Tal; im Bambuswald ohne Kirschbäume */
+function bioRows(part,cX,by,fm,ns){const n=ns&&BG.treesBn;
+  if(part==='rowsB'){if(fm<1){ctx.globalAlpha=1-fm;tile(n?BG.treesBn:BG.treesB,cX*.24,by+2)}if(fm>0){ctx.globalAlpha=fm;tile(n?BG.ftreesBn:BG.ftreesB,cX*.24,by-12)}}
+  else{if(fm<1){ctx.globalAlpha=1-fm;tile(n?BG.treesFn:BG.treesF,cX*.32,by-8)}if(fm>0){ctx.globalAlpha=fm;tile(n?BG.ftreesFn:BG.ftreesF,cX*.32,by-34)}}
+  ctx.globalAlpha=1}
 function bioScene(b,part,cX,by,fm){
+  if(part==='rowsB'||part==='rowsF'){bioRows(part,cX,by,fm,b&&b.id==='bamboo');return}
   if(!b){if(part==='lifts'&&!JAPAN&&!WIEHEN)drawLifts(cX,1-fm);else if(part==='vill')drawVillages(cX,by+65);return}
   const id=b.id,cc=cX+VW*.6;
   if(part==='far'){
@@ -3528,13 +3542,30 @@ function bioScene(b,part,cX,by,fm){
     else if(id==='shrine')drawBandTiled(shrineBand(),o,by-84);
     else if(id==='fields')drawBandTiled(fieldBand(),o,by-56);
     else if(id==='quarry')drawBandTiled(quarryBand(),o,by-70)}}
-/* Die Kulisse: dichte, hohe Nadelbaumgruppe; der höchste Baum steht genau auf der Grenze und reicht bis über die Gipfel des Gletschers */
+/* Die Kulisse: im Wiehengebirge eine dichte, hohe Fichtengruppe; in den Alpen und in Japan eine Felsnadel (dort gibt es keine Riesenbäume).
+   Die höchste Spitze steht genau auf der Grenze und reicht bis über die Gipfel des Gletschers. */
 const OCC_SPR={};
 function occSpr(){const key=bSeas();if(OCC_SPR[key])return OCC_SPR[key];const W=OCC_W,H=340,[c,g]=mk(W,H);
-  const cols=JAPAN?['#1c3527','#28452f']:WIEHEN&&SUMMER?['#22402a','#2e5336']:SUMMER?['#1e4127','#2a5633']:['#1b372f','#264a3d'],snow=SUMMER?0:.75;
-  const TR=[[OCC_C,316,30],[OCC_C-48,258,27],[OCC_C+50,270,28],[OCC_C-86,210,23],[OCC_C+86,222,23],[OCC_C-22,190,22],[OCC_C+26,200,21],[OCC_C-104,160,17],[OCC_C+104,168,17]];
-  TR.sort((a,b)=>a[1]-b[1]);for(const [x,ht,w] of TR)drawTreeVar(g,x,H-8,ht,w,cols,snow,Math.round(ht*.1),x*.37+ht);
-  for(let x=0;x<W;x++){const hh=Math.round(14+6*Math.sin(x*.11)+4*Math.sin(x*.27+1)),dk=cols[0];g.fillStyle=dk;g.fillRect(x,H-hh,1,hh);if(!SUMMER&&x%3){g.fillStyle='#eef4fb';g.fillRect(x,H-hh,1,1)}}
+  if(WIEHEN){const cols=SUMMER?['#22402a','#2e5336']:['#1b372f','#264a3d'],snow=SUMMER?0:.75;
+    const TR=[[OCC_C,316,30],[OCC_C-48,258,27],[OCC_C+50,270,28],[OCC_C-86,210,23],[OCC_C+86,222,23],[OCC_C-22,190,22],[OCC_C+26,200,21],[OCC_C-104,160,17],[OCC_C+104,168,17]];
+    TR.sort((a,b)=>a[1]-b[1]);for(const [x,ht,w] of TR)drawTreeVar(g,x,H-8,ht,w,cols,snow,Math.round(ht*.1),x*.37+ht);
+    for(let x=0;x<W;x++){const hh=Math.round(14+6*Math.sin(x*.11)+4*Math.sin(x*.27+1));g.fillStyle=cols[0];g.fillRect(x,H-hh,1,hh);if(!SUMMER&&x%3){g.fillStyle='#eef4fb';g.fillRect(x,H-hh,1,1)}}
+    return OCC_SPR[key]=c}
+  /* Felsnadel: Hauptspitze in der Mitte, Nebenspitzen, zackige Kante; Felsflächen in senkrechten Streifen (Licht von rechts),
+     einzelne Risse, kurze Schnee- bzw. Grasbänder auf Absätzen, oben Schnee, unten Schutt */
+  const P=JAPAN?{lit:'#7c7884',lit2:'#6c6874',sh:'#524e5a',cr:'#3e3a46',top:'#ffffff',sp:'#eef4fb'}:SUMMER?{lit:'#a6a69f',lit2:'#96968f',sh:'#74746e',cr:'#5a5a55',top:'#b8b8b0',sp:'#6f9a48'}:{lit:'#969cac',lit2:'#868c9c',sh:'#646a7b',cr:'#4c5160',top:'#ffffff',sp:'#eef4fb'};
+  const PK=[[OCC_C,6,3.1],[OCC_C-44,80,2.6],[OCC_C+46,96,2.7],[OCC_C-84,164,2.2],[OCC_C+88,178,2.3]];
+  const topAt=x=>{let best=1e9,pk=PK[0];for(const q of PK){const y=q[1]+Math.abs(x-q[0])*q[2]+Math.floor(hash01(Math.floor(x/4)*1.7+q[0])*7);if(y<best){best=y;pk=q}}return [best,pk]};
+  const id=g.createImageData(W,H),D=id.data,set=(x,y,col)=>{const v=pxCol(col),i=(y*W+x)*4;D[i]=v&255;D[i+1]=(v>>>8)&255;D[i+2]=(v>>>16)&255;D[i+3]=255};
+  for(let x=0;x<W;x++){const [t,pk]=topAt(x),lit=x>=pk[0],T0=Math.max(0,Math.round(t)),fo=Math.floor(hash01(Math.floor(x/9)*3.3)*5),fc=Math.floor((x+fo)/9),fl=lit?hash01(fc*2.3)<.75:hash01(fc*2.3)<.18,edge=(x+fo)%9===0;
+    const so=Math.floor(hash01(fc*7.7)*13);
+    for(let y=T0;y<H;y++){const d=y-T0,b=(BAYER[y&3][x&3]+.5)/16,yy=y+so,cy=Math.floor(yy/13);let col=fl?(hash01(fc*5.1+Math.floor(y/30))<.3?P.lit2:P.lit):P.sh;
+      if(edge&&d>3&&hash01(fc+Math.floor(y/17)*1.9)<.7)col=P.cr;
+      if(yy%13<2&&d>5&&hash01(Math.floor((x+cy*3)/5)*1.31+cy*7.7)<(SUMMER&&!JAPAN?.07:.11))col=yy%13===0?P.sp:(fl?P.lit:P.sh);
+      if(d<2||(!SUMMER||JAPAN)&&d<5&&b<.55)col=P.top;
+      if(y>H-34){const f=(y-(H-34))/34;if(b<f)col=SUMMER&&!JAPAN?(b<f*.6?'#7fb150':'#a8a69c'):(b<f*.6?'#ffffff':'#dfe8f4')}
+      set(x,y,col)}}
+  g.putImageData(id,0,0);
   return OCC_SPR[key]=c}
 function drawOccluder(sx,by){const S=occSpr();ctx.drawImage(S,Math.round(sx)-OCC_C,by+96-S.height)}
 
@@ -3550,22 +3581,19 @@ function drawBamboo(g,X,base,h,tw,seed,far){const C=far?['#9bb08e','#b2c4a6','#8
   for(let i=0;i<(far?9:24);i++){const a=-Math.PI/2+(hash01(seed*5+i)-.5)*2.9,L=(far?4:6)+hash01(seed+i*3)*(far?4:9),sy=ty+Math.floor(hash01(seed*9+i)*h*.32);
     for(let r=0;r<L;r++){g.fillStyle=LF[(i+r)&1];g.fillRect(Math.round(tx+Math.cos(a)*r*1.2),Math.round(sy+Math.sin(a)*r*.5+r*.35),1,1)}
     if(!far&&hash01(seed*7+i)<.55){g.fillStyle='#ffffff';g.fillRect(Math.round(tx+Math.cos(a)*L*.7),Math.round(sy+Math.sin(a)*L*.35+L*.2)-1,2,1)}}}
-function bambooSprites(){if(BAM_SPR)return BAM_SPR;const back=[],mid=[],front=[];
+function bambooSprites(){if(BAM_SPR)return BAM_SPR;const back=[],mid=[];
   for(let i=0;i<8;i++){const h=Math.round(40+hash01(i*3.3+1)*30),[c,g]=mk(34,h+8);drawBamboo(g,16,h+5,h,1,i*7.3+2,true);if(i%2)drawBamboo(g,21,h+5,h-6,1,i*5.1+9,true);back.push({c,ox:17,H:h+8})}
   for(let i=0;i<10;i++){const h=Math.round(100+hash01(i*5.1+3)*70),[c,g]=mk(56,h+12),n=2+(i%2);for(let k=0;k<n;k++)drawBamboo(g,22+k*5-(n-1)*2,h+9,h-k*11,3,i*9.1+5+k,false);
     g.fillStyle='#ffffff';g.fillRect(16,h+8,22,3);g.fillStyle='#dfe9f7';g.fillRect(16,h+10,22,1);mid.push({c,ox:26,H:h+12})}
-  for(let i=0;i<4;i++){const h=300,[c,g]=mk(60,h+10);drawBamboo(g,26,h+7,h,8,i*4.7+11,false);g.fillStyle='#ffffff';g.fillRect(20,h+6,20,3);
-    const [cd,gd]=mk(c.width,c.height);gd.drawImage(c,0,0);gd.globalCompositeOperation='source-atop';gd.fillStyle='rgba(8,12,30,.82)';gd.fillRect(0,0,cd.width,cd.height);front.push({c,cd,ox:30,H:h+10})}
-  return BAM_SPR={back,mid,front}}
+
+  return BAM_SPR={back,mid}}
 /* Zedern am Schrein (Sugi): hoch, schmal, dunkel, rötlicher Stamm, Schnee auf den Etagen */
-function cedarSprites(){if(CED_SPR)return CED_SPR;const back=[],mid=[],front=[];
+function cedarSprites(){if(CED_SPR)return CED_SPR;const back=[],mid=[];
   const mkC=(h,w,cols,snow,tr,seed)=>{const [c,g]=mk(w*2+8,h+6);drawTreeVar(g,w+3,h+3,h,w,cols,snow,tr,seed);g.fillStyle='#7a4a32';g.fillRect(w+3,h+3-tr,2,tr);g.fillStyle='#9a6a4a';g.fillRect(w+3,h+3-tr,1,tr);return {c,ox:w+3,H:h+4}};
   for(let i=0;i<8;i++){const h=Math.round(44+hash01(i*3.3+1)*26);back.push(mkC(h,Math.ceil(h*.13),['#5d7468','#6d8476'],.7,Math.round(h*.25),i*7.3+2))}
   for(let i=0;i<10;i++){const h=Math.round(110+hash01(i*5.1+3)*70);mid.push(mkC(h,Math.ceil(h*.12),['#1f3a2a','#2d4a32'],.55,Math.round(h*.3),i*9.1+5))}
-  for(let i=0;i<4;i++){const h=320,tw=14+Math.floor(hash01(i)*5),W=40,[c,g]=mk(W*2,h+8);
-    for(let y=0;y<h;y++)for(let x=0;x<tw;x++){const u=(x+.5)/tw,n=hash01(i*3.1+Math.floor(y/3)*.37+x*1.31);g.fillStyle=u<.2?'#a2705a':u>.7?'#4a2a1e':(x+Math.round(Math.sin(y*.06)*1.5))%4===0&&n<.85?'#5a3424':'#7a4a32';g.fillRect(W-Math.floor(tw/2)+x,y,1,1)}
-    g.fillStyle='#ffffff';g.fillRect(W-tw,h+3,tw*2,3);const [cd,gd]=mk(c.width,c.height);gd.drawImage(c,0,0);gd.globalCompositeOperation='source-atop';gd.fillStyle='rgba(8,12,30,.82)';gd.fillRect(0,0,cd.width,cd.height);front.push({c,cd,ox:W,H:h+6})}
-  return CED_SPR={back,mid,front}}
+
+  return CED_SPR={back,mid}}
 function bioPrebake(){const L=[...bioSet()],run=()=>{const id=L.shift();if(!id)return;try{({alm:almBand,lake:lakeBand,scree:screeBand,onsen:onsenBand,shrine:shrineBand,fields:fieldBand,quarry:quarryBand,weser:riverBand,glacier:glacierSpr,bamboo:bambooSprites,
   })[id]?.()}catch(e){}sched()},sched=()=>{if(window.requestIdleCallback)requestIdleCallback(run,{timeout:1500});else setTimeout(run,120)};sched()}
 const bioFsetSpr=id=>id==='bamboo'?bambooSprites():cedarSprites();
@@ -5234,12 +5262,11 @@ let JF_SPR=null;
 function jfSprites(){if(JF_SPR)return JF_SPR;
   const mkT=(h,tw,seed,far,dark,mound)=>{const R=Math.ceil(h*.4)+5,[c,g]=mk(R*2+4,h+4);drawBirch(g,R+1,h+3,h,tw,seed,far,dark);
     if(mound){g.fillStyle='#ffffff';g.fillRect(R-3,h+1,9,3);g.fillRect(R-1,h,5,1);g.fillStyle='#dfe9f7';g.fillRect(R-3,h+3,9,1)}return {c,ox:R+1,H:h+4}};
-  const back=[],mid=[],front=[];
+  const back=[],mid=[];
   for(let i=0;i<8;i++)back.push(mkT(Math.round(34+hash01(i*3.3+1)*30),1,i*7.3+2,true,i%4===3));
   for(let i=0;i<10;i++)mid.push(mkT(Math.round(58+hash01(i*5.1+3)*50),2,i*9.1+5,false,i%3===2));
-  for(let i=0;i<5;i++){const t=mkT(Math.round(130+hash01(i*2.7+9)*50),3,i*4.7+11,false,i%2===1,true),[cd,gd]=mk(t.c.width,t.c.height);
-    gd.drawImage(t.c,0,0);gd.globalCompositeOperation='source-atop';gd.fillStyle='rgba(8,12,30,.82)';gd.fillRect(0,0,cd.width,cd.height);t.cd=cd;front.push(t)}
-  return JF_SPR={back,mid,front}}
+
+  return JF_SPR={back,mid}}
 const JF_NO={kicker:1,pkick:1,deck:1,rock:1,rocklip:1,alm:1,start:1,loopfloor:1,dtop:1,ditch:1,dface:1,planks:1};
 /* Sommer-Wald wie ein Buchenwald: hinten dunstiger Mischwald, in der Mitte große Buchen mit dicken grauen Stämmen und runden Kronen,
    vorne ab und zu ein riesiger Stamm (Krone oben aus dem Bild) mit Farn und Büschen am Fuß. */
@@ -5261,7 +5288,7 @@ function drawBeech(g,X,base,h,tw,seed,cols,bark){const tt=base-Math.round(h*.55)
 function sfSprites(){if(SF_SPR)return SF_SPR;
   const LEAF=WIEHEN?[['#7a3416','#b8601e','#e0943a'],['#6a2416','#a23c22','#d2683a'],['#7a5418','#b8902a','#e8c24c'],['#56501e','#86782a','#b4a644']]:[['#2b5228','#3a6d33','#5a9446'],['#2f5a2a','#43793a','#6aa24e'],['#284a2a','#376536','#518a49']],BARK=[['#4d4a43','#6f6a5e','#918b7c'],['#463f37','#655d52','#857c6c']];
   const HAZE=WIEHEN?[['#9a6640','#b07a4a','#c48e58'],['#8c6446','#a27650','#b68a5c']]:[['#5f7d63','#6d8b6d','#7f9b7a'],['#688667','#779475','#89a585']];
-  const back=[],mid=[],front=[];
+  const back=[],mid=[];
   for(let i=0;i<8;i++){const h=Math.round(46+hash01(i*3.3+1)*34),con=i%3===1,W=Math.ceil(h*.42)+4,[c,g]=mk(W*2+6,h+6);
     if(WIEHEN)slimTree(g,W+2,h+5,h,2,i*7.3+2,{cols:HAZE[i%2],far:true,leaf:.9});
     else if(con)drawTreeVar(g,W+2,h+5,h,Math.ceil(h*.2),WIEHEN?['#5d6f5a','#6b7d66']:[HAZE[i%2][0],HAZE[i%2][1]],0,4,i*7.3+2);else drawBeech(g,W+2,h+5,h,2,i*7.3+2,HAZE[i%2],WIEHEN?['#7a6e60','#887c6c','#988a78']:['#5c6f5a','#6a7d66','#7a8c74']);
@@ -5269,58 +5296,40 @@ function sfSprites(){if(SF_SPR)return SF_SPR;
   for(let i=0;i<(WIEHEN?14:10);i++){const h=Math.round((WIEHEN?120:96)+hash01(i*5.1+3)*70),tw=WIEHEN?5+Math.floor(hash01(i*1.9)*3):6+Math.floor(hash01(i*1.9)*4),W=Math.ceil(h*.52)+6,[c,g]=mk(W*2+6,h+8);
     if(WIEHEN)slimTree(g,W+2,h+6,h,tw,i*9.1+5,{cols:LEAF[i%4],leaf:i%5===1?.5:.9});   /* schlanke Buche, i%5===1 hat schon viel Laub verloren */
     else drawBeech(g,W+2,h+6,h,tw,i*9.1+5,LEAF[i%(WIEHEN?4:3)],BARK[i%2]);mid.push({c,ox:W+2,H:h+8})}
-  /* Riesenstämme: oben eine breite Krone mit Ästen, damit bei hohen Sprüngen kein abgeschnittener Stamm zu sehen ist */
-  for(let i=0;i<5;i++){const tw=26+Math.floor(hash01(i*2.7+9)*12),h=320,CR=Math.round(tw*2.1)+10,RX=Math.round(tw*2.6),W=Math.max(tw+22,RX+12),[c,g]=mk(W*2,h+16+CR),X=W,top=CR,base=top+h+8,bk=BARK[i%2];
-    for(let y=top-6;y<=base;y++){const t=(y-top)/(base-top),w=tw+(t>.9?Math.round((t-.9)/.1*14):0),x0=X-Math.floor(w/2);
-      for(let x=0;x<w;x++){const u=(x+.5)/w,fx=Math.floor((x+hash01(i+Math.floor(y/9))*3)/6),n=hash01(i*3.1+Math.floor(y/2)*.37+x*1.31),furche=(x+Math.round(Math.sin(y*.05+fx)*1.2))%6===0&&n<.8;
-        g.fillStyle=u<.16?bk[2]:u>.74?bk[0]:furche?bk[0]:n<.05?bk[2]:bk[1];if(t>.8&&u>.15&&u<.6&&hash01(i*7+x*.7+y*.3)<(t-.8)*2)g.fillStyle='#4f6b34';g.fillRect(x0+x,y,1,1)}}   // Furchen in der Rinde, unten Moos
-    for(const s of [-1,1])for(let k=0;k<Math.round(RX*.45);k++){const bw=Math.max(2,Math.round(tw*.22*(1-k/RX)));g.fillStyle=bk[0];g.fillRect(X+s*(Math.floor(tw/2)-2+k)-(s<0?bw:0),top+16-Math.round(k*.6),bw,bw)}   // dicke Äste in die Krone
-    leafCrown(g,X,top+4,RX,CR*.62,Math.round(RX*.55),Math.max(7,tw*.32),LEAF[i%3],i*17+3);   // Krone
-    if(WIEHEN)leafCrown(g,X,base-4,tw*1.1,3.5,18,3,['#3e3018','#5e4c22','#86682e'],i*13+1);else leafCrown(g,X,base-6,tw*.9,7,9,6,LEAF[i%3],i*13+1);   // Farn und Büsche am Fuß
-    for(let k=0;k<(WIEHEN?44:6);k++){g.fillStyle=WIEHEN?LITC[k%LITC.length]:k%2?'#e8925a':'#f2b46a';g.fillRect(Math.round(X-tw*.9+hash01(i*9+k)*tw*1.8),Math.round(base-10+hash01(i*4+k)*7),WIEHEN&&k%3===0?2:1,1)}   // kleine Blüten
-    const [cd,gd]=mk(c.width,c.height);gd.drawImage(c,0,0);gd.globalCompositeOperation='source-atop';gd.fillStyle='rgba(8,14,10,.82)';gd.fillRect(0,0,cd.width,cd.height);
-    front.push({c,cd,ox:X,H:base+2})}
-  return SF_SPR={back,mid,front}}
+
+  return SF_SPR={back,mid}}
 /* Alpen-Freeride: derselbe Wald, aber aus Fichten mit Schnee (hinten klein und dunstig, Mitte kräftig) und schlanken Kiefern vorne. */
 let AF_SPR=null;
 function afSprites(){if(AF_SPR)return AF_SPR;
   const mkS=(h,w,cols,snow,tr,seed,mound)=>{const [c,g]=mk(w*2+8,h+6);drawTreeVar(g,w+3,h+3,h,w,cols,snow,tr,seed);
     if(mound){g.fillStyle='#ffffff';g.fillRect(w-1,h+1,9,3);g.fillRect(w+1,h,5,1);g.fillStyle='#dfe9f7';g.fillRect(w-1,h+3,9,1)}return {c,ox:w+3,H:h+4}};
-  const back=[],mid=[],front=[];
+  const back=[],mid=[];
   for(let i=0;i<8;i++){const h=Math.round(26+hash01(i*3.3+1)*22);back.push(mkS(h,Math.ceil(h*.2),['#4c6a70','#5d7d82'],.8,3,i*7.3+2))}
   for(let i=0;i<10;i++){const h=Math.round(44+hash01(i*5.1+3)*40);mid.push(mkS(h,Math.ceil(h*(.17+hash01(i*2.3)*.08)),TREE_COLS[i%TREE_COLS.length],.4+hash01(i*9.1)*.5,3,i*9.1+5))}
-  for(let i=0;i<5;i++){const h=Math.round(84+hash01(i*2.7+9)*24),t=mkS(h,Math.ceil(h*.1),TREE_COLS[i%TREE_COLS.length],.6,Math.round(h*.42),i*4.7+11,true),[cd,gd]=mk(t.c.width,t.c.height);
-    gd.drawImage(t.c,0,0);gd.globalCompositeOperation='source-atop';gd.fillStyle='rgba(8,12,30,.82)';gd.fillRect(0,0,cd.width,cd.height);t.cd=cd;front.push(t)}
-  return AF_SPR={back,mid,front}}
+
+  return AF_SPR={back,mid}}
 /* Wiehengebirge im Winter: nur kahle, schlanke Buchen mit Schnee auf den Ästen */
 let WF_SPR=null;
 function wfSprites(){if(WF_SPR)return WF_SPR;
-  const back=[],mid=[],front=[];
+  const back=[],mid=[];
   for(let i=0;i<9;i++){const h=Math.round(30+hash01(i*3.3+1)*32);
     {const R=Math.ceil(h*.45)+4,[c,g]=mk(R*2+4,h+4);slimTree(g,R+1,h+3,h,2,i*7.3+2,{far:true,snow:true});back.push({c,ox:R+1,H:h+4})}}
   for(let i=0;i<12;i++){const h=Math.round(84+hash01(i*5.1+3)*70);
     {const R=Math.ceil(h*.45)+5,[c,g]=mk(R*2+4,h+4);slimTree(g,R+1,h+3,h,3+(i%3),i*9.1+5,{snow:true});mid.push({c,ox:R+1,H:h+4})}}
-  for(let i=0;i<5;i++){const h=Math.round(180+hash01(i*2.7+9)*50),tw=7+Math.floor(hash01(i*3.9)*4),R=Math.ceil(h*.55)+6,[c,g]=mk(R*2+4,h+6),X=R+1,b=h+3;
-    bareTree(g,X,b,h,tw,i*4.7+11,false);g.fillStyle='#ffffff';g.fillRect(X-tw,b-2,tw*2+2,3);g.fillRect(X-tw+2,b-3,tw*2-2,1);g.fillStyle='#dfe9f7';g.fillRect(X-tw,b+1,tw*2+2,1);
-    const [cd,gd]=mk(c.width,c.height);gd.drawImage(c,0,0);gd.globalCompositeOperation='source-atop';gd.fillStyle='rgba(8,12,30,.82)';gd.fillRect(0,0,cd.width,cd.height);front.push({c,cd,ox:X,H:h+4})}
-  return WF_SPR={back,mid,front}}
+
+  return WF_SPR={back,mid}}
 const forSpr=()=>JAPAN?jfSprites():SUMMER?sfSprites():WIEHEN?wfSprites():afSprites();
 const forestOn=g=>JAPAN||WIEHEN||SUMMER||g.seg.zone==='free';   // Wald: Japan, Wiehengebirge und Sommer überall, Alpen-Winter nur im Freeride
 function drawJForest(cX,cY){const S=forSpr();
   for(let x=Math.floor((cX-60)/5)*5;x<cX+VW+60;x+=5){const h=((x*2654435761)>>>0);if(h%(JAPAN||WIEHEN?3:4)!==0)continue;
     const g=groundAt(x);if(!g||JF_NO[g.seg.kind]||!forestOn(g))continue;const bt=bioTree(x,h);if(!bt)continue;const SS=bt===2?bioFsetSpr(bioTreeId):S,far=((h>>>3)%100)<55,L=far?SS.back:SS.mid,V=L[(h>>>11)%L.length];
     const sx=Math.round(x-cX)-V.ox,sy=Math.round(g.y-cY)-V.H+3;if(sx>VW||sx+V.c.width<0||sy>VH)continue;ctx.drawImage(V.c,sx,sy)}}
-function drawJForestFront(cX,cY){if(WIEHEN||RACE)return;   /* Race: keine Stämme vor der Strecke, Steinfelder und Wurzeln müssen sichtbar sein */const S=forSpr(),dk=clamp(curDS.night*.85+curDS.dusk*.2,0,.9);
-  for(let x=Math.floor((cX-80)/7)*7;x<cX+VW+80;x+=7){const h=((x*40503+977)>>>0);if(h%(SUMMER?47:29)!==0)continue;
-    const g=groundAt(x);if(!g||JF_NO[g.seg.kind]||!forestOn(g))continue;const bt=bioTree(x,h);if(!bt)continue;const FS=bt===2?bioFsetSpr(bioTreeId).front:S.front,V=FS[(h>>>9)%FS.length];
-    const sx=Math.round(x-cX)-V.ox,sy=Math.round(g.y-cY)-V.H+9+((h>>>5)%6);if(sx>VW||sx+V.c.width<0)continue;
-    ctx.drawImage(V.c,sx,sy);if(dk>.02){ctx.globalAlpha=dk;ctx.drawImage(V.cd,sx,sy);ctx.globalAlpha=1}}}
 function drawTrees(cX,cY){drawJForest(cX,cY);for(let pass=0;pass<2;pass++)for(const t of trees){if(!!t.dk!==(pass===0))continue;const V=TREE_SPR[t.k]||TREE_SPR[0],sp=t.dk?treeDark(V):V.c,W=sp.width;
   // Fuß so tief, dass die untersten Äste talseitig auf dem Schnee liegen; bergseitig stecken sie im Schnee. Kiefern stehen auf dem Stamm.
   const g0=groundAt(t.x),gl=groundAt(t.x-V.w),gr=groundAt(t.x+V.w),y0=g0?g0.y:t.y,low=Math.max(gl?gl.y:y0,gr?gr.y:y0);
   const foot=Math.max(y0+2,low+2-(V.tr-3)),sx=Math.round(t.x-cX-W/2),sy=Math.round(foot-cY-V.base);if(sx>VW||sx+W<0||sy>VH||sy+sp.height<0)continue;
   ctx.save();clipAboveGround(sx,sy-2,W,cX,cY,1);if(t.f){ctx.translate(sx*2+W,0);ctx.scale(-1,1)}ctx.drawImage(sp,sx,sy);ctx.restore()}}
-function drawJTrees(cX,cY){if(!jtrees.length)return;const S=jtSprites();for(const q of jtrees){
+function drawJTrees(cX,cY){if(!jtrees.length)return;for(const q of jtrees){const S=q.alt?jtSprites2():jtSprites();
   if(q.shape==='log'){const L=logSprites()[q.k],sx=Math.round(q.x-cX-L.S/2),sy=Math.round(q.ft-cY-L.r*2-1.5);if(sx>VW||sx+L.S<0||sy>VH||sy+L.S<0)continue;ctx.drawImage(L.c,sx,sy);continue}
   const V=S[q.k],sp=V.c,W=sp.width;
   const g0=groundAt(q.x),gl=groundAt(q.x-V.w),gr=groundAt(q.x+V.w),y0=g0?g0.y:q.y,low=Math.max(gl?gl.y:y0,gr?gr.y:y0);
@@ -5497,12 +5506,8 @@ function render(dt){
   bioPart(WP,'far',cX,by,fm);
   ctx.drawImage(BG.valley,0,by+12);
   bioPart(WP,'lifts',cX,by,fm);
-  if(fm<1){ctx.globalAlpha=1-fm;tile(BG.treesB,cX*.24,by+2)}
-  if(fm>0){ctx.globalAlpha=fm;tile(BG.ftreesB,cX*.24,by-12)}
-  ctx.globalAlpha=1;bioPart(WP,'water',cX,by,fm);
-  if(fm<1){ctx.globalAlpha=1-fm;tile(BG.treesF,cX*.32,by-8)}
-  if(fm>0){ctx.globalAlpha=fm;tile(BG.ftreesF,cX*.32,by-34)}
-  ctx.globalAlpha=1;bioPart(WP,'vill',cX,by,fm);bioPart(WP,'hills',cX,by,fm);if(WP.seam!==null)drawOccluder(WP.seam,by);
+  bioPart(WP,'rowsB',cX,by,fm);bioPart(WP,'water',cX,by,fm);bioPart(WP,'rowsF',cX,by,fm);
+  bioPart(WP,'vill',cX,by,fm);bioPart(WP,'hills',cX,by,fm);if(WP.seam!==null)drawOccluder(WP.seam,by);
   nightPass(curDS,emissiveBg,null);
   ctx=mainCtx;ctx.drawImage(bgCv,0,0);
   // Welt: Piste, Klippen, alles Bewegliche; nachts Flutlicht und Stirnlampe
@@ -5517,7 +5522,7 @@ function render(dt){
   if(lamp)drawBeam(cX,cY,lamp,lm*curDS.night);
   if(!WIEHEN&&curDS.night>.05&&fm<.95)drawFloodFog(cX,cY,curDS.night*(1-fm));
   if(HIP)ctx=afterCtx;   // ab hier über dem feinen Fahrer
-  drawJForestFront(cX,cY);drawFlakes(cX,cY,dt);
+  drawFlakes(cX,cY,dt);
   if(state==='play'||state==='pause')drawPatrolPointer(cX,cY);
   if(whiteout>0){ctx.fillStyle=(SUMMER?'rgba(92,66,40,':'rgba(255,255,255,')+whiteout.toFixed(3)+')';ctx.fillRect(0,0,VW,VH)}
   ctx=mainCtx;
@@ -5546,7 +5551,7 @@ function show(id){if(id!=='menu'&&typeof setOpen==='function')setOpen(false);scr
 /* Saisonwechsel: alles, was nach Schnee oder Sommer aussieht, neu bauen (Hintergrund, Bäume, Alm, Ranger), Bild-Caches leeren, neue Welt */
 function seasonVisuals(){MPAL=WIEHEN?(SUMMER?MPAL_WHS:MPAL_WH):SUMMER?MPAL_S:JAPAN?MPAL_J:MPAL_W;MLAY=WIEHEN?(SUMMER?MLAY_WHS:MLAY_WH):JAPAN?MLAY_J:MLAY_A;avaColors()}
 function applySeason(){SUMMER=SAVE.season==='summer';JAPAN=!SUMMER&&SAVE.map==='japan';WIEHEN=SAVE.map==='wiehen';RACE=SUMMER&&SAVE.dh==='race';setGear();
-  sprCache.clear();sprW=0;comCache.clear();stoneSpr.clear();mCache.clear();for(const k in mLuts)delete mLuts[k];avaSpr.clear();JT_SPR=null;LOG_SPR=null;for(const k in FAUNA_SPR)delete FAUNA_SPR[k];
+  sprCache.clear();sprW=0;comCache.clear();stoneSpr.clear();mCache.clear();for(const k in mLuts)delete mLuts[k];avaSpr.clear();JT_SPR=null;JT_SPR2=null;LOG_SPR=null;for(const k in FAUNA_SPR)delete FAUNA_SPR[k];
   if(typeof seasonVisuals==='function')seasonVisuals();
   rebuildBg();makeTreeSprites();makeAlmSprites();PATROL_SPR=[makePatrol(true),makePatrol(false)];initFlakes();if(typeof bioPrebake==='function')bioPrebake();
   resetRun();updCamera(0,true);refreshMenu()}
