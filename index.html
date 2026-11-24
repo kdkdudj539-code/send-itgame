@@ -3355,33 +3355,30 @@ function drawBarge(x,base,f){const O='#1a1d24';ctx.save();if(f){ctx.translate(x*
 function bandSpruce(g,X,base,h,snow,cols){bflush();const w=Math.max(2,Math.round(h*.28));drawTreeVar(g,X,base,h,w,cols,snow?.8:0,2,X*.37+h)}
 
 /* ---------- Die Bänder der einzelnen Landschaften ----------
-   Jedes Band ist ein endliches Stück Landschaft (keine Kachel): es zieht beim Fahren von rechts ins Bild und links wieder hinaus.
-   An beiden Enden läuft es über TAP px flach ins Tal aus, deshalb gibt es keine Kante und nichts wird ein- oder ausgeblendet.
+   Jedes Band ist eine Kachel, die sich nahtlos wiederholt (Kamm und Wellen sind über die Breite periodisch).
+   Wo die Landschaft anfängt und aufhört, entscheidet die Waldkulisse (bioWipe), nicht das Band.
    Hügel (Alm, Onsen, Schrein, Felder, Steinbruch, Felswand) liegen am nächsten (vor Baumreihen und Dörfern),
-   See und Fluss liegen weiter hinten am Fuß der Berge, die Baumreihen im Tal stehen davor. */
-const TAP=190;
-const tapE=(x,W)=>smooth01(Math.min(x,W-1-x)/TAP);
-const taper=(cr,W,H)=>x=>{const t=tapE(x,W);return t>=1?cr(x):H+2-(H+2-cr(x))*t};
+   See und Fluss zwischen den hinteren und vorderen Baumreihen. */
 const HILLW={top:'#ffffff',lit:'#ffffff',mid:'#ecf2fb',sh:'#d6e1f1',base:'#dde8f6'},HILLS={top:'#a2cf6c',lit:'#8fc05c',mid:'#7fb150',sh:'#6c9c44',base:'#93bf6a'};
 const VALC=()=>WIEHEN&&SUMMER?'#b0a46c':SUMMER?'#93bf6a':'#dde8f6';
 /* untere Zeilen des Bands gerastert in die Talfarbe */
 function bandFoot(g,W,H,n,col){for(let y=H-n;y<H;y++)for(let x=0;x<W;x++)if(bayer(x,y)<(y-(H-n))/n)PX(g,col,x,y)}
 /* Alm: weicher Wiesen- bzw. Schneehügel mit Hütten, Stadeln, Zäunen, ein paar Fichten; im Sommer Kühe und ein Weg */
-function almBand(){return band('alm'+bSeas(),1500,138,(g,W,H)=>{
-  const cr=taper(x=>32+8*Math.sin(TAU*2*x/1300+.5)+4*Math.sin(TAU*5*x/1300+1.3)+1.5*Math.sin(TAU*13*x/1300),W,H);
+function almBand(){return band('alm'+bSeas(),1300,138,(g,W,H)=>{
+  const cr=x=>32+8*Math.sin(TAU*2*x/W+.5)+4*Math.sin(TAU*5*x/W+1.3)+1.5*Math.sin(TAU*13*x/W);
   paintHill(g,W,H,cr,SUMMER?HILLS:HILLW);
-  const HUTS=[330,600,880,1150];
-  if(SUMMER){let x=380,y=cr(380)+4;for(let k=0;k<130;k++){PX(g,'#c9b48a',Math.round(x),Math.round(y));x+=1+(k%9<5?1:0);y+=.55*Math.sin(k*.11)+.35;if(y>H-30)break}}
+  const HUTS=[130,430,760,1060];
+  if(SUMMER){let x=180,y=cr(180)+4;for(let k=0;k<130;k++){PX(g,'#c9b48a',Math.round(x),Math.round(y));x+=1+(k%9<5?1:0);y+=.55*Math.sin(k*.11)+.35;if(y>H-30)break}}
   const TC=SUMMER?['#2f5a30','#3f7039']:['#2b4f47','#36614f'];
-  for(let i=0;i<34;i++){const x=Math.floor(TAP+hash01(i*3.7+1)*(W-2*TAP));if(HUTS.some(c=>x>c-14&&x<c+50))continue;const n=1+Math.floor(hash01(i*1.3)*3);for(let k=0;k<n;k++){const xx=x+k*5,h=10+Math.floor(hash01(i+k*7)*10);bandSpruce(g,xx,Math.round(cr(xx))+3,h,!SUMMER,TC)}}
+  for(let i=0;i<34;i++){const x=Math.floor(40+hash01(i*3.7+1)*(W-100));if(HUTS.some(c=>x>c-14&&x<c+50))continue;const n=1+Math.floor(hash01(i*1.3)*3);for(let k=0;k<n;k++){const xx=x+k*5,h=10+Math.floor(hash01(i+k*7)*10);bandSpruce(g,xx,Math.round(cr(xx))+3,h,!SUMMER,TC)}}
   for(const [i,cx] of HUTS.entries()){const w=22+Math.floor(hash01(i*5.1)*7),b=Math.round(Math.max(cr(cx),cr(cx+w)))+5;
     drawChalet(cx,b,w,12,i*11+3);if(i%2===0)drawStadel(cx+w+10,Math.round(cr(cx+w+16))+6);
     for(let k=0;k<8;k++){const fx=cx-32+k*5,fy=Math.round(cr(fx))+9;PX(g,'#4a2f1a',fx,fy-4,1,4);if(k<7)PX(g,'#4a2f1a',fx,fy-3,5,1)}}
-  if(SUMMER)for(let k=0;k<11;k++){const x=Math.floor(TAP+30+hash01(k*9.7+2)*(W-2*TAP-60)),y=Math.round(cr(x))+12+Math.floor(hash01(k*3.1)*24);drawCow(x,y,hash01(k*1.9)<.5,k*7+1)}})}
+  if(SUMMER)for(let k=0;k<11;k++){const x=Math.floor(60+hash01(k*9.7+2)*(W-130)),y=Math.round(cr(x))+12+Math.floor(hash01(k*3.1)*24);drawCow(x,y,hash01(k*1.9)<.5,k*7+1)}})}
 /* Bergsee am Fuß der Berge: hinten ein Ufer mit Bäumchen, Spiegelung, Glanz, vorne Kies bzw. Schnee; zu den Enden hin wird er schmal
    und läuft im Talboden aus. Eine Kapelle auf einer Landzunge, Bootshäuser */
-function lakeBand(){return band('lake'+bSeas(),1550,88,(g,W,H)=>{const L0=30,VB=72,MID=L0+17,HW=11.5,VC=VALC();
-  const geo=x=>{const t=tapE(x,W),mid=MID+(1-t)*(VB-MID),hw=HW*t;return [t,Math.round(mid-hw),Math.round(mid+hw)]};
+function lakeBand(){return band('lake'+bSeas(),1400,88,(g,W,H)=>{const L0=30,MID=L0+17,HW=11.5,VC=VALC();
+  const geo=x=>[1,Math.round(MID-HW),Math.round(MID+HW)];
   for(let x=0;x<W;x++){const [t,top,bot]=geo(x);
     for(let y=top;y<bot;y++){const tt=(y-top)/Math.max(1,bot-top),b=bayer(x,y);let c;
       if(SUMMER)c=tt<.16?'#2f6a64':tt<.24?(b<(.24-tt)/.08?'#2f6a64':'#3994a9'):tt<.62?'#3994a9':(b<(tt-.62)/.3?'#55b2c3':'#3994a9');
@@ -3389,43 +3386,43 @@ function lakeBand(){return band('lake'+bSeas(),1550,88,(g,W,H)=>{const L0=30,VB=
       PX(g,c,x,y)}
     if(t>.1){PX(g,SUMMER?'#4c7a3c':'#9fb4d2',x,top-2,1,2);const th=hash01(x*.71);if(th<.55){const h=Math.round((2+Math.floor(hash01(x*1.9)*5))*Math.min(1,t*1.4));if(h>0){PX(g,SUMMER?(th<.2?'#28482a':'#33583a'):(th<.2?'#5f748e':'#6f86a2'),x,top-2-h,1,h);if(!SUMMER&&h>3)PX(g,'#eef4fb',x,top-2-h,1,1)}}}
     PX(g,t>.1?(SUMMER?'#d9d2b4':'#c9d8ec'):VC,x,bot,1,2);PX(g,VC,x,bot+2,1,Math.max(0,H-bot-2))}
-  for(let i=0;i<80;i++){const x=Math.floor(TAP+hash01(i*4.3)*(W-2*TAP)),[t,top,bot]=geo(x),y=top+3+Math.floor(hash01(i*7.9)*Math.max(1,bot-top-5)),w=3+Math.floor(hash01(i*2.2)*10);PX(g,SUMMER?'#cdeff3':'#ffffff',x,y,w,1)}
-  if(!SUMMER)for(let i=0;i<36;i++){const x=Math.floor(TAP+hash01(i*5.9+1)*(W-2*TAP)),[t,top,bot]=geo(x),y=top+4+Math.floor(hash01(i*3.3)*Math.max(1,bot-top-7));PX(g,'#b4cde8',x,y,1,1);PX(g,'#b4cde8',x+1,y+1,2,1)}
-  for(const kx of [470,1080]){for(let k=-36;k<=36;k++){const hh=Math.round(16*Math.max(0,1-Math.pow(k/36,2)));for(let y=L0+29-hh;y<L0+31;y++)PX(g,y===L0+29-hh?(SUMMER?'#a2cf6c':'#ffffff'):(k>0?(SUMMER?'#8fc05c':'#ffffff'):(SUMMER?'#7fb150':'#e6eef9')),kx+k,y)}
+  for(let i=0;i<80;i++){const x=Math.floor(hash01(i*4.3)*(W-14)),[t,top,bot]=geo(x),y=top+3+Math.floor(hash01(i*7.9)*Math.max(1,bot-top-5)),w=3+Math.floor(hash01(i*2.2)*10);PX(g,SUMMER?'#cdeff3':'#ffffff',x,y,w,1)}
+  if(!SUMMER)for(let i=0;i<36;i++){const x=Math.floor(hash01(i*5.9+1)*(W-4)),[t,top,bot]=geo(x),y=top+4+Math.floor(hash01(i*3.3)*Math.max(1,bot-top-7));PX(g,'#b4cde8',x,y,1,1);PX(g,'#b4cde8',x+1,y+1,2,1)}
+  for(const kx of [380,1080]){for(let k=-36;k<=36;k++){const hh=Math.round(16*Math.max(0,1-Math.pow(k/36,2)));for(let y=L0+29-hh;y<L0+31;y++)PX(g,y===L0+29-hh?(SUMMER?'#a2cf6c':'#ffffff'):(k>0?(SUMMER?'#8fc05c':'#ffffff'):(SUMMER?'#7fb150':'#e6eef9')),kx+k,y)}
     bandSpruce(g,kx-20,L0+20,12,!SUMMER,SUMMER?['#2f5a30','#3f7039']:['#2b4f47','#36614f']);drawChapel(kx-4,L0+15)}
-  drawBoathouse(780,L0+20);drawBoathouse(820,L0+21);drawBoathouse(330,L0+19);drawBoathouse(1290,L0+20)})}
+  drawBoathouse(720,L0+20);drawBoathouse(760,L0+21);drawBoathouse(230,L0+19);drawBoathouse(1260,L0+20)})}
 /* Felswand mit Schuttkegeln (Sommer): klare Flächen, Licht von rechts, unten grüne Matten; zu den Enden hin sinkt die Wand ins Tal */
-function screeBand(){return band('scree'+bSeas(),1500,166,(g,W,H)=>{
-  const top=taper(x=>16+7*Math.sin(TAU*3*x/1000)+4*Math.sin(TAU*7*x/1000+1)+3*Math.abs(Math.sin(x*.09)),W,H),cb=x=>Math.min(H+2,top(x)+(30+4*Math.sin(TAU*4*x/1000))*tapE(x,W));
+function screeBand(){return band('scree'+bSeas(),1000,166,(g,W,H)=>{
+  const top=x=>16+7*Math.sin(TAU*3*x/W)+4*Math.sin(TAU*7*x/W+1)+3*Math.abs(Math.sin(TAU*10*x/W)),cb=x=>top(x)+30+4*Math.sin(TAU*4*x/W);
   for(let x=0;x<W;x++){const t=Math.round(top(x)),b=Math.round(cb(x)),f=Math.floor((x+Math.floor(hash01(Math.floor(x/14))*6))/14),lit=hash01(f*2.3)<.55;
     for(let y=t;y<H;y++){let c;
       if(y<b){c=lit?'#a8abb4':'#8a8d97';if((x+Math.floor(hash01(Math.floor(x/14))*6))%14===0&&y>t+2)c='#6e717a';if(y===t)c=lit?'#c0c3cb':'#9ea1aa';if(y>b-3&&bayer(x,y)<.5)c='#7c8a62'}
       else c=bayer(x,y)<clamp((y-b)/40,0,1)*.6?'#86b858':'#76a64c';
       PX(g,c,x,y)}}
-  for(const [cx,hw] of [[330,90],[560,110],[790,84],[1020,110],[1240,80]]){const ap=Math.round(cb(cx))-4,HB=H-34;
+  for(const [cx,hw] of [[90,70],[300,96],[520,80],[740,104],[930,64]]){const ap=Math.round(cb(cx))-4,HB=H-34;
     for(let x=cx-hw;x<cx+hw;x++){const u=(x-cx)/hw,yt=Math.round(ap+(HB-ap)*Math.pow(Math.abs(u),1.15)*.95+(Math.abs(u)<.08?2:0));
       for(let y=yt;y<HB+Math.round(4*(1-Math.abs(u)));y++){const H=HB;const v=(y-ap)/(H-ap),ray=hash01(Math.round((x-cx)/Math.max(.25,v)/9)*1.7+cx)<.22;let c=u>0?(ray?'#a9a79e':'#b5b3aa'):(ray?'#878580':'#93918a');if(y===yt)c=u>0?'#c8c6bc':'#a19f98';
         if(Math.abs(u)>.8&&bayer(x,y)<(Math.abs(u)-.8)*3)c='#7c9a56';PX(g,c,x,y)}}
     for(let k=0;k<7;k++){const bx=Math.round(cx-hw*.8+Math.floor(hash01(cx+k*3.3)*hw*1.6)),by=H-62-Math.floor(hash01(cx*1.7+k)*10);PX(g,'#6e6c66',bx,by,3,2);PX(g,'#c4c2b8',bx,by,2,1)}}
   bandFoot(g,W,H,26,'#93bf6a')})}
 /* Onsen: verschneiter Hang mit Terrassen, Ryokan, dampfende Becken, Steinlaternen, ein paar Zedern */
-function onsenBand(){return band('onsen'+bSeas(),1400,136,(g,W,H)=>{
-  const cr=taper(x=>32+7*Math.sin(TAU*2*x/1200+2)+3*Math.sin(TAU*6*x/1200),W,H);paintHill(g,W,H,cr,HILLW);
-  for(let i=0;i<24;i++){const x=Math.floor(TAP+hash01(i*5.3+2)*(W-2*TAP));bandSpruce(g,x,Math.round(cr(x))+3,12+Math.floor(hash01(i)*12),true,['#1f3a2a','#2d4a32'])}
-  for(const [i,rx] of [330,700,1010].entries()){const w=46+Math.floor(hash01(i*2.9)*16),b=Math.round(Math.max(cr(rx),cr(rx+w)))+10;drawRyokan(rx,b,w);
+function onsenBand(){return band('onsen'+bSeas(),1200,136,(g,W,H)=>{
+  const cr=x=>32+7*Math.sin(TAU*2*x/W+2)+3*Math.sin(TAU*6*x/W);paintHill(g,W,H,cr,HILLW);
+  for(let i=0;i<24;i++){const x=Math.floor(30+hash01(i*5.3+2)*(W-60));bandSpruce(g,x,Math.round(cr(x))+3,12+Math.floor(hash01(i)*12),true,['#1f3a2a','#2d4a32'])}
+  for(const [i,rx] of [160,560,940].entries()){const w=46+Math.floor(hash01(i*2.9)*16),b=Math.round(Math.max(cr(rx),cr(rx+w)))+10;drawRyokan(rx,b,w);
     drawPool(rx-38,b+8,30,i*5+1);drawPool(rx+w+8,b+12,24,i*5+3);
     for(const lx of [rx-6,rx+w+3]){PX(g,'#6d717c',lx,b+2,3,4);PX(g,'#9aa0aa',lx+1,b-1,1,3);PX(g,'#f4f8ff',lx,b-2,3,1)}}})}
 /* Schrein: Hügel mit dichtem Zedernwald, Steintreppe mit roten Torii den Hang hinauf, oben die Halle */
-function shrineBand(){return band('shrine'+bSeas(),1400,158,(g,W,H)=>{
-  const cr=taper(x=>36+10*Math.sin(TAU*2*x/1300+.8)+4*Math.sin(TAU*5*x/1300+2),W,H);paintHill(g,W,H,cr,HILLW);
-  for(let x=0;x<W;x+=3){if(hash01(x*.37)<.45||tapE(x,W)<.6)continue;const h=14+Math.floor(hash01(x*1.3)*16);bandSpruce(g,x,Math.round(cr(x))+4+Math.floor(hash01(x)*4),h,true,['#1f3a2a','#2d4a32'])}
-  for(const x0 of [330,860]){const xt=x0+100,yt=Math.round(cr(xt))+16,yb=Math.round(cr(x0))+52,n=10;
+function shrineBand(){return band('shrine'+bSeas(),1300,158,(g,W,H)=>{
+  const cr=x=>36+10*Math.sin(TAU*2*x/W+.8)+4*Math.sin(TAU*5*x/W+2);paintHill(g,W,H,cr,HILLW);
+  for(let x=0;x<W-6;x+=3){if(hash01(x*.37)<.45)continue;const h=14+Math.floor(hash01(x*1.3)*16);bandSpruce(g,x,Math.round(cr(x))+4+Math.floor(hash01(x)*4),h,true,['#1f3a2a','#2d4a32'])}
+  for(const x0 of [200,860]){const xt=x0+100,yt=Math.round(cr(xt))+16,yb=Math.round(cr(x0))+52,n=10;
     for(let i=0;i<=n;i++){const u=i/n,x=Math.round(x0+(xt-x0)*u),y=Math.round(yb+(yt-yb)*u);PX(g,'#9aa0aa',x-1,y,10,1);PX(g,'#f4f8ff',x-1,y-1,10,1)}
     for(let i=0;i<=n;i++){const u=i/n,x=Math.round(x0+(xt-x0)*u),y=Math.round(yb+(yt-yb)*u);if(i%2===0)drawToriiS(x,y,10-Math.round(u*2))}
     drawHall(xt+6,yt-2)}})}
 /* Felder (Mühlenkreis): Hügel, auf dessen Hang Parzellen in Reihen liegen, Hecken dazwischen, Mühle und Höfe oben */
-function fieldBand(){return band('fields'+bSeas(),1500,138,(g,W,H)=>{
-  const cr=taper(x=>26+10*Math.sin(TAU*x/1300+1)+5*Math.sin(TAU*3*x/1300+.2),W,H);
+function fieldBand(){return band('fields'+bSeas(),1300,138,(g,W,H)=>{
+  const cr=x=>26+10*Math.sin(TAU*x/W+1)+5*Math.sin(TAU*3*x/W+.2);
   const CR=SUMMER?[['#8a5a36','#7a4e2e'],['#cfae5c','#bfa04e'],['#7a9a46','#6e8e3e'],['#a87a48','#986c3e'],['#9aa850','#8c9a46'],['#6f9a48','#638c40']]:[['#f4f8fd','#e2eaf5'],['#eef3fb','#dce5f2'],['#f8fbff','#e8eef7']];
   const HC=SUMMER?'#4e4420':'#6a707c',TR=SUMMER?['#b8601e','#c49a3a','#8a6a24']:['#7a808a','#8a909a'];
   const rowAt=(x,y)=>{const d=y-cr(x),f=d/11+.3*Math.sin(x*.011),row=Math.floor(f);return [row,(f-row)*11]};
@@ -3437,32 +3434,32 @@ function fieldBand(){return band('fields'+bSeas(),1500,138,(g,W,H)=>{
       if(y===Math.floor(t))c=SUMMER?'#8aa84a':'#ffffff';PX(g,c,x,y)}}
   for(let x=0;x<W;x++)for(let y=Math.floor(cr(x))+11;y<H;y++){const [row,rd]=rowAt(x,y);if(rd>=1||hash01(row*7.1+Math.floor((x+row*53)/span(row))*1.9)>=.4||hash01(x*.91+row)>.05)continue;
     PX(g,'#3a2a1e',x,y-3,1,3);PX(g,TR[(x+row)%TR.length],x-1,y-6,3,3);PX(g,TR[(x+row)%TR.length],x,y-7,1,1)}
-  if(SUMMER)for(let k=0;k<44;k++){const x=Math.floor(TAP+hash01(k*6.1)*(W-2*TAP)),y=Math.round(cr(x))+14+Math.floor(hash01(k*2.7)*40),[row]=rowAt(x,y),par=Math.floor((x+row*53)/span(row));
+  if(SUMMER)for(let k=0;k<44;k++){const x=Math.floor(4+hash01(k*6.1)*(W-8)),y=Math.round(cr(x))+14+Math.floor(hash01(k*2.7)*40),[row]=rowAt(x,y),par=Math.floor((x+row*53)/span(row));
     if(Math.floor(hash01(par*3.7+row*11.3)*CR.length)!==1)continue;PX(g,'#7a5a24',x,y+1,2,1);PX(g,'#e8c868',x,y,2,1)}
   bandFoot(g,W,H,24,VALC());
-  for(const [i,mx] of [400,1000].entries()){bflush();const b=Math.round(cr(mx))+3;drawMillBody(mx,b,i*7+2);drawHouseF(mx+24,Math.round(cr(mx+33))+7,18,10,i*20+3);if(i===0)drawHouseF(mx+46,Math.round(cr(mx+53))+9,15,9,i*20+4)}})}
+  for(const [i,mx] of [300,900].entries()){bflush();const b=Math.round(cr(mx))+3;drawMillBody(mx,b,i*7+2);drawHouseF(mx+24,Math.round(cr(mx+33))+7,18,10,i*20+3);if(i===0)drawHouseF(mx+46,Math.round(cr(mx+53))+9,15,9,i*20+4)}})}
 /* Weser vor dem Fuß des Gebirges: Weiden am anderen Ufer, Spiegelung, vorne Uferstreifen; zu den Enden hin wird sie schmal */
-function riverBand(){return band('weser'+bSeas(),1550,82,(g,W,H)=>{const R0=24,VB=66,MID=R0+12,HW=8,VC=VALC();
-  const geo=x=>{const t=tapE(x,W),mid=MID+(1-t)*(VB-MID),hw=HW*t;return [t,Math.round(mid-hw),Math.round(mid+hw)]};
+function riverBand(){return band('weser'+bSeas(),1600,82,(g,W,H)=>{const R0=24,MID=R0+12,VC=VALC();
+  const geo=x=>{const hw=8+1.4*Math.sin(TAU*3*x/W+2),mid=MID+2.2*Math.sin(TAU*2*x/W)+1.2*Math.sin(TAU*5*x/W+1);return [1,Math.round(mid-hw*.8),Math.round(mid+hw)]};
   for(let x=0;x<W;x++){const [t,top,bot]=geo(x);
     for(let y=top;y<bot;y++){const tt=(y-top)/Math.max(1,bot-top),b=bayer(x,y);PX(g,SUMMER?(tt<.25?(b<(.3-tt)*4?'#3e5a5e':'#5d7e92'):'#5d7e92'):(tt<.25?(b<(.3-tt)*4?'#3e5068':'#56708a'):'#56708a'),x,y)}
     if(t>.1){PX(g,SUMMER?'#6a6a3a':'#9aa4b4',x,top-2,1,2);if(!SUMMER&&bot>top+2){PX(g,'#eef4fd',x,top,1,1);if(hash01(x*.31)<.6)PX(g,'#eef4fd',x,bot-1,1,1)}}
     PX(g,t>.1?(SUMMER?'#7a6a42':'#c9d6ea'):VC,x,bot,1,2);PX(g,VC,x,bot+2,1,Math.max(0,H-bot-2))}
-  for(let i=0;i<80;i++){const x=Math.floor(TAP+hash01(i*4.3)*(W-2*TAP)),[t,top,bot]=geo(x),y=top+3+Math.floor(hash01(i*7.9)*Math.max(1,bot-top-4)),w=2+Math.floor(hash01(i*2.2)*7);PX(g,SUMMER?'#a9c3d0':'#a8bdd2',x,y,w,1)}
+  for(let i=0;i<80;i++){const x=Math.floor(hash01(i*4.3)*(W-10)),[t,top,bot]=geo(x),y=top+3+Math.floor(hash01(i*7.9)*Math.max(1,bot-top-4)),w=2+Math.floor(hash01(i*2.2)*7);PX(g,SUMMER?'#a9c3d0':'#a8bdd2',x,y,w,1)}
   for(let x=0;x<W;x+=2){const [t,top]=geo(x);if(hash01(x*.41)<.4||t<.15)continue;const h=Math.round((6+Math.floor(hash01(x*2.1)*10))*Math.min(1,t*1.3)),r=Math.max(1,Math.round((2+Math.floor(hash01(x*1.3)*3))*Math.min(1,t*1.3))),cl=SUMMER?(hash01(x)<.4?['#7a5418','#b8902a']:hash01(x)<.7?['#6a2416','#a23c22']:['#56501e','#86782a']):['#5a606c','#7a808c'];
     PX(g,'#3a2a1e',x,top-1-h,1,h);for(let yy=-r;yy<=r;yy++){const ww=Math.round(Math.sqrt(r*r-yy*yy));PX(g,cl[yy<0?1:0],x-ww,top-1-h+yy,ww*2+1,1)}if(!SUMMER)PX(g,'#eef4fd',x-1,top-2-h-r,3,1)}})}
 /* Steinbruch: Waldhügel mit einem Anschnitt aus Sandstein in Stufen, Schutt, kleiner Bagger */
-function quarryBand(){return band('quarry'+bSeas(),1500,152,(g,W,H)=>{
-  const cr=taper(x=>24+12*Math.sin(TAU*x/1100+.3)+4*Math.sin(TAU*4*x/1100),W,H);
+function quarryBand(){return band('quarry'+bSeas(),1100,152,(g,W,H)=>{
+  const cr=x=>24+12*Math.sin(TAU*x/W+.3)+4*Math.sin(TAU*4*x/W);
   const P=SUMMER?{top:'#a0582a',lit:'#8e5226',mid:'#7a4622',sh:'#64391c',base:'#b0a46c'}:{top:'#ffffff',lit:'#f4f8fd',mid:'#e2e9f4',sh:'#c8d3e4',base:'#dde8f6'};
   paintHill(g,W,H,cr,P);
   const PAL=SUMMER?[['#7a3416','#b8601e','#d88a3a'],['#7a5418','#b8902a','#dcb44a'],['#56501e','#86782a','#a89a3a'],['#6a2416','#a23c22','#c85a32']]:[['#5a606c','#727884','#8a909c']];
-  const Q=[[420,630],[930,1060]],pit=(x,y)=>{for(const [q0,q1] of Q){if(x<q0||x>=q1)continue;const top=Math.round(cr(x))+3;if(y<top)return false;const lev=Math.floor((y-top)/11),l0=q0+lev*14+Math.round(4*Math.sin(lev*1.7)),r0=q1-lev*11-Math.round(3*Math.sin(lev*2.3));return lev<=6&&r0-l0>=16&&x>=l0&&x<r0}return false},inQ=(x,y)=>pit(x,y)||pit(x-3,y)||pit(x+3,y)||pit(x,y+3);
+  const Q=[[330,540],[830,960]],pit=(x,y)=>{for(const [q0,q1] of Q){if(x<q0||x>=q1)continue;const top=Math.round(cr(x))+3;if(y<top)return false;const lev=Math.floor((y-top)/11),l0=q0+lev*14+Math.round(4*Math.sin(lev*1.7)),r0=q1-lev*11-Math.round(3*Math.sin(lev*2.3));return lev<=6&&r0-l0>=16&&x>=l0&&x<r0}return false},inQ=(x,y)=>pit(x,y)||pit(x-3,y)||pit(x+3,y)||pit(x,y+3);
   for(let y0=0;y0<H;y0+=4)for(let x0=0;x0<W;x0+=4){const x=x0+Math.floor(hash01(x0*1.3+y0*7.1)*4),y=y0+Math.floor(hash01(x0*3.1+y0)*3);if(y<cr(x)+1||y>H-14||inQ(x,y))continue;
     if(!SUMMER){if(hash01(x*.7+y*1.3)<.28){const th=4+Math.floor(hash01(x+y)*5);PX(g,'#8e939c',x,y-th,1,th);PX(g,'#a8adb6',x-1,y-th+1,1,1);PX(g,'#a8adb6',x+1,y-th+2,1,1);PX(g,'#ffffff',x,y-th-1,1,1)}continue}
     const pl=PAL[Math.floor(hash01(x*.17+y*.71)*PAL.length)],r=2;
     for(let yy=-r;yy<=r;yy++){const ww=Math.round(Math.sqrt(r*r-yy*yy)+.3);for(let xx=-ww;xx<=ww;xx++)PX(g,pl[yy<0&&xx>-1?2:yy>0||xx<-1?0:1],x+xx,y+yy)}}
-  for(let x=0;x<W;x+=2){const t=Math.round(cr(x));if(t>=H||inQ(x,t+2))continue;if(!SUMMER){const th=6+Math.floor(hash01(x*1.7)*8);PX(g,'#8e939c',x,t-th,1,th);PX(g,'#a8adb6',x-1,t-th+2,1,1);PX(g,'#a8adb6',x+1,t-th+3,1,1);PX(g,'#ffffff',x,t-th-1,1,1);continue}
+  for(let x=0;x<W-2;x+=2){const t=Math.round(cr(x));if(t>=H||inQ(x,t+2))continue;if(!SUMMER){const th=6+Math.floor(hash01(x*1.7)*8);PX(g,'#8e939c',x,t-th,1,th);PX(g,'#a8adb6',x-1,t-th+2,1,1);PX(g,'#a8adb6',x+1,t-th+3,1,1);PX(g,'#ffffff',x,t-th-1,1,1);continue}
     const pl=PAL[Math.floor(hash01(x*.37)*PAL.length)],r=2+Math.floor(hash01(x*.9)*2);
     for(let yy=-r;yy<=r;yy++){const ww=Math.round(Math.sqrt(r*r-yy*yy));PX(g,pl[yy<0?2:1],x-ww,t-1+yy,ww*2+1,1)}}
   for(const [q0,q1] of Q){const qw=q1-q0;
@@ -3491,30 +3488,55 @@ function glacierSpr(){return bspr('glacier6',640,190,(g,W,H)=>{
           if(Math.abs(u)>.93&&k>.35)c='#8f929b'}}
       if(y>=H-18&&b<(y-(H-18))/18)c='#cadcf2';
       PX(g,c,x,y)}}})}
-/* Landschaften in der Nähe der Kamera. Ein Band steht in der Welt fest: sein linkes Ende erreicht den rechten Bildrand,
-   wenn die Kamera BIO_PRE px vor dem Abschnitt ist, danach zieht es mit seiner Parallaxe durchs Bild. */
-const BIO_PRE=450;
-function bioNear(cc,fn){for(const b of bioList){if(b.x0-14000>cc)break;if(b.x1+14000<cc)continue;fn(b)}}
-const bandX=(b,cc,par)=>Math.round(VW+(b.x0-BIO_PRE-cc)*par);
-/* hinter dem Tal: das Gletschermassiv schiebt sich von rechts vor die Berge, Windräder hinter den Feldern */
-function drawBioFar(cX,by){const cc=cX+VW*.6;bioNear(cc,b=>{
-  if(b.id==='glacier'){const S=glacierSpr(),sx=Math.round(VW+70+(b.x0-BIO_PRE-cc)*.14);if(sx<VW&&sx+S.width>0)ctx.drawImage(S,sx,by+14-S.height)}
-  else if(b.id==='fields'){const x0=bandX(b,cc,.12);for(let i=0;i<6;i++){const sx=x0+50+i*95+Math.round(hash01(b.x0*.001+i)*40);if(sx>-30&&sx<VW+30)drawTurbine(sx,by-18+(i%2)*3,b.x0*.001+i)}}})}
-/* weiter hinten im Tal (vor den Baumreihen gezeichnet, die stehen davor): See und Fluss */
-function drawBioWater(cX,by){const cc=cX+VW*.6;bioNear(cc,b=>{
-  if(b.id==='lake'){const B=lakeBand(),sx=bandX(b,cc,.26);if(sx<VW&&sx+B.c.width>0)drawBandAt(B,sx,by-60)}
-  else if(b.id==='weser'){const B=riverBand(),sx=bandX(b,cc,.26);if(sx>=VW||sx+B.c.width<=0)return;drawBandAt(B,sx,by-54);
-    for(let i=0;i<2;i++){const u=((T*5+i*520)%1100+1100)%1100,bx=Math.round(sx+TAP+30+(i?1100-u:u));if(bx>-40&&bx<VW+4)drawBarge(bx,by-14,i===1)}
-    const a0=ctx.globalAlpha,m0=Math.max(0,sx+TAP),m1=Math.min(VW,sx+B.c.width-TAP);if(m1>m0)for(let k=0;k<3;k++){ctx.globalAlpha=a0*(.1+.05*Math.sin(T*.3+k));ctx.fillStyle='#ffffff';ctx.fillRect(m0,by-25+k*4,m1-m0,2)}ctx.globalAlpha=a0}})}
-/* am nächsten (nach Baumreihen und Dörfern gezeichnet): die Hügel der Landschaften */
-function drawBioBand(cX,by){const cc=cX+VW*.6;bioNear(cc,b=>{const id=b.id;
-  const at=(Bd,y)=>{const sx=bandX(b,cc,.34);if(sx<VW&&sx+Bd.c.width>0)drawBandAt(Bd,sx,y)};
-  if(id==='alm')at(almBand(),by-62);
-  else if(id==='scree')at(screeBand(),by-90);
-  else if(id==='onsen')at(onsenBand(),by-60);
-  else if(id==='shrine')at(shrineBand(),by-84);
-  else if(id==='fields')at(fieldBand(),by-56);
-  else if(id==='quarry')at(quarryBand(),by-70)})}
+/* Übergang mit Waldkulisse: an Anfang und Ende jeder Landschaft zieht eine hohe Baumgruppe (Parallaxe OCC_P) durch den Hintergrund.
+   Links von ihr wird die bisherige Landschaft gezeichnet, rechts die neue; die Grenze liegt immer hinter den Bäumen.
+   So überlappen sich alte und neue Landschaft nie: Lifte und Dörfer gibt es nur in der normalen Landschaft,
+   Hügel, See, Fluss, Gletscher und Windräder nur in ihrer. Nichts wird ein- oder ausgeblendet. */
+const OCC_P=.5,OCC_W=220,OCC_C=110;
+const seamX=(xs,cc)=>VW/2+(xs-cc)*OCC_P;
+const bioBg=b=>b&&b.id!=='bamboo';   /* Bambus ändert nur den Wald an der Strecke */
+function bioWipe(cc){const M=OCC_W/2+12;
+  for(const b of bioList){if(b.x0-6000>cc)break;if(b.x1+6000<cc||!bioBg(b))continue;
+    const se=seamX(b.x0,cc),sx=seamX(b.x1,cc);
+    if(se>-M&&se<VW+M)return {seam:se,A:null,B:b};
+    if(sx>-M&&sx<VW+M)return {seam:sx,A:b,B:null};
+    if(se<=-M&&sx>=VW+M)return {seam:null,A:b,B:null}}
+  return {seam:null,A:null,B:null}}
+/* Ein Teil der Landschaft, links bzw. rechts der Kulisse abgeschnitten; Lichter außerhalb fallen weg */
+function bioPart(WP,part,cX,by,fm){
+  const run=(b,x0,x1)=>{if(x1<=x0)return;const full=x0<=0&&x1>=VW,n0=emissiveBg.length;
+    if(!full){ctx.save();ctx.beginPath();ctx.rect(x0,0,x1-x0,VH);ctx.clip()}
+    try{bioScene(b,part,cX,by,fm)}finally{if(!full)ctx.restore();ctx.globalAlpha=1}
+    if(!full)for(let i=emissiveBg.length-1;i>=n0;i--){const e=emissiveBg[i];if(e.x<x0||e.x>=x1)emissiveBg.splice(i,1)}};
+  if(WP.seam===null)run(WP.A,0,VW);else{const s=Math.round(WP.seam);run(WP.A,0,s);run(WP.B,s,VW)}}
+function drawBandTiled(Bd,off,y){const W=Bd.c.width;for(let x=-(((off%W)+W)%W);x<VW;x+=W)drawBandAt(Bd,x,y)}
+function bioScene(b,part,cX,by,fm){
+  if(!b){if(part==='lifts'&&!JAPAN&&!WIEHEN)drawLifts(cX,1-fm);else if(part==='vill')drawVillages(cX,by+65);return}
+  const id=b.id,cc=cX+VW*.6;
+  if(part==='far'){
+    if(id==='glacier'){const S=glacierSpr(),sx=Math.round(VW*.62+((b.x0+b.x1)/2-cc)*.14-S.width/2);if(sx<VW&&sx+S.width>0)ctx.drawImage(S,sx,by+14-S.height)}
+    else if(id==='fields'){const off=cX*.12;for(let k=Math.floor((off-60)/230);k*230<off+VW+60;k++){const sx=Math.round(k*230+hash01(k*1.7)*80-off);drawTurbine(sx,by-18+(k&1)*3,k)}}}
+  else if(part==='water'){
+    if(id==='lake')drawBandTiled(lakeBand(),cX*.26,by-60);
+    else if(id==='weser'){const B=riverBand(),W=B.c.width,off=cX*.26;drawBandTiled(B,off,by-54);
+      for(let x=-(((off%W)+W)%W);x<VW;x+=W)for(let i=0;i<2;i++){const u=((T*5+i*700)%W+W)%W,bx=Math.round(x+(i?W-u:u));if(bx>-40&&bx<VW+4)drawBarge(bx,by-13,i===1)}
+      const a0=ctx.globalAlpha;for(let k=0;k<3;k++){ctx.globalAlpha=a0*(.1+.05*Math.sin(T*.3+k));ctx.fillStyle='#ffffff';ctx.fillRect(0,by-25+k*4,VW,2)}ctx.globalAlpha=a0}}
+  else if(part==='hills'){const o=cX*.34;
+    if(id==='alm')drawBandTiled(almBand(),o,by-62);
+    else if(id==='scree')drawBandTiled(screeBand(),o,by-90);
+    else if(id==='onsen')drawBandTiled(onsenBand(),o,by-60);
+    else if(id==='shrine')drawBandTiled(shrineBand(),o,by-84);
+    else if(id==='fields')drawBandTiled(fieldBand(),o,by-56);
+    else if(id==='quarry')drawBandTiled(quarryBand(),o,by-70)}}
+/* Die Kulisse: dichte, hohe Nadelbaumgruppe; der höchste Baum steht genau auf der Grenze und reicht bis über die Gipfel des Gletschers */
+const OCC_SPR={};
+function occSpr(){const key=bSeas();if(OCC_SPR[key])return OCC_SPR[key];const W=OCC_W,H=340,[c,g]=mk(W,H);
+  const cols=JAPAN?['#1c3527','#28452f']:WIEHEN&&SUMMER?['#22402a','#2e5336']:SUMMER?['#1e4127','#2a5633']:['#1b372f','#264a3d'],snow=SUMMER?0:.75;
+  const TR=[[OCC_C,316,30],[OCC_C-48,258,27],[OCC_C+50,270,28],[OCC_C-86,210,23],[OCC_C+86,222,23],[OCC_C-22,190,22],[OCC_C+26,200,21],[OCC_C-104,160,17],[OCC_C+104,168,17]];
+  TR.sort((a,b)=>a[1]-b[1]);for(const [x,ht,w] of TR)drawTreeVar(g,x,H-8,ht,w,cols,snow,Math.round(ht*.1),x*.37+ht);
+  for(let x=0;x<W;x++){const hh=Math.round(14+6*Math.sin(x*.11)+4*Math.sin(x*.27+1)),dk=cols[0];g.fillStyle=dk;g.fillRect(x,H-hh,1,hh);if(!SUMMER&&x%3){g.fillStyle='#eef4fb';g.fillRect(x,H-hh,1,1)}}
+  return OCC_SPR[key]=c}
+function drawOccluder(sx,by){const S=occSpr();ctx.drawImage(S,Math.round(sx)-OCC_C,by+96-S.height)}
 
 /* ---------- Wald neben der Strecke: Bambus und Zedern ---------- */
 let BAM_SPR=null,CED_SPR=null;
@@ -5471,16 +5493,16 @@ function render(dt){
   // Talboden, Skiberg, Baumreihen, Dörfer: eigene Ebene, nachts nur von Fenstern beleuchtet
   if(!bgCv||bgCv.width!==VW){[bgCv,bgCtx]=mk(VW,VH)}
   ctx=bgCtx;ctx.clearRect(0,0,VW,VH);
-  drawBioFar(cX,by);   /* Landschaften: Gletscher und Windräder hinten, See und Fluss im Tal, Hügel ganz vorne */
+  const WP=bioWipe(cX+VW*.6);   /* Landschaften: links und rechts der Waldkulisse, nach Tiefe sortiert */
+  bioPart(WP,'far',cX,by,fm);
   ctx.drawImage(BG.valley,0,by+12);
-  drawBioWater(cX,by);
-  if(!JAPAN&&!WIEHEN)drawLifts(cX,1-fm);
+  bioPart(WP,'lifts',cX,by,fm);
   if(fm<1){ctx.globalAlpha=1-fm;tile(BG.treesB,cX*.24,by+2)}
   if(fm>0){ctx.globalAlpha=fm;tile(BG.ftreesB,cX*.24,by-12)}
-  ctx.globalAlpha=1;
+  ctx.globalAlpha=1;bioPart(WP,'water',cX,by,fm);
   if(fm<1){ctx.globalAlpha=1-fm;tile(BG.treesF,cX*.32,by-8)}
   if(fm>0){ctx.globalAlpha=fm;tile(BG.ftreesF,cX*.32,by-34)}
-  ctx.globalAlpha=1;drawVillages(cX,by+65);drawBioBand(cX,by);
+  ctx.globalAlpha=1;bioPart(WP,'vill',cX,by,fm);bioPart(WP,'hills',cX,by,fm);if(WP.seam!==null)drawOccluder(WP.seam,by);
   nightPass(curDS,emissiveBg,null);
   ctx=mainCtx;ctx.drawImage(bgCv,0,0);
   // Welt: Piste, Klippen, alles Bewegliche; nachts Flutlicht und Stirnlampe
