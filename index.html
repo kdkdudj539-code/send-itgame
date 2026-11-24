@@ -3236,7 +3236,7 @@ const bioSet=()=>BIO_SETS[JAPAN?'japan':WIEHEN?'wiehen':SUMMER?'alps_s':'alps_w'
 const bioPoolKey=()=>JAPAN?'japan':WIEHEN?(SUMMER?'wiehen_s':'wiehen_w'):SUMMER?'alps_s':'alps_w';
 function bioPlan(seed){bioList=[];const ids=bioSet(),r=raceRng(seed*7919+13);let x=2300+r()*900,prev=null,bag=[];
   while(x<600000){if(!bag.length){bag=[...ids];for(let i=bag.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[bag[i],bag[j]]=[bag[j],bag[i]]}if(bag[0]===prev)bag.push(bag.shift())}
-    const id=bag.shift(),L=3600+r()*1600;bioList.push({x0:x,x1:x+L,id});prev=id;x+=L+2300+r()*1500}}
+    const id=bag.shift(),L=3600+r()*1600;bioList.push({x0:x,x1:x+L,id});prev=id;x+=L+2500+r()*1500}}
 function bioAt(x){let lo=0,hi=bioList.length-1;
   while(lo<=hi){const m=(lo+hi)>>1,b=bioList[m];if(x<b.x0-BIO_FADE)hi=m-1;else if(x>b.x1+BIO_FADE)lo=m+1;
     else{BIO_R.id=b.id;BIO_R.b=b;BIO_R.k=smooth01(Math.min(x-b.x0+BIO_FADE,b.x1+BIO_FADE-x)/(2*BIO_FADE));return BIO_R}}
@@ -3364,7 +3364,7 @@ function bandSpruce(g,X,base,h,snow,cols){bflush();const w=Math.max(2,Math.round
 
 /* ---------- Die Bänder der einzelnen Landschaften ----------
    Jedes Band ist eine Kachel, die sich nahtlos wiederholt (Kamm und Wellen sind über die Breite periodisch).
-   Wo die Landschaft anfängt und aufhört, entscheidet die Waldkulisse (bioWipe), nicht das Band.
+   Wo die Landschaft anfängt und aufhört, entscheidet der Berg davor (bioWipe), nicht das Band.
    Hügel (Alm, Onsen, Schrein, Felder, Steinbruch, Felswand) liegen am nächsten (vor Baumreihen und Dörfern),
    See und Fluss zwischen den hinteren und vorderen Baumreihen. */
 const HILLW={top:'#ffffff',lit:'#ffffff',mid:'#ecf2fb',sh:'#d6e1f1',base:'#dde8f6'},HILLS={top:'#a2cf6c',lit:'#8fc05c',mid:'#7fb150',sh:'#6c9c44',base:'#93bf6a'};
@@ -3496,11 +3496,11 @@ function glacierSpr(){return bspr('glacier6',640,190,(g,W,H)=>{
           if(Math.abs(u)>.93&&k>.35)c='#8f929b'}}
       if(y>=H-18&&b<(y-(H-18))/18)c='#cadcf2';
       PX(g,c,x,y)}}})}
-/* Übergang mit Waldkulisse: an Anfang und Ende jeder Landschaft zieht eine hohe Baumgruppe (Parallaxe OCC_P) durch den Hintergrund.
-   Links von ihr wird die bisherige Landschaft gezeichnet, rechts die neue; die Grenze liegt immer hinter den Bäumen.
+/* Übergang hinter einem Berg: an Anfang und Ende jeder Landschaft zieht ein naher Berg (Parallaxe OCC_P) durch den Hintergrund.
+   Links von ihm wird die bisherige Landschaft gezeichnet, rechts die neue; die Grenze liegt immer hinter dem Gipfel.
    So überlappen sich alte und neue Landschaft nie: Lifte und Dörfer gibt es nur in der normalen Landschaft,
    Hügel, See, Fluss, Gletscher und Windräder nur in ihrer. Nichts wird ein- oder ausgeblendet. */
-const OCC_P=.5,OCC_W=220,OCC_C=110;
+const OCC_P=.5,OCC_W=560,OCC_C=280,OCC_H=330;
 const seamX=(xs,cc)=>VW/2+(xs-cc)*OCC_P;
 const bioBg=b=>!!b;
 function bioWipe(cc){const M=OCC_W/2+12;
@@ -3542,31 +3542,60 @@ function bioScene(b,part,cX,by,fm){
     else if(id==='shrine')drawBandTiled(shrineBand(),o,by-84);
     else if(id==='fields')drawBandTiled(fieldBand(),o,by-56);
     else if(id==='quarry')drawBandTiled(quarryBand(),o,by-70)}}
-/* Die Kulisse: im Wiehengebirge eine dichte, hohe Fichtengruppe; in den Alpen und in Japan eine Felsnadel (dort gibt es keine Riesenbäume).
-   Die höchste Spitze steht genau auf der Grenze und reicht bis über die Gipfel des Gletschers. */
+/* Die Kulisse ist ein naher Berg im Stil der Berge dahinter (Flächen mit Licht von rechts, gerasterte Übergänge).
+   Sein Gipfel steht genau auf der Grenze und reicht bis über alles, was sich ändert (in den Alpen über den Gletscher).
+   Alpen: Felsgipfel mit Graten, Felsrippen, Schnee, unten Bergwald (Sommer: Gipfelschnee, Almwiesen);
+   Japan: runder, verschneiter Waldberg mit Birken und Zedern; Wiehengebirge: bewaldeter Bergrücken. */
 const OCC_SPR={};
-function occSpr(){const key=bSeas();if(OCC_SPR[key])return OCC_SPR[key];const W=OCC_W,H=340,[c,g]=mk(W,H);
-  if(WIEHEN){const cols=SUMMER?['#22402a','#2e5336']:['#1b372f','#264a3d'],snow=SUMMER?0:.75;
-    const TR=[[OCC_C,316,30],[OCC_C-48,258,27],[OCC_C+50,270,28],[OCC_C-86,210,23],[OCC_C+86,222,23],[OCC_C-22,190,22],[OCC_C+26,200,21],[OCC_C-104,160,17],[OCC_C+104,168,17]];
-    TR.sort((a,b)=>a[1]-b[1]);for(const [x,ht,w] of TR)drawTreeVar(g,x,H-8,ht,w,cols,snow,Math.round(ht*.1),x*.37+ht);
-    for(let x=0;x<W;x++){const hh=Math.round(14+6*Math.sin(x*.11)+4*Math.sin(x*.27+1));g.fillStyle=cols[0];g.fillRect(x,H-hh,1,hh);if(!SUMMER&&x%3){g.fillStyle='#eef4fb';g.fillRect(x,H-hh,1,1)}}
-    return OCC_SPR[key]=c}
-  /* Felsnadel: Hauptspitze in der Mitte, Nebenspitzen, zackige Kante; Felsflächen in senkrechten Streifen (Licht von rechts),
-     einzelne Risse, kurze Schnee- bzw. Grasbänder auf Absätzen, oben Schnee, unten Schutt */
-  const P=JAPAN?{lit:'#7c7884',lit2:'#6c6874',sh:'#524e5a',cr:'#3e3a46',top:'#ffffff',sp:'#eef4fb'}:SUMMER?{lit:'#a6a69f',lit2:'#96968f',sh:'#74746e',cr:'#5a5a55',top:'#b8b8b0',sp:'#6f9a48'}:{lit:'#969cac',lit2:'#868c9c',sh:'#646a7b',cr:'#4c5160',top:'#ffffff',sp:'#eef4fb'};
-  const PK=[[OCC_C,6,3.1],[OCC_C-44,80,2.6],[OCC_C+46,96,2.7],[OCC_C-84,164,2.2],[OCC_C+88,178,2.3]];
-  const topAt=x=>{let best=1e9,pk=PK[0];for(const q of PK){const y=q[1]+Math.abs(x-q[0])*q[2]+Math.floor(hash01(Math.floor(x/4)*1.7+q[0])*7);if(y<best){best=y;pk=q}}return [best,pk]};
-  const id=g.createImageData(W,H),D=id.data,set=(x,y,col)=>{const v=pxCol(col),i=(y*W+x)*4;D[i]=v&255;D[i+1]=(v>>>8)&255;D[i+2]=(v>>>16)&255;D[i+3]=255};
-  for(let x=0;x<W;x++){const [t,pk]=topAt(x),lit=x>=pk[0],T0=Math.max(0,Math.round(t)),fo=Math.floor(hash01(Math.floor(x/9)*3.3)*5),fc=Math.floor((x+fo)/9),fl=lit?hash01(fc*2.3)<.75:hash01(fc*2.3)<.18,edge=(x+fo)%9===0;
-    const so=Math.floor(hash01(fc*7.7)*13);
-    for(let y=T0;y<H;y++){const d=y-T0,b=(BAYER[y&3][x&3]+.5)/16,yy=y+so,cy=Math.floor(yy/13);let col=fl?(hash01(fc*5.1+Math.floor(y/30))<.3?P.lit2:P.lit):P.sh;
-      if(edge&&d>3&&hash01(fc+Math.floor(y/17)*1.9)<.7)col=P.cr;
-      if(yy%13<2&&d>5&&hash01(Math.floor((x+cy*3)/5)*1.31+cy*7.7)<(SUMMER&&!JAPAN?.07:.11))col=yy%13===0?P.sp:(fl?P.lit:P.sh);
-      if(d<2||(!SUMMER||JAPAN)&&d<5&&b<.55)col=P.top;
-      if(y>H-34){const f=(y-(H-34))/34;if(b<f)col=SUMMER&&!JAPAN?(b<f*.6?'#7fb150':'#a8a69c'):(b<f*.6?'#ffffff':'#dfe8f4')}
-      set(x,y,col)}}
-  g.putImageData(id,0,0);
-  return OCC_SPR[key]=c}
+function occSpr(){const key=bSeas();if(OCC_SPR[key])return OCC_SPR[key];
+  const W=OCC_W,H=OCC_H,C=OCC_C,[c,g]=mk(W,H),id=g.createImageData(W,H),D=new Uint32Array(id.data.buffer);
+  const put=(x,y,col)=>{if(x>=0&&x<W&&y>=0&&y<H)D[y*W+x]=pxCol(col)},bay=(x,y)=>(BAYER[y&3][x&3]+.5)/16;
+  const edge=x=>{const e=Math.min(x,W-1-x);return e<120?Math.pow((120-e)/120,2)*280:0};   /* zu den Rändern hin fällt der Berg bis unten ab */
+  const crown=(x,y,r,cols)=>{for(let yy=-r;yy<=r;yy++){const ww=Math.round(Math.sqrt(r*r-yy*yy)+.3);for(let xx=-ww;xx<=ww;xx++)put(x+xx,y+yy,cols[yy<0&&xx>-1?2:yy>0||xx<-1?0:1])}};
+  if(!JAPAN&&!WIEHEN){
+    /* Alpen: Gipfel, zwei Schultern, flache Vorberge; Grat leicht gezackt */
+    const top=H-282,PK=[[C,top,1.22],[C-132,top+92,1.08],[C+124,top+66,1.16],[C-240,top+186,.95],[C+240,top+172,.98]];
+    const sil=x=>{let b=1e9,k=0;PK.forEach((q,i)=>{const y=q[1]+Math.abs(x-q[0])*q[2];if(y<b){b=y;k=i}});return [b+edge(x)+Math.floor(hash01(Math.floor(x/3)*1.7)*3)+2*Math.sin(x*.09),PK[k]]};
+    const S=SUMMER?{la:'#a3a49d',lb:'#919289',sa:'#7a7b74',sb:'#696a63',sn:'#f4f6f8',ss:'#cfd5dc',m1:'#86b25a',m2:'#729d4b',f1:'#2f5a32',f2:'#3d6e3c'}
+                  :{la:'#a9b7cc',lb:'#96a6be',sa:'#7d8ea8',sb:'#6b7b95',sn:'#ffffff',ss:'#cfdbec',m1:'#ffffff',m2:'#dfe8f4',f1:'#24453d',f2:'#30594d'};
+    const treeL=x=>H-60+6*Math.sin(x*.07)+4*Math.sin(x*.19);
+    for(let x=0;x<W;x++){const [t,pk]=sil(x),T0=Math.max(0,Math.round(t)),lit=x>=pk[0],dir=lit?-1:1;
+      const snowL=top+(SUMMER?58:128)+18*Math.sin(x*.05)+10*Math.sin(x*.17)+6*Math.sin(x*.41),meadL=top+176+10*Math.sin(x*.05),tl=treeL(x);
+      for(let y=T0;y<H;y++){const d=y-T0,b=bay(x,y),dy=y-pk[1];
+        let col=lit?(x-pk[0]<dy*.36?S.la:S.lb):(pk[0]-x<dy*.3?S.sa:S.sb);
+        const fl=x+dir*y*.8,g9=Math.floor(fl/13),rib=((fl%13)+13)%13<2&&hash01(g9*1.37)<.22&&d>7&&d<20+hash01(g9*3.1)*70;   /* wenige schmale Felsrippen in Falllinie, verschieden lang */
+        if(y<snowL){if(!rib)col=lit?S.sn:S.ss}
+        else if(y<snowL+22&&b<1-(y-snowL)/22)col=lit?S.sn:S.ss;   /* Schneegrenze gerastert */
+        if(SUMMER&&y>meadL)col=b<clamp((y-meadL)/14,0,1)?(lit?S.m1:S.m2):col;
+        if(!SUMMER&&y>meadL)col=b<clamp((y-meadL)/18,0,1)*.85?(lit?S.sn:S.ss):col;
+        if(y>=tl+4)col=((x+(y>>2))%5)<2?S.f1:S.f2;
+        put(x,y,col)}}
+    /* Fichtenspitzen am oberen Waldrand */
+    for(let x=1;x<W;x+=3){const tl=Math.round(treeL(x)),hh=4+Math.floor(hash01(x*1.7)*7);if(sil(x)[0]>tl+4-hh-1)continue;
+      for(let k=0;k<hh;k++){const w=Math.round(k/hh*2.6),yy=tl+4-hh+k;for(let xx=-w;xx<=w;xx++)put(x+xx,yy,xx<0?S.f1:S.f2);if(!SUMMER&&k%3===1&&w>0)put(x-w,yy,'#eef4fb')}
+      if(!SUMMER)put(x,tl+4-hh,'#ffffff')}}
+  else if(JAPAN){
+    /* Japan: runder Waldberg, verschneit, Birken als feine graue Striche, dazwischen dunkle Zedern */
+    const top=H-212,PK=[[C,top,.0042],[C-150,top+70,.0045],[C+150,top+58,.0046]];
+    const sil=x=>{let b=1e9,k=0;PK.forEach((q,i)=>{const y=q[1]+(x-q[0])*(x-q[0])*q[2]+Math.abs(x-q[0])*.25;if(y<b){b=y;k=i}});return [b+edge(x)+Math.floor(hash01(Math.floor(x/2)*1.3)*2),PK[k]]};
+    for(let x=0;x<W;x++){const [t,pk]=sil(x),T0=Math.max(0,Math.round(t)),lit=x>=pk[0];
+      for(let y=T0;y<H;y++){const b=bay(x,y),dy=y-pk[1];put(x,y,lit?(x-pk[0]<dy*.5?'#ffffff':'#f1f5fb'):(pk[0]-x<dy*.4?'#e2e9f4':'#d2dcec'))}}
+    for(let y0=0;y0<H;y0+=5)for(let x0=0;x0<W;x0+=3){const x=x0+Math.floor(hash01(x0*1.7+y0*3.1)*3),y=y0+Math.floor(hash01(x0*.7+y0)*4),[t]=sil(x);if(y<t+5)continue;
+      const dens=clamp((y-t)/80,.06,.4);if(hash01(x*.37+y*1.13)>dens)continue;
+      if(hash01(x*2.3+y)<.32){const h=6+Math.floor(hash01(x+y*.3)*5);for(let k=0;k<h;k++){const w=Math.max(0,Math.round((k/h)*2.2));for(let xx=-w;xx<=w;xx++)put(x+xx,y-h+k,k%3===0&&xx===-w?'#f4f8ff':k%2?'#28452f':'#1f3a2a')}}
+      else{const h=5+Math.floor(hash01(x*1.1+y)*6);for(let k=0;k<h;k++)put(x,y-k,k===h-1?'#ffffff':'#8e8a86');if(hash01(x+y)<.5)put(x+1,y-h+2,'#a8a29c')}}}
+  else{
+    /* Wiehengebirge: langer bewaldeter Rücken; Herbst bunte Kronen, Winter kahle Bäume mit Schnee */
+    const top=H-208,PK=[[C,top,.0036],[C-170,top+44,.004],[C+175,top+38,.0038]];
+    const sil=x=>{let b=1e9;for(const q of PK){const y=q[1]+(x-q[0])*(x-q[0])*q[2]+Math.abs(x-q[0])*.2;if(y<b)b=y}return b+edge(x)};
+    const P=SUMMER?{lit:'#9a5a2a',mid:'#7e4822',sh:'#64391c'}:{lit:'#ffffff',mid:'#f4f7fb',sh:'#e4ebf4'};
+    for(let x=0;x<W;x++){const t=Math.round(sil(x)),dd=sil(x+1)-sil(x-1);for(let y=Math.max(0,t);y<H;y++)put(x,y,dd>.6?P.lit:dd<-.6?P.sh:P.mid)}
+    const PAL=SUMMER?[['#7a3416','#b8601e','#d88a3a'],['#7a5418','#b8902a','#dcb44a'],['#56501e','#86782a','#a89a3a'],['#6a2416','#a23c22','#c85a32'],['#244a2c','#2f5a36','#3e6e44']]:null;
+    for(let y0=0;y0<H+4;y0+=4)for(let x0=-2;x0<W+2;x0+=4){const x=x0+Math.floor(hash01(x0*1.3+y0*7.1)*4),y=y0+Math.floor(hash01(x0*3.1+y0)*3),t=sil(x);if(y<t+1)continue;
+      if(SUMMER){crown(x,y,2,PAL[Math.floor(hash01(x*.17+y*.71)*PAL.length)])}
+      else if(hash01(x*.7+y*1.3)<.34){const th=4+Math.floor(hash01(x+y)*6);for(let k=0;k<th;k++)put(x,y-k,'#8e939c');put(x-1,y-th+1,'#a8adb6');put(x+1,y-th+2,'#a8adb6');put(x,y-th-1,'#ffffff')}}
+    for(let x=0;x<W;x+=2){const t=Math.round(sil(x));if(SUMMER)crown(x,t,2+Math.floor(hash01(x*.9)*2),PAL[Math.floor(hash01(x*.37)*PAL.length)]);else{const th=6+Math.floor(hash01(x*1.7)*8);for(let k=0;k<th;k++)put(x,t-k,'#8e939c');put(x,t-th-1,'#ffffff')}}}
+  g.putImageData(id,0,0);return OCC_SPR[key]=c}
 function drawOccluder(sx,by){const S=occSpr();ctx.drawImage(S,Math.round(sx)-OCC_C,by+96-S.height)}
 
 /* ---------- Wald neben der Strecke: Bambus und Zedern ---------- */
@@ -5502,7 +5531,7 @@ function render(dt){
   // Talboden, Skiberg, Baumreihen, Dörfer: eigene Ebene, nachts nur von Fenstern beleuchtet
   if(!bgCv||bgCv.width!==VW){[bgCv,bgCtx]=mk(VW,VH)}
   ctx=bgCtx;ctx.clearRect(0,0,VW,VH);
-  const WP=bioWipe(cX+VW*.6);   /* Landschaften: links und rechts der Waldkulisse, nach Tiefe sortiert */
+  const WP=bioWipe(cX+VW*.6);   /* Landschaften: links und rechts des Bergs davor, nach Tiefe sortiert */
   bioPart(WP,'far',cX,by,fm);
   ctx.drawImage(BG.valley,0,by+12);
   bioPart(WP,'lifts',cX,by,fm);
